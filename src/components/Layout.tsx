@@ -17,7 +17,6 @@ export default function Layout() {
     <div style={{ position: 'relative', minHeight: '100vh' }}>
       <div className="grid-bg" />
 
-
       {/* NAV */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,

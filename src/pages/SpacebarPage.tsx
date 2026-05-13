@@ -29,6 +29,7 @@ export default function SpacebarPage() {
   };
 
   const handleSpacebar = (e: React.KeyboardEvent | React.MouseEvent) => {
+    if ('key' in e) e.preventDefault();
     if ('key' in e && e.key !== ' ') return;
     if (phase === 'idle') { start(); return; }
     if (phase !== 'running') return;
@@ -43,6 +44,20 @@ export default function SpacebarPage() {
   }, [phase]);
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === ' ') {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const sps = count > 0 && phase === 'running' ? ((count / Math.max(0.1, duration - timeLeft))).toFixed(1) : '0';
   const finalSps = count > 0 ? (count / duration).toFixed(2) : '0';
