@@ -47,7 +47,7 @@ class AudioManager {
     if (!this.ctx && !this.muted) {
       try {
         this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      } catch (e) {
+      } catch { // <-- e সরিয়ে দেওয়া হয়েছে
         console.warn('Web Audio API not supported');
       }
     }
@@ -175,7 +175,8 @@ export default function VoyagerGame() {
     screenShake: 0
   });
 
-  const actionsRef = useRef<{ start: () => void, boostUp: () => void, boostDown: () => void }>();
+  // <-- এখানে undefined যুক্ত করে ফিক্স করা হয়েছে
+  const actionsRef = useRef<{ start: () => void, boostUp: () => void, boostDown: () => void }>(undefined);
 
   const toggleSound = () => {
     const next = !isMuted;
@@ -592,8 +593,8 @@ export default function VoyagerGame() {
         {uiView === 'playing' && (
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1.5rem', display: 'flex', justifyContent: 'space-between', pointerEvents: 'none' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', pointerEvents: 'auto' }}>
-              <StatBox id="stat-distance" icon={<TrendingUp size={16} color="var(--neon-green)" />} label="Distance" initialValue="0" />
-              <StatBox id="stat-avoided" icon={<Shield size={16} color="var(--neon-orange)" />} label="Avoided" initialValue="0" />
+              <StatBox id="stat-distance" icon={<TrendingUp size={16} color="var(--neon-green)" />} label="Distance" />
+              <StatBox id="stat-avoided" icon={<Shield size={16} color="var(--neon-orange)" />} label="Avoided" />
               <button 
                 onClick={(e) => { e.currentTarget.blur(); toggleSound(); }}
                 style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px', color: isMuted ? 'var(--text-muted)' : '#fff', cursor: 'pointer', alignSelf: 'flex-start', transition: 'all 0.2s', marginTop: '0.5rem' }}
@@ -603,7 +604,7 @@ export default function VoyagerGame() {
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <StatBox id="stat-cps" icon={<Zap size={16} color="var(--neon-yellow)" />} label="CPS" initialValue="0" />
+              <StatBox id="stat-cps" icon={<Zap size={16} color="var(--neon-yellow)" />} label="CPS" />
               <StatBox id="stat-speed" icon={<Activity size={16} color="var(--neon-cyan)" />} label="Speed" initialValue={`${INITIAL_SPEED.toFixed(1)}u`} />
               <StatBox id="stat-time" icon={<Timer size={16} color="var(--neon-purple)" />} label="Time" initialValue="0s" />
             </div>
@@ -744,14 +745,15 @@ export default function VoyagerGame() {
 
 // --- Subcomponents ---
 
-const StatBox = ({ icon, label, id, initialValue }: { icon: React.ReactNode, label: string, id: string, initialValue: string | number }) => (
+// Added '?' to initialValue to make it optional, fixing the TS error completely
+const StatBox = ({ icon, label, id, initialValue }: { icon: React.ReactNode, label: string, id: string, initialValue?: string | number }) => (
   <div style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '0.4rem 0.8rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
     <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {icon}
     </div>
     <div style={{ display: 'flex', flexDirection: 'column' }}>
         <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', fontWeight: '800' }}>{label}</span>
-        <span id={id} style={{ fontSize: '1rem', fontFamily: 'monospace', fontWeight: '700', color: '#fff', lineHeight: 1 }}>{initialValue}</span>
+        <span id={id} style={{ fontSize: '1rem', fontFamily: 'monospace', fontWeight: '700', color: '#fff', lineHeight: 1 }}>{initialValue ?? 0}</span>
     </div>
   </div>
 );
