@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import HomePage from './pages/temp';
+import HomePage from './pages/HomePage';
 import CPSTestPage from './pages/CPSTestPage';
 import TypingTestPage from './pages/TypingTestPage';
 import ReactionTimePage from './pages/ReactionTimePage';
@@ -22,7 +22,7 @@ import TermsPage from './pages/TermsPage';
 import ContactPage from './pages/ContactPage';
 
 import SpaceDefensePage from './pages/SpaceDefensePage';
-import VoyagerGame from './pages/temp2';
+import VoyagerGame from './pages/VoyagerGame';
 // নতুন Games পেজ ইমপোর্ট করা হলো 
 import GamesPage from './pages/GamesPage'; 
 
