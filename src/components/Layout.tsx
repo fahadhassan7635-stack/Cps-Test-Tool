@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
-const mouseIcon = '/mouse-icon.jpg';
+const mouseIcon = '/logo.png';
 
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // নেভিগেশন আইটেম (Games কে আলাদা পেজের লিংক করা হয়েছে)
   const navItems = [
     { to: '/', label: 'Home', exact: true },
     { to: '/keyboard', label: 'Keyboard' },
