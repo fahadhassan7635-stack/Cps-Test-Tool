@@ -11,7 +11,7 @@ import {
   Home,
   Volume2,
   VolumeX,
-  BookOpen
+  Gauge
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -658,12 +658,12 @@ export default function VoyagerGame() {
         )}
       </div>
 
-      {/* --- Article Section --- */}
+      {/* --- SEO Friendly CPS Test Article Section --- */}
       <article style={{
         width: '100%',
         maxWidth: '850px',
         background: 'rgba(17, 24, 39, 0.7)',
-        border: '1px solid rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(0, 245, 255, 0.1)',
         borderRadius: '16px',
         padding: '2rem',
         boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
@@ -671,45 +671,58 @@ export default function VoyagerGame() {
         color: '#d1d5db'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-          <BookOpen size={24} color="#00f5ff" />
+          <Gauge size={24} color="#00f5ff" />
           <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#fff', margin: 0 }}>
-            Voyager 1: The Human Journey Beyond Our Solar System
+            Spacebar CPS Test: Boost Your Clicking Speed with Voyager Game
           </h2>
         </div>
 
         <p style={{ marginBottom: '1.25rem' }}>
-          Launched by NASA on September 5, 1977, the <strong>Voyager 1</strong> spacecraft has become one of humanity's greatest achievements in exploration. Originally designed for a five-year mission to study Jupiter and Saturn, this robust probe surpassed all expectations and continues to beam data back to Earth from the freezing, uncharted territory of interstellar space.
+          Are you ready to calculate your exact clicking speed? Welcome to the ultimate <strong>Spacebar CPS Test</strong> (Clicks Per Second) packed inside an immersive interstellar arcade trainer! While traditional click speed tests feature blank, boring screens, our <strong>Voyager Asteroid Navigator</strong> turns intensive clicking practice into an addictive cosmic adventure.
         </p>
 
         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-          Breaking Boundaries
+          What is a CPS Test and Why Does it Matter?
         </h3>
         <p style={{ marginBottom: '1.25rem' }}>
-          In August 2012, Voyager 1 made history by crossing the <em>heliopause</em>—the boundary where the solar wind meets the interstellar medium. This milestone officially made it the first human-made object to venture into the space between stars. Traveling at an immense speed of over 38,000 miles per hour (61,000 km/h), it is currently the most distant human object from Earth.
+          <strong>CPS</strong> stands for <em>Clicks Per Second</em>. It is a core metric used by competitive pro-gamers (especially in Minecraft, FPS, and clicker-heavy strategy titles) to measure raw reflex velocity and finger stamina. Improving your CPS score helps lower reaction time thresholds and gives you an upper hand over opponents during micro-intensive modern gaming matches.
         </p>
 
         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-          The Golden Record
+          How to Test and Improve Your Clicks Per Second Score Here
         </h3>
         <p style={{ marginBottom: '1.25rem' }}>
-          As a cosmic message in a bottle, Voyager 1 carries a 12-inch gold-plated copper disk. This <strong>Golden Record</strong> contains sounds and images selected to portray the diversity of life and culture on Earth. It features greetings in 55 languages, classical masterpieces from Bach and Mozart, natural sounds of thunder and whales, and structural diagrams of our DNA—a token of peace for any extraterrestrial intelligence that might encounter it.
+          Unlike standard speed-clicking scripts, the Voyager Game challenges you to balance brute mechanical force with surgical precision:
+        </p>
+        <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.25rem', color: '#9ca3af' }}>
+          <li style={{ marginBottom: '0.5rem' }}><strong>Real-time Tracking:</strong> Monitor your live interactive CPS directly inside the upper HUD panel while you actively avoid lethal, incoming procedural asteroids.</li>
+          <li style={{ marginBottom: '0.5rem' }}><strong>Stamina Training:</strong> As the ship drops constantly due to mock cosmic gravity, your rhythmic click patterns regulate the engine propulsion required to pass narrow gaps.</li>
+          <li style={{ marginBottom: '0.5rem' }}><strong>Peak Score Analytics:</strong> The post-game analysis screen accurately displays your maximum Peak CPS alongside survival time and distance cleared.</li>
+        </ul>
+
+        <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
+          Pro Tips to Rank Higher on the Speed Clicker Leaderboards
+        </h3>
+        <p style={{ marginBottom: '1.25rem' }}>
+          To achieve double-digit clicks per second (10+ CPS), players generally utilize specific physical execution models. Try experimenting with the **Jitter Clicking** method by vibrating your forearm muscles gently, or use the dual-finger **Butterfly Clicking** technique on your mouse/spacebar layout to maximize input signals safely without causing strain.
         </p>
 
-        <blockquote style={{
-          borderLeft: '4px solid #22c55e',
-          paddingLeft: '1rem',
+        <div style={{
+          background: 'rgba(0, 245, 255, 0.03)',
+          borderLeft: '4px solid #00f5ff',
+          padding: '1rem',
           margin: '1.5rem 0',
-          color: '#9ca3af',
-          fontStyle: 'italic'
+          borderRadius: '0 12px 12px 0'
         }}>
-          "The spacecraft will be encountered and the record played only if there are advanced spacefaring civilizations in interstellar space." — Carl Sagan
-        </blockquote>
+          <span style={{ display: 'block', fontWeight: '800', color: '#fff', marginBottom: '0.25rem' }}>💡 Did You Know?</span>
+          The current average score for global computer users sits between 4 to 6.5 CPS. Professional esports veterans frequently breach sustained ranges of 12 to 15 clicks per second under extreme pressure!
+        </div>
 
         <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-          An Enduring Legacy
+          Take the Challenge Now
         </h3>
         <p style={{ margin: 0 }}>
-          Today, Voyager 1 operates on minimal power generated by its decaying plutonium source. Scientists have systematically turned off non-essential instruments to prolong its life, allowing it to continue measuring cosmic rays and magnetic fields. Even after its transmitters eventually go silent, Voyager 1 will silently coast through the Milky Way for millions of years, carrying the eternal memory of planet Earth.
+          Launch the simulation above, tap your Spacebar or click vigorously on the viewframe to fire your thrusters, and see if you possess the elite micro-skills needed to guide the Voyager ship through deep space. Benchmark your index finger today!
         </p>
       </article>
 
