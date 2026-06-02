@@ -322,7 +322,7 @@ export default function Layout() {
           gap: '0.75rem',
         }}>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0 }}>
-            © 2026 CPS Test Tools — All rights reserved.
+            © Best CPS Test Tools — All rights reserved.
           </p>
 
           <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
