@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div className="section-label">Competition</div>
-        <h1 className="tool-title">Global Leaderboard</h1>
+        <h1 className="tool-title">Hall of Fame</h1>
         <p className="tool-subtitle">Top performers from around the world</p>
       </div>
 

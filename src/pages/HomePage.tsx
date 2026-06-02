@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 const leaderboardData = {
   cps: [
-    { rank: 1, name: 'FlashClick', score: '14.2 CPS', country: '🇰🇷', avatar: '⚡' },
+    { rank: 1, name: 'Arpon', score: '14.2 CPS', country: '🇰🇷', avatar: '⚡' },
     { rank: 2, name: 'RapidFire99', score: '13.8 CPS', country: '🇺🇸', avatar: '🔥' },
     { rank: 3, name: 'ClickMaster', score: '13.1 CPS', country: '🇧🇷', avatar: '💥' },
     { rank: 4, name: 'XSpeedX', score: '12.9 CPS', country: '🇯🇵', avatar: '🎯' },
@@ -33,7 +33,12 @@ const tools = [
   { to: '/spacebar', icon: '▭', name: 'Spacebar Counter', tag: 'Key Smash', accent: 'var(--neon-cyan)' },
   { to: '/key-visualizer', icon: '👁️', name: 'Key Visualizer', tag: 'Real-Time', accent: 'var(--neon-purple)' },
   { to: '/double-click', icon: '🖱️', name: 'Double Click', tag: 'Mouse Test', accent: 'var(--neon-green)' },
-  { to: '/sniper-mode', icon: '🔭', name: 'Sniper Mode', tag: 'Precision', accent: 'var(--neon-orange)' },
+  { to: '/accuracy', icon: '📏', name: 'Accuracy Test', tag: 'Precision', accent: 'var(--neon-yellow)' },
+  { to: '/scroll-test', icon: '↕️', name: 'Scroll Test', tag: 'Scroll Speed', accent: 'var(--neon-cyan)' },
+  { to: '/mouse-accuracy', icon: '🖲️', name: 'Mouse Accuracy', tag: 'Tracking', accent: 'var(--neon-green)' },
+  { to: '/sniper-mode', icon: '🔭', name: 'Sniper Mode', tag: 'Micro-Flicks', accent: 'var(--neon-red)' },
+  { to: '/space-defense', icon: '🚀', name: 'Space Defense', tag: 'Skill Game', accent: 'var(--neon-purple)' },
+  { to: '/voyager-game', icon: '🌌', name: 'Voyager Game', tag: 'Endless', accent: 'var(--neon-cyan)' },
 ];
 
 const gearItems = [
@@ -44,37 +49,43 @@ const gearItems = [
 ];
 
 const blogPosts = [
-  { to: '/blog', emoji: '⌨️', tag: 'Typing', tagColor: 'var(--neon-cyan)', date: 'May 2, 2025', title: 'How to Go From 60 to 120 WPM in 30 Days', excerpt: 'A proven training routine used by competitive typists to double their speed without sacrificing accuracy.' },
-  { to: '/blog', emoji: '🖱️', tag: 'Mouse', tagColor: 'var(--neon-green)', date: 'Apr 28, 2025', title: 'Best Gaming Mice for High CPS — 2025 Roundup', excerpt: 'Which mice enable the fastest click speeds? We tested 12 mice over 10,000 clicks each to find out.' },
-  { to: '/blog', emoji: '⚡', tag: 'Reaction', tagColor: 'var(--neon-orange)', date: 'Apr 20, 2025', title: 'Science-Backed Methods to Reduce Your Reaction Time', excerpt: 'Sleep, training schedules, and warm-up drills that elite FPS players use to stay at peak performance.' },
+  { to: '/blog', emoji: '⌨️', tag: 'Typing', tagColor: 'var(--neon-cyan)', date: 'May 2, 2025', title: 'How to Go From 60 to 120 WPM in 30 Days', excerpt: 'A proven training routine used by competitive typists to double their speed.' },
+  { to: '/blog', emoji: '🖱️', tag: 'Mouse', tagColor: 'var(--neon-green)', date: 'Apr 28, 2025', title: 'Best Gaming Mice for High CPS', excerpt: 'Which mice enable the fastest click speeds? We tested 12 mice to find out.' },
+  { to: '/blog', emoji: '⚡', tag: 'Reaction', tagColor: 'var(--neon-orange)', date: 'Apr 20, 2025', title: 'Methods to Reduce Reaction Time', excerpt: 'Training schedules and warm-up drills that elite FPS players use daily.' },
 ];
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'cps' | 'wpm' | 'reaction'>('cps');
-  const [challengeTime, setChallengeTime] = useState('');
+  const [challengeTime, setChallengeTime] = useState('00:00:00');
+
+  const tick = useCallback(() => {
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    const diff = midnight.getTime() - now.getTime();
+    
+    if (diff <= 0) {
+      setChallengeTime('00:00:00');
+      return;
+    }
+
+    const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+    const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+    const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+    setChallengeTime(`${h}:${m}:${s}`);
+  }, []);
 
   useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const midnight = new Date();
-      midnight.setHours(24, 0, 0, 0);
-      const diff = midnight.getTime() - now.getTime();
-      const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-      const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-      const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-      setChallengeTime(`${h}:${m}:${s}`);
-    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [tick]);
 
   const lbData = leaderboardData[activeTab];
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', paddingBottom: '3rem' }}>
 
-      {/* ── HERO ── */}
       <section style={{ textAlign: 'center', padding: '5rem 1rem 4rem' }}>
         <div className="fade-in-up" style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -99,7 +110,7 @@ export default function HomePage() {
           lineHeight: '1.1',
           marginBottom: '1.5rem',
         }}>
-          <span style={{ display: 'block', color: 'var(--text-primary)' }}>Test. Train.</span>
+          <span style={{ display: 'block', color: 'var(--text-primary)' }}>Test Train </span>
           <span style={{
             display: 'block',
             background: 'linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-green) 50%, var(--neon-cyan) 100%)',
@@ -108,7 +119,7 @@ export default function HomePage() {
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
-          }}>Dominate.</span>
+          }}>Dominate </span>
         </h1>
 
         <p className="fade-in-up d2" style={{
@@ -117,10 +128,9 @@ export default function HomePage() {
           maxWidth: '600px', margin: '0 auto 2.5rem',
           lineHeight: '1.7',
         }}>
-          The ultimate skill-testing platform for gamers. Measure your typing speed, mouse precision, reaction time, and aim — then climb the global leaderboard.
+          Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!
         </p>
 
-        {/* Stats */}
         <div className="fade-in-up d3" style={{
           display: 'flex', justifyContent: 'center', gap: '3rem',
           flexWrap: 'wrap', marginBottom: '2.5rem',
@@ -137,7 +147,6 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* CTA Buttons */}
         <div className="fade-in-up d4" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/cps-test" className="btn btn-primary" style={{ fontSize: '1rem', padding: '0.85rem 2rem' }}>
             ⚡ Start CPS Test
@@ -148,16 +157,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Ad Banner */}
-      <div className="ad-space ad-leaderboard" style={{ marginBottom: '3rem' }}>
-        📢 Ad Space — 728×90 Leaderboard (Google AdSense Ready)
-      </div>
-
-      {/* ── CATEGORIES ── */}
       <section style={{ marginBottom: '4rem' }}>
-        <div className="section-label">Tools</div>
+        <div className="section-label">Tools & Games</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Choose Your Arena</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>14 precision tools across 4 skill categories. Free, instant, no signup required.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Precision tools and skill games. Free, instant, no signup required.</p>
 
         <div style={{
           display: 'grid',
@@ -172,19 +175,15 @@ export default function HomePage() {
               pills: [
                 { to: '/typing-test', label: '⌨ Typing Speed' },
                 { to: '/key-visualizer', label: '👁 Key Visualizer' },
-                { to: '/spacebar', label: '▭ Spacebar Counter' },
-                { to: '/accuracy', label: '🎯 Accuracy Test' },
               ],
             },
             {
               to: '/mouse', icon: '🖱️', title: 'Mouse Tools',
-              desc: 'Measure clicks per second, test double-click intervals, and challenge your mouse precision.',
+              desc: 'Measure clicks per second, test double-click intervals, and challenge your overall mouse precision.',
               color: 'var(--neon-green)',
               pills: [
                 { to: '/cps-test', label: '⚡ CPS Test' },
                 { to: '/double-click', label: '🖱 Double Click' },
-                { to: '/scroll-test', label: '🔄 Scroll Test' },
-                { to: '/mouse-accuracy', label: '🎯 Accuracy' },
               ],
             },
             {
@@ -194,17 +193,24 @@ export default function HomePage() {
               pills: [
                 { to: '/reaction-time', label: '⚡ Reaction Time' },
                 { to: '/aim-trainer', label: '🎯 Aim Trainer' },
-                { to: '/sniper-mode', label: '🔭 Sniper Mode' },
               ],
             },
             {
-              to: '/leaderboard', icon: '🏆', title: 'Compete Globally',
+              to: '/hall-of-fame', icon: '🏆', title: 'Compete Globally',
               desc: 'Submit your scores, track your history, complete daily challenges, and climb the worldwide leaderboard.',
               color: 'var(--neon-yellow)',
               pills: [
-                { to: '/leaderboard', label: '🏆 Leaderboard' },
+                { to: '/hall-of-fame', label: '🏆 Hall of Fame' },
                 { to: '/cps-test', label: '📅 Daily Challenge' },
-                { to: '/leaderboard', label: '📊 Score History' },
+              ],
+            },
+            {
+              to: '/games', icon: '🎮', title: 'Skill Games',
+              desc: 'Try our interactive games to develop your reaction time and CPS skills in a highly engaging environment.',
+              color: 'var(--neon-purple)',
+              pills: [
+                { to: '/space-defense', label: '🚀 Space Defense' },
+                { to: '/voyager-game', label: '🌌 Voyager Game' },
               ],
             },
           ].map(cat => (
@@ -224,14 +230,16 @@ export default function HomePage() {
                 overflow: 'hidden',
               }}
               onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = cat.color;
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px)';
-                (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 40px rgba(0,0,0,0.4), 0 0 30px ${cat.color}20`;
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = cat.color;
+                el.style.transform = 'translateY(-6px)';
+                el.style.boxShadow = `0 20px 40px rgba(0,0,0,0.4), 0 0 30px ${cat.color}20`;
               }}
               onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                const el = e.currentTarget as HTMLElement;
+                el.style.borderColor = 'var(--border)';
+                el.style.transform = 'translateY(0)';
+                el.style.boxShadow = 'none';
               }}
             >
               <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>{cat.icon}</div>
@@ -239,7 +247,7 @@ export default function HomePage() {
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>{cat.desc}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                 {cat.pills.map(p => (
-                  <span key={p.to} style={{
+                  <span key={p.label} style={{
                     padding: '0.3rem 0.7rem',
                     borderRadius: '50px',
                     fontSize: '0.75rem',
@@ -259,11 +267,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── QUICK LAUNCH ── */}
       <section style={{ marginBottom: '4rem' }}>
         <div className="section-label">Quick Launch</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Jump In Instantly</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>No setup. Click a tool and start testing in under 3 seconds.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>No setup required. Click a tool and start testing in under 3 seconds.</p>
 
         <div style={{
           display: 'grid',
@@ -309,17 +316,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── LEADERBOARD + DAILY CHALLENGE ── */}
-      <section style={{ marginBottom: '4rem' }}>
+      <section style={{ marginBottom: '5rem' }}>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '2rem',
         }}>
-          {/* Leaderboard */}
           <div>
-            <div className="section-label">Competition</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>Global Leaderboard</h2>
+            <div className="section-label">Records</div>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>
+              Hall of Fame: Benchmark Scores
+            </h2>
 
             <div style={{
               background: 'var(--bg-card)',
@@ -328,7 +335,6 @@ export default function HomePage() {
               overflow: 'hidden',
               marginBottom: '1rem',
             }}>
-              {/* Header */}
               <div style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '1rem 1.25rem',
@@ -336,7 +342,7 @@ export default function HomePage() {
                 background: 'rgba(0,0,0,0.2)',
               }}>
                 <span style={{ fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--neon-yellow)' }}>
-                  🏆 TOP PERFORMERS
+                  🏆 ALL-TIME HIGH
                 </span>
                 <div style={{ display: 'flex', gap: '0.25rem' }}>
                   {(['cps', 'wpm', 'reaction'] as const).map(tab => (
@@ -361,7 +367,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Entries */}
               {lbData.map((entry, i) => (
                 <div key={entry.name} className="lb-row" style={{
                   display: 'flex', alignItems: 'center', gap: '0.75rem',
@@ -383,12 +388,11 @@ export default function HomePage() {
               ))}
             </div>
 
-            <Link to="/leaderboard" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
-              View Full Leaderboard →
+            <Link to="/hall-of-fame" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
+              View All Targets →
             </Link>
           </div>
 
-          {/* Daily Challenge */}
           <div>
             <div className="section-label">Daily</div>
             <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>Today's Challenge</h2>
@@ -398,7 +402,6 @@ export default function HomePage() {
               border: '1px solid rgba(0,245,255,0.2)',
               borderRadius: '16px',
               padding: '1.75rem',
-              marginBottom: '1rem',
             }}>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
@@ -445,16 +448,62 @@ export default function HomePage() {
                 ⚡ Accept Challenge
               </Link>
             </div>
-
-            {/* Sidebar Ad */}
-            <div className="ad-space ad-sidebar" style={{ minHeight: '120px' }}>
-              📢 Ad Space — 300×250 Rectangle (Google AdSense Ready)
-            </div>
           </div>
         </div>
       </section>
 
-      {/* ── GEAR ── */}
+      <section style={{ marginBottom: '4rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+          
+          <div>
+            <div className="section-label">Knowledge Base</div>
+            <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '1.5rem' }}>Improve Your Game</h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {blogPosts.map(post => (
+                <Link 
+                  key={post.title} 
+                  to={post.to} 
+                  style={{ 
+                    display: 'flex', gap: '1rem', padding: '1.25rem', background: 'var(--bg-card)', 
+                    border: '1px solid var(--border)', borderRadius: '12px', textDecoration: 'none',
+                    transition: 'border-color 0.2s ease'
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = post.tagColor)}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
+                >
+                  <div style={{ 
+                    width: '70px', height: '70px', flexShrink: 0, 
+                    background: `linear-gradient(135deg, ${post.tagColor}15, transparent)`, 
+                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                    fontSize: '2rem', border: `1px solid ${post.tagColor}30`
+                  }}>
+                    {post.emoji}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
+                      <span style={{ padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${post.tagColor}15`, color: post.tagColor, textTransform: 'uppercase' }}>
+                        {post.tag}
+                      </span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{post.date}</span>
+                    </div>
+                    <h3 style={{ fontWeight: '700', fontSize: '0.95rem', color: '#fff', marginBottom: '0.3rem', lineHeight: '1.4' }}>{post.title}</h3>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.5', margin: 0 }}>{post.excerpt}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            
+            <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
+              <Link to="/blog" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', textDecoration: 'none' }}>
+                Read All Articles →
+              </Link>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
       <section style={{
         marginBottom: '4rem',
         background: 'rgba(8,13,20,0.6)',
@@ -480,46 +529,82 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── BLOG ── */}
-      <section style={{ marginBottom: '4rem' }}>
-        <div className="section-label">Knowledge Base</div>
-        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Improve Your Game</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Guides, tips, and insights from our team of competitive gamers and typing champions.</p>
+      <hr style={{ borderColor: 'var(--border)', margin: '5rem 0 4rem' }} />
+      
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '3rem 2.5rem', marginTop: '3rem' }}>
+        <section style={{ maxWidth: '900px', margin: '0 auto', color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.05rem' }}>
+          
+          <h2 style={{ color: 'var(--text-primary)', fontSize: '2.25rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>
+            Why Your Click Speed and Typing WPM Actually Matter (And How to Improve)
+          </h2>
+          
+          <p style={{ marginBottom: '2rem' }}>
+            We've all been there—you miss a crucial shot in Valorant, lose a 1v1 in Minecraft bedwars, or find yourself buried under emails at work, wishing you could just type a little faster. You might even find yourself blaming your mouse or keyboard. But how much of it is your gear, and how much of it is raw skill? That’s exactly why we built this platform: to give you a free, no-nonsense way to test your limits and actually get better.
+          </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-          {blogPosts.map(post => (
-            <Link key={post.title} to={post.to} className="blog-card">
-              <div style={{
-                height: '120px',
-                background: `linear-gradient(135deg, ${post.tagColor}15, transparent)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '3.5rem',
-                borderBottom: '1px solid var(--border)',
-              }}>{post.emoji}</div>
-              <div style={{ padding: '1.25rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-                  <span style={{
-                    padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700',
-                    background: `${post.tagColor}15`, color: post.tagColor,
-                  }}>{post.tag}</span>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{post.date}</span>
-                </div>
-                <h3 style={{ fontWeight: '700', fontSize: '1rem', marginBottom: '0.5rem', lineHeight: '1.4' }}>{post.title}</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.6' }}>{post.excerpt}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+          <div style={{ margin: '2.5rem 0' }}>
+            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+              ⚡ Mastering the CPS Test (Clicks Per Second)
+            </h3>
+            <p style={{ marginBottom: '1rem' }}>
+              If you’re a gamer, you know that your clicking speed can make or break a match. A standard user usually clicks around 5 to 7 times per second. But competitive players? They easily hit 10 to 14 CPS. 
+            </p>
+            <p style={{ margin: '0' }}>
+              Our <strong>CPS Test</strong> isn't just a fun mini-game; it's a training ground. Whether you are practicing "Jitter clicking" (vibrating your hand to generate rapid clicks) or "Butterfly clicking" (using two fingers to alternate clicks on the same button), testing your speed daily builds muscle memory. It helps you figure out the exact clicking technique that won't ruin your aim.
+            </p>
+          </div>
 
-        <div style={{ textAlign: 'center' }}>
-          <Link to="/blog" className="btn btn-secondary">Read All Articles →</Link>
-        </div>
-      </section>
+          <div style={{ margin: '2.5rem 0' }}>
+            <h3 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+              ⌨️ Typing Speed: Going Beyond the Average WPM
+            </h3>
+            <p style={{ marginBottom: '1rem' }}>
+              Typing fast isn't just a flex for your resume anymore. Whether you're a programmer, a student writing a last-minute essay, or a remote worker on Slack, your <strong>Words Per Minute (WPM)</strong> dictates your workflow. The global average is around 40 WPM, but with a bit of practice, hitting 80 or even 100+ WPM is completely achievable.
+            </p>
+            <p style={{ margin: '0' }}>
+              Taking a <strong>Typing Speed Test</strong> regularly helps you identify bad habits. Are you looking down at your keyboard too much? Do you rely heavily on your index fingers? Our tools help you spot these errors, track your accuracy, and slowly transition into a true touch-typer. Plus, climbing our global WPM leaderboard is surprisingly addictive!
+            </p>
+          </div>
 
-      {/* Bottom Ad */}
-      <div className="ad-space ad-banner" style={{ marginBottom: '2rem' }}>
-        📢 Ad Space — 728×90 Banner (Google AdSense Ready)
+          <div style={{ margin: '2.5rem 0' }}>
+            <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+              🎯 Reaction Time and Aim Training
+            </h3>
+            <p style={{ margin: '0' }}>
+              Have you ever wondered if your reflexes are naturally fast? Human reaction time to visual stimuli averages around 250 milliseconds. However, elite esports athletes can push that down to 150ms. Using our <strong>Reaction Time Test</strong> and <strong>Aim Trainer</strong>, you can warm up your eyes and hands before jumping into a ranked match. Think of it as stretching before a workout—it wakes up your nervous system and gets you locked in.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h3 style={{ color: 'var(--neon-purple)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+              🛠️ Does Your Gear Actually Make a Difference?
+            </h3>
+            <p style={{ marginBottom: '1rem' }}>
+              Here is the truth: a $150 gaming mouse won't magically make you a pro, but a bad mouse will definitely hold you back. Using our suite, you can actually test your hardware. 
+            </p>
+            <ul style={{ paddingLeft: '1.5rem', marginBottom: '1rem', listStyleType: 'circle', color: 'var(--text-secondary)' }}>
+              <li style={{ marginBottom: '0.5rem' }}>Got a new mouse? Run a <strong>Double Click Test</strong> to make sure the switches aren't faulty.</li>
+              <li style={{ marginBottom: '0.5rem' }}>Bought a mechanical keyboard? Use our <strong>Key Visualizer</strong> and <strong>Spacebar Counter</strong> to check for ghosting and verify that every keystroke registers instantly.</li>
+            </ul>
+          </div>
+
+          <div style={{ marginTop: '3.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h4 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', marginTop: '0' }}>
+              Ready to set a new personal record?
+            </h4>
+            <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-muted)' }}>
+              No downloads, no sketchy background apps, and no forced sign-ups. Just pure, browser-based performance testing that works on Windows, Mac, and Chromebooks alike.
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <Link to="/cps-test" style={{ color: 'var(--neon-cyan)', fontWeight: '600', textDecoration: 'none' }}>→ Try the CPS Test</Link>
+              <Link to="/typing-test" style={{ color: 'var(--neon-green)', fontWeight: '600', textDecoration: 'none' }}>→ Check your Typing WPM</Link>
+              <Link to="/reaction-time" style={{ color: 'var(--neon-orange)', fontWeight: '600', textDecoration: 'none' }}>→ Test Reaction Speed</Link>
+            </div>
+          </div>
+
+        </section>
       </div>
+
     </div>
   );
 }

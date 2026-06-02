@@ -237,7 +237,7 @@ body {
   padding: 1rem;
   margin: 1rem 0;
 }
-.ad-leaderboard { height: 90px; }
+.ad-Hall of Fame { height: 90px; }
 .ad-sidebar { height: 250px; }
 .ad-banner { height: 90px; }
 
@@ -298,7 +298,7 @@ body {
   transform: scale(0);
 }
 
-/* Leaderboard rows */
+/* Hall of Fame rows */
 .lb-row {
   display: flex;
   align-items: center;

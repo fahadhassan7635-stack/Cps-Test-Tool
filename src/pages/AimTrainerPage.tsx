@@ -202,7 +202,7 @@ export default function AimTrainerPage() {
 
       {/* History */}
       {history.length > 0 && (
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '3rem' }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
           {history.map((h, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', fontSize: '0.875rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none' }}>
@@ -213,6 +213,72 @@ export default function AimTrainerPage() {
           ))}
         </div>
       )}
+
+      {/* ================= SEO ARTICLE SECTION START ================= */}
+      <hr style={{ border: '0', borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
+
+      <section style={{ color: 'var(--text-muted)', lineHeight: '1.7', fontSize: '0.95rem' }}>
+        <h2 style={{ color: '#fff', fontSize: '1.75rem', fontWeight: '700', marginBottom: '1rem' }}>
+          What is an Aim Trainer and Why Should You Use It?
+        </h2>
+        <p style={{ marginBottom: '1.5rem' }}>
+          An <strong>Aim Trainer</strong> is an essential web tool designed to help gamers test and improve their mouse reaction time, clicking accuracy, and spatial awareness. Whether you are playing fast-paced FPS games like Valorant, Counter-Strike 2, Apex Legends, or Call of Duty, your mechanical precision directly dictates your performance. Practicing on this dedicated tool helps build stable neural pathways between your eyes and your hands.
+        </p>
+
+        <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+          How Aim Training Enhances Gaming Performance
+        </h3>
+        <p style={{ marginBottom: '1.5rem' }}>
+          In competitive shooter games, conflicts are often won or lost in milliseconds. Entering a live match without a proper warm-up can ruin your early rounds. Using a browser-based simulator provides several direct advantages:
+        </p>
+        <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
+          <li style={{ marginBottom: '0.5rem' }}><strong>Develops Muscle Memory:</strong> Regular practice teaches your arm and wrist exactly how much physical force is required to move the crosshair to a precise point on your monitor.</li>
+          <li style={{ marginBottom: '0.5rem' }}><strong>Improves Flicking Precision:</strong> The random appearance of targets forces you to practice short, explosive movements ("flicks") which simulate sudden close-range enemy encounters.</li>
+          <li style={{ marginBottom: '0.5rem' }}><strong>Reduces Over-Aiming & Under-Aiming:</strong> Monitoring your accuracy stat tells you if you are misclicking frequently, guiding you to adjust your Windows mouse settings or in-game sensitivity (DPI).</li>
+        </ul>
+
+        <h3 style={{ color: '#fff', fontSize: '1.25rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+          Tips for Achieving a High Score
+        </h3>
+        <p style={{ marginBottom: '1.5rem' }}>
+          To improve your click score, do not just spam clicks blindly. Focus heavily on <strong>accuracy first</strong>. Ensure your arm position is consistent, use a high-quality mouse pad, and try to eliminate nervous tension in your fingers. Once your movement transitions cleanly from target to target, speed up your tempo naturally.
+        </p>
+
+        {/* FAQ Section */}
+        <div style={{ marginTop: '3rem', background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem' }}>
+          <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
+            Frequently Asked Questions (FAQs)
+          </h3>
+          
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h4 style={{ color: '#fff', fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+              Does browser aim training help in actual PC games?
+            </h4>
+            <p style={{ margin: '0', color: 'var(--text-muted)' }}>
+              Yes, absolutely. While 3D games involve depth perception, a 2D canvas trainer isolates and builds pure mouse control and hand-eye coordination, which seamlessly translates to better crosshair placement in games.
+            </p>
+          </div>
+
+          <div style={{ marginBottom: '1.25rem' }}>
+            <h4 style={{ color: '#fff', fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+              What is the ideal target accuracy percentage to aim for?
+            </h4>
+            <p style={{ margin: '0', color: 'var(--text-muted)' }}>
+              You should always aim for an accuracy score of <strong>90% or above</strong>. If your accuracy falls below 80%, it is a clear indicator that you are sacrificing control for speed.
+            </p>
+          </div>
+
+          <div>
+            <h4 style={{ color: '#fff', fontSize: '1rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+              How long should I warm up before starting a competitive match?
+            </h4>
+            <p style={{ margin: '0', color: 'var(--text-muted)' }}>
+              Spending <strong>5 to 10 minutes</strong> (roughly 10-15 sessions on this trainer) is ideal to flex your wrist joints and focus your brain before jumping into an online lobby.
+            </p>
+          </div>
+        </div>
+      </section>
+      {/* ================= SEO ARTICLE SECTION END ================= */}
     </div>
   );
 }

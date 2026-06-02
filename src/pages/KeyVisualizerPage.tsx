@@ -135,7 +135,7 @@ export default function KeyVisualizerPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
         {/* Key history */}
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden' }}>
           <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.85rem', color: 'var(--neon-cyan)' }}>⌨️ Key Log</div>
@@ -190,9 +190,80 @@ export default function KeyVisualizerPage() {
         </div>
       </div>
 
-      <button className="btn btn-secondary" onClick={() => { setActiveKeys({}); setKeyHistory([]); setTotalKeys(0); setKeyCount({}); }}>
-        🔄 Reset
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2.5rem' }}>
+        <button className="btn btn-secondary" onClick={() => { setActiveKeys({}); setKeyHistory([]); setTotalKeys(0); setKeyCount({}); }}>
+          🔄 Reset Dashboard
+        </button>
+      </div>
+
+      {/* ================= SEO ARTICLES & EDUCATION SECTION ================= */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem', marginTop: '2rem' }}>
+        <section style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
+          <h2 style={{ fontWeight: '700', fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '0' }}>
+            What is a Key Visualizer and How Does It Benefit You?
+          </h2>
+          <p style={{ marginBottom: '1.5rem' }}>
+            A <strong>Key Visualizer</strong> is an interactive web utility designed to record, translate, and render physical peripheral inputs onto a simulated hardware interface. By tracking input changes in real time, this diagnostics tool benchmarks complex processing operations like multi-key rollover capabilities and localized input lag. Programmers, hardware enthusiasts, and speed typists use it to inspect immediate mechanical actuation patterns and confirm continuous peripheral signal accuracy.
+          </p>
+
+          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+            Debugging Ghosting and testing N-Key Rollover (NKRO)
+          </h3>
+          <p style={{ marginBottom: '1.5rem' }}>
+            When multiple structural nodes are pressed simultaneously on modern membranes, a circuit error called <strong>Ghosting</strong> can prevent the machine from acknowledging inputs. Key visualizers isolate these connection faults immediately. By checking whether a sequence shows up completely on screen, users can confirm if their mechanical keyboard features partial or full <strong>N-Key Rollover (NKRO)</strong>, which is critical for executing split-second macros or intense gaming commands without signal drops.
+          </p>
+
+          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+            How Hardware Latency Impacts Typing and Gaming Output
+          </h3>
+          <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>Peripheral Polling Rate:</strong> Higher polling frequencies (such as 1000Hz or greater) shorten the temporal interval between physical contact and system interrupt events, allowing inputs to render with virtually no micro-stuttering.
+            </li>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>Actuation Depth Variables:</strong> Standard linear, tactile, or clicky mechanical switches feature varying travel thresholds. Customizing or inspecting these properties provides predictable tactile feedback, helping prevent hand fatigue over long working periods.
+            </li>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>Browser Context Binding:</strong> Web-based event listeners hook straight into DOM tracking components. Keeping your tab focused guarantees instantaneous key register tracking and reliable statistics parsing.
+            </li>
+          </ul>
+
+          {/* FAQ Section */}
+          <div style={{ marginTop: '2.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+            <h3 style={{ color: 'var(--neon-green)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
+              Frequently Asked Questions (FAQs)
+            </h3>
+            
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                Why do some complex system shortcut keys fail to light up on the display board?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                Certain combinations (like <code>Alt + Tab</code> or OS-level Window shortcuts) are captured by your computer operating system before they can be processed inside a browser sandbox window. The application captures all standard layout parameters that reach the local tab window context.
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                What metric dictates how the "Most Used Keys" relative tracking bar calculates width?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                The progress graph references your highest single switch interaction value as its baseline anchor limit. Secondary key elements scale down dynamically relative to that leading item, offering a clear visual representation of your specific typing style or gaming layout habits.
+              </p>
+            </div>
+
+            <div>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                Can this visualization panel detect multi-touch inputs or custom macro pads?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                Yes, as long as your external hardware translates those custom actions into standard web-compliant HID keyboard event codes, the tracker engine logs the active parameters into your real-time performance dashboard.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      {/* ================= SEO ARTICLES & EDUCATION SECTION END ================= */}
     </div>
   );
 }

@@ -1,23 +1,27 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 
+const mouseIcon = '/mouse-icon.jpg';
+
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // নেভিগেশন আইটেম (Games কে আলাদা পেজের লিংক করা হয়েছে)
   const navItems = [
     { to: '/', label: 'Home', exact: true },
     { to: '/keyboard', label: 'Keyboard' },
     { to: '/mouse', label: 'Mouse' },
     { to: '/aim', label: 'Aim & Reaction' },
-    { to: '/leaderboard', label: 'Leaderboard' },
-    { to: '/blog', label: 'Blog' },
+    { to: '/hall-of-fame', label: 'Hall of Fame' },
+    { to: '/games', label: '🎮 Games' }, 
+    { to: '/blog', label: '📖 Blog' },
   ];
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
       <div className="grid-bg" />
 
-      {/* NAV */}
+      {/* NAV BAR */}
       <nav style={{
         position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(8,13,20,0.95)',
@@ -33,17 +37,27 @@ export default function Layout() {
           textDecoration: 'none',
         }}>
           <div style={{
-            width: '40px', height: '40px', borderRadius: '10px',
-            background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '900', fontSize: '0.9rem', color: '#000',
-          }}>CT</div>
-          <span style={{ fontWeight: '700', fontSize: '1.1rem', color: 'var(--text-primary)' }}>
-            CPS<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Tool
+            width: '44px',
+            height: '44px',
+            borderRadius: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+            background: 'rgba(255,255,255,0.05)',
+          }}>
+            <img
+              src={mouseIcon}
+              alt="Logo"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+          <span style={{ fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            CPS<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Tools
           </span>
         </Link>
 
-        {/* Desktop nav */}
+        {/* Desktop Navigation */}
         <ul style={{
           display: 'flex', alignItems: 'center', gap: '0.25rem',
           listStyle: 'none', margin: 0, padding: 0,
@@ -53,17 +67,21 @@ export default function Layout() {
               <NavLink
                 to={item.to}
                 end={item.exact}
-                style={({ isActive }) => ({
-                  padding: '0.4rem 0.9rem',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontSize: '0.9rem',
-                  fontWeight: '500',
-                  color: isActive ? 'var(--neon-cyan)' : 'var(--text-secondary)',
-                  background: isActive ? 'rgba(0,245,255,0.1)' : 'transparent',
-                  transition: 'all 0.2s',
-                  display: 'block',
-                })}
+                style={({ isActive }) => {
+                  const isGame = item.label.includes('Games');
+                  return {
+                    padding: '0.4rem 0.9rem',
+                    borderRadius: '6px',
+                    textDecoration: 'none',
+                    fontSize: '0.9rem',
+                    fontWeight: '500',
+                    color: isActive ? (isGame ? '#ff6b35' : 'var(--neon-cyan)') : 'var(--text-secondary)',
+                    background: isActive ? (isGame ? 'rgba(255,107,53,0.12)' : 'rgba(0,245,255,0.1)') : 'transparent',
+                    transition: 'all 0.2s',
+                    display: 'block',
+                    whiteSpace: 'nowrap'
+                  };
+                }}
               >{item.label}</NavLink>
             </li>
           ))}
@@ -78,11 +96,12 @@ export default function Layout() {
               background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
               display: 'block',
               whiteSpace: 'nowrap',
+              marginLeft: '10px'
             }}>⚡ CPS Test</Link>
           </li>
         </ul>
 
-        {/* Hamburger */}
+        {/* Hamburger Mobile Trigger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           style={{
@@ -104,7 +123,7 @@ export default function Layout() {
         </button>
       </nav>
 
-      {/* Mobile menu */}
+      {/* Mobile Nav Menu */}
       {menuOpen && (
         <div style={{
           position: 'fixed', top: '64px', left: 0, right: 0,
@@ -114,6 +133,8 @@ export default function Layout() {
           padding: '1rem 2rem',
           zIndex: 99,
           display: 'flex', flexDirection: 'column', gap: '0.5rem',
+          maxHeight: 'calc(100vh - 64px)',
+          overflowY: 'auto'
         }}>
           {navItems.map(item => (
             <NavLink
@@ -121,15 +142,18 @@ export default function Layout() {
               to={item.to}
               end={item.exact}
               onClick={() => setMenuOpen(false)}
-              style={({ isActive }) => ({
-                padding: '0.75rem 1rem',
-                borderRadius: '8px',
-                textDecoration: 'none',
-                fontSize: '1rem',
-                fontWeight: '500',
-                color: isActive ? 'var(--neon-cyan)' : 'var(--text-primary)',
-                background: isActive ? 'rgba(0,245,255,0.1)' : 'transparent',
-              })}
+              style={({ isActive }) => {
+                const isGame = item.label.includes('Games');
+                return {
+                  padding: '0.75rem 1rem',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  fontSize: '1rem',
+                  fontWeight: '500',
+                  color: isActive ? (isGame ? '#ff6b35' : 'var(--neon-cyan)') : 'var(--text-primary)',
+                  background: isActive ? (isGame ? 'rgba(255,107,53,0.12)' : 'rgba(0,245,255,0.1)') : 'transparent',
+                };
+              }}
             >{item.label}</NavLink>
           ))}
           <Link
@@ -146,12 +170,12 @@ export default function Layout() {
         </div>
       )}
 
-      {/* Page content */}
+      {/* Main Page Render View */}
       <main style={{ position: 'relative', zIndex: 1 }}>
         <Outlet />
       </main>
 
-      {/* Footer */}
+      {/* FOOTER SECTION */}
       <footer style={{
         background: 'rgba(8,13,20,0.95)',
         borderTop: '1px solid var(--border)',
@@ -166,20 +190,30 @@ export default function Layout() {
           gap: '2rem',
           marginBottom: '2rem',
         }}>
-          {/* Brand */}
+          {/* Brand Info Grid */}
           <div>
             <Link to="/" style={{
               display: 'flex', alignItems: 'center', gap: '0.75rem',
               textDecoration: 'none', marginBottom: '1rem',
             }}>
               <div style={{
-                width: '36px', height: '36px', borderRadius: '8px',
-                background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: '900', fontSize: '0.8rem', color: '#000',
-              }}>ST</div>
+                width: '36px',
+                height: '36px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                background: 'rgba(255,255,255,0.05)',
+              }}>
+                <img
+                  src={mouseIcon}
+                  alt="Logo"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </div>
               <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>
-                Skill<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Hub
+                CPS<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Tools
               </span>
             </Link>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1rem' }}>
@@ -198,10 +232,10 @@ export default function Layout() {
             </div>
           </div>
 
-          {/* Keyboard links */}
+          {/* Keyboard Tools Grid */}
           <div>
             <h4 style={{ color: 'var(--neon-cyan)', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Keyboard</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0, padding: 0 }}>
               {[
                 { to: '/typing-test', label: 'Typing Speed Test' },
                 { to: '/key-visualizer', label: 'Key Visualizer' },
@@ -218,10 +252,10 @@ export default function Layout() {
             </ul>
           </div>
 
-          {/* Mouse links */}
+          {/* Mouse Tools Grid */}
           <div>
             <h4 style={{ color: 'var(--neon-green)', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Mouse</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0, padding: 0 }}>
               {[
                 { to: '/cps-test', label: 'CPS Test' },
                 { to: '/double-click', label: 'Double Click Test' },
@@ -238,15 +272,34 @@ export default function Layout() {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Games Grid */}
+          <div>
+            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>🚀 Arcade Games</h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0, padding: 0 }}>
+              {[
+                { to: '/games', label: '🎮 All Games Center' },
+                { to: '/space-defense', label: '🚀 Space Defense' },
+                { to: '/voyager-game', label: '🛸 Voyager Game' },
+              ].map(l => (
+                <li key={l.to}>
+                  <Link to={l.to} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s' }}
+                    onMouseEnter={e => (e.target as HTMLElement).style.color = '#ff6b35'}
+                    onMouseLeave={e => (e.target as HTMLElement).style.color = 'var(--text-secondary)'}
+                  >{l.label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Explore Hub Grid */}
           <div>
             <h4 style={{ color: 'var(--neon-orange)', fontSize: '0.85rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>Explore</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', margin: 0, padding: 0 }}>
               {[
-                { to: '/leaderboard', label: 'Leaderboard' },
+                { to: '/hall-of-fame', label: 'Leaderboard' },
                 { to: '/aim-trainer', label: 'Aim Trainer' },
                 { to: '/reaction-time', label: 'Reaction Time' },
-                { to: '/blog', label: 'Blog' },
+                { to: '/blog', label: '📖 Blog' },
               ].map(l => (
                 <li key={l.to}>
                   <Link to={l.to} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontSize: '0.875rem', transition: 'color 0.2s' }}
@@ -259,22 +312,44 @@ export default function Layout() {
           </div>
         </div>
 
+        {/* Footer Bottom Rights */}
         <div style={{
           borderTop: '1px solid var(--border)',
-          paddingTop: '1.5rem',
+          padding: '1.5rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          gap: '0.5rem',
+          gap: '0.75rem',
         }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>© 2025 SkillTest Hub — All rights reserved.</p>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Built for gamers, by gamers. 🎮</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0 }}>
+            © 2026 CPS Test Tools — All rights reserved.
+          </p>
+
+          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }}>
+            {[
+              { to: '/privacy-policy', label: 'Privacy Policy' },
+              { to: '/terms', label: 'Terms of Service' },
+              { to: '/contact', label: 'Contact' },
+            ].map(l => (
+              <Link
+                key={l.to}
+                to={l.to}
+                style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.8rem', transition: 'color 0.2s' }}
+                onMouseEnter={e => (e.target as HTMLElement).style.color = 'var(--neon-cyan)'}
+                onMouseLeave={e => (e.target as HTMLElement).style.color = 'var(--text-muted)'}
+              >{l.label}</Link>
+            ))}
+          </div>
+
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8rem', margin: 0 }}>
+            Built for gamers, by gamers. 🎮
+          </p>
         </div>
       </footer>
 
       <style>{`
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .hamburger-btn { display: flex !important; }
         }

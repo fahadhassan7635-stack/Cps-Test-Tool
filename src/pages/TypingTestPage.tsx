@@ -1,19 +1,26 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
- 
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+
 const WORD_LISTS = {
   easy: 'the and for are but not you all can her was one our out day get has him his how man new now old see two way who boy did its let put say she too use'.split(' '),
   medium: 'about after again below could every first found great happy large later light might never other place plant point right small sound spell still study their there these thing think three water where which world would write'.split(' '),
   hard: 'beautiful believe between business children complete consider continue describe different difficult environment experience government important including information knowledge language national original particular performance political position possible practice president probably problem provide question recognize relationship remember represent responsible situation something sometimes structure thousand together usually whatever'.split(' '),
 };
- 
+
 type Difficulty = 'easy' | 'medium' | 'hard';
 type Phase = 'idle' | 'running' | 'done';
- 
+
+interface HistoryItem {
+  wpm: number;
+  acc: number;
+  diff: string;
+  dur: number;
+}
+
 function generateText(diff: Difficulty, count = 80) {
   const list = WORD_LISTS[diff];
   return Array.from({ length: count }, () => list[Math.floor(Math.random() * list.length)]).join(' ');
 }
- 
+
 export default function TypingTestPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [duration, setDuration] = useState(60);
@@ -23,8 +30,8 @@ export default function TypingTestPage() {
   const [timeLeft, setTimeLeft] = useState(60);
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
-  const [history, setHistory] = useState<{ wpm: number; acc: number; diff: string; dur: number }[]>([]);
- 
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTime = useRef<number>(0);
@@ -33,18 +40,16 @@ export default function TypingTestPage() {
   const phaseRef = useRef<Phase>('idle');
   const lastScrolledLine = useRef<number>(-1);
   const containerOffsetRef = useRef<number>(0);
-  // store final values for modal
   const finalWpm = useRef(0);
   const finalAcc = useRef(100);
-  const finalTyped = useRef('');
- 
+
   const endTest = useCallback(() => {
     if (phaseRef.current !== 'running') return;
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     phaseRef.current = 'done';
     setPhase('done');
   }, []);
- 
+
   const reset = useCallback((diff: Difficulty = difficulty, dur: number = duration) => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
     phaseRef.current = 'idle';
@@ -64,19 +69,18 @@ export default function TypingTestPage() {
     }
     setTimeout(() => inputRef.current?.focus(), 50);
   }, [difficulty, duration]);
- 
+
   const scrollToCursor = useCallback((currentWordIndex: number) => {
     const container = wordsContainerRef.current;
     const currentWordEl = wordRefs.current[currentWordIndex];
     const firstWordEl = wordRefs.current[0];
     if (!container || !currentWordEl || !firstWordEl) return;
- 
+
     const lineH = currentWordEl.offsetHeight + 8;
     const wordNaturalTop = currentWordEl.offsetTop;
     const firstNaturalTop = firstWordEl.offsetTop;
     const currentLine = Math.round((wordNaturalTop - firstNaturalTop) / lineH);
- 
-    // scroll when cursor reaches line 2 (keep 1 line of context above)
+
     if (currentLine > 1 && currentLine !== lastScrolledLine.current) {
       lastScrolledLine.current = currentLine;
       const newOffset = -((currentLine - 1) * lineH);
@@ -85,10 +89,24 @@ export default function TypingTestPage() {
       container.style.transform = `translateY(${newOffset}px)`;
     }
   }, []);
- 
+
+  const textWordsArr = useMemo(() => {
+    const arr = [];
+    let temp = [];
+    for (let i = 0; i < text.length; i++) {
+      temp.push({ char: text[i], index: i });
+      if (text[i] === ' ') {
+        arr.push(temp);
+        temp = [];
+      }
+    }
+    if (temp.length > 0) arr.push(temp);
+    return arr;
+  }, [text]);
+
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
- 
+
     if (phaseRef.current === 'idle') {
       phaseRef.current = 'running';
       setPhase('running');
@@ -100,24 +118,11 @@ export default function TypingTestPage() {
         if (left <= 0) endTest();
       }, 100);
     }
- 
+
     if (phaseRef.current !== 'running') return;
- 
+
     setTyped(val);
-    finalTyped.current = val;
- 
-    // WPM: সব word শেষ হলে last word সহ count করো, নইলে শুধু completed (space-separated) words
-    const typedWordsFull = val.split(' ');
-    const textWords = text.split(' ');
-    const allDone = typedWordsFull.length >= textWords.length;
-    const wordsToCount = allDone ? typedWordsFull : typedWordsFull.slice(0, -1);
-    const correctCount = wordsToCount.filter((w, i) => w === textWords[i]).length;
-    const elapsedMin = Math.max(0.01, (performance.now() - startTime.current) / 60000);
-    const liveWpm = Math.round(correctCount / elapsedMin);
-    setWpm(liveWpm);
-    finalWpm.current = liveWpm;
- 
-    // Accuracy: character level over entire typed string
+
     let correct = 0;
     for (let i = 0; i < val.length; i++) {
       if (val[i] === text[i]) correct++;
@@ -125,45 +130,45 @@ export default function TypingTestPage() {
     const acc = val.length > 0 ? Math.round((correct / val.length) * 100) : 100;
     setAccuracy(acc);
     finalAcc.current = acc;
- 
-    const currentWordIndex = val.split(' ').length - 1;
-    scrollToCursor(currentWordIndex);
- 
-    // শেষ word টাইপ হয়ে গেলেই end — length নয়, word count দিয়ে
-    const allWordsTyped = typedWordsFull.length >= textWords.length;
-    const lastWordCorrect = typedWordsFull[textWords.length - 1] === textWords[textWords.length - 1];
-    if (allWordsTyped || lastWordCorrect || val.length >= text.length) endTest();
+
+    const elapsedMin = Math.max(0.01, (performance.now() - startTime.current) / 60000);
+    const liveWpm = Math.round((correct / 5) / elapsedMin);
+    setWpm(liveWpm);
+    finalWpm.current = liveWpm;
+
+    const activeWordIndex = textWordsArr.findIndex(w => w.some(c => c.index === val.length));
+    const safeWordIndex = activeWordIndex !== -1 ? activeWordIndex : textWordsArr.length - 1;
+    scrollToCursor(safeWordIndex);
+
+    if (val.length >= text.length) endTest();
   };
- 
+
   useEffect(() => {
     if (phase === 'done') {
-      // use refs for accurate final values
       setHistory(prev => [{ wpm: finalWpm.current, acc: finalAcc.current, diff: difficulty, dur: duration }, ...prev.slice(0, 9)]);
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [phase]);
- 
+  }, [phase, difficulty, duration]);
+
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
- 
+
   const getRating = (w: number) => {
-    if (w >= 120) return { label: '🔥 Blazing Fast', color: 'var(--neon-red)' };
-    if (w >= 80)  return { label: '⚡ Speed Typist', color: 'var(--neon-orange)' };
-    if (w >= 60)  return { label: '🎯 Proficient', color: 'var(--neon-cyan)' };
-    if (w >= 40)  return { label: '✅ Average', color: 'var(--neon-green)' };
-    return { label: '🐢 Beginner', color: 'var(--text-secondary)' };
+    if (w >= 120) return { label: '🔥 Blazing Fast', color: 'var(--neon-red, #ff2d55)' };
+    if (w >= 80)  return { label: '⚡ Speed Typist', color: 'var(--neon-orange, #f97316)' };
+    if (w >= 60)  return { label: '🎯 Proficient', color: 'var(--neon-cyan, #00f5ff)' };
+    if (w >= 40)  return { label: '✅ Average', color: 'var(--neon-green, #10b981)' };
+    return { label: '🐢 Beginner', color: 'var(--text-secondary, #94a3b8)' };
   };
- 
+
   const progress = phase === 'running'
     ? ((duration - timeLeft) / duration) * 100
     : phase === 'done' ? 100 : 0;
- 
-  const textWords = text.split(' ');
-  const typedWords = typed.split(' ');
+
   const finalRating = getRating(finalWpm.current);
- 
+
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -171,9 +176,9 @@ export default function TypingTestPage() {
         <h1 className="tool-title">Typing Speed Test</h1>
         <p className="tool-subtitle">Test your WPM — Words Per Minute</p>
       </div>
- 
+
       {/* Controls */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '0.4rem' }}>
           {(['easy', 'medium', 'hard'] as Difficulty[]).map(d => (
             <button key={d}
@@ -205,7 +210,7 @@ export default function TypingTestPage() {
           ))}
         </div>
       </div>
- 
+
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
@@ -220,11 +225,11 @@ export default function TypingTestPage() {
           </div>
         ))}
       </div>
- 
+
       <div className="progress-bar" style={{ marginBottom: '1.5rem' }}>
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
- 
+
       {/* Text Display */}
       {phase !== 'done' && (
         <div
@@ -233,101 +238,72 @@ export default function TypingTestPage() {
             background: 'var(--bg-card)',
             border: `1px solid ${phase === 'running' ? 'var(--neon-cyan)' : 'var(--border)'}`,
             boxShadow: phase === 'running' ? '0 0 20px rgba(0,245,255,0.07)' : 'none',
-            borderRadius: '16px',
-            padding: '1.75rem',
-            cursor: 'text',
-            marginBottom: '1rem',
-            height: '170px',
-            overflow: 'hidden',
-            position: 'relative',
-            transition: 'border 0.2s, box-shadow 0.2s',
+            borderRadius: '16px', padding: '1.75rem', cursor: 'text', marginBottom: '1rem',
+            height: '170px', overflow: 'hidden', position: 'relative', transition: 'border 0.2s, box-shadow 0.2s',
           }}
         >
-          {/* Top fade */}
           <div style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: '30px',
             background: 'linear-gradient(to bottom, var(--bg-card) 30%, transparent)',
             zIndex: 2, borderRadius: '16px 16px 0 0', pointerEvents: 'none',
           }} />
-          {/* Bottom fade */}
           <div style={{
             position: 'absolute', bottom: 0, left: 0, right: 0, height: '30px',
             background: 'linear-gradient(to top, var(--bg-card) 30%, transparent)',
             zIndex: 2, borderRadius: '0 0 16px 16px', pointerEvents: 'none',
           }} />
- 
+
           <div
             ref={wordsContainerRef}
             style={{
-              fontFamily: "'Courier New', monospace",
-              fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
-              lineHeight: '2',
-              letterSpacing: '0.03em',
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: '0 0.4em',
-              alignContent: 'flex-start',
-              willChange: 'transform',
+              fontFamily: "'Courier New', monospace", fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
+              lineHeight: '2', letterSpacing: '0.03em', display: 'flex', flexWrap: 'wrap',
+              alignContent: 'flex-start', willChange: 'transform',
             }}
           >
-            {textWords.map((word, wordIndex) => {
-              const isCurrentWord = wordIndex === typedWords.length - 1;
-              const isPastWord = wordIndex < typedWords.length - 1;
-              const typedWord = typedWords[wordIndex] ?? '';
- 
-              let wordContent: React.ReactNode;
- 
-              if (isPastWord) {
-                wordContent = word.split('').map((ch, ci) => {
-                  const correct = (typedWords[wordIndex] ?? '')[ci] === ch;
+            {textWordsArr.map((wordObj, wIdx) => (
+              <span
+                key={wIdx}
+                ref={el => { wordRefs.current[wIdx] = el; }}
+                style={{ display: 'inline-block', whiteSpace: 'pre' }}
+              >
+                {wordObj.map(({ char, index }) => {
+                  const isTyped = index < typed.length;
+                  const isCursor = index === typed.length;
+                  const typedChar = typed[index];
+                  const isCorrect = isTyped && typedChar === char;
+
+                  let color = 'var(--text-muted)';
+                  let bg = 'transparent';
+                  let bb = 'none';
+
+                  if (isCursor) {
+                    color = 'var(--text-primary)';
+                    bg = 'rgba(0,245,255,0.28)';
+                    bb = '2px solid var(--neon-cyan)';
+                  } else if (isTyped) {
+                    color = isCorrect ? 'var(--neon-green)' : 'var(--neon-red)';
+                    bg = isCorrect ? 'transparent' : 'rgba(255,45,85,0.12)';
+                  }
+
                   return (
-                    <span key={ci} style={{
-                      color: correct ? 'var(--neon-green)' : 'var(--neon-red)',
-                      background: correct ? 'transparent' : 'rgba(255,45,85,0.12)',
-                      borderRadius: '2px',
-                    }}>{ch}</span>
+                    <span
+                      key={index}
+                      style={{
+                        color, background: bg, borderBottom: bb, borderRadius: '2px',
+                        fontWeight: isCursor ? '700' : '400', transition: 'color 0.08s, background 0.08s'
+                      }}
+                    >
+                      {char}
+                    </span>
                   );
-                });
-              } else if (isCurrentWord) {
-                wordContent = word.split('').map((ch, ci) => {
-                  const isCursor = ci === typedWord.length;
-                  const isTyped = ci < typedWord.length;
-                  const correct = isTyped && typedWord[ci] === ch;
-                  const wrong = isTyped && typedWord[ci] !== ch;
-                  return (
-                    <span key={ci} style={{
-                      color: wrong ? 'var(--neon-red)' : isTyped ? 'var(--neon-green)' : isCursor ? 'var(--text-primary)' : 'var(--text-muted)',
-                      background: wrong ? 'rgba(255,45,85,0.12)' : isCursor ? 'rgba(0,245,255,0.28)' : 'transparent',
-                      borderRadius: '2px',
-                      fontWeight: isCursor ? '700' : '400',
-                      borderBottom: isCursor ? '2px solid var(--neon-cyan)' : 'none',
-                      transition: 'color 0.08s, background 0.08s',
-                    }}>{ch}</span>
-                  );
-                });
-              } else {
-                wordContent = <span style={{ color: 'var(--text-muted)' }}>{word}</span>;
-              }
- 
-              return (
-                <span
-                  key={wordIndex}
-                  ref={el => { wordRefs.current[wordIndex] = el; }}
-                  style={{
-                    display: 'inline-block',
-                    borderBottom: isCurrentWord ? '1px solid rgba(0,245,255,0.2)' : 'none',
-                    paddingBottom: isCurrentWord ? '1px' : '0',
-                  }}
-                >
-                  {wordContent}
-                </span>
-              );
-            })}
+                })}
+              </span>
+            ))}
           </div>
         </div>
       )}
- 
-      {/* Hidden input */}
+
       <input
         ref={inputRef}
         value={typed}
@@ -339,116 +315,90 @@ export default function TypingTestPage() {
         autoCapitalize="off"
         spellCheck={false}
       />
- 
+
       {phase !== 'done' && (
         <div style={{
-          background: 'rgba(0,245,255,0.05)',
-          border: '1px dashed rgba(0,245,255,0.2)',
+          background: 'rgba(0,245,255,0.05)', border: '1px dashed rgba(0,245,255,0.2)',
           borderRadius: '10px', padding: '1rem', textAlign: 'center',
-          color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem',
-          cursor: 'pointer',
+          color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem', cursor: 'pointer',
         }} onClick={() => inputRef.current?.focus()}>
           {phase === 'idle' ? '👆 Click here or on the text above and start typing!' : '⌨️ Keep typing...'}
         </div>
       )}
- 
+
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '2rem' }}>
         <button className="btn btn-secondary" onClick={() => reset()}>🔄 New Text</button>
       </div>
- 
+
       {/* ── Results Modal ── */}
       {phase === 'done' && (
         <>
-          {/* Backdrop */}
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 999,
+            background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 999,
             animation: 'fadeIn 0.3s ease-out forwards',
           }} onClick={() => reset()} />
- 
-          {/* Modal */}
+
           <div style={{
-            position: 'fixed', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '90%', maxWidth: '400px',
+            position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            width: '90%', maxWidth: '360px',
             background: 'linear-gradient(135deg, rgba(0,245,255,0.08), rgba(0,255,136,0.08))',
-            border: '2px solid rgba(0,245,255,0.3)',
-            borderRadius: '20px',
-            padding: '1rem 0.85rem 0.85rem',
-            textAlign: 'center',
-            zIndex: 1000,
+            border: '2px solid rgba(0,245,255,0.3)', borderRadius: '20px', padding: '1.5rem 0.75rem 0.75rem 0.75rem',
+            textAlign: 'center', zIndex: 1000,
             animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
             maxHeight: '90vh', overflowY: 'auto',
             boxShadow: '0 0 60px rgba(0,245,255,0.2), 0 0 120px rgba(0,255,136,0.1)',
           }}>
-            {/* Close */}
             <button onClick={() => reset()} style={{
               position: 'absolute', top: '0.5rem', right: '0.5rem',
-              background: 'rgba(0,245,255,0.1)',
-              border: '1px solid rgba(0,245,255,0.3)',
-              color: 'var(--neon-cyan)',
-              width: '32px', height: '32px', borderRadius: '50%',
-              cursor: 'pointer', fontSize: '0.9rem',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.2s',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,245,255,0.2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(0,245,255,0.1)'; }}
-            >✕</button>
- 
+              background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)',
+              color: 'var(--neon-cyan)', width: '32px', height: '32px', borderRadius: '50%',
+              cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>✕</button>
+
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.1rem' }}>Your Result</div>
- 
-            {/* WPM big */}
-            <div style={{ fontSize: 'clamp(2.2rem, 6vw, 3.5rem)', fontWeight: '900', color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums', marginBottom: '0.1rem' }}>
+
+            <div style={{ fontSize: 'clamp(1.9rem, 5.5vw, 3rem)', fontWeight: '900', color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums', marginBottom: '0.05rem' }}>
               {finalWpm.current} <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>WPM</span>
             </div>
- 
-            {/* Rating badge */}
+
             <div style={{
-              display: 'inline-flex', alignItems: 'center',
-              padding: '0.3rem 0.85rem', borderRadius: '50px',
-              background: `${finalRating.color}20`,
-              border: `2px solid ${finalRating.color}50`,
-              color: finalRating.color,
-              fontSize: '0.88rem', fontWeight: '700', marginBottom: '0.5rem',
+              display: 'inline-flex', alignItems: 'center', padding: '0.3rem 0.85rem', borderRadius: '50px',
+              background: `${finalRating.color}20`, border: `2px solid ${finalRating.color}50`,
+              color: finalRating.color, fontSize: '0.88rem', fontWeight: '700', marginBottom: '0.45rem',
             }}>{finalRating.label}</div>
- 
-            {/* 3 stat cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.3rem', marginBottom: '0.5rem' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.2rem', marginBottom: '0.45rem' }}>
               {[
                 { value: `${finalAcc.current}%`, label: 'Accuracy' },
-                { value: finalTyped.current.trim().split(/\s+/).filter(Boolean).length, label: 'Words Typed' },
+                { value: Math.round(typed.length / 5), label: 'Words' },
                 { value: `${duration}s`, label: 'Duration' },
               ].map(s => (
                 <div key={s.label} style={{
                   background: 'rgba(0,0,0,0.3)', borderRadius: '12px',
-                  padding: '0.4rem', border: '1px solid rgba(0,245,255,0.2)',
+                  padding: '0.3rem', border: '1px solid rgba(0,245,255,0.2)',
                 }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: '800', color: 'var(--neon-cyan)' }}>{s.value}</div>
-                  <div style={{ fontSize: '0.5rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.1rem' }}>{s.label}</div>
+                  <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--neon-cyan)' }}>{s.value}</div>
+                  <div style={{ fontSize: '0.45rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.04rem' }}>{s.label}</div>
                 </div>
               ))}
             </div>
- 
+
             {/* WPM Rating Scale */}
             <div style={{
-              textAlign: 'left', background: 'rgba(0,0,0,0.3)',
-              borderRadius: '12px', padding: '0.5rem', marginBottom: '0.5rem',
-              border: '1px solid rgba(0,245,255,0.2)',
+              textAlign: 'left', background: 'rgba(0,0,0,0.3)', borderRadius: '12px',
+              padding: '0.4rem', marginBottom: '0.45rem', border: '1px solid rgba(0,245,255,0.2)',
             }}>
-              <div style={{ fontSize: '0.58rem', color: 'var(--text-muted)', marginBottom: '0.25rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '600' }}>WPM Rating Scale</div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.2rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '600' }}>WPM Rating Scale</div>
               {[
-                { range: '1–39',   label: 'Beginner',     color: 'var(--text-secondary)' },
-                { range: '40–59',  label: 'Average',      color: 'var(--neon-green)' },
-                { range: '60–79',  label: 'Proficient',   color: 'var(--neon-cyan)' },
-                { range: '80–119', label: 'Speed Typist', color: 'var(--neon-orange)' },
-                { range: '120+',   label: 'Blazing Fast', color: 'var(--neon-red)' },
+                { range: '1–39',   label: 'Beginner',    color: 'var(--text-secondary, #94a3b8)' },
+                { range: '40–59',  label: 'Average',     color: 'var(--neon-green, #10b981)' },
+                { range: '60–79',  label: 'Proficient',  color: 'var(--neon-cyan, #00f5ff)' },
+                { range: '80–119', label: 'Speed Typist', color: 'var(--neon-orange, #f97316)' },
+                { range: '120+',   label: 'Blazing Fast', color: 'var(--neon-red, #ff2d55)' },
               ].map(r => (
                 <div key={r.range} style={{
-                  display: 'flex', justifyContent: 'space-between',
-                  padding: '0.1rem 0', fontSize: '0.6rem',
+                  display: 'flex', justifyContent: 'space-between', padding: '0.1rem 0', fontSize: '0.6rem',
                   borderBottom: '1px solid rgba(255,255,255,0.05)',
                 }}>
                   <span style={{ color: r.color, fontWeight: '600' }}>{r.range} WPM</span>
@@ -456,39 +406,23 @@ export default function TypingTestPage() {
                 </div>
               ))}
             </div>
- 
-            {/* Buttons */}
-            <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
-              <button className="btn btn-secondary" onClick={() => reset()}
-                style={{ animation: 'slideUp 0.4s ease-out 0.1s both', padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>
-                🔄 Reset
-              </button>
-              <button className="btn btn-primary" onClick={() => { reset(); setTimeout(() => inputRef.current?.focus(), 150); }}
-                style={{ animation: 'slideUp 0.4s ease-out 0.2s both', padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>
-                ▶ Try Again
-              </button>
+
+            <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className="btn btn-secondary" onClick={() => reset()} style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>🔄 Reset</button>
+              <button className="btn btn-primary" onClick={() => { reset(); setTimeout(() => inputRef.current?.focus(), 150); }} style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>▶ Try Again</button>
             </div>
           </div>
- 
+
           <style>{`
-            @keyframes fadeIn {
-              from { opacity: 0; } to { opacity: 1; }
-            }
-            @keyframes modalPopIn {
-              from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-              to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            }
-            @keyframes slideUp {
-              from { opacity: 0; transform: translateY(20px); }
-              to   { opacity: 1; transform: translateY(0); }
-            }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes modalPopIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
           `}</style>
         </>
       )}
- 
+
       {/* History */}
       {history.length > 0 && (
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden' }}>
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem' }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>
             📊 Session History
           </div>
@@ -507,6 +441,85 @@ export default function TypingTestPage() {
           ))}
         </div>
       )}
+
+      {/* ================= SEO ARTICLES & EDUCATION SECTION ================= */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem', marginTop: '2rem' }}>
+        <section style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
+          <h2 style={{ fontWeight: '700', fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '0' }}>
+            Understanding WPM & How Typing Tests Calculate Speed
+          </h2>
+          <p style={{ marginBottom: '1.5rem' }}>
+            A <strong>Typing Speed Test</strong> is more than just a metric of how fast your fingers can fly across a layout; it is a standardized professional evaluation tool. The standard unit of measurement is <strong>WPM (Words Per Minute)</strong>. To keep things fair across different languages and long words, a single standardized "word" is globally defined as exactly <strong>5 keystrokes</strong> (including spaces and punctuation).
+          </p>
+
+          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+            The Scientific Formula Behind WPM and Accuracy
+          </h3>
+          <p style={{ marginBottom: '1.25rem' }}>
+            Many modern platforms use confusing logic, but the industry benchmark logic running natively in this test follows strict mathematical constraints:
+          </p>
+          
+          {/* ⚠️ CLEANED TRANSFORMATION FROM CODE BLOCK TO BALANCED PARAGRAPH TEXT ⚠️ */}
+          <p style={{ margin: '1rem 0 1.5rem 0', fontWeight: '500', color: 'var(--text-primary, #fff)' }}>
+            Gross WPM = (Total Typed Characters / 5) / Time Elapsed (Minutes)<br />
+            Net WPM = (Correct Characters / 5) / Time Elapsed (Minutes)
+          </p>
+          
+          <p style={{ marginBottom: '1.5rem' }}>
+            By focusing on <em>Correct Characters</em> directly under our <code>liveWpm</code> calculator state, we ensure your results perfectly match professional micro-typing criteria, eliminating accidental mash-cheating.
+          </p>
+
+          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+            Tips to Transition to Touch Typing
+          </h3>
+          <p style={{ marginBottom: '1.5rem' }}>
+            If you are still looking down at your keys while typing, you are hitting an artificial performance ceiling. Moving up to an advanced speed typist tier requires <strong>Touch Typing</strong>—typing relying solely on muscle memory without visual guidance:
+          </p>
+          <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>The Home Row anchor:</strong> Always reset your fingers back to the home baseline row (<code>A-S-D-F</code> for the left hand, and <code>J-K-L-;</code> for the right hand). Look for the physical tactile bumps on the <strong>F</strong> and <strong>J</strong> keys.
+            </li>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>Prioritize Accuracy First:</strong> Speed is naturally built over time through consistent cognitive sub-routines. Rushing your inputs causes frequent typos, triggering a heavy cascade penalty on your live Net WPM calculations.
+            </li>
+          </ul>
+
+          {/* FAQ Section */}
+          <div style={{ marginTop: '2.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+            <h3 style={{ color: 'var(--neon-purple, #a855f7)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
+              Frequently Asked Questions (FAQs)
+            </h3>
+            
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                What is considered a good typing speed?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                An average typing speed hovers around 40 WPM. Hitting a consistent bracket between 60 to 79 WPM is deemed highly proficient for office productivity, while anything scaling beyond 120+ WPM places you in the elite bracket of computational data specialists.
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                How does this layout deal with word-wrapping and line jumps?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                The script calculates structural element boundaries inside the <code>scrollToCursor</code> hook callback. When it identifies that your cursor index has moved to a lower offset container height, it fires an accelerated CSS transition <code>translateY</code> adjustment to smoothly pan the text matrix without disorienting your focus.
+              </p>
+            </div>
+
+            <div>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                Does using a mechanical keyboard improve WPM scores?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                Yes. Standard membrane dome keypads suffer from heavy ghosting and mushy tactile lockouts. Premium mechanical switches provide rapid, clean actuation handshakes with auditory and physical feedback loops, minimizing finger fatigue during extended sessions.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      {/* ================= SEO ARTICLES & EDUCATION SECTION END ================= */}
     </div>
   );
 }

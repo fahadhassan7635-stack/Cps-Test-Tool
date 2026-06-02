@@ -170,10 +170,79 @@ export default function SniperModePage() {
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem' }}>
         {phase !== 'running' && <button className="btn btn-primary" onClick={start}>{phase === 'done' ? '▶ Play Again' : '🔭 Start Sniper Mode'}</button>}
         {phase !== 'idle' && <button className="btn btn-secondary" onClick={() => { cancelAnimationFrame(animRef.current); if (timerRef.current) clearInterval(timerRef.current); setPhase('idle'); setTarget(null); }}>🔄 Reset</button>}
       </div>
+
+      {/* ================= SEO ARTICLES & EDUCATION SECTION ================= */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem', marginTop: '2rem' }}>
+        <section style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
+          <h2 style={{ fontWeight: '700', fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--neon-red)', marginTop: '0' }}>
+            What is Sniper Mode Aim Tracking?
+          </h2>
+          <p style={{ marginBottom: '1.5rem' }}>
+            The <strong>Sniper Mode Aim Trainer</strong> is a specialized visual calibration tool designed to evaluate and sharpen your **Tracking Aim**. Unlike static flicking tests, tracking requires your hand muscles to maintain continuous, uniform synchronization with an unpredictable vector path. This mechanism maps high-frequency spatial updates directly to your visual cortex, making it an essential training regime for tactical shooter enthusiasts.
+          </p>
+
+          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+            Flicking vs. Tracking: The Architectural Difference
+          </h3>
+          <p style={{ marginBottom: '1.5rem' }}>
+            In modern competitive gaming (like <em>Apex Legends</em>, <em>Overwatch</em>, or <em>Call of Duty</em>), crosshair mechanics are categorized into two primary core principles:
+          </p>
+          <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>Flicking (Static Precision):</strong> Moving the cursor from a fixed home base to an isolated point instantaneosly (e.g., clicking on a popping bubble).
+            </li>
+            <li style={{ marginBottom: '0.6rem' }}>
+              <strong>Tracking (Dynamic Kinematics):</strong> Keeping your crosshair locked onto a high-velocity target that constantly changes axes. Sniper Mode implements target bounding collision rules that force vector redirection upon reaching container walls, mimicking advanced evasive enemy movements.
+            </li>
+          </ul>
+
+          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
+            How to Master Tracking and Improve In-Game Accuracy
+          </h3>
+          <p style={{ marginBottom: '1.5rem' }}>
+            To scale your score in Sniper Mode, focus on smooth micro-corrections rather than erratic fast wrist jerks. Keep your arm and wrist relaxed; tensing up your muscles introduces **micro-stuttering**, causing your cursor to lag behind or overshoot the 20px target circle. Ensuring a consistent system polling rate (typically 1000Hz or above) minimizes physical input latency, keeping your visual feed in perfect phase sync with the browser's render cycles.
+          </p>
+
+          {/* FAQ Section */}
+          <div style={{ marginTop: '2.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
+              Frequently Asked Questions (FAQs)
+            </h3>
+            
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                How is the performance accuracy calculated in Sniper Mode?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                The script tracks net inputs mathematically: <code>(Valid Target Hits / Total Clicks Registered) * 100</code>. Clicking outside the targeted 20px node boundaries triggers a misfire penalty, instantly increasing your **Misses** value and reducing your accuracy profile.
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                Why does the target change directions abruptly?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                The rendering loop evaluates individual coordinate positions against the canvas dimensions via <code>rect.width</code> and <code>rect.height</code>. When the node crosses a perimeter boundary, the velocity vector inversions (<code>vx *= -1</code>) cause an instantaneous directional ricochet, testing your immediate tracking reaction limits.
+              </p>
+            </div>
+
+            <div>
+              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                What is the advantage of using requestAnimationFrame over normal intervals?
+              </h4>
+              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                <code>requestAnimationFrame</code> aligns target positional logic precisely with your monitor's hardware refresh rate loop (e.g., 60Hz, 144Hz). This eliminates screen tearing and frame-skipping, providing a silky-smooth tracking experience compared to standard asynchronous Javascript timers.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      {/* ================= SEO ARTICLES & EDUCATION SECTION END ================= */}
     </div>
   );
 }

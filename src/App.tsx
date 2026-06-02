@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import CPSTestPage from './pages/CPSTestPage';
@@ -17,13 +17,22 @@ import ScrollTestPage from './pages/ScrollTestPage';
 import MouseAccuracyPage from './pages/MouseAccuracyPage';
 import SniperModePage from './pages/SniperModePage';
 import AccuracyTestPage from './pages/AccuracyTestPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsPage from './pages/TermsPage';
+import ContactPage from './pages/ContactPage';
+
+import SpaceDefensePage from './pages/SpaceDefensePage';
+import VoyagerGame from './pages/VoyagerGame';
+// নতুন Games পেজ ইমপোর্ট করা হলো 
+import GamesPage from './pages/GamesPage'; 
 
 export default function App() {
   return (
-    <HashRouter>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
+          
           <Route path="cps-test" element={<CPSTestPage />} />
           <Route path="typing-test" element={<TypingTestPage />} />
           <Route path="reaction-time" element={<ReactionTimePage />} />
@@ -35,13 +44,26 @@ export default function App() {
           <Route path="mouse-accuracy" element={<MouseAccuracyPage />} />
           <Route path="sniper-mode" element={<SniperModePage />} />
           <Route path="accuracy" element={<AccuracyTestPage />} />
+          <Route path="space-defense" element={<SpaceDefensePage />} />
+          <Route path="voyager-game" element={<VoyagerGame />} />
+          
+          {/* ক্যাটাগরি পেজগুলো */}
           <Route path="mouse" element={<MousePage />} />
           <Route path="keyboard" element={<KeyboardPage />} />
           <Route path="aim" element={<AimPage />} />
+          <Route path="games" element={<GamesPage />} />  {/* <-- নতুন গেমস রাউট */}
+          
           <Route path="leaderboard" element={<LeaderboardPage />} />
+          <Route path="hall-of-fame" element={<LeaderboardPage />} />
+          
           <Route path="blog" element={<BlogPage />} />
+          <Route path="privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="terms" element={<TermsPage />} />
+          <Route path="contact" element={<ContactPage />} />
         </Route>
+        
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </HashRouter>
+    </BrowserRouter>
   );
 }
