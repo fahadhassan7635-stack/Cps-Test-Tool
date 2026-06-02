@@ -22,7 +22,7 @@ import TermsPage from './pages/TermsPage';
 import ContactPage from './pages/ContactPage';
 
 import SpaceDefensePage from './pages/SpaceDefensePage';
-import VoyagerGame from './pages/.temp2';
+import VoyagerGame from './pages/temp2';
 // নতুন Games পেজ ইমপোর্ট করা হলো 
 import GamesPage from './pages/GamesPage'; 
 

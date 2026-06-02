@@ -27,5 +27,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "vite.config.ts", "src/pages/.temp2.tsx"]
+  "include": ["src", "vite.config.ts", "src/pages/temp2.tsx"]
 }
