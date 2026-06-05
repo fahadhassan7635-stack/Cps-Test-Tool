@@ -9,36 +9,47 @@ const tools = [
 
 export default function MousePage() {
   return (
+    /* আপনার AimPage এর মত maxWidth 900px এবং সেম প্যাডিং দেওয়া হয়েছে */
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <div className="section-label">Category</div>
+        {/* ইনলাইন ফন্ট-সাইজ সরিয়ে দেওয়া হয়েছে, এখন AimPage এর মত সমান বড় দেখাবে */}
         <h1 className="tool-title">Mouse Tools</h1>
         <p className="tool-subtitle">Test and measure every aspect of your mouse performance</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      {/* আপনার AimPage এর গ্রিড সাইজ (260px) ব্যবহার করা হয়েছে */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         {tools.map(tool => (
           <Link key={tool.to} to={tool.to} style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: '16px', padding: '1.75rem', textDecoration: 'none',
-            color: 'var(--text-primary)', display: 'block', transition: 'all 0.3s ease',
-            position: 'relative',
+            color: 'var(--text-primary)', 
+            /* কার্ডগুলোর সাইজ সমান রাখার জন্য flex ব্যবহার করা হয়েছে, বাকি সব AimPage এর মত */
+            display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', 
+            transition: 'all 0.3s ease', position: 'relative',
           }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color; el.style.transform = 'translateY(-4px)'; el.style.boxShadow = `0 15px 40px rgba(0,0,0,0.4)`; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'; }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color; el.style.transform = 'translateY(-4px)'; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.transform = 'translateY(0)'; }}
           >
-            {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{tool.icon}</div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: tool.color, marginBottom: '0.5rem' }}>{tool.title}</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>{tool.desc}</p>
+            <div>
+              {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{tool.icon}</div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: tool.color, marginBottom: '0.5rem' }}>{tool.title}</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>{tool.desc}</p>
+            </div>
             <span style={{ color: tool.color, fontWeight: '600', fontSize: '0.875rem' }}>Start Test →</span>
           </Link>
         ))}
       </div>
 
+      {/* নিচের টিপস সেকশনটিও AimPage এর সাইজের সাথে মিলিয়ে দেওয়া হয়েছে */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem' }}>
         <h3 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--neon-green)' }}>🖱️ Mouse Performance Tips</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.7', marginBottom: '1.25rem' }}>
+          Optimizing your mouse settings can drastically improve your aim. Professional gamers carefully tune their DPI, polling rate, and grip styles.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           {[
             { t: 'DPI Settings', d: 'Most pro gamers use 400-1600 DPI. Lower DPI = more precision.' },
             { t: 'Polling Rate', d: '1000Hz polling rate gives smoother cursor movement.' },

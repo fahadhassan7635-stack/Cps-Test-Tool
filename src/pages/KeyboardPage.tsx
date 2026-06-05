@@ -16,21 +16,24 @@ export default function KeyboardPage() {
         <p className="tool-subtitle">Master your typing speed, accuracy, and keyboard skills</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         {tools.map(tool => (
           <Link key={tool.to} to={tool.to} style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: '16px', padding: '1.75rem', textDecoration: 'none',
-            color: 'var(--text-primary)', display: 'block', transition: 'all 0.3s ease',
+            color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', 
+            height: '100%', justifyContent: 'space-between', transition: 'all 0.3s ease',
             position: 'relative',
           }}
             onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color; el.style.transform = 'translateY(-4px)'; }}
             onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.transform = 'translateY(0)'; }}
           >
-            {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}
-            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{tool.icon}</div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: tool.color, marginBottom: '0.5rem' }}>{tool.title}</h3>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>{tool.desc}</p>
+            <div>
+              {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{tool.icon}</div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: tool.color, marginBottom: '0.5rem' }}>{tool.title}</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>{tool.desc}</p>
+            </div>
             <span style={{ color: tool.color, fontWeight: '600', fontSize: '0.875rem' }}>Start Test →</span>
           </Link>
         ))}
@@ -38,7 +41,7 @@ export default function KeyboardPage() {
 
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem' }}>
         <h3 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--neon-cyan)' }}>⌨️ Typing Improvement Tips</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           {[
             { t: 'Touch Typing', d: 'Learn to type without looking at the keyboard. Use all 10 fingers.' },
             { t: 'Practice Daily', d: '15-30 minutes of focused practice daily yields rapid improvement.' },

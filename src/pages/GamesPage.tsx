@@ -17,147 +17,123 @@ export default function GamesPage() {
       desc: 'Navigate through the asteroid field using your spacebar or clicking speed. Test your endurance and boost your reflexes.',
       color: 'var(--neon-purple)',
       badge: 'MOST POPULAR'
+    },
+    {
+      to: '/cps-rush',
+      icon: '⚡',
+      title: 'CPS Rush',
+      desc: 'The faster you click or smash the spacebar, the faster your speed and higher you bounce! Can you avoid obstacles and reach the final Cyber Gate?',
+      color: '#06b6d4',
+      badge: 'NEW REFLEX'
     }
   ];
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '4rem 1.5rem', minHeight: '80vh' }}>
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem', minHeight: '80vh' }}>
       
-      {/* HEADER SECTION */}
-      <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-        <span style={{
-          display: 'inline-block',
-          padding: '0.4rem 1rem',
-          borderRadius: '50px',
-          border: '1px solid rgba(0, 245, 255, 0.3)',
-          background: 'rgba(0, 245, 255, 0.05)',
-          color: 'var(--neon-cyan)',
-          fontSize: '0.75rem',
-          fontWeight: '700',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          marginBottom: '1.5rem'
-        }}>
-          Category
-        </span>
-        
-        <h1 style={{
-          fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-          fontWeight: '900',
-          color: 'var(--text-primary)',
-          marginBottom: '1rem',
-          letterSpacing: '-0.02em'
-        }}>
-          Arcade <span style={{ color: '#ff6b35' }}>Games</span>
-        </h1>
-        
-        <p style={{
-          color: 'var(--text-secondary)',
-          fontSize: '1.1rem',
-          maxWidth: '600px',
-          margin: '0 auto',
-          lineHeight: '1.6'
-        }}>
-          Play interactive skill games to improve your reaction time, clicking speed, and keyboard accuracy.
-        </p>
+      {/* HEADER SECTION (Standardized to match other pages) */}
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <div className="section-label">Category</div>
+        <h1 className="tool-title">Arcade <span style={{ color: '#ff6b35' }}>Games</span></h1>
+        <p className="tool-subtitle">Play interactive skill games to improve your reaction time, clicking speed, and keyboard accuracy.</p>
       </div>
 
-      {/* GAMES GRID */}
+      {/* GAMES GRID (Matched grid size and flex setup) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-        gap: '2rem'
+        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gap: '1.5rem',
+        marginBottom: '3rem'
       }}>
-        {games.map((game) => (
-          <Link
-            key={game.to}
-            to={game.to}
-            style={{
-              display: 'block',
-              background: '#0f1724',
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: '16px',
-              padding: '2.5rem',
-              textDecoration: 'none',
-              position: 'relative',
-              transition: 'all 0.3s ease',
-              overflow: 'hidden'
-            }}
-            onMouseEnter={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.transform = 'translateY(-5px)';
-              el.style.borderColor = game.color;
-              el.style.boxShadow = `0 10px 30px ${game.color}20`;
-            }}
-            onMouseLeave={e => {
-              const el = e.currentTarget as HTMLElement;
-              el.style.transform = 'translateY(0)';
-              el.style.borderColor = 'rgba(255,255,255,0.05)';
-              el.style.boxShadow = 'none';
-            }}
-          >
-            {/* Badge */}
-            {game.badge && (
+        {games.map((game) => {
+          // Maintaining your custom logic for the Voyager game badge color
+          const badgeColor = game.color === 'var(--neon-purple)' ? 'var(--neon-cyan)' : game.color;
+
+          return (
+            <Link
+              key={game.to}
+              to={game.to}
+              style={{
+                background: 'var(--bg-card)', 
+                border: '1px solid var(--border)',
+                borderRadius: '16px', 
+                padding: '1.75rem', 
+                textDecoration: 'none',
+                color: 'var(--text-primary)', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: '100%', 
+                justifyContent: 'space-between', 
+                transition: 'all 0.3s ease',
+                position: 'relative',
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = 'translateY(-4px)';
+                el.style.borderColor = game.color;
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLElement;
+                el.style.transform = 'translateY(0)';
+                el.style.borderColor = 'var(--border)';
+              }}
+            >
+              <div>
+                {/* Badge */}
+                {game.badge && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '1rem',
+                    right: '1rem',
+                    padding: '0.2rem 0.5rem',
+                    borderRadius: '4px',
+                    fontSize: '0.65rem',
+                    fontWeight: '700',
+                    background: `${badgeColor}20`,
+                    color: badgeColor,
+                    textTransform: 'uppercase'
+                  }}>
+                    {game.badge}
+                  </span>
+                )}
+
+                {/* Icon (Simplified to match Aim/Mouse pages) */}
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>
+                  {game.icon}
+                </div>
+
+                {/* Title */}
+                <h3 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  color: game.color,
+                  marginBottom: '0.5rem'
+                }}>
+                  {game.title}
+                </h3>
+                
+                {/* Description */}
+                <p style={{
+                  color: 'var(--text-secondary)',
+                  fontSize: '0.875rem',
+                  lineHeight: '1.6',
+                  marginBottom: '1.25rem'
+                }}>
+                  {game.desc}
+                </p>
+              </div>
+
+              {/* CTA */}
               <span style={{
-                position: 'absolute',
-                top: '1.5rem',
-                right: '1.5rem',
-                fontSize: '0.7rem',
-                fontWeight: '800',
-                color: 'var(--neon-cyan)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em'
+                color: game.color,
+                fontWeight: '600',
+                fontSize: '0.875rem'
               }}>
-                {game.badge}
+                Start Game →
               </span>
-            )}
-
-            {/* Icon */}
-            <div style={{
-              width: '60px', height: '60px',
-              background: 'rgba(255,255,255,0.03)',
-              borderRadius: '12px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2rem',
-              marginBottom: '1.5rem',
-              border: '1px solid rgba(255,255,255,0.05)'
-            }}>
-              {game.icon}
-            </div>
-
-            {/* Title */}
-            <h2 style={{
-              color: game.color,
-              fontSize: '1.5rem',
-              fontWeight: '800',
-              marginBottom: '1rem'
-            }}>
-              {game.title}
-            </h2>
-            
-            {/* Description */}
-            <p style={{
-              color: 'var(--text-secondary)',
-              fontSize: '0.95rem',
-              lineHeight: '1.6',
-              marginBottom: '2rem'
-            }}>
-              {game.desc}
-            </p>
-
-            {/* CTA */}
-            <div style={{
-              color: game.color,
-              fontWeight: '600',
-              fontSize: '0.95rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}>
-              Start Game →
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

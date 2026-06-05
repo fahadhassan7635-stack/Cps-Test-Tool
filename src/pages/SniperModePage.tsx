@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Target { id: number; x: number; y: number; vx: number; vy: number; size: number; }
 
@@ -175,74 +175,109 @@ export default function SniperModePage() {
         {phase !== 'idle' && <button className="btn btn-secondary" onClick={() => { cancelAnimationFrame(animRef.current); if (timerRef.current) clearInterval(timerRef.current); setPhase('idle'); setTarget(null); }}>🔄 Reset</button>}
       </div>
 
-      {/* ================= SEO ARTICLES & EDUCATION SECTION ================= */}
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem', marginTop: '2rem' }}>
-        <section style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
-          <h2 style={{ fontWeight: '700', fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--neon-red)', marginTop: '0' }}>
-            What is Sniper Mode Aim Tracking?
+      {/* ================= MASSIVE SEO ARTICLES & EDUCATION SECTION ================= */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
+        <article style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
+          
+          <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--neon-red)', marginTop: '0', letterSpacing: '-0.5px' }}>
+            The Ultimate Guide to Sniper Aiming & Target Tracking
           </h2>
-          <p style={{ marginBottom: '1.5rem' }}>
-            The <strong>Sniper Mode Aim Trainer</strong> is a specialized visual calibration tool designed to evaluate and sharpen your **Tracking Aim**. Unlike static flicking tests, tracking requires your hand muscles to maintain continuous, uniform synchronization with an unpredictable vector path. This mechanism maps high-frequency spatial updates directly to your visual cortex, making it an essential training regime for tactical shooter enthusiasts.
+          
+          <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
+            The <strong>Sniper Mode Aim Trainer</strong> is an advanced visual calibration tool designed specifically to evaluate and sharpen your **Tracking Aim**. Unlike static clicking tools, tracking requires your hand muscles to maintain continuous synchronization with an unpredictable, moving target. Whether you are using a sniper rifle to hit a running player or tracking a fast-moving vehicle, mastering your dynamic cursor control is the ultimate key to dominating competitive tactical shooters.
           </p>
 
-          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
-            Flicking vs. Tracking: The Architectural Difference
-          </h3>
-          <p style={{ marginBottom: '1.5rem' }}>
-            In modern competitive gaming (like <em>Apex Legends</em>, <em>Overwatch</em>, or <em>Call of Duty</em>), crosshair mechanics are categorized into two primary core principles:
-          </p>
-          <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
-            <li style={{ marginBottom: '0.6rem' }}>
-              <strong>Flicking (Static Precision):</strong> Moving the cursor from a fixed home base to an isolated point instantaneosly (e.g., clicking on a popping bubble).
-            </li>
-            <li style={{ marginBottom: '0.6rem' }}>
-              <strong>Tracking (Dynamic Kinematics):</strong> Keeping your crosshair locked onto a high-velocity target that constantly changes axes. Sniper Mode implements target bounding collision rules that force vector redirection upon reaching container walls, mimicking advanced evasive enemy movements.
-            </li>
-          </ul>
-
-          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
-            How to Master Tracking and Improve In-Game Accuracy
-          </h3>
-          <p style={{ marginBottom: '1.5rem' }}>
-            To scale your score in Sniper Mode, focus on smooth micro-corrections rather than erratic fast wrist jerks. Keep your arm and wrist relaxed; tensing up your muscles introduces **micro-stuttering**, causing your cursor to lag behind or overshoot the 20px target circle. Ensuring a consistent system polling rate (typically 1000Hz or above) minimizes physical input latency, keeping your visual feed in perfect phase sync with the browser's render cycles.
-          </p>
-
-          {/* FAQ Section */}
-          <div style={{ marginTop: '2.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
-            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
-              Frequently Asked Questions (FAQs)
+          {/* New Mouse Sensor Check Box */}
+          <div style={{ background: 'rgba(255, 45, 85, 0.05)', borderLeft: '4px solid var(--neon-red)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
+            <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🖱️ The Ultimate &quot;New Mouse&quot; Tracking Check
             </h3>
-            
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                How is the performance accuracy calculated in Sniper Mode?
-              </h4>
-              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                The script tracks net inputs mathematically: <code>(Valid Target Hits / Total Clicks Registered) * 100</code>. Clicking outside the targeted 20px node boundaries triggers a misfire penalty, instantly increasing your **Misses** value and reducing your accuracy profile.
-              </p>
-            </div>
-
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                Why does the target change directions abruptly?
-              </h4>
-              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                The rendering loop evaluates individual coordinate positions against the canvas dimensions via <code>rect.width</code> and <code>rect.height</code>. When the node crosses a perimeter boundary, the velocity vector inversions (<code>vx *= -1</code>) cause an instantaneous directional ricochet, testing your immediate tracking reaction limits.
-              </p>
-            </div>
-
-            <div>
-              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                What is the advantage of using requestAnimationFrame over normal intervals?
-              </h4>
-              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                <code>requestAnimationFrame</code> aligns target positional logic precisely with your monitor's hardware refresh rate loop (e.g., 60Hz, 144Hz). This eliminates screen tearing and frame-skipping, providing a silky-smooth tracking experience compared to standard asynchronous Javascript timers.
-              </p>
-            </div>
+            <p style={{ margin: 0, color: '#9ca3af' }}>
+              Just bought a premium gaming mouse? Our Sniper Mode is the absolute best way to perform a <strong>new mouse check</strong>. By tracking the small bouncing dot, you can instantly verify your sensor&apos;s polling rate stability (ensuring it doesn&apos;t stutter), test your PTFE mouse skates for smooth gliding, and fine-tune your DPI before stepping into ranked matches.
+            </p>
           </div>
-        </section>
+
+          <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem' }}>
+            Why Tracking Precision Dominates Modern Gaming
+          </h3>
+          <p style={{ marginBottom: '1.5rem' }}>
+            Sniping and tracking are universally feared skills. A player who can consistently hit a moving target applies immense psychological pressure on the enemy team. Training your tracking aim dramatically boosts your performance in these popular games:
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+            {['Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V', 'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2', 'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us'].map((game) => (
+              <div key={game} style={{ background: 'rgba(0,0,0,0.4)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'var(--neon-red)' }}>🔭</span> {game}
+              </div>
+            ))}
+          </div>
+
+          {/* Detailed Q&A / Pro Strategies Section */}
+          <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+            Pro Sniping Strategies & Aim FAQs
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            
+            {/* PUBG / Warzone Sniper Aiming */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to improve Snipe and Tracking Aim in PUBG & Warzone?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                In large-scale Battle Royales like <strong>PUBG: Battlegrounds</strong> and <strong>Call of Duty: Warzone</strong>, enemies are rarely standing still. To hit a running target with a Kar98k or HDR, you must master the art of &quot;leading&quot; your shot. Our Sniper Mode helps you build the muscle memory required to track a target seamlessly without jittering your wrist. The constant directional changes of the red dot train your eyes to predict movement vectors perfectly.
+              </p>
+            </div>
+
+            {/* Valorant / CS2 Flicks & Tracking */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to increase precision with Sniper Rifles in CS2 & Valorant?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                Using the AWP in <strong>Counter-Strike 2</strong> or the Operator in Valorant requires extreme discipline. If you miss your first shot, you are likely dead. While holding angles (crosshair placement) is key, you must also be able to micro-track an enemy who &quot;jiggle-peeks&quot; or swings wide. Playing our Sniper Mode daily trains you to click the mouse exactly when your crosshair aligns with a tiny moving hitbox, drastically improving your single-shot accuracy.
+              </p>
+            </div>
+
+            {/* Minecraft Bow Aiming */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to get better Bow Aim and PvP Tracking in Minecraft?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                While &quot;Fast CPS&quot; is famous for sword combat in <strong>Minecraft</strong>, tracking is what wins ranged bow fights and keeps your cursor locked onto an enemy while both of you are strafing. If your crosshair slips off the enemy hitbox, your clicks won&apos;t register. Sniper mode forces you to keep your cursor glued to the target, enhancing your PvP tracking skills on popular servers like Hypixel.
+              </p>
+            </div>
+
+            {/* Reaction Time */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to improve reaction time to unpredictable movement in FPS games?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                When the target in this tool hits a wall, it bounces back instantly. This replicates an enemy suddenly changing direction (strafing) in games like <strong>Fortnite</strong>, <strong>Apex Legends</strong>, or <strong>Grand Theft Auto V</strong>. To improve your reaction time:
+                <br/><br/>
+                <strong>1. Don&apos;t Predict, React:</strong> Stop guessing where the dot will go. Keep your eyes locked on the dot itself, not your crosshair. <br/>
+                <strong>2. Relax Your Grip:</strong> Tensing your hand to click fast actually slows down your tracking speed. A relaxed grip allows for smoother micro-adjustments.<br/>
+                <strong>3. Higher Refresh Rate:</strong> Playing this tracking tool on a 144Hz or 240Hz monitor will make the target&apos;s movement appear significantly smoother, lowering your visual reaction latency.
+              </p>
+            </div>
+
+            {/* Pro Tip Box */}
+            <div style={{ background: 'rgba(255, 107, 0, 0.05)', border: '1px solid rgba(255,107,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
+              <h4 style={{ color: 'var(--neon-orange)', fontSize: '1.1rem', fontWeight: '700', margin: '0 0 0.5rem 0' }}>
+                💡 Pro Tip: Optimize Your Sensitivity (eDPI)
+              </h4>
+              <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.9rem' }}>
+                If you find yourself constantly &quot;overshooting&quot; the red target, your mouse sensitivity is too high. If you are trailing behind it, your sensitivity might be too low (or your mousepad is too small). Lowering your DPI (e.g., to 400 or 800) and using your forearm to track movements provides exponentially higher consistency than relying solely on your wrist.
+              </p>
+            </div>
+
+          </div>
+        </article>
       </div>
-      {/* ================= SEO ARTICLES & EDUCATION SECTION END ================= */}
+      {/* ================= MASSIVE SEO ARTICLES & EDUCATION SECTION END ================= */}
+
     </div>
   );
 }

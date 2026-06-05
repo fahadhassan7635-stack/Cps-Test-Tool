@@ -342,14 +342,12 @@ export default function CPSTestPage() {
       {/* ===== MODERN PROFILE SPLIT RESULT MODAL ===== */}
       {phase === 'done' && finalRating && (
         <>
-          {/* Backdrop */}
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
             zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards',
           }} onClick={() => resetTest()} />
 
-          {/* Modal Container */}
           <div style={{
             position: 'fixed', top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
@@ -364,7 +362,6 @@ export default function CPSTestPage() {
             animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
             boxShadow: `0 0 40px ${finalRating.color}25`,
           }}>
-            {/* Close button */}
             <button onClick={() => resetTest()} style={{
               position: 'absolute', top: '0.75rem', right: '0.75rem',
               background: 'rgba(255,255,255,0.03)',
@@ -374,103 +371,44 @@ export default function CPSTestPage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>✕</button>
 
-            {/* Split Grid Layout (Animal vs Rank/Stats) */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: '1fr 1.2fr', 
-              gap: '1.25rem', 
-              alignItems: 'center', 
-              minHeight: '130px', 
-              marginBottom: '1.25rem' 
-            }}>
-              
-              {/* Left Column: Graphic Animal Badge */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                borderRight: '1px solid rgba(255,255,255,0.08)', 
-                paddingRight: '1rem', 
-                height: '100%' 
-              }}>
-                <span style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}>
-                  {finalRating.emoji}
-                </span>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.25rem', alignItems: 'center', minHeight: '130px', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '1rem', height: '100%' }}>
+                <span style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}>{finalRating.emoji}</span>
               </div>
-
-              {/* Right Column: Score details */}
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Your Rank is
-                </div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}>
-                  {finalRating.label}!
-                </div>
-                
-                {/* Visual Stars */}
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Rank is</div>
+                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}>{finalRating.label}!</div>
                 <div style={{ display: 'flex', gap: '3px', marginBottom: '0.5rem' }}>
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} style={{ fontSize: '1.2rem', color: i < finalRating.stars ? '#ffca28' : 'rgba(255,255,255,0.1)' }}>
-                      ★
-                    </span>
+                    <span key={i} style={{ fontSize: '1.2rem', color: i < finalRating.stars ? '#ffca28' : 'rgba(255,255,255,0.1)' }}>★</span>
                   ))}
                 </div>
-
-                <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                  You Clicked with the speed of <strong style={{ color: '#fff', fontSize: '1.15rem', fontVariantNumeric: 'tabular-nums' }}>{cps}</strong> CPS
-                </div>
+                <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>You Clicked with the speed of <strong style={{ color: '#fff', fontSize: '1.15rem', fontVariantNumeric: 'tabular-nums' }}>{cps}</strong> CPS</div>
               </div>
             </div>
 
-            {/* Graphic Subtitle Quote Box */}
-            <div style={{ 
-              background: 'rgba(0,0,0,0.25)', 
-              padding: '0.85rem 1rem', 
-              borderRadius: '12px', 
-              borderLeft: `3px solid ${finalRating.color}`, 
-              fontStyle: 'italic', 
-              color: '#cbd5e1', 
-              fontSize: '0.88rem', 
-              textAlign: 'left', 
-              marginBottom: '1.25rem', 
-              lineHeight: '1.5' 
-            }}>
+            <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.85rem 1rem', borderRadius: '12px', borderLeft: `3px solid ${finalRating.color}`, fontStyle: 'italic', color: '#cbd5e1', fontSize: '0.88rem', textAlign: 'left', marginBottom: '1.25rem', lineHeight: '1.5' }}>
               {finalRating.desc}
             </div>
 
-            {/* Bottom mini counters */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.5rem' }}>
               {[
                 { value: clicks, label: 'Total Clicks', color: 'var(--neon-green)' },
                 { value: maxCps, label: 'Peak (1s)', color: 'var(--neon-cyan)' },
                 { value: `${duration}s`, label: 'Duration', color: 'var(--neon-orange)' },
               ].map(s => (
-                <div key={s.label} style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  borderRadius: '12px', padding: '0.5rem 0.25rem',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                }}>
+                <div key={s.label} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.5rem 0.25rem', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div style={{ fontSize: '1.2rem', fontWeight: '800', color: s.color }}>{s.value}</div>
                   <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px' }}>{s.label}</div>
                 </div>
               ))}
             </div>
 
-            {/* Action Control Buttons */}
             <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-              <button
-                className="btn btn-secondary"
-                onClick={() => resetTest()}
-                style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
+              <button onClick={() => resetTest()} style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', background: 'var(--bg-card)', border: '1px solid var(--border)', color: '#fff' }}>
                 🔄 Reset
               </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => { resetTest(); startTest(); }}
-                style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', backgroundColor: finalRating.color, borderColor: finalRating.color, color: '#000', fontWeight: '700' }}
-              >
+              <button onClick={() => { resetTest(); startTest(); }} style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', backgroundColor: finalRating.color, border: `1px solid ${finalRating.color}`, color: '#000', fontWeight: '700' }}>
                 ▶ Try Again
               </button>
             </div>
@@ -480,16 +418,9 @@ export default function CPSTestPage() {
 
       {history.length > 0 && (
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem' }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>
-            📊 Session History
-          </div>
+          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
           {history.map((h, i) => (
-            <div key={i} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '0.75rem 1.25rem',
-              borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none',
-              fontSize: '0.875rem',
-            }}>
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none', fontSize: '0.875rem' }}>
               <span style={{ color: 'var(--text-muted)' }}>#{history.length - i}</span>
               <span style={{ color: 'var(--neon-cyan)', fontWeight: '700' }}>{h.cps} CPS</span>
               <span style={{ color: 'var(--text-secondary)' }}>{h.clicks} clicks</span>
@@ -500,77 +431,112 @@ export default function CPSTestPage() {
         </div>
       )}
 
-      {/* SEO ARTICLE SECTION */}
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2rem', marginTop: '2rem' }}>
-        <section style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
-          <h2 style={{ fontWeight: '700', fontSize: '1.6rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '0' }}>
-            What is a CPS Test and How Does It Work?
+      {/* ================= MASSIVE SEO ARTICLE SECTION ================= */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
+        <article style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
+          
+          <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
+            The Ultimate Guide to CPS (Clicks Per Second) & Gaming Performance
           </h2>
-          <p style={{ marginBottom: '1.5rem' }}>
-            A <strong>CPS Test (Clicks Per Second Test)</strong> is an interactive online tool used to measure mouse clicking speed over a specific duration. Originally popular among competitive Minecraft PvP players, CPS speed checkers are now widely used by global eSports athletes to audit their physical reflexes and evaluate mouse hardware capabilities. The calculation is simple: your total recorded mouse clicks divided by the selected duration equals your raw CPS score.
+          
+          <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
+            A <strong>CPS Test (Clicks Per Second Test)</strong> is an essential online benchmarking tool utilized by professional eSports players, casual gamers, and hardware enthusiasts. It accurately measures how fast you can click your mouse button within a specific time frame. Whether you are battling in a high-stakes PvP arena, building structures at lightning speed, or just testing the limits of your human reflexes, mastering your CPS is the gateway to elevating your overall gaming prowess.
           </p>
 
-          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
-            Advanced Mouse Clicking Techniques Covered
+          {/* New Mouse Check Box */}
+          <div style={{ background: 'rgba(0, 245, 255, 0.05)', borderLeft: '4px solid var(--neon-cyan)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
+            <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🖱️ The Ultimate "New Mouse Check"
+            </h3>
+            <p style={{ margin: 0, color: '#9ca3af' }}>
+              Just unboxed a new gaming mouse (like a Logitech G Pro X Superlight, Razer DeathAdder, or Glorious Model O)? Our tool serves as the perfect <strong>new mouse check</strong>. You can instantly test the responsiveness of the mechanical or optical switches, verify your polling rate consistency, and ensure your hardware isn't suffering from frustrating double-clicking issues right out of the box.
+            </p>
+          </div>
+
+          <h3 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem' }}>
+            Why Clicking Speed Matters in Modern Gaming
           </h3>
           <p style={{ marginBottom: '1.5rem' }}>
-            While standard point-and-click actions typically yield average scores, advanced gaming communities have developed specialized muscle manipulation methods to break the limits of hardware:
+            In the modern era of competitive gaming, Actions Per Minute (APM) and raw clicking speed can dictate the outcome of a match. A higher CPS gives you a distinct mechanical advantage across a massive variety of popular titles. Our tool is highly recommended for players who regularly play:
           </p>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-            {[
-              { title: '🖱️ Regular Clicking', desc: 'The natural finger press used in daily operations. Typically limits users to a safe 4-8 CPS range.' },
-              { title: '⚡ Jitter Clicking', desc: 'Controlled hand vibration. By straining forearm muscles, players transmit rapid micro-spasms to the finger, pushing output to 9-14 CPS.' },
-              { title: '🦋 Butterfly Clicking', desc: 'Alternating index and middle fingers on a single mouse clicker, creating a rapid double-hit cycle resulting in 15-22+ CPS.' },
-            ].map(tip => (
-              <div key={tip.title} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '1rem', border: '1px solid var(--border)' }}>
-                <div style={{ fontWeight: '700', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--neon-green)' }}>{tip.title}</div>
-                <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.5' }}>{tip.desc}</div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+            {['Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V', 'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2', 'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us'].map((game) => (
+              <div key={game} style={{ background: 'rgba(0,0,0,0.4)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'var(--neon-cyan)' }}>🎮</span> {game}
               </div>
             ))}
           </div>
 
-          <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '600', marginBottom: '0.75rem', marginTop: '2rem' }}>
-            Why eSports Gamers Frequently Test Clicks Per Second
-          </h3>
-          <p style={{ marginBottom: '1.5rem' }}>
-            In tactical strategy titles and rapid battle arenas, actions-per-minute (APM) determine how quickly you execute inventory swaps, weapon triggers, or spell-casting queues. Consistently benchmarking your input speed ensures you are maintaining peak physical conditioning while checking if your mechanical mouse switches are suffering from double-click degradation or input lag.
-          </p>
+          {/* Detailed Q&A / How-To Section */}
+          <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+            Pro Gamer FAQs & Strategies
+          </h2>
 
-          <div style={{ marginTop: '2.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '1.5rem', border: '1px dashed var(--border)' }}>
-            <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
-              Frequently Asked Questions (FAQs)
-            </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                What is the world record for the highest CPS test?
-              </h4>
-              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                According to official gaming leaderboards, the absolute highest world records peak around <strong>22 to 27 CPS</strong>, typically accomplished via highly specialized drag-clicking or butterfly-clicking techniques on unbuffered gaming mice.
-              </p>
-            </div>
-
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                Does jitter clicking cause physical harm or carpal tunnel?
-              </h4>
-              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                Extended strain can lead to wrist fatigue. If you are practicing intense vibration methods like jitter clicking, it is critical to take regular 5-minute stretching intervals to safeguard your joint health.
-              </p>
-            </div>
-
+            {/* Minecraft */}
             <div>
-              <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: '600', margin: '0 0 0.25rem 0' }}>
-                What is the best time frame to test actual speed?
-              </h4>
-              <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                The <strong>5-second test</strong> is the industry standard benchmark because it balances raw human explosive power without introducing excessive physical muscle exhaustion.
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to get fast CPS in Minecraft?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                To achieve high CPS in <strong>Minecraft</strong>—which is absolutely vital for PvP combat (especially in 1.8 mechanics) and advanced speed bridging techniques like Godbridge or Breezily bridge—players utilize specialized grips. 
+                <br/><br/>
+                <strong>Jitter Clicking:</strong> Involves tensing your forearm to send rapid vibrations to your index finger, easily achieving 10-14 CPS. <br/>
+                <strong>Butterfly Clicking:</strong> Uses two fingers (index and middle) to alternate strikes on the left mouse button, pushing limits to 15-20 CPS. <br/>
+                <strong>Drag Clicking:</strong> Involves dragging your finger across the surface of the mouse button to utilize friction, generating upwards of 25+ CPS (requires a mouse with specific matte textures).
               </p>
             </div>
+
+            {/* PUBG */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to improve CPS in PUBG: Battlegrounds?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                In <strong>PUBG</strong>, raw clicking speed transforms single-fire weapons like the M16A4, Mutant, and various DMRs (SKS, Mini14) into fully automatic killing machines. To improve your CPS in PUBG, you must master <em>trigger discipline</em>. Instead of resting your entire finger flat on the mouse, curve your finger into a "claw grip" and use only the very tip to tap the button. Using our 10-second CPS tool daily helps build the muscle memory required to spam-click without throwing off your aim or recoil control.
+              </p>
+            </div>
+
+            {/* Valorant / FPS */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to increase clicking speed in Valorant?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                While Valorant relies heavily on tactical crosshair placement rather than spamming, fast clicking speed is the ultimate lifesaver during intense pistol rounds (using the Classic, Frenzy, or Ghost). To increase your speed, ensure your hand posture is relaxed. Tense hands lead to slower inputs. Warm up with our 5-second test before queueing for ranked matches. It gets the blood flowing to your fingertips, ensuring your single-fire tapping speed is instantly responsive when you peek a corner.
+              </p>
+            </div>
+
+            {/* Reaction Time */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to improve reaction time in FPS games?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                In hyper-fast shooters like <strong>Counter-Strike 2 (CS2)</strong>, <strong>Call of Duty: Warzone</strong>, and <strong>Apex Legends</strong>, clicking fast means nothing if you react slowly. To improve your reaction time:
+                <br/><br/>
+                <strong>1. Optimize Hardware:</strong> Upgrade to a high refresh rate monitor (144Hz or 240Hz+) and ensure your mouse has at least a 1000Hz polling rate to minimize input delay. <br/>
+                <strong>2. Active Tracking:</strong> Keep your eyes focused on the environment looking for targets, rather than just staring blankly at your own crosshair. <br/>
+                <strong>3. Routine Practice:</strong> Combine daily use of aim trainers (like Aim Lab or KovaaK's) with our CPS checker to significantly reduce the cognitive delay between your brain spotting an enemy and your finger executing the click.
+              </p>
+            </div>
+
+            {/* General Health Tip */}
+            <div style={{ background: 'rgba(255, 0, 0, 0.05)', border: '1px solid rgba(255,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
+              <h4 style={{ color: 'var(--neon-red)', fontSize: '1.1rem', fontWeight: '700', margin: '0 0 0.5rem 0' }}>
+                ⚠️ A Note on Physical Health
+              </h4>
+              <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.9rem' }}>
+                Attempting to reach maximum CPS via Jitter or Butterfly clicking puts strain on your forearm tendons. To avoid repetitive strain injuries or carpal tunnel syndrome, always perform wrist stretches before gaming and avoid practicing these intense clicking methods for more than a few minutes at a time.
+              </p>
+            </div>
+
           </div>
-        </section>
+        </article>
       </div>
+
     </div>
   );
 }
