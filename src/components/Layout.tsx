@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 
-const mouseIcon = '/mouse-icon.jpg';
+const mouseIcon = '/logo.png';
 
 interface ToolItem {
   to: string;
@@ -239,13 +239,11 @@ export default function Layout() {
               title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               {sidebarOpen ? (
-                /* Left Arrow (When Open) */
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="19" y1="12" x2="5" y2="12" />
                   <polyline points="12 19 5 12 12 5" />
                 </svg>
               ) : (
-                /* Right Arrow (When Closed) */
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
@@ -254,7 +252,7 @@ export default function Layout() {
             </button>
           </div>
 
-          {/* FILTER DROPDOWN - Hides when mini-sidebar is active */}
+          {/* FILTER DROPDOWN */}
           <div style={{ display: sidebarOpen ? 'flex' : 'none', alignItems: 'center', marginBottom: '1.25rem' }}>
             <select 
               value={selectedCategory} 
@@ -294,7 +292,7 @@ export default function Layout() {
           }}>
             {filteredTools.map((tool) => {
               const isCurrentActive = location.pathname === tool.to;
-              const isPinned = tool.to === '/cps-test'; // CPS Test Check
+              const isPinned = tool.to === '/cps-test';
               
               return (
                 <Link
@@ -308,7 +306,6 @@ export default function Layout() {
                     padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
                     borderRadius: '6px',
                     textDecoration: 'none',
-                    // PINNED STICKY LOGIC
                     position: isPinned ? 'sticky' : 'static',
                     top: isPinned ? 0 : 'auto',
                     zIndex: isPinned ? 10 : 1,
@@ -319,12 +316,11 @@ export default function Layout() {
                     border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
                     borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
                     marginBottom: isPinned ? '5px' : '0',
-
                     fontSize: '0.85rem',
                     fontWeight: isCurrentActive ? '600' : '500',
                     color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
-                    transition: 'all 0.3s ease', // Smooth hover transition
-                    transform: 'translateX(0)' // Default state for animation
+                    transition: 'all 0.3s ease',
+                    transform: 'translateX(0)'
                   }}
                   onMouseEnter={(e) => {
                     if (!isCurrentActive) {
@@ -344,7 +340,6 @@ export default function Layout() {
                   }}
                 >
                   <span style={{ fontSize: '1.1rem' }}>{tool.icon}</span>
-                  {/* TEXT VISIBILITY LOGIC */}
                   <span style={{ 
                     display: (sidebarOpen || isPinned) ? 'block' : 'none', 
                     textTransform: 'uppercase', 
@@ -427,7 +422,6 @@ export default function Layout() {
           <div>
             <h4 style={{ color: 'var(--neon-green, #0cf991)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>MOUSE</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {/* === Added CPS Rush right here === */}
               {[{ to: '/cps-test', label: 'CPS Test' }, { to: '/double-click', label: 'Double Click Test' }, { to: '/scroll-test', label: 'Scroll Wheel Test' }, { to: '/mouse-accuracy', label: 'Mouse Accuracy' }, { to: '/cps-rush', label: 'CPS Rush' }].map(l => (
                 <li key={l.to}>
                   <Link to={l.to} className="footer-link">{l.label}</Link>
@@ -462,7 +456,7 @@ export default function Layout() {
 
         </div>
 
-        {/* Bottom Bar Container */}
+        {/* Bottom Bar */}
         <div style={{
           borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', 
           maxWidth: '1200px', margin: '0 auto', display: 'flex',
@@ -486,12 +480,10 @@ export default function Layout() {
 
       {/* STYLES */}
       <style>{`
-        /* Desktop Footer Layout */
         .footer-grid {
           grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr;
         }
         
-        /* New Custom CSS for Footer Links & Icons */
         .footer-link {
           color: #8892b0;
           text-decoration: none;
@@ -525,7 +517,6 @@ export default function Layout() {
           color: var(--text-primary, #ffffff);
         }
 
-        /* Existing Media Queries & Scrollbars */
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .hamburger-btn { display: flex !important; }
