@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 
 interface Target { id: number; x: number; y: number; vx: number; vy: number; size: number; }
 
@@ -190,10 +190,10 @@ export default function SniperModePage() {
           {/* New Mouse Sensor Check Box */}
           <div style={{ background: 'rgba(255, 45, 85, 0.05)', borderLeft: '4px solid var(--neon-red)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
             <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🖱️ The Ultimate "New Mouse" Tracking Check
+              🖱️ The Ultimate &quot;New Mouse&quot; Tracking Check
             </h3>
             <p style={{ margin: 0, color: '#9ca3af' }}>
-              Just bought a premium gaming mouse? Our Sniper Mode is the absolute best way to perform a <strong>new mouse check</strong>. By tracking the small bouncing dot, you can instantly verify your sensor's polling rate stability (ensuring it doesn't stutter), test your PTFE mouse skates for smooth gliding, and fine-tune your DPI before stepping into ranked matches.
+              Just bought a premium gaming mouse? Our Sniper Mode is the absolute best way to perform a <strong>new mouse check</strong>. By tracking the small bouncing dot, you can instantly verify your sensor&apos;s polling rate stability (ensuring it doesn&apos;t stutter), test your PTFE mouse skates for smooth gliding, and fine-tune your DPI before stepping into ranked matches.
             </p>
           </div>
 
@@ -225,7 +225,7 @@ export default function SniperModePage() {
                 How to improve Snipe and Tracking Aim in PUBG & Warzone?
               </h3>
               <p style={{ color: '#9ca3af', margin: 0 }}>
-                In large-scale Battle Royales like <strong>PUBG: Battlegrounds</strong> and <strong>Call of Duty: Warzone</strong>, enemies are rarely standing still. To hit a running target with a Kar98k or HDR, you must master the art of "leading" your shot. Our Sniper Mode helps you build the muscle memory required to track a target seamlessly without jittering your wrist. The constant directional changes of the red dot train your eyes to predict movement vectors perfectly.
+                In large-scale Battle Royales like <strong>PUBG: Battlegrounds</strong> and <strong>Call of Duty: Warzone</strong>, enemies are rarely standing still. To hit a running target with a Kar98k or HDR, you must master the art of &quot;leading&quot; your shot. Our Sniper Mode helps you build the muscle memory required to track a target seamlessly without jittering your wrist. The constant directional changes of the red dot train your eyes to predict movement vectors perfectly.
               </p>
             </div>
 
@@ -235,7 +235,7 @@ export default function SniperModePage() {
                 How to increase precision with Sniper Rifles in CS2 & Valorant?
               </h3>
               <p style={{ color: '#9ca3af', margin: 0 }}>
-                Using the AWP in <strong>Counter-Strike 2</strong> or the Operator in Valorant requires extreme discipline. If you miss your first shot, you are likely dead. While holding angles (crosshair placement) is key, you must also be able to micro-track an enemy who "jiggle-peeks" or swings wide. Playing our Sniper Mode daily trains you to click the mouse exactly when your crosshair aligns with a tiny moving hitbox, drastically improving your single-shot accuracy.
+                Using the AWP in <strong>Counter-Strike 2</strong> or the Operator in Valorant requires extreme discipline. If you miss your first shot, you are likely dead. While holding angles (crosshair placement) is key, you must also be able to micro-track an enemy who &quot;jiggle-peeks&quot; or swings wide. Playing our Sniper Mode daily trains you to click the mouse exactly when your crosshair aligns with a tiny moving hitbox, drastically improving your single-shot accuracy.
               </p>
             </div>
 
@@ -245,7 +245,7 @@ export default function SniperModePage() {
                 How to get better Bow Aim and PvP Tracking in Minecraft?
               </h3>
               <p style={{ color: '#9ca3af', margin: 0 }}>
-                While "Fast CPS" is famous for sword combat in <strong>Minecraft</strong>, tracking is what wins ranged bow fights and keeps your cursor locked onto an enemy while both of you are strafing. If your crosshair slips off the enemy hitbox, your clicks won't register. Sniper mode forces you to keep your cursor glued to the target, enhancing your PvP tracking skills on popular servers like Hypixel.
+                While &quot;Fast CPS&quot; is famous for sword combat in <strong>Minecraft</strong>, tracking is what wins ranged bow fights and keeps your cursor locked onto an enemy while both of you are strafing. If your crosshair slips off the enemy hitbox, your clicks won&apos;t register. Sniper mode forces you to keep your cursor glued to the target, enhancing your PvP tracking skills on popular servers like Hypixel.
               </p>
             </div>
 
@@ -257,9 +257,9 @@ export default function SniperModePage() {
               <p style={{ color: '#9ca3af', margin: 0 }}>
                 When the target in this tool hits a wall, it bounces back instantly. This replicates an enemy suddenly changing direction (strafing) in games like <strong>Fortnite</strong>, <strong>Apex Legends</strong>, or <strong>Grand Theft Auto V</strong>. To improve your reaction time:
                 <br/><br/>
-                <strong>1. Don't Predict, React:</strong> Stop guessing where the dot will go. Keep your eyes locked on the dot itself, not your crosshair. <br/>
+                <strong>1. Don&apos;t Predict, React:</strong> Stop guessing where the dot will go. Keep your eyes locked on the dot itself, not your crosshair. <br/>
                 <strong>2. Relax Your Grip:</strong> Tensing your hand to click fast actually slows down your tracking speed. A relaxed grip allows for smoother micro-adjustments.<br/>
-                <strong>3. Higher Refresh Rate:</strong> Playing this tracking tool on a 144Hz or 240Hz monitor will make the target's movement appear significantly smoother, lowering your visual reaction latency.
+                <strong>3. Higher Refresh Rate:</strong> Playing this tracking tool on a 144Hz or 240Hz monitor will make the target&apos;s movement appear significantly smoother, lowering your visual reaction latency.
               </p>
             </div>
 
@@ -269,7 +269,7 @@ export default function SniperModePage() {
                 💡 Pro Tip: Optimize Your Sensitivity (eDPI)
               </h4>
               <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.9rem' }}>
-                If you find yourself constantly "overshooting" the red target, your mouse sensitivity is too high. If you are trailing behind it, your sensitivity might be too low (or your mousepad is too small). Lowering your DPI (e.g., to 400 or 800) and using your forearm to track movements provides exponentially higher consistency than relying solely on your wrist.
+                If you find yourself constantly &quot;overshooting&quot; the red target, your mouse sensitivity is too high. If you are trailing behind it, your sensitivity might be too low (or your mousepad is too small). Lowering your DPI (e.g., to 400 or 800) and using your forearm to track movements provides exponentially higher consistency than relying solely on your wrist.
               </p>
             </div>
 
