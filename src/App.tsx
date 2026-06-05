@@ -23,8 +23,9 @@ import ContactPage from './pages/ContactPage';
 
 import SpaceDefensePage from './pages/SpaceDefensePage';
 import VoyagerGame from './pages/VoyagerGame';
-// নতুন Games পেজ ইমপোর্ট করা হলো 
 import GamesPage from './pages/GamesPage'; 
+import F1ReactionPage from './pages/F1ReactionPage'; 
+import CpsRush from './pages/CpsRush';
 
 export default function App() {
   return (
@@ -46,12 +47,14 @@ export default function App() {
           <Route path="accuracy" element={<AccuracyTestPage />} />
           <Route path="space-defense" element={<SpaceDefensePage />} />
           <Route path="voyager-game" element={<VoyagerGame />} />
+          <Route path="f1-reaction" element={<F1ReactionPage />} /> 
+          <Route path="cps-rush" element={<CpsRush />} /> 
           
-          {/* ক্যাটাগরি পেজগুলো */}
+          {/* Category Pages */}
           <Route path="mouse" element={<MousePage />} />
           <Route path="keyboard" element={<KeyboardPage />} />
           <Route path="aim" element={<AimPage />} />
-          <Route path="games" element={<GamesPage />} />  {/* <-- নতুন গেমস রাউট */}
+          <Route path="games" element={<GamesPage />} />
           
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="hall-of-fame" element={<LeaderboardPage />} />
