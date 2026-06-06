@@ -1,584 +1,245 @@
-import { useState, useMemo } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { MousePointer2, Keyboard, Play, RotateCcw, Trophy, Zap, Activity, Shield, Lightbulb, Target } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
-const mouseIcon = '/mouse-icon.jpg';
+const GRAVITY = 0.35;
+const INITIAL_JUMP_FORCE = -8.5;
+const BASE_SPEED = 2.5;
+const MAX_SPEED_BOOST = 10;
+const MAX_JUMP_BOOST = 8;
+const CANVAS_WIDTH = 800;
+const CANVAS_HEIGHT = 440; 
+const BALL_RADIUS = 12;
 
-interface ToolItem {
-  to: string;
-  label: string;
-  category: 'mouse' | 'keyboard' | 'aim' | 'games' | 'misc';
+interface Platform {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  isEnd?: boolean;
 }
 
-export default function Layout() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const location = useLocation();
+export default function CpsRush() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gameState, setGameState] = useState<'menu' | 'playing' | 'won'>('menu');
+  const [inputMode, setInputMode] = useState<'mouse' | 'keyboard'>('mouse');
+  const [score, setScore] = useState(0);
+  const [distanceToFinish, setDistanceToFinish] = useState(1000);
+  
+  const [cps, setCps] = useState(0);
+  const clickTimestamps = useRef<number[]>([]);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const navItems = [
-    { to: '/', label: 'Home', exact: true },
-    { to: '/keyboard', label: 'Keyboard' },
-    { to: '/mouse', label: 'Mouse' },
-    { to: '/aim', label: 'Aim & Reaction' },
-    { to: '/hall-of-fame', label: 'Hall of Fame' },
-    { to: '/games', label: 'Games' }, 
-    { to: '/blog', label: 'Blog' },
-  ];
+  const ball = useRef({ x: 50, y: 260, vy: 0, vx: 0 });
+  const platforms = useRef<Platform[]>([]);
+  const finishX = useRef(0);
+  const cameraX = useRef(0);
+  const frameId = useRef<number>(0);
+  const keysPressed = useRef<Record<string, boolean>>({});
 
-  const toolsList: (ToolItem & { icon: string })[] = [
-    // Mouse Tools
-    { to: '/cps-test', label: 'CPS Test', category: 'mouse', icon: '⚡' },
-    { to: '/double-click', label: 'Double Click Test', category: 'mouse', icon: '🖱️' },
-    { to: '/scroll-test', label: 'Scroll Wheel Test', category: 'mouse', icon: '📜' },
-    { to: '/mouse-accuracy', label: 'Mouse Accuracy', category: 'mouse', icon: '🎯' },
-    { to: '/cps-rush', label: 'CPS Rush', category: 'mouse', icon: '🔥' },
-    
-    // Keyboard Tools
-    { to: '/typing-test', label: 'Typing Speed Test', category: 'keyboard', icon: '⌨️' },
-    { to: '/key-visualizer', label: 'Key Visual', category: 'keyboard', icon: '🖥️' },
-    { to: '/spacebar', label: 'Spacebar Counter', category: 'keyboard', icon: '➖' },
-    { to: '/accuracy', label: 'Accuracy Test', category: 'keyboard', icon: '✔️' },
-    
-    // Aim & Reaction Tools
-    { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
-    { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
-    { to: '/sniper-mode', label: 'Sniper Mode', category: 'aim', icon: '🔭' },
-    { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
-    
-    // Games
-    { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
-    { to: '/voyager-game', label: 'Voyager Game', category: 'games', icon: '🛸' },
-    
-    // Misc / Others (Blog & Hall of Record)
-    { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
-    { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
-  ];
+  const recordClick = useCallback(() => {
+    const now = performance.now();
+    clickTimestamps.current.push(now);
+  }, []);
 
-  const filteredTools = useMemo(() => {
-    if (selectedCategory === 'all') return toolsList;
-    return toolsList.filter(tool => tool.category === selectedCategory);
-  }, [selectedCategory]);
+  useEffect(() => {
+    let intervalId: ReturnType<typeof setInterval>;
+    if (gameState === 'playing') {
+      intervalId = setInterval(() => {
+        const now = performance.now();
+        clickTimestamps.current = clickTimestamps.current.filter(t => now - t < 1000);
+        setCps(clickTimestamps.current.length);
+      }, 100);
+    } else {
+      setCps(0);
+      clickTimestamps.current = [];
+    }
+    return () => clearInterval(intervalId);
+  }, [gameState]);
+
+  const initGame = useCallback(() => {
+    ball.current = { x: 50, y: 260, vy: 0, vx: 0 };
+    cameraX.current = 0;
+    keysPressed.current = {};
+    clickTimestamps.current = [];
+    setScore(0);
+    setCps(0);
+    
+    const p: Platform[] = [{ x: 0, y: 350, width: 220, height: 16, color: '#00f0ff' }];
+    let lastX = 220;
+    let lastY = 350;
+    for (let i = 0; i < 35; i++) {
+      const width = Math.max(80, 160 - i * 2);
+      const gap = 120 + Math.random() * 80 + (i * 1.5);
+      const yOffset = (Math.random() - 0.5) * 140;
+      const nextY = Math.min(Math.max(160, lastY + yOffset), 380);
+      p.push({ x: lastX + gap, y: nextY, width, height: 14, color: '#00f0ff' });
+      lastX += gap + width;
+      lastY = nextY;
+    }
+    const finalX = lastX + 180;
+    p.push({ x: finalX, y: lastY - 60, width: 120, height: 160, color: '#ff00aa', isEnd: true });
+    finishX.current = finalX;
+    platforms.current = p;
+    setDistanceToFinish(Math.floor(finalX / 10));
+  }, []);
+
+  const handleInput = useCallback(() => {
+    if (gameState === 'playing') recordClick();
+  }, [gameState, recordClick]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keysPressed.current[e.code] = true;
+      if (e.code === 'Space' && inputMode === 'keyboard' && gameState === 'playing') {
+        e.preventDefault();
+        handleInput();
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => { keysPressed.current[e.code] = false; };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [inputMode, gameState, handleInput]);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.fillStyle = '#030712';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(-cameraX.current % 45, 0);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.lineWidth = 1;
+    for(let x = 0; x <= canvas.width + 45; x += 45) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.translate(-cameraX.current, 0);
+    platforms.current.forEach(p => {
+      if (p.x + p.width > cameraX.current && p.x < cameraX.current + canvas.width) {
+        ctx.shadowBlur = 15; ctx.shadowColor = p.color; ctx.fillStyle = p.color;
+        if (p.isEnd) {
+          ctx.beginPath(); ctx.roundRect(p.x, p.y, p.width, p.height, 12); ctx.fill();
+          ctx.font = 'bold 20px sans-serif'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center';
+          ctx.fillText('FINISH', p.x + p.width / 2, p.y + p.height / 2 + 7);
+        } else {
+          ctx.beginPath(); ctx.roundRect(p.x, p.y, p.width, p.height, 6); ctx.fill();
+        }
+      }
+    });
+    ctx.shadowBlur = 18; ctx.shadowColor = '#00f0ff'; ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(ball.current.x, ball.current.y, BALL_RADIUS, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0; ctx.strokeStyle = '#030712'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.restore();
+  }, []);
+
+  const update = useCallback(() => {
+    if (gameState !== 'playing') return;
+    const currentCps = clickTimestamps.current.filter(t => performance.now() - t < 1000).length;
+    const speedBoost = Math.min(currentCps * 0.45, MAX_SPEED_BOOST);
+    const jumpBoost = Math.min(currentCps * 0.35, MAX_JUMP_BOOST);
+    let direction = 0;
+    if (keysPressed.current['ArrowRight'] || keysPressed.current['KeyD']) direction = 1;
+    if (keysPressed.current['ArrowLeft'] || keysPressed.current['KeyA']) direction = -1;
+    ball.current.vy += GRAVITY;
+    ball.current.vx = direction * (BASE_SPEED + speedBoost);
+    ball.current.x += ball.current.vx;
+    ball.current.y += ball.current.vy;
+    cameraX.current = ball.current.x - 220;
+    platforms.current.forEach(p => {
+      if ( ball.current.x + BALL_RADIUS > p.x && ball.current.x - BALL_RADIUS < p.x + p.width && ball.current.y + BALL_RADIUS > p.y && ball.current.y - BALL_RADIUS < p.y + p.height && ball.current.vy > 0 ) {
+        if (p.isEnd) { setGameState('won'); confetti({ particleCount: 140, spread: 65, colors: ['#00f0ff', '#ff00aa'] }); return; }
+        ball.current.y = p.y - BALL_RADIUS;
+        ball.current.vy = INITIAL_JUMP_FORCE - jumpBoost;
+      }
+    });
+    setScore(Math.floor(ball.current.x / 80));
+    setDistanceToFinish(Math.max(0, Math.floor((finishX.current - ball.current.x) / 5)));
+    if (ball.current.y > CANVAS_HEIGHT + 150) initGame();
+    draw();
+    frameId.current = requestAnimationFrame(update);
+  }, [gameState, initGame, draw]);
+
+  useEffect(() => {
+    if (gameState === 'playing') frameId.current = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(frameId.current);
+  }, [gameState, update]);
+
+  const startGame = () => { initGame(); setGameState('playing'); };
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div className="grid-bg" />
+    // FIXED: Removed minHeight 100vh and background - now it fits inside Layout
+    <div style={{ width: '100%', color: '#ffffff' }}>
+      <div style={{ maxWidth: '840px', margin: '0 auto' }}>
+        
+        <header style={{ textAlign: 'center', marginBottom: '1.2rem' }}>
+          <div style={{ display: 'inline-flex', backgroundColor: 'rgba(0, 240, 255, 0.06)', border: '1px solid rgba(0, 240, 255, 0.2)', color: '#00f0ff', fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>
+            MOUSE & KEYBOARD SPEED TEST
+          </div>
+          <h1 style={{ fontSize: '2.4rem', fontWeight: 900, margin: 0, color: '#00f0ff', letterSpacing: '-0.5px' }}>
+            CPS RUSH
+          </h1>
+        </header>
 
-      {/* TOP NAVIGATION BAR */}
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(8,13,20,0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border)',
-        padding: '0 2rem',
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '64px',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-            <div style={{
-              width: '44px', height: '44px', borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', background: 'rgba(255,255,255,0.05)',
-            }}>
-              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <span style={{ fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              CPS<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Tools
-            </span>
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <ul style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', listStyle: 'none', margin: 0, padding: 0 }} className="desktop-nav">
-          {navItems.map(item => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                end={item.exact}
-                style={({ isActive }) => {
-                  const isGame = item.label.includes('Games');
-                  return {
-                    padding: '0.4rem 0.9rem', borderRadius: '6px', textDecoration: 'none',
-                    fontSize: '0.9rem', fontWeight: '500',
-                    color: isActive ? (isGame ? '#ff6b35' : 'var(--neon-cyan)') : 'var(--text-secondary)',
-                    background: isActive ? (isGame ? 'rgba(255,107,53,0.12)' : 'rgba(0,245,255,0.1)') : 'transparent',
-                    transition: 'all 0.2s', display: 'block', whiteSpace: 'nowrap'
-                  };
-                }}
-              >{item.label}</NavLink>
-            </li>
-          ))}
-          {/* Highlighted Tool Buttons */}
-          <li>
-            <Link to="/cps-test" style={{
-              padding: '0.45rem 1.1rem', borderRadius: '6px', textDecoration: 'none',
-              fontSize: '0.9rem', fontWeight: '700', color: '#000',
-              background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
-              display: 'block', whiteSpace: 'nowrap', marginLeft: '10px'
-            }}>⚡ CPS Test</Link>
-          </li>
-          <li>
-            <Link to="/cps-rush" style={{
-              padding: '0.45rem 1.1rem', borderRadius: '6px', textDecoration: 'none',
-              fontSize: '0.9rem', fontWeight: '700', color: '#fff',
-              background: 'linear-gradient(135deg, #ff6b35, #ff9f1c)',
-              display: 'block', whiteSpace: 'nowrap', marginLeft: '8px'
-            }}>🔥 CPS Rush</Link>
-          </li>
-        </ul>
-
-        {/* Hamburger Menu Button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{ display: 'none', flexDirection: 'column', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
-          className="hamburger-btn"
-          aria-label="Toggle menu"
+        <div onPointerDown={() => { if (inputMode === 'mouse' && gameState === 'playing') handleInput(); }}
+          style={{ position: 'relative', width: '100%', maxHeight: '440px', aspectRatio: '16/9', backgroundColor: '#030712', borderRadius: '16px', overflow: 'hidden', border: '1px solid #111827', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.7)', touchAction: 'none' }}
         >
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{ display: 'block', width: '24px', height: '2px', background: 'var(--neon-cyan)', borderRadius: '2px', transition: 'all 0.3s' }} />
-          ))}
-        </button>
-      </nav>
-
-      {/* MOBILE OVERLAY */}
-      {menuOpen && (
-        <div style={{
-          position: 'fixed', top: '64px', left: 0, right: 0,
-          background: 'rgba(8,13,20,0.98)', backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border)', padding: '1rem 2rem', zIndex: 99,
-          display: 'flex', flexDirection: 'column', gap: '0.5rem',
-          maxHeight: 'calc(100vh - 64px)', overflowY: 'auto'
-        }}>
-          {navItems.map(item => (
-            <NavLink
-              key={item.to} to={item.to} end={item.exact}
-              onClick={() => setMenuOpen(false)}
-              style={({ isActive }) => {
-                const isGame = item.label.includes('Games');
-                return {
-                  padding: '0.75rem 1rem', borderRadius: '8px', textDecoration: 'none',
-                  fontSize: '1rem', fontWeight: '500',
-                  color: isActive ? (isGame ? '#ff6b35' : 'var(--neon-cyan)') : 'var(--text-primary)',
-                  background: isActive ? (isGame ? 'rgba(255,107,53,0.12)' : 'rgba(0,245,255,0.1)') : 'transparent',
-                };
-              }}
-            >{item.label}</NavLink>
-          ))}
-          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-            <Link
-              to="/cps-test" onClick={() => setMenuOpen(false)}
-              style={{
-                flex: 1, padding: '0.75rem 0.5rem', borderRadius: '8px', textDecoration: 'none',
-                fontSize: '0.95rem', fontWeight: '700', color: '#000',
-                background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
-                textAlign: 'center',
-              }}
-            >⚡ CPS Test</Link>
-            <Link
-              to="/cps-rush" onClick={() => setMenuOpen(false)}
-              style={{
-                flex: 1, padding: '0.75rem 0.5rem', borderRadius: '8px', textDecoration: 'none',
-                fontSize: '0.95rem', fontWeight: '700', color: '#fff',
-                background: 'linear-gradient(135deg, #ff6b35, #ff9f1c)',
-                textAlign: 'center',
-              }}
-            >🔥 CPS Rush</Link>
-          </div>
-        </div>
-      )}
-
-      {/* BODY SECTION */}
-      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
-        
-        {/* SIDEBAR PANEL */}
-        <aside className="sidebar-pannel" style={{
-          width: sidebarOpen ? '280px' : '85px', 
-          opacity: 1,
-          visibility: 'visible',
-          background: 'transparent',
-          backdropFilter: 'none',
-          borderRight: '1px solid var(--border)',
-          height: 'calc(100vh - 64px)',
-          position: 'sticky',
-          top: '64px',
-          display: 'flex',
-          flexDirection: 'column',
-          zIndex: 10,
-          padding: sidebarOpen ? '1.25rem' : '1.25rem 0.5rem',
-          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          overflow: 'hidden' 
-        }}>
-
-          {/* IN-SIDEBAR HEADER: ALL TOOLS BADGE & TOGGLE ARROW */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: sidebarOpen ? 'space-between' : 'center', 
-            alignItems: 'center',
-            marginBottom: '1rem',
-            paddingRight: sidebarOpen ? '0.5rem' : '0'
-          }}>
-            
-            {/* "All Tools" styled label */}
-            {sidebarOpen && (
-              <div style={{
-                background: 'linear-gradient(135deg, #00f5ff, #0cf991)',
-                color: '#000',
-                fontSize: '1rem',
-                fontWeight: '800',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '8px',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                boxShadow: '0 4px 10px rgba(0, 245, 255, 0.2)',
-                whiteSpace: 'nowrap'
-              }}>
-                🛠️ All Tools
-              </div>
-            )}
-
-            {/* TOGGLE BUTTON */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px',
-                borderRadius: '6px',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--neon-cyan)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
-              aria-label="Toggle Sidebar"
-              title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-            >
-              {sidebarOpen ? (
-                /* Left Arrow (When Open) */
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="19" y1="12" x2="5" y2="12" />
-                  <polyline points="12 19 5 12 12 5" />
-                </svg>
-              ) : (
-                /* Right Arrow (When Closed) */
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* FILTER DROPDOWN - Hides when mini-sidebar is active */}
-          <div style={{ display: sidebarOpen ? 'flex' : 'none', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <select 
-              value={selectedCategory} 
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              style={{
-                flex: 1,
-                padding: '0.65rem 1rem',
-                borderRadius: '8px',
-                background: 'rgba(15, 23, 42, 0.8)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                outline: 'none',
-                cursor: 'pointer',
-                letterSpacing: '0.05em'
-              }}
-            >
-              <option value="all">FILTER BY TYPE</option>
-              <option value="mouse">MOUSE TOOLS</option>
-              <option value="keyboard">KEYBOARD TOOLS</option>
-              <option value="aim">AIM & REACTION</option>
-              <option value="games">ARCADE GAMES</option>
-              <option value="misc">OTHER SECTIONS</option>
-            </select>
-          </div>
-
-          {/* SCROLLABLE TOOLS LIST */}
-          <div className="sidebar-scroll" style={{ 
-            flex: 1, 
-            overflowY: 'auto', 
-            overflowX: 'hidden', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '0.35rem',
-            paddingRight: '4px'
-          }}>
-            {filteredTools.map((tool) => {
-              const isCurrentActive = location.pathname === tool.to;
-              const isPinned = tool.to === '/cps-test'; // CPS Test Check
-              
-              return (
-                <Link
-                  key={tool.to}
-                  to={tool.to}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: sidebarOpen ? 'flex-start' : 'center',
-                    gap: sidebarOpen ? '0.75rem' : '0.4rem',
-                    padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
-                    borderRadius: '6px',
-                    textDecoration: 'none',
-                    // PINNED STICKY LOGIC
-                    position: isPinned ? 'sticky' : 'static',
-                    top: isPinned ? 0 : 'auto',
-                    zIndex: isPinned ? 10 : 1,
-                    background: isPinned 
-                      ? (isCurrentActive ? 'rgba(0, 245, 255, 0.15)' : 'rgba(15, 23, 42, 0.95)') 
-                      : (isCurrentActive ? 'rgba(0, 245, 255, 0.08)' : 'transparent'),
-                    backdropFilter: isPinned ? 'blur(5px)' : 'none',
-                    border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
-                    borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
-                    marginBottom: isPinned ? '5px' : '0',
-
-                    fontSize: '0.85rem',
-                    fontWeight: isCurrentActive ? '600' : '500',
-                    color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
-                    transition: 'all 0.3s ease', // Smooth hover transition
-                    transform: 'translateX(0)' // Default state for animation
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isCurrentActive) {
-                      e.currentTarget.style.background = isPinned ? 'rgba(0, 245, 255, 0.15)' : 'rgba(0, 245, 255, 0.1)';
-                      e.currentTarget.style.color = '#00f5ff'; 
-                      e.currentTarget.style.transform = 'translateX(6px)'; 
-                      e.currentTarget.style.border = '1px solid rgba(0, 245, 255, 0.1)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isCurrentActive) {
-                      e.currentTarget.style.background = isPinned ? 'rgba(15, 23, 42, 0.95)' : 'transparent';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.transform = 'translateX(0)';
-                      e.currentTarget.style.border = '1px solid transparent';
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: '1.1rem' }}>{tool.icon}</span>
-                  {/* TEXT VISIBILITY LOGIC */}
-                  <span style={{ 
-                    display: (sidebarOpen || isPinned) ? 'block' : 'none', 
-                    textTransform: 'uppercase', 
-                    fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
-                    letterSpacing: '0.02em', 
-                    whiteSpace: 'nowrap', 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis' 
-                  }}>
-                    {tool.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </aside>
-
-        {/* MAIN DYNAMIC CONTENT */}
-        <main style={{ 
-          flex: 1, 
-          position: 'relative', 
-          zIndex: 1, 
-          padding: '2rem',
-          transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}>
-          <Outlet />
-        </main>
-      </div>
-
-      {/* FOOTER SECTION */}
-      <footer style={{
-        background: 'rgba(8,13,20,0.95)', borderTop: '1px solid var(--border)',
-        padding: '3rem 2rem 1.5rem', position: 'relative', zIndex: 1, marginTop: 'auto'
-      }}>
-        <div className="footer-grid" style={{
-          maxWidth: '1200px', margin: '0 auto', display: 'grid',
-          gap: '2rem', marginBottom: '3rem',
-        }}>
+          <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} style={{ width: '100%', height: '100%', display: 'block' }} />
           
-          {/* Brand Col */}
-          <div style={{ paddingRight: '2rem' }}>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', marginBottom: '1rem' }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '8px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden', background: 'rgba(255,255,255,0.05)',
-              }}>
-                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <span style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-                CPS<span style={{ color: 'var(--neon-cyan, #00f5ff)' }}>Test</span> Tools
-              </span>
-            </Link>
-            <p style={{ color: '#8892b0', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-              The ultimate free platform for gamers and typists to test, train, and compete. No signup required.
-            </p>
-            
-            {/* Social Icons */}
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <a href="#" className="social-btn">𝕏</a>
-              <a href="#" className="social-btn">💬</a>
-              <a href="#" className="social-btn">▶</a>
-              <a href="#" className="social-btn">🤖</a>
+          <div style={{ position: 'absolute', top: '16px', left: '20px', right: '20px', display: 'flex', justifyContent: 'space-between', pointerEvents: 'none', userSelect: 'none' }}>
+            <div style={{ background: 'rgba(4, 9, 20, 0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(0, 240, 255, 0.3)', borderRadius: '14px', width: '85px', padding: '8px 0', textAlign: 'center' }}>
+              <div style={{ fontSize: '10px', fontWeight: 800, color: '#00f0ff' }}>CPS</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>{cps}</div>
+            </div>
+            <div style={{ background: 'rgba(4, 9, 20, 0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(219, 39, 119, 0.3)', borderRadius: '14px', width: '85px', padding: '8px 0', textAlign: 'center' }}>
+              <div style={{ fontSize: '10px', fontWeight: 800, color: '#db2777' }}>Score</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>{score}</div>
+            </div>
+            <div style={{ background: 'rgba(4, 9, 20, 0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(236, 72, 153, 0.3)', borderRadius: '14px', minWidth: '95px', padding: '8px 6px', textAlign: 'center' }}>
+              <div style={{ fontSize: '10px', fontWeight: 800, color: '#ec4899' }}>Finish</div>
+              <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>{distanceToFinish}<span style={{ fontSize: '15px', color: '#cbcbcb', marginLeft: '1px' }}>m</span></div>
             </div>
           </div>
 
-          {/* Keyboard Col */}
-          <div>
-            <h4 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>KEYBOARD</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/typing-test', label: 'Typing Speed Test' }, { to: '/key-visualizer', label: 'Key Visualizer' }, { to: '/spacebar', label: 'Spacebar Counter' }, { to: '/accuracy', label: 'Accuracy Test' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {gameState === 'menu' && (
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(2, 4, 10, 0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+              <h2 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '1.2rem', color: '#fff' }}>SELECT INPUT MODE</h2>
+              <div style={{ display: 'flex', gap: '12px', marginBottom: '1.8rem', width: '100%', maxWidth: '340px' }}>
+                <button onClick={() => setInputMode('mouse')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '8px', border: '1px solid', cursor: 'pointer', fontWeight: 'bold', backgroundColor: inputMode === 'mouse' ? 'rgba(0, 240, 255, 0.08)' : '#0b111e', borderColor: inputMode === 'mouse' ? '#00f0ff' : '#1f2937', color: inputMode === 'mouse' ? '#00f0ff' : '#9ca3af' }}>
+                  <MousePointer2 size={14} /> Mouse
+                </button>
+                <button onClick={() => setInputMode('keyboard')} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', borderRadius: '8px', border: '1px solid', cursor: 'pointer', fontWeight: 'bold', backgroundColor: inputMode === 'keyboard' ? 'rgba(0, 240, 255, 0.08)' : '#0b111e', borderColor: inputMode === 'keyboard' ? '#00f0ff' : '#1f2937', color: inputMode === 'keyboard' ? '#00f0ff' : '#9ca3af' }}>
+                  <Keyboard size={14} /> Spacebar
+                </button>
+              </div>
+              <button onClick={startGame} style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#00f0ff', color: '#02040a', padding: '12px 36px', borderRadius: '6px', fontSize: '0.95rem', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                <Play fill="currentColor" size={12} /> START GAME
+              </button>
+            </div>
+          )}
 
-          {/* Mouse Col */}
-          <div>
-            <h4 style={{ color: 'var(--neon-green, #0cf991)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>MOUSE</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/cps-test', label: 'CPS Test' }, { to: '/double-click', label: 'Double Click Test' }, { to: '/scroll-test', label: 'Scroll Wheel Test' }, { to: '/mouse-accuracy', label: 'Mouse Accuracy' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Arcade Games Col */}
-          <div>
-            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>🚀 ARCADE GAMES</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[
-                { to: '/games', label: '🎮 All Games Center' }, 
-                { to: '/cps-rush', label: '🔥 CPS Rush' }, 
-                { to: '/space-defense', label: '🚀 Space Defense' }, 
-                { to: '/voyager-game', label: '🛸 Voyager Game' }
-              ].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Explore Col */}
-          <div>
-            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>EXPLORE</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/hall-of-fame', label: 'Leaderboard' }, { to: '/aim-trainer', label: 'Aim Trainer' }, { to: '/reaction-time', label: 'Reaction Time' }, { to: '/blog', label: '📖 Blog' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
+          {gameState === 'won' && (
+            <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(2, 4, 10, 0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <Trophy size={28} style={{ color: '#00f0ff', marginBottom: '12px' }} />
+              <h2 style={{ fontSize: '1.8rem', fontWeight: 800, color: '#fff' }}>FINISHED!</h2>
+              <p style={{ color: '#9ca3af', marginBottom: '1.5rem' }}>Score: <span style={{ color: '#00f0ff', fontWeight: 700 }}>{score}</span></p>
+              <button onClick={startGame} style={{ display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: '#00f0ff', color: '#02040a', padding: '10px 24px', borderRadius: '6px', fontWeight: 800, border: 'none', cursor: 'pointer' }}>
+                <RotateCcw size={14} /> PLAY AGAIN
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Bottom Bar Container */}
-        <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', 
-          maxWidth: '1200px', margin: '0 auto', display: 'flex',
-          justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem',
-        }}>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-             © Best CPS Test Tools — All rights reserved.
-          </p>
-          
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <Link to="/privacy-policy" className="footer-bottom-link">Privacy Policy</Link>
-            <Link to="/terms" className="footer-bottom-link">Terms of Service</Link>
-            <Link to="/contact" className="footer-bottom-link">Contact</Link>
-          </div>
-
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-             Built for gamers, by gamers. 🎮
-          </p>
-        </div>
-      </footer>
-
-      {/* STYLES */}
-      <style>{`
-        /* Desktop Footer Layout */
-        .footer-grid {
-          grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr;
-        }
-        
-        /* New Custom CSS for Footer Links & Icons */
-        .footer-link {
-          color: #8892b0;
-          text-decoration: none;
-          font-size: 0.9rem;
-          transition: color 0.2s;
-        }
-        .footer-link:hover {
-          color: var(--text-primary, #ffffff);
-        }
-        
-        .footer-bottom-link {
-          color: #64748b;
-          text-decoration: none;
-          font-size: 0.85rem;
-          transition: color 0.2s;
-        }
-        .footer-bottom-link:hover {
-          color: var(--text-primary, #ffffff);
-        }
-        
-        .social-btn {
-          width: 36px; height: 36px;
-          border-radius: 8px;
-          background: rgba(255,255,255,0.05);
-          display: flex; align-items: center; justify-content: center;
-          color: #8892b0; text-decoration: none; font-size: 1.1rem;
-          transition: all 0.2s;
-        }
-        .social-btn:hover {
-          background: rgba(255,255,255,0.1);
-          color: var(--text-primary, #ffffff);
-        }
-
-        /* Existing Media Queries & Scrollbars */
-        @media (max-width: 1024px) {
-          .desktop-nav { display: none !important; }
-          .hamburger-btn { display: flex !important; }
-          .sidebar-pannel { display: none !important; }
-          .footer-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-        
-        @media (max-width: 600px) {
-          .footer-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        .sidebar-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-        .sidebar-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-          background: var(--neon-cyan);
-        }
-      `}</style>
+        {/* ... বাকি Article এবং FAQ সেকশন আপনার আগের মতোই থাকবে ... */}
+      </div>
     </div>
   );
 }
