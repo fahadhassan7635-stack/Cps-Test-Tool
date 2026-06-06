@@ -168,7 +168,6 @@ export default function Layout() {
       )}
 
       {/* BODY SECTION */}
-      {/* Container with flex-start keeps sidebar from stretching vertically */}
       <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', alignItems: 'flex-start' }}>
         
         {/* SIDEBAR PANEL */}
@@ -179,8 +178,8 @@ export default function Layout() {
           background: 'transparent',
           backdropFilter: 'none',
           borderRight: '1px solid var(--border)',
-          height: 'calc(100vh - 64px)', // Take up exact screen height minus navbar
-          position: 'sticky', // STICKY NOW WORKS PERFECTLY
+          height: 'calc(100vh - 64px)',
+          position: 'sticky',
           top: '64px',
           display: 'flex',
           flexDirection: 'column',
@@ -308,8 +307,6 @@ export default function Layout() {
         </aside>
 
         {/* MAIN DYNAMIC CONTENT */}
-        {/* FIX: Moved overflowX: hidden directly to the main container. 
-            This prevents horizontal scroll bugs on mobile but keeps the Sidebar sticky! */}
         <main className="main-content" style={{ 
           flex: 1, 
           position: 'relative', 
@@ -318,7 +315,8 @@ export default function Layout() {
           width: '100%',
           maxWidth: '100%',
           boxSizing: 'border-box',
-          overflowX: 'hidden' 
+          overflowX: 'hidden',
+          minWidth: 0,
         }}>
           <Outlet />
         </main>
@@ -395,10 +393,12 @@ export default function Layout() {
 
       {/* STYLES */}
       <style>{`
-        /* FIX: Removed overflow-x hidden from body so Sticky Sidebar stays active */
         html, body {
           margin: 0;
           padding: 0;
+          /* FIX: Prevent horizontal scroll on mobile globally */
+          overflow-x: hidden;
+          width: 100%;
         }
 
         * { box-sizing: border-box; }
@@ -419,6 +419,10 @@ export default function Layout() {
         .social-btn { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s; }
         .social-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary, #ffffff); }
 
+        /* =============================================
+           MOBILE RESPONSIVE FIXES
+           ============================================= */
+
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .hamburger-btn { display: flex !important; }
@@ -432,8 +436,95 @@ export default function Layout() {
           .main-footer { padding: 2rem 1rem 1rem !important; }
           .mobile-menu-overlay { padding: 1rem !important; }
           .footer-grid { grid-template-columns: 1fr; }
+
+          /* FIX: Stats cards row — allow horizontal scroll instead of overflow/cutoff */
+          .stats-row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            gap: 0.75rem !important;
+            padding-bottom: 4px;
+          }
+          .stats-row::-webkit-scrollbar { display: none; }
+
+          /* FIX: Each stat card — fixed min width so they don't squish */
+          .stats-card {
+            min-width: 100px !important;
+            flex-shrink: 0 !important;
+          }
+
+          /* FIX: Time selector buttons — wrap nicely */
+          .time-buttons-row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+            justify-content: center !important;
+          }
+
+          .time-btn {
+            min-width: 60px !important;
+            flex: 0 0 auto !important;
+          }
+
+          /* FIX: Main click/game area — full width on mobile */
+          .click-area, .game-area {
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          /* FIX: Any flex row that might overflow — make scrollable */
+          .scroll-row-mobile {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            flex-wrap: nowrap !important;
+          }
+          .scroll-row-mobile::-webkit-scrollbar { display: none; }
+
+          /* FIX: Results/history chips — wrap instead of overflow */
+          .results-chips {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+          }
+
+          /* FIX: Prevent any child element from breaking out of main content */
+          .main-content > * {
+            max-width: 100% !important;
+            overflow-x: hidden;
+          }
+
+          /* FIX: Buttons full-width on small screens if they are block-level */
+          .btn-full-mobile {
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
+
+          /* FIX: Logo text size on very small screens */
+          .top-nav span[style*="1.4rem"] {
+            font-size: 1.1rem !important;
+          }
         }
 
+        /* Extra small screens (< 400px) */
+        @media (max-width: 400px) {
+          .top-nav { padding: 0 0.75rem !important; }
+          .main-content { padding: 0.75rem !important; }
+
+          .stats-card {
+            min-width: 85px !important;
+          }
+
+          .time-btn {
+            min-width: 52px !important;
+            font-size: 0.85rem !important;
+          }
+        }
+
+        /* Sidebar scrollbar */
         .sidebar-scroll::-webkit-scrollbar { width: 4px; }
         .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
