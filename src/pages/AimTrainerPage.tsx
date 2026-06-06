@@ -27,8 +27,6 @@ export default function AimTrainerPage() {
     const y = size / 2 + Math.random() * (rect.height - size);
     const id = ++targetId.current;
     setTargets(prev => [...prev.slice(-4), { id, x, y, size }]);
-
-    // Auto remove after 2s
     setTimeout(() => {
       setTargets(prev => prev.filter(t => t.id !== id));
     }, 2000);
@@ -93,35 +91,115 @@ export default function AimTrainerPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+
+      <style>{`
+        /* ── Aim Trainer Mobile Fixes ── */
+        @media (max-width: 600px) {
+          .aim-page-wrap {
+            padding: 1.25rem 0.75rem !important;
+          }
+
+          /* Stats: 2x2 grid on mobile instead of 4-in-a-row */
+          .aim-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.6rem !important;
+          }
+          .aim-stat-card {
+            padding: 0.85rem 0.5rem !important;
+            border-radius: 10px !important;
+          }
+          .aim-stat-value {
+            font-size: clamp(1.4rem, 7vw, 2.2rem) !important;
+          }
+          .aim-stat-label {
+            font-size: 0.62rem !important;
+          }
+
+          /* Game area shorter on mobile */
+          .aim-game-area {
+            height: 280px !important;
+          }
+
+          /* Buttons stack on mobile */
+          .aim-controls {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 0.6rem !important;
+          }
+          .aim-controls button {
+            width: 100% !important;
+          }
+
+          /* Games grid 2 columns */
+          .aim-games-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.6rem !important;
+          }
+
+          /* SEO article padding */
+          .aim-article-wrap {
+            padding: 1.25rem !important;
+          }
+          .aim-article-wrap h2 {
+            font-size: 1.4rem !important;
+          }
+          .aim-article-wrap h3 {
+            font-size: 1.1rem !important;
+          }
+
+          /* History rows */
+          .aim-history-row {
+            font-size: 0.8rem !important;
+            padding: 0.6rem 1rem !important;
+          }
+        }
+      `}</style>
+
+      {/* ── HEADER ── */}
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div className="section-label">Aim Tool</div>
         <h1 className="tool-title">Aim Trainer</h1>
         <p className="tool-subtitle">Click targets as fast and accurately as possible</p>
       </div>
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+      {/* ── STATS CARDS ── */}
+      <div
+        className="aim-stats-grid"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}
+      >
         {[
-          { value: score, label: 'Hits', color: 'var(--neon-green)' },
-          { value: misses, label: 'Misses', color: 'var(--neon-red)' },
-          { value: `${acc}%`, label: 'Accuracy', color: 'var(--neon-cyan)' },
-          { value: timeLeft.toFixed(1), label: 'Seconds', color: 'var(--neon-orange)' },
+          { value: score,              label: 'Hits',     color: 'var(--neon-green)'  },
+          { value: misses,             label: 'Misses',   color: 'var(--neon-red)'    },
+          { value: `${acc}%`,          label: 'Accuracy', color: 'var(--neon-cyan)'   },
+          { value: timeLeft.toFixed(1),label: 'Seconds',  color: 'var(--neon-orange)' },
         ].map(s => (
-          <div key={s.label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', fontWeight: '900', color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.2rem' }}>{s.label}</div>
+          <div
+            key={s.label}
+            className="aim-stat-card"
+            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1rem', textAlign: 'center' }}
+          >
+            <div
+              className="aim-stat-value"
+              style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', fontWeight: '900', color: s.color }}
+            >{s.value}</div>
+            <div
+              className="aim-stat-label"
+              style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.2rem' }}
+            >{s.label}</div>
           </div>
         ))}
       </div>
 
+      {/* ── PROGRESS BAR ── */}
       <div className="progress-bar" style={{ marginBottom: '1rem' }}>
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* Game area */}
+      {/* ── GAME AREA ── */}
       <div
         ref={areaRef}
         onClick={missClick}
+        className="aim-game-area"
         style={{
           position: 'relative',
           width: '100%',
@@ -152,17 +230,14 @@ export default function AimTrainerPage() {
           </div>
         )}
 
-        {/* Targets */}
         {targets.map(t => (
           <div
             key={t.id}
             onClick={(e) => hitTarget(t.id, e)}
             style={{
               position: 'absolute',
-              left: t.x,
-              top: t.y,
-              width: t.size,
-              height: t.size,
+              left: t.x, top: t.y,
+              width: t.size, height: t.size,
               borderRadius: '50%',
               transform: 'translate(-50%, -50%)',
               background: 'radial-gradient(circle, rgba(255,45,85,0.9) 30%, rgba(255,107,0,0.7) 70%)',
@@ -170,23 +245,19 @@ export default function AimTrainerPage() {
               cursor: 'crosshair',
               animation: 'target-appear 0.15s ease forwards',
               boxShadow: '0 0 20px rgba(255,45,85,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
-            <div style={{
-              width: t.size * 0.3,
-              height: t.size * 0.3,
-              borderRadius: '50%',
-              background: 'rgba(255,255,255,0.9)',
-            }} />
+            <div style={{ width: t.size * 0.3, height: t.size * 0.3, borderRadius: '50%', background: 'rgba(255,255,255,0.9)' }} />
           </div>
         ))}
       </div>
 
-      {/* Controls */}
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}>
+      {/* ── CONTROLS ── */}
+      <div
+        className="aim-controls"
+        style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2rem' }}
+      >
         {phase !== 'running' && (
           <button className="btn btn-primary" onClick={startGame}>
             {phase === 'done' ? '▶ Play Again' : '🎯 Start Game'}
@@ -200,12 +271,16 @@ export default function AimTrainerPage() {
         )}
       </div>
 
-      {/* History */}
+      {/* ── SESSION HISTORY ── */}
       {history.length > 0 && (
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '3rem' }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
           {history.map((h, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', fontSize: '0.875rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <div
+              key={i}
+              className="aim-history-row"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', fontSize: '0.875rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none' }}
+            >
               <span style={{ color: 'var(--text-muted)' }}>#{history.length - i}</span>
               <span style={{ color: 'var(--neon-green)', fontWeight: '700' }}>{h.score} hits</span>
               <span style={{ color: 'var(--neon-cyan)' }}>{h.acc}% acc</span>
@@ -214,8 +289,8 @@ export default function AimTrainerPage() {
         </div>
       )}
 
-      {/* ================= MASSIVE SEO ARTICLE SECTION START ================= */}
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
+      {/* ── SEO ARTICLE ── */}
+      <div className="aim-article-wrap" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
         <article style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
           
           <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
@@ -226,7 +301,6 @@ export default function AimTrainerPage() {
             An <strong>Aim Trainer</strong> is a specialized web-based tool designed to help gamers test and dramatically improve their mouse reaction time, clicking accuracy, and spatial tracking. In the competitive eSports world, raw clicking speed (CPS) means nothing if you can't hit your target. Our 2D Aim Trainer isolates your mechanical mouse control, allowing you to build stable neural pathways between your eyes and your hands without the distractions of in-game elements.
           </p>
 
-          {/* New Mouse & Sensor Check */}
           <div style={{ background: 'rgba(0, 255, 136, 0.05)', borderLeft: '4px solid var(--neon-green)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
             <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
               🖱️ The Ultimate Mouse Sensor Check
@@ -243,7 +317,10 @@ export default function AimTrainerPage() {
             Precision and speed are universally rewarded across almost every gaming genre. Regular practice on our aim tool translates into noticeable performance boosts in the following massively popular titles:
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+          <div
+            className="aim-games-grid"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}
+          >
             {['Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V', 'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2', 'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us'].map((game) => (
               <div key={game} style={{ background: 'rgba(0,0,0,0.4)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: 'var(--neon-green)' }}>🎯</span> {game}
@@ -251,14 +328,12 @@ export default function AimTrainerPage() {
             ))}
           </div>
 
-          {/* Detailed Q&A / How-To Section tailored for Aiming */}
           <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
             Pro FPS Strategies & FAQs
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             
-            {/* Reaction Time & FPS generally */}
             <div>
               <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to improve reaction time in FPS games?
@@ -268,7 +343,6 @@ export default function AimTrainerPage() {
               </p>
             </div>
 
-            {/* Valorant / Micro Flicks */}
             <div>
               <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to increase clicking precision and flick speed in Valorant?
@@ -278,7 +352,6 @@ export default function AimTrainerPage() {
               </p>
             </div>
 
-            {/* PUBG / Tracking */}
             <div>
               <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to improve aiming and tracking in PUBG: Battlegrounds?
@@ -288,7 +361,6 @@ export default function AimTrainerPage() {
               </p>
             </div>
 
-            {/* Minecraft, LoL, etc. */}
             <div>
               <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 Does aim training help in Minecraft, Roblox, or League of Legends?
@@ -302,7 +374,6 @@ export default function AimTrainerPage() {
               </p>
             </div>
 
-            {/* Health & Form Tips */}
             <div style={{ background: 'rgba(255, 107, 0, 0.05)', border: '1px solid rgba(255,107,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
               <h4 style={{ color: 'var(--neon-orange)', fontSize: '1.1rem', fontWeight: '700', margin: '0 0 0.5rem 0' }}>
                 💡 Pro Tip: Arm Aiming vs. Wrist Aiming
@@ -315,7 +386,6 @@ export default function AimTrainerPage() {
           </div>
         </article>
       </div>
-      {/* ================= MASSIVE SEO ARTICLE SECTION END ================= */}
 
     </div>
   );
