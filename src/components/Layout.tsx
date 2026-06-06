@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 
-const mouseIcon = '/logo.png'; // Updated to use the correct logo file
+// Fixed the image path here
+const mouseIcon = '/logo.png';
 
 interface ToolItem {
   to: string;
@@ -427,7 +428,6 @@ export default function Layout() {
           <div>
             <h4 style={{ color: 'var(--neon-green, #0cf991)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>MOUSE</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {/* === Added CPS Rush right here === */}
               {[{ to: '/cps-test', label: 'CPS Test' }, { to: '/double-click', label: 'Double Click Test' }, { to: '/scroll-test', label: 'Scroll Wheel Test' }, { to: '/mouse-accuracy', label: 'Mouse Accuracy' }, { to: '/cps-rush', label: 'CPS Rush' }].map(l => (
                 <li key={l.to}>
                   <Link to={l.to} className="footer-link">{l.label}</Link>
