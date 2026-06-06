@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 
-const mouseIcon = '/mouse-icon.jpg';
+const mouseIcon = '/logo.png'; // Updated to use the correct logo file
 
 interface ToolItem {
   to: string;
