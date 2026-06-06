@@ -61,12 +61,11 @@ export default function Layout() {
   }, [selectedCategory]);
 
   return (
-    // FIX 1: Added overflowX: hidden and width: 100% to prevent horizontal scrolling
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
+    // FIX 1: Removed inline 'overflowX: hidden' to allow sticky to work
+    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
       <div className="grid-bg" />
 
       {/* TOP NAVIGATION BAR */}
-      {/* FIX 2: Replaced inline padding with class 'top-nav' */}
       <nav className="top-nav" style={{
         position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(8,13,20,0.95)',
@@ -175,7 +174,8 @@ export default function Layout() {
       )}
 
       {/* BODY SECTION */}
-      <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%' }}>
+      {/* FIX 2: Added alignItems: 'flex-start' here. THIS IS THE MAGIC LINE for sticky sidebar */}
+      <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', alignItems: 'flex-start' }}>
         
         {/* SIDEBAR PANEL */}
         <aside className="sidebar-pannel" style={{
@@ -366,7 +366,6 @@ export default function Layout() {
         </aside>
 
         {/* MAIN DYNAMIC CONTENT */}
-        {/* FIX 3: Replaced inline padding with class 'main-content' */}
         <main className="main-content" style={{ 
           flex: 1, 
           position: 'relative', 
@@ -380,7 +379,6 @@ export default function Layout() {
       </div>
 
       {/* FOOTER SECTION */}
-      {/* FIX 4: Replaced inline padding with class 'main-footer' */}
       <footer className="main-footer" style={{
         background: 'rgba(8,13,20,0.95)', borderTop: '1px solid var(--border)',
         position: 'relative', zIndex: 1, marginTop: 'auto', width: '100%', boxSizing: 'border-box'
@@ -491,7 +489,14 @@ export default function Layout() {
 
       {/* STYLES */}
       <style>{`
-        /* FIX 5: Layout Responsive Padding Classes */
+        /* FIX 3: Added global mobile overflow protection here */
+        html, body {
+          max-width: 100vw;
+          overflow-x: hidden;
+          margin: 0;
+          padding: 0;
+        }
+
         .top-nav { padding: 0 2rem; }
         .main-content { padding: 2rem; }
         .main-footer { padding: 3rem 2rem 1.5rem; }
@@ -520,7 +525,7 @@ export default function Layout() {
         }
         .social-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary, #ffffff); }
 
-        /* FIX 6: Mobile Media Queries */
+        /* Mobile Media Queries */
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .hamburger-btn { display: flex !important; }
