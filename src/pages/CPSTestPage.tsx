@@ -186,18 +186,116 @@ export default function CPSTestPage() {
           0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
           100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
         }
+
+        /* ── Mobile fixes ── */
+        @media (max-width: 600px) {
+          /* Outer page padding */
+          .cps-page-wrap {
+            padding: 1.25rem 0.75rem !important;
+          }
+
+          /* Time-selector buttons row */
+          .cps-duration-row {
+            gap: 0.4rem !important;
+          }
+          .cps-duration-btn {
+            padding: 0.4rem 0.65rem !important;
+            font-size: 0.8rem !important;
+            min-width: 44px !important;
+          }
+
+          /* Custom time input wrapper */
+          .cps-custom-wrap {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+
+          /* Stats cards — stack 3-in-a-row stays but font shrinks */
+          .cps-stats-grid {
+            gap: 0.5rem !important;
+          }
+          .cps-stat-card {
+            padding: 0.85rem 0.4rem !important;
+            border-radius: 10px !important;
+          }
+          .cps-stat-value {
+            font-size: clamp(1.4rem, 7vw, 2.2rem) !important;
+          }
+          .cps-stat-label {
+            font-size: 0.6rem !important;
+            letter-spacing: 0.05em !important;
+          }
+
+          /* Result modal layout — single column on mobile */
+          .cps-modal-split {
+            grid-template-columns: 1fr !important;
+            min-height: unset !important;
+            gap: 0.75rem !important;
+          }
+          .cps-modal-left {
+            border-right: none !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+            padding-right: 0 !important;
+            padding-bottom: 0.75rem !important;
+          }
+          .cps-modal-emoji {
+            font-size: 3rem !important;
+          }
+          .cps-modal-rank {
+            font-size: 1.6rem !important;
+          }
+          .cps-modal-inner {
+            padding: 1.25rem 1rem !important;
+          }
+
+          /* History rows — don't overflow */
+          .cps-history-row {
+            font-size: 0.78rem !important;
+            gap: 0.25rem !important;
+            flex-wrap: wrap !important;
+            padding: 0.6rem 1rem !important;
+          }
+
+          /* SEO article */
+          .cps-article {
+            padding: 1.25rem !important;
+          }
+          .cps-article h2 {
+            font-size: 1.4rem !important;
+          }
+          .cps-article h3 {
+            font-size: 1.1rem !important;
+          }
+          .cps-games-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 0.6rem !important;
+          }
+        }
       `}</style>
 
+      {/* ── HEADER ── */}
       <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div className="section-label">Mouse Tool</div>
         <h1 className="tool-title">CPS Test</h1>
         <p className="tool-subtitle">Clicks Per Second — How fast can you click?</p>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem', alignItems: 'center' }}>
+      {/* ── DURATION SELECTOR ── */}
+      <div
+        className="cps-duration-row"
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '0.5rem',
+          flexWrap: 'wrap',
+          marginBottom: '2rem',
+          alignItems: 'center',
+        }}
+      >
         {DURATIONS.map(d => (
           <button
             key={d}
+            className="cps-duration-btn"
             onClick={() => { setDuration(d); durationRef.current = d; resetTest(); setTimeLeft(d); setCustomTime(''); }}
             disabled={phase === 'running'}
             style={{
@@ -211,11 +309,15 @@ export default function CPSTestPage() {
           >{d}s</button>
         ))}
 
-        <div style={{ 
-          display: 'flex', alignItems: 'center', gap: '0.3rem', 
-          background: 'var(--bg-card)', border: '1px solid var(--border)', 
-          borderRadius: '8px', padding: '0.2rem 0.2rem 0.2rem 0.6rem' 
-        }}>
+        {/* Custom time */}
+        <div
+          className="cps-custom-wrap"
+          style={{ 
+            display: 'flex', alignItems: 'center', gap: '0.3rem', 
+            background: 'var(--bg-card)', border: '1px solid var(--border)', 
+            borderRadius: '8px', padding: '0.2rem 0.2rem 0.2rem 0.6rem',
+          }}
+        >
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Custom:</span>
           <input 
             type="number" 
@@ -226,7 +328,7 @@ export default function CPSTestPage() {
             style={{ 
               width: '50px', background: 'transparent', border: 'none', 
               color: 'var(--neon-cyan)', fontWeight: '700', outline: 'none', 
-              textAlign: 'center', fontSize: '0.85rem' 
+              textAlign: 'center', fontSize: '0.85rem',
             }}
           />
           <button 
@@ -242,26 +344,42 @@ export default function CPSTestPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+      {/* ── STATS CARDS ── */}
+      <div
+        className="cps-stats-grid"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}
+      >
         {[
           { value: phase === 'idle' ? '0.00' : typeof cps === 'number' && cps % 1 !== 0 ? cps.toFixed(2) : cps, label: 'CPS', color: 'var(--neon-cyan)' },
           { value: clicks, label: 'Clicks', color: 'var(--neon-green)' },
           { value: timeLeft.toFixed(1), label: 'Seconds Left', color: 'var(--neon-orange)' },
         ].map(s => (
-          <div key={s.label} style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: '12px', padding: '1.25rem', textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: '900', color: s.color, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.25rem' }}>{s.label}</div>
+          <div
+            key={s.label}
+            className="cps-stat-card"
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              borderRadius: '12px', padding: '1.25rem', textAlign: 'center',
+            }}
+          >
+            <div
+              className="cps-stat-value"
+              style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: '900', color: s.color, fontVariantNumeric: 'tabular-nums' }}
+            >{s.value}</div>
+            <div
+              className="cps-stat-label"
+              style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.25rem' }}
+            >{s.label}</div>
           </div>
         ))}
       </div>
 
+      {/* ── PROGRESS BAR ── */}
       <div className="progress-bar" style={{ marginBottom: '1.5rem' }}>
         <div className="progress-fill" style={{ width: `${progress}%` }} />
       </div>
 
+      {/* ── CLICK AREA ── */}
       <div
         onClick={handleClick}
         style={{
@@ -308,6 +426,7 @@ export default function CPSTestPage() {
         )}
       </div>
 
+      {/* ── RESET BUTTON (while running) ── */}
       {phase === 'running' && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease-in' }}>
           <button
@@ -339,7 +458,7 @@ export default function CPSTestPage() {
         </div>
       )}
 
-      {/* ===== MODERN PROFILE SPLIT RESULT MODAL ===== */}
+      {/* ── RESULT MODAL ── */}
       {phase === 'done' && finalRating && (
         <>
           <div style={{
@@ -348,20 +467,25 @@ export default function CPSTestPage() {
             zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards',
           }} onClick={() => resetTest()} />
 
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '95%', 
-            maxWidth: '560px',
-            background: '#0d1117',
-            border: `2px solid ${finalRating.color}`,
-            borderRadius: '20px',
-            padding: '2rem 1.5rem',
-            textAlign: 'center',
-            zIndex: 1000,
-            animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-            boxShadow: `0 0 40px ${finalRating.color}25`,
-          }}>
+          <div
+            className="cps-modal-inner"
+            style={{
+              position: 'fixed', top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '95%', 
+              maxWidth: '560px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: '#0d1117',
+              border: `2px solid ${finalRating.color}`,
+              borderRadius: '20px',
+              padding: '2rem 1.5rem',
+              textAlign: 'center',
+              zIndex: 1000,
+              animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+              boxShadow: `0 0 40px ${finalRating.color}25`,
+            }}
+          >
             <button onClick={() => resetTest()} style={{
               position: 'absolute', top: '0.75rem', right: '0.75rem',
               background: 'rgba(255,255,255,0.03)',
@@ -371,13 +495,26 @@ export default function CPSTestPage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>✕</button>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.25rem', alignItems: 'center', minHeight: '130px', marginBottom: '1.25rem' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '1rem', height: '100%' }}>
-                <span style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}>{finalRating.emoji}</span>
+            {/* Split layout — stacks on mobile via CSS class */}
+            <div
+              className="cps-modal-split"
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.25rem', alignItems: 'center', minHeight: '130px', marginBottom: '1.25rem' }}
+            >
+              <div
+                className="cps-modal-left"
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '1rem', height: '100%' }}
+              >
+                <span
+                  className="cps-modal-emoji"
+                  style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}
+                >{finalRating.emoji}</span>
               </div>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Rank is</div>
-                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}>{finalRating.label}!</div>
+                <div
+                  className="cps-modal-rank"
+                  style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}
+                >{finalRating.label}!</div>
                 <div style={{ display: 'flex', gap: '3px', marginBottom: '0.5rem' }}>
                   {Array.from({ length: 5 }).map((_, i) => (
                     <span key={i} style={{ fontSize: '1.2rem', color: i < finalRating.stars ? '#ffca28' : 'rgba(255,255,255,0.1)' }}>★</span>
@@ -416,11 +553,16 @@ export default function CPSTestPage() {
         </>
       )}
 
+      {/* ── SESSION HISTORY ── */}
       {history.length > 0 && (
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem' }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
           {history.map((h, i) => (
-            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none', fontSize: '0.875rem' }}>
+            <div
+              key={i}
+              className="cps-history-row"
+              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none', fontSize: '0.875rem' }}
+            >
               <span style={{ color: 'var(--text-muted)' }}>#{history.length - i}</span>
               <span style={{ color: 'var(--neon-cyan)', fontWeight: '700' }}>{h.cps} CPS</span>
               <span style={{ color: 'var(--text-secondary)' }}>{h.clicks} clicks</span>
@@ -431,9 +573,9 @@ export default function CPSTestPage() {
         </div>
       )}
 
-      {/* ================= MASSIVE SEO ARTICLE SECTION ================= */}
+      {/* ── SEO ARTICLE ── */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
-        <article style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
+        <article className="cps-article" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
           
           <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.5rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
             The Ultimate Guide to CPS (Clicks Per Second) & Gaming Performance
@@ -443,7 +585,6 @@ export default function CPSTestPage() {
             A <strong>CPS Test (Clicks Per Second Test)</strong> is an essential online benchmarking tool utilized by professional eSports players, casual gamers, and hardware enthusiasts. It accurately measures how fast you can click your mouse button within a specific time frame. Whether you are battling in a high-stakes PvP arena, building structures at lightning speed, or just testing the limits of your human reflexes, mastering your CPS is the gateway to elevating your overall gaming prowess.
           </p>
 
-          {/* New Mouse Check Box */}
           <div style={{ background: 'rgba(0, 245, 255, 0.05)', borderLeft: '4px solid var(--neon-cyan)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
             <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
               🖱️ The Ultimate "New Mouse Check"
@@ -460,7 +601,10 @@ export default function CPSTestPage() {
             In the modern era of competitive gaming, Actions Per Minute (APM) and raw clicking speed can dictate the outcome of a match. A higher CPS gives you a distinct mechanical advantage across a massive variety of popular titles. Our tool is highly recommended for players who regularly play:
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+          <div
+            className="cps-games-grid"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}
+          >
             {['Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V', 'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2', 'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us'].map((game) => (
               <div key={game} style={{ background: 'rgba(0,0,0,0.4)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: 'var(--neon-cyan)' }}>🎮</span> {game}
@@ -468,14 +612,12 @@ export default function CPSTestPage() {
             ))}
           </div>
 
-          {/* Detailed Q&A / How-To Section */}
           <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
             Pro Gamer FAQs & Strategies
           </h2>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
             
-            {/* Minecraft */}
             <div>
               <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to get fast CPS in Minecraft?
@@ -489,7 +631,6 @@ export default function CPSTestPage() {
               </p>
             </div>
 
-            {/* PUBG */}
             <div>
               <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to improve CPS in PUBG: Battlegrounds?
@@ -499,7 +640,6 @@ export default function CPSTestPage() {
               </p>
             </div>
 
-            {/* Valorant / FPS */}
             <div>
               <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to increase clicking speed in Valorant?
@@ -509,7 +649,6 @@ export default function CPSTestPage() {
               </p>
             </div>
 
-            {/* Reaction Time */}
             <div>
               <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to improve reaction time in FPS games?
@@ -523,7 +662,6 @@ export default function CPSTestPage() {
               </p>
             </div>
 
-            {/* General Health Tip */}
             <div style={{ background: 'rgba(255, 0, 0, 0.05)', border: '1px solid rgba(255,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
               <h4 style={{ color: 'var(--neon-red)', fontSize: '1.1rem', fontWeight: '700', margin: '0 0 0.5rem 0' }}>
                 ⚠️ A Note on Physical Health
