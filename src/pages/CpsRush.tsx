@@ -176,11 +176,10 @@ export default function CpsRush() {
   const startGame = () => { initGame(); setGameState('playing'); };
 
   return (
-    // FIXED: Removed minHeight 100vh and background - now it fits inside Layout
     <div style={{ width: '100%', color: '#ffffff' }}>
-      <div style={{ maxWidth: '840px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '840px', margin: '0 auto', paddingBottom: '4rem' }}>
         
-        <header style={{ textAlign: 'center', marginBottom: '1.2rem' }}>
+        <header style={{ textAlign: 'center', marginBottom: '1.2rem', paddingTop: '2rem' }}>
           <div style={{ display: 'inline-flex', backgroundColor: 'rgba(0, 240, 255, 0.06)', border: '1px solid rgba(0, 240, 255, 0.2)', color: '#00f0ff', fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>
             MOUSE & KEYBOARD SPEED TEST
           </div>
@@ -190,7 +189,7 @@ export default function CpsRush() {
         </header>
 
         <div onPointerDown={() => { if (inputMode === 'mouse' && gameState === 'playing') handleInput(); }}
-          style={{ position: 'relative', width: '100%', maxHeight: '440px', aspectRatio: '16/9', backgroundColor: '#030712', borderRadius: '16px', overflow: 'hidden', border: '1px solid #111827', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.7)', touchAction: 'none' }}
+          style={{ position: 'relative', width: '100%', maxHeight: '440px', aspectRatio: '16/9', backgroundColor: '#030712', borderRadius: '16px', overflow: 'hidden', border: '1px solid #111827', boxShadow: '0 20px 40px -15px rgba(0,0,0,0.7)', touchAction: 'none', marginBottom: '3rem' }}
         >
           <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} style={{ width: '100%', height: '100%', display: 'block' }} />
           
@@ -238,7 +237,108 @@ export default function CpsRush() {
           )}
         </div>
 
-        {/* ... বাকি Article এবং FAQ সেকশন আপনার আগের মতোই থাকবে ... */}
+        {/* ================= MASSIVE SEO ARTICLE SECTION ================= */}
+        <div style={{ borderTop: '1px solid #1f2937', paddingTop: '3rem' }}>
+          
+          <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginBottom: '1.5rem', color: '#fff', letterSpacing: '-0.5px' }}>
+            The Ultimate Guide to CPS Mastery and Platforming Speed
+          </h2>
+          
+          <p style={{ color: '#9ca3af', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '2.5rem' }}>
+            <strong>CPS Rush</strong> is a hybrid platformer and speed-testing simulator designed to push your mechanical limits. By tying your <em>Clicks Per Second (CPS)</em> directly to your in-game movement speed and jump height, this tool trains your hand endurance while challenging your spatial awareness. Whether you prefer smashing the spacebar or jitter-clicking your mouse, mastering this momentum-based challenge will elevate your performance in top-tier competitive games.
+          </p>
+
+          {/* Ultimate Hardware Check Box */}
+          <div style={{ backgroundColor: 'rgba(0, 240, 255, 0.05)', borderLeft: '4px solid #00f0ff', padding: '1.5rem', borderRadius: '0 12px 12px 0', marginBottom: '3rem' }}>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontSize: '1.25rem', fontWeight: 800, marginTop: 0, marginBottom: '0.75rem' }}>
+              <MousePointer2 size={20} color="#00f0ff" />
+              The Ultimate &quot;New Mouse &amp; Keyboard Check&quot;
+            </h3>
+            <p style={{ color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+              Did you recently upgrade your gaming setup? <strong>CPS Rush</strong> acts as an incredibly effective <strong>new mouse check</strong> and keyboard switch tester. Use the mouse mode to verify your main button&apos;s debounce time and ensure it doesn&apos;t suffer from accidental double-clicking. Switch to Keyboard mode to test your mechanical switch actuation point (like Cherry MX or optical switches) by spamming the spacebar to generate maximum jumping momentum!
+            </p>
+          </div>
+
+          <h3 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#fff', marginBottom: '1.2rem' }}>
+            Why High CPS Elevates Your Gameplay
+          </h3>
+          <p style={{ color: '#9ca3af', fontSize: '1.05rem', lineHeight: '1.8', marginBottom: '1.5rem' }}>
+            Clicking speed is a universal skill that dictates how quickly you can execute actions per minute (APM). Practicing your click stamina on our CPS platformer directly prepares your muscles for intense moments in the world&apos;s most popular gaming titles:
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px', marginBottom: '3.5rem' }}>
+            {['Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V', 'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2', 'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us'].map((game) => (
+              <div key={game} style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '8px', padding: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#e5e7eb', fontWeight: 600, fontSize: '0.9rem' }}>
+                <Zap size={16} color="#ff00aa" /> {game}
+              </div>
+            ))}
+          </div>
+
+          {/* FAQs & Pro Strategies */}
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 900, color: '#fff', borderBottom: '1px solid #1f2937', paddingBottom: '1rem', marginBottom: '2rem' }}>
+            Pro Gamer FAQs &amp; Strategies
+          </h2>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+            
+            {/* Minecraft */}
+            <div>
+              <h3 style={{ color: '#00f0ff', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+                How to get fast CPS in Minecraft?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0, lineHeight: '1.7' }}>
+                In <strong>Minecraft</strong>, a high CPS rate reduces your incoming knockback during PvP encounters and is required for complex speed-bridging techniques. To achieve fast CPS, players utilize specialized hand grips. <strong>Jitter Clicking</strong> involves vibrating your forearm muscles to tap the mouse, yielding 10-14 CPS. <strong>Butterfly Clicking</strong> uses your index and middle fingers to strike the button alternately, often hitting 15-20 CPS. You can test both methods safely in CPS Rush to see how much speed boost you can generate!
+              </p>
+            </div>
+
+            {/* PUBG */}
+            <div>
+              <h3 style={{ color: '#00f0ff', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+                How to improve CPS in PUBG: Battlegrounds?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0, lineHeight: '1.7' }}>
+                If you are using designated marksman rifles (DMRs) or burst-fire weapons in <strong>PUBG</strong>, your tapping speed determines your time-to-kill (TTK). To improve, you must practice <em>trigger discipline</em>. Instead of tensing your whole hand, rely on short, explosive taps using just your fingertip. Practicing in this tool ensures you can maintain a high fire rate without your hand cramping during the final circles.
+              </p>
+            </div>
+
+            {/* Valorant */}
+            <div>
+              <h3 style={{ color: '#00f0ff', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+                How to increase clicking speed and accuracy in Valorant?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0, lineHeight: '1.7' }}>
+                Unlike tracking-heavy games, <strong>Valorant</strong> requires precise, controlled clicks. However, during pistol rounds, being able to rapid-fire a Classic or Frenzy is essential. To increase your speed while maintaining accuracy, make sure your wrist is anchored to the desk or mousepad. The movement tracking in CPS Rush helps you decouple your clicking action from your tracking action, ensuring your crosshair doesn&apos;t shake when you click rapidly.
+              </p>
+            </div>
+
+            {/* Reaction Time */}
+            <div>
+              <h3 style={{ color: '#00f0ff', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+                How to improve reaction time in FPS games?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0, lineHeight: '1.7' }}>
+                In high-octane FPS games like <strong>Counter-Strike 2 (CS2)</strong> and fast-paced battle royales, human reaction time is the defining factor of success. To improve:
+                <br/><br/>
+                1. <strong>Visual Prediction:</strong> In CPS Rush, you have to predict platform gaps and adjust your clicking speed dynamically. This trains your brain to process visual depth faster.<br/>
+                2. <strong>Hardware Optimization:</strong> Playing on a 144Hz or 240Hz monitor drastically reduces input lag.<br/>
+                3. <strong>Warm-up Routines:</strong> Play 3-5 rounds of this tool before launching your competitive matches to wake up your central nervous system and get the blood flowing to your hands.
+              </p>
+            </div>
+
+            {/* General Health Tip */}
+            <div style={{ backgroundColor: 'rgba(255, 0, 170, 0.05)', border: '1px solid rgba(255, 0, 170, 0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
+              <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff00aa', fontSize: '1.1rem', fontWeight: 800, margin: '0 0 0.5rem 0' }}>
+                <Shield size={18} /> A Note on Wrist Health
+              </h4>
+              <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.95rem', lineHeight: '1.6' }}>
+                Generating extremely high CPS via jittering or intense spacebar tapping can strain your forearm tendons. To avoid repetitive strain injuries or carpal tunnel syndrome, always perform wrist stretches before gaming and avoid practicing these intense mechanics for more than 10-15 minutes at a time without resting.
+              </p>
+            </div>
+
+          </div>
+        </div>
+        {/* ================= SEO ARTICLE SECTION END ================= */}
+
       </div>
     </div>
   );
