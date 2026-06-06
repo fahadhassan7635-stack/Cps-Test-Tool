@@ -27,30 +27,25 @@ export default function Layout() {
   ];
 
   const toolsList: (ToolItem & { icon: string })[] = [
-    // Mouse Tools
     { to: '/cps-test', label: 'CPS Test', category: 'mouse', icon: '⚡' },
     { to: '/double-click', label: 'Double Click Test', category: 'mouse', icon: '🖱️' },
     { to: '/scroll-test', label: 'Scroll Wheel Test', category: 'mouse', icon: '📜' },
     { to: '/mouse-accuracy', label: 'Mouse Accuracy', category: 'mouse', icon: '🎯' },
     { to: '/cps-rush', label: 'CPS Rush', category: 'mouse', icon: '🔥' },
     
-    // Keyboard Tools
     { to: '/typing-test', label: 'Typing Speed Test', category: 'keyboard', icon: '⌨️' },
     { to: '/key-visualizer', label: 'Key Visual', category: 'keyboard', icon: '🖥️' },
     { to: '/spacebar', label: 'Spacebar Counter', category: 'keyboard', icon: '➖' },
     { to: '/accuracy', label: 'Accuracy Test', category: 'keyboard', icon: '✔️' },
     
-    // Aim & Reaction Tools
     { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
     { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
     { to: '/sniper-mode', label: 'Sniper Mode', category: 'aim', icon: '🔭' },
     { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
     
-    // Games
     { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
     { to: '/voyager-game', label: 'Voyager Game', category: 'games', icon: '🛸' },
     
-    // Misc / Others (Blog & Hall of Record)
     { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
     { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
   ];
@@ -61,7 +56,6 @@ export default function Layout() {
   }, [selectedCategory]);
 
   return (
-    // FIX 1: Removed inline 'overflowX: hidden' to allow sticky to work
     <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
       <div className="grid-bg" />
 
@@ -174,7 +168,7 @@ export default function Layout() {
       )}
 
       {/* BODY SECTION */}
-      {/* FIX 2: Added alignItems: 'flex-start' here. THIS IS THE MAGIC LINE for sticky sidebar */}
+      {/* Container with flex-start keeps sidebar from stretching vertically */}
       <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', alignItems: 'flex-start' }}>
         
         {/* SIDEBAR PANEL */}
@@ -185,8 +179,8 @@ export default function Layout() {
           background: 'transparent',
           backdropFilter: 'none',
           borderRight: '1px solid var(--border)',
-          height: 'calc(100vh - 64px)',
-          position: 'sticky',
+          height: 'calc(100vh - 64px)', // Take up exact screen height minus navbar
+          position: 'sticky', // STICKY NOW WORKS PERFECTLY
           top: '64px',
           display: 'flex',
           flexDirection: 'column',
@@ -197,7 +191,7 @@ export default function Layout() {
           boxSizing: 'border-box'
         }}>
 
-          {/* IN-SIDEBAR HEADER: ALL TOOLS BADGE & TOGGLE ARROW */}
+          {/* IN-SIDEBAR HEADER */}
           <div style={{ 
             display: 'flex', 
             justifyContent: sidebarOpen ? 'space-between' : 'center', 
@@ -205,57 +199,31 @@ export default function Layout() {
             marginBottom: '1rem',
             paddingRight: sidebarOpen ? '0.5rem' : '0'
           }}>
-            
-            {/* "All Tools" styled label */}
             {sidebarOpen && (
               <div style={{
                 background: 'linear-gradient(135deg, #00f5ff, #0cf991)',
-                color: '#000',
-                fontSize: '1rem',
-                fontWeight: '800',
-                padding: '0.4rem 0.8rem',
-                borderRadius: '8px',
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                boxShadow: '0 4px 10px rgba(0, 245, 255, 0.2)',
-                whiteSpace: 'nowrap'
+                color: '#000', fontSize: '1rem', fontWeight: '800',
+                padding: '0.4rem 0.8rem', borderRadius: '8px',
+                letterSpacing: '0.05em', textTransform: 'uppercase',
+                boxShadow: '0 4px 10px rgba(0, 245, 255, 0.2)', whiteSpace: 'nowrap'
               }}>
                 🛠️ All Tools
               </div>
             )}
-
-            {/* TOGGLE BUTTON */}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--text-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '6px',
-                borderRadius: '6px',
-                transition: 'all 0.2s ease',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                color: 'var(--text-secondary)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--neon-cyan)' }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
-              aria-label="Toggle Sidebar"
-              title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
             >
               {sidebarOpen ? (
-                /* Left Arrow (When Open) */
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="19" y1="12" x2="5" y2="12" />
-                  <polyline points="12 19 5 12 12 5" />
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
               ) : (
-                /* Right Arrow (When Closed) */
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
               )}
             </button>
           </div>
@@ -266,17 +234,10 @@ export default function Layout() {
               value={selectedCategory} 
               onChange={(e) => setSelectedCategory(e.target.value)}
               style={{
-                flex: 1,
-                padding: '0.65rem 1rem',
-                borderRadius: '8px',
-                background: 'rgba(15, 23, 42, 0.8)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                fontSize: '0.85rem',
-                fontWeight: '600',
-                outline: 'none',
-                cursor: 'pointer',
-                letterSpacing: '0.05em'
+                flex: 1, padding: '0.65rem 1rem', borderRadius: '8px',
+                background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border)',
+                color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: '600',
+                outline: 'none', cursor: 'pointer', letterSpacing: '0.05em'
               }}
             >
               <option value="all">FILTER BY TYPE</option>
@@ -290,45 +251,30 @@ export default function Layout() {
 
           {/* SCROLLABLE TOOLS LIST */}
           <div className="sidebar-scroll" style={{ 
-            flex: 1, 
-            overflowY: 'auto', 
-            overflowX: 'hidden', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '0.35rem',
-            paddingRight: '4px'
+            flex: 1, overflowY: 'auto', overflowX: 'hidden', 
+            display: 'flex', flexDirection: 'column', gap: '0.35rem', paddingRight: '4px'
           }}>
             {filteredTools.map((tool) => {
               const isCurrentActive = location.pathname === tool.to;
-              const isPinned = tool.to === '/cps-test'; // CPS Test Check
-              
+              const isPinned = tool.to === '/cps-test';
               return (
                 <Link
-                  key={tool.to}
-                  to={tool.to}
+                  key={tool.to} to={tool.to}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: 'flex', alignItems: 'center',
                     justifyContent: sidebarOpen ? 'flex-start' : 'center',
                     gap: sidebarOpen ? '0.75rem' : '0.4rem',
                     padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
-                    borderRadius: '6px',
-                    textDecoration: 'none',
-                    position: isPinned ? 'sticky' : 'static',
-                    top: isPinned ? 0 : 'auto',
-                    zIndex: isPinned ? 10 : 1,
-                    background: isPinned 
-                      ? (isCurrentActive ? 'rgba(0, 245, 255, 0.15)' : 'rgba(15, 23, 42, 0.95)') 
-                      : (isCurrentActive ? 'rgba(0, 245, 255, 0.08)' : 'transparent'),
+                    borderRadius: '6px', textDecoration: 'none',
+                    position: isPinned ? 'sticky' : 'static', top: isPinned ? 0 : 'auto', zIndex: isPinned ? 10 : 1,
+                    background: isPinned ? (isCurrentActive ? 'rgba(0, 245, 255, 0.15)' : 'rgba(15, 23, 42, 0.95)') : (isCurrentActive ? 'rgba(0, 245, 255, 0.08)' : 'transparent'),
                     backdropFilter: isPinned ? 'blur(5px)' : 'none',
                     border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
                     borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
                     marginBottom: isPinned ? '5px' : '0',
-                    fontSize: '0.85rem',
-                    fontWeight: isCurrentActive ? '600' : '500',
+                    fontSize: '0.85rem', fontWeight: isCurrentActive ? '600' : '500',
                     color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
-                    transition: 'all 0.3s ease',
-                    transform: 'translateX(0)'
+                    transition: 'all 0.3s ease', transform: 'translateX(0)'
                   }}
                   onMouseEnter={(e) => {
                     if (!isCurrentActive) {
@@ -350,12 +296,8 @@ export default function Layout() {
                   <span style={{ fontSize: '1.1rem' }}>{tool.icon}</span>
                   <span style={{ 
                     display: (sidebarOpen || isPinned) ? 'block' : 'none', 
-                    textTransform: 'uppercase', 
-                    fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
-                    letterSpacing: '0.02em', 
-                    whiteSpace: 'nowrap', 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis' 
+                    textTransform: 'uppercase', fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
+                    letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
                   }}>
                     {tool.label}
                   </span>
@@ -366,13 +308,17 @@ export default function Layout() {
         </aside>
 
         {/* MAIN DYNAMIC CONTENT */}
+        {/* FIX: Moved overflowX: hidden directly to the main container. 
+            This prevents horizontal scroll bugs on mobile but keeps the Sidebar sticky! */}
         <main className="main-content" style={{ 
           flex: 1, 
           position: 'relative', 
           zIndex: 1, 
           transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           width: '100%',
-          boxSizing: 'border-box'
+          maxWidth: '100%',
+          boxSizing: 'border-box',
+          overflowX: 'hidden' 
         }}>
           <Outlet />
         </main>
@@ -383,149 +329,96 @@ export default function Layout() {
         background: 'rgba(8,13,20,0.95)', borderTop: '1px solid var(--border)',
         position: 'relative', zIndex: 1, marginTop: 'auto', width: '100%', boxSizing: 'border-box'
       }}>
-        <div className="footer-grid" style={{
-          maxWidth: '1200px', margin: '0 auto', display: 'grid',
-          gap: '2rem', marginBottom: '3rem',
-        }}>
+        <div className="footer-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gap: '2rem', marginBottom: '3rem' }}>
           
-          {/* Brand Col */}
           <div style={{ paddingRight: '2rem' }}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', marginBottom: '1rem' }}>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '8px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                overflow: 'hidden', background: 'rgba(255,255,255,0.05)',
-              }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'rgba(255,255,255,0.05)' }}>
                 <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
-              <span style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)' }}>
-                CPS<span style={{ color: 'var(--neon-cyan, #00f5ff)' }}>Test</span> Tools
-              </span>
+              <span style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)' }}>CPS<span style={{ color: 'var(--neon-cyan, #00f5ff)' }}>Test</span> Tools</span>
             </Link>
-            <p style={{ color: '#8892b0', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-              The ultimate free platform for gamers and typists to test, train, and compete. No signup required.
-            </p>
-            
-            {/* Social Icons */}
+            <p style={{ color: '#8892b0', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>The ultimate free platform for gamers and typists to test, train, and compete. No signup required.</p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <a href="#" className="social-btn">𝕏</a>
-              <a href="#" className="social-btn">💬</a>
-              <a href="#" className="social-btn">▶</a>
-              <a href="#" className="social-btn">🤖</a>
+              <a href="#" className="social-btn">𝕏</a><a href="#" className="social-btn">💬</a><a href="#" className="social-btn">▶</a><a href="#" className="social-btn">🤖</a>
             </div>
           </div>
 
-          {/* Keyboard Col */}
           <div>
             <h4 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>KEYBOARD</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
               {[{ to: '/typing-test', label: 'Typing Speed Test' }, { to: '/key-visualizer', label: 'Key Visualizer' }, { to: '/spacebar', label: 'Spacebar Counter' }, { to: '/accuracy', label: 'Accuracy Test' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
+                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
               ))}
             </ul>
           </div>
 
-          {/* Mouse Col */}
           <div>
             <h4 style={{ color: 'var(--neon-green, #0cf991)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>MOUSE</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
               {[{ to: '/cps-test', label: 'CPS Test' }, { to: '/double-click', label: 'Double Click Test' }, { to: '/scroll-test', label: 'Scroll Wheel Test' }, { to: '/mouse-accuracy', label: 'Mouse Accuracy' }, { to: '/cps-rush', label: 'CPS Rush' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
+                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
               ))}
             </ul>
           </div>
 
-          {/* Arcade Games Col */}
           <div>
             <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>🚀 ARCADE GAMES</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
               {[{ to: '/games', label: '🎮 All Games Center' }, { to: '/space-defense', label: '🚀 Space Defense' }, { to: '/voyager-game', label: '🛸 Voyager Game' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
+                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
               ))}
             </ul>
           </div>
 
-          {/* Explore Col */}
           <div>
             <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>EXPLORE</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
               {[{ to: '/hall-of-fame', label: 'Leaderboard' }, { to: '/aim-trainer', label: 'Aim Trainer' }, { to: '/reaction-time', label: 'Reaction Time' }, { to: '/blog', label: '📖 Blog' }].map(l => (
-                <li key={l.to}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
+                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
               ))}
             </ul>
           </div>
 
         </div>
 
-        {/* Bottom Bar Container */}
-        <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', 
-          maxWidth: '1200px', margin: '0 auto', display: 'flex',
-          justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem',
-        }}>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-             © Best CPS Test Tools — All rights reserved.
-          </p>
-          
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>© Best CPS Test Tools — All rights reserved.</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link to="/privacy-policy" className="footer-bottom-link">Privacy Policy</Link>
             <Link to="/terms" className="footer-bottom-link">Terms of Service</Link>
             <Link to="/contact" className="footer-bottom-link">Contact</Link>
           </div>
-
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>
-             Built for gamers, by gamers. 🎮
-          </p>
+          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Built for gamers, by gamers. 🎮</p>
         </div>
       </footer>
 
       {/* STYLES */}
       <style>{`
-        /* FIX 3: Added global mobile overflow protection here */
+        /* FIX: Removed overflow-x hidden from body so Sticky Sidebar stays active */
         html, body {
-          max-width: 100vw;
-          overflow-x: hidden;
           margin: 0;
           padding: 0;
         }
+
+        * { box-sizing: border-box; }
 
         .top-nav { padding: 0 2rem; }
         .main-content { padding: 2rem; }
         .main-footer { padding: 3rem 2rem 1.5rem; }
         .mobile-menu-overlay { padding: 1rem 2rem; }
 
-        /* Desktop Footer Layout */
-        .footer-grid {
-          grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr;
-        }
+        .footer-grid { grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; }
         
-        /* New Custom CSS for Footer Links & Icons */
-        .footer-link {
-          color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;
-        }
+        .footer-link { color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
         .footer-link:hover { color: var(--text-primary, #ffffff); }
         
-        .footer-bottom-link {
-          color: #64748b; text-decoration: none; font-size: 0.85rem; transition: color 0.2s;
-        }
+        .footer-bottom-link { color: #64748b; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
         .footer-bottom-link:hover { color: var(--text-primary, #ffffff); }
         
-        .social-btn {
-          width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05);
-          display: flex; align-items: center; justify-content: center;
-          color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s;
-        }
+        .social-btn { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s; }
         .social-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary, #ffffff); }
 
-        /* Mobile Media Queries */
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .hamburger-btn { display: flex !important; }
@@ -533,7 +426,6 @@ export default function Layout() {
           .footer-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
-        /* Specific Mobile Phone Adjustments */
         @media (max-width: 768px) {
           .top-nav { padding: 0 1rem !important; }
           .main-content { padding: 1rem !important; }
@@ -546,9 +438,6 @@ export default function Layout() {
         .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
         .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
-        
-        /* Ensure all elements respect borders */
-        * { box-sizing: border-box; }
       `}</style>
     </div>
   );
