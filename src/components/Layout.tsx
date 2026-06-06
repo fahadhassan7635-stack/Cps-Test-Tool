@@ -61,19 +61,22 @@ export default function Layout() {
   }, [selectedCategory]);
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    // FIX 1: Added overflowX: hidden and width: 100% to prevent horizontal scrolling
+    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', overflowX: 'hidden', width: '100%', maxWidth: '100vw' }}>
       <div className="grid-bg" />
 
       {/* TOP NAVIGATION BAR */}
-      <nav style={{
+      {/* FIX 2: Replaced inline padding with class 'top-nav' */}
+      <nav className="top-nav" style={{
         position: 'sticky', top: 0, zIndex: 100,
         background: 'rgba(8,13,20,0.95)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--border)',
-        padding: '0 2rem',
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
         height: '64px',
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           
@@ -136,12 +139,13 @@ export default function Layout() {
 
       {/* MOBILE OVERLAY */}
       {menuOpen && (
-        <div style={{
+        <div className="mobile-menu-overlay" style={{
           position: 'fixed', top: '64px', left: 0, right: 0,
           background: 'rgba(8,13,20,0.98)', backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border)', padding: '1rem 2rem', zIndex: 99,
+          borderBottom: '1px solid var(--border)', zIndex: 99,
           display: 'flex', flexDirection: 'column', gap: '0.5rem',
-          maxHeight: 'calc(100vh - 64px)', overflowY: 'auto'
+          maxHeight: 'calc(100vh - 64px)', overflowY: 'auto',
+          boxSizing: 'border-box'
         }}>
           {navItems.map(item => (
             <NavLink
@@ -171,7 +175,7 @@ export default function Layout() {
       )}
 
       {/* BODY SECTION */}
-      <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
+      <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%' }}>
         
         {/* SIDEBAR PANEL */}
         <aside className="sidebar-pannel" style={{
@@ -189,7 +193,8 @@ export default function Layout() {
           zIndex: 10,
           padding: sidebarOpen ? '1.25rem' : '1.25rem 0.5rem',
           transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          overflow: 'hidden' 
+          overflow: 'hidden',
+          boxSizing: 'border-box'
         }}>
 
           {/* IN-SIDEBAR HEADER: ALL TOOLS BADGE & TOGGLE ARROW */}
@@ -255,7 +260,7 @@ export default function Layout() {
             </button>
           </div>
 
-          {/* FILTER DROPDOWN - Hides when mini-sidebar is active */}
+          {/* FILTER DROPDOWN */}
           <div style={{ display: sidebarOpen ? 'flex' : 'none', alignItems: 'center', marginBottom: '1.25rem' }}>
             <select 
               value={selectedCategory} 
@@ -309,7 +314,6 @@ export default function Layout() {
                     padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
                     borderRadius: '6px',
                     textDecoration: 'none',
-                    // PINNED STICKY LOGIC
                     position: isPinned ? 'sticky' : 'static',
                     top: isPinned ? 0 : 'auto',
                     zIndex: isPinned ? 10 : 1,
@@ -320,12 +324,11 @@ export default function Layout() {
                     border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
                     borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
                     marginBottom: isPinned ? '5px' : '0',
-
                     fontSize: '0.85rem',
                     fontWeight: isCurrentActive ? '600' : '500',
                     color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
-                    transition: 'all 0.3s ease', // Smooth hover transition
-                    transform: 'translateX(0)' // Default state for animation
+                    transition: 'all 0.3s ease',
+                    transform: 'translateX(0)'
                   }}
                   onMouseEnter={(e) => {
                     if (!isCurrentActive) {
@@ -345,7 +348,6 @@ export default function Layout() {
                   }}
                 >
                   <span style={{ fontSize: '1.1rem' }}>{tool.icon}</span>
-                  {/* TEXT VISIBILITY LOGIC */}
                   <span style={{ 
                     display: (sidebarOpen || isPinned) ? 'block' : 'none', 
                     textTransform: 'uppercase', 
@@ -364,21 +366,24 @@ export default function Layout() {
         </aside>
 
         {/* MAIN DYNAMIC CONTENT */}
-        <main style={{ 
+        {/* FIX 3: Replaced inline padding with class 'main-content' */}
+        <main className="main-content" style={{ 
           flex: 1, 
           position: 'relative', 
           zIndex: 1, 
-          padding: '2rem',
-          transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
           <Outlet />
         </main>
       </div>
 
       {/* FOOTER SECTION */}
-      <footer style={{
+      {/* FIX 4: Replaced inline padding with class 'main-footer' */}
+      <footer className="main-footer" style={{
         background: 'rgba(8,13,20,0.95)', borderTop: '1px solid var(--border)',
-        padding: '3rem 2rem 1.5rem', position: 'relative', zIndex: 1, marginTop: 'auto'
+        position: 'relative', zIndex: 1, marginTop: 'auto', width: '100%', boxSizing: 'border-box'
       }}>
         <div className="footer-grid" style={{
           maxWidth: '1200px', margin: '0 auto', display: 'grid',
@@ -486,6 +491,12 @@ export default function Layout() {
 
       {/* STYLES */}
       <style>{`
+        /* FIX 5: Layout Responsive Padding Classes */
+        .top-nav { padding: 0 2rem; }
+        .main-content { padding: 2rem; }
+        .main-footer { padding: 3rem 2rem 1.5rem; }
+        .mobile-menu-overlay { padding: 1rem 2rem; }
+
         /* Desktop Footer Layout */
         .footer-grid {
           grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr;
@@ -493,67 +504,46 @@ export default function Layout() {
         
         /* New Custom CSS for Footer Links & Icons */
         .footer-link {
-          color: #8892b0;
-          text-decoration: none;
-          font-size: 0.9rem;
-          transition: color 0.2s;
+          color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s;
         }
-        .footer-link:hover {
-          color: var(--text-primary, #ffffff);
-        }
+        .footer-link:hover { color: var(--text-primary, #ffffff); }
         
         .footer-bottom-link {
-          color: #64748b;
-          text-decoration: none;
-          font-size: 0.85rem;
-          transition: color 0.2s;
+          color: #64748b; text-decoration: none; font-size: 0.85rem; transition: color 0.2s;
         }
-        .footer-bottom-link:hover {
-          color: var(--text-primary, #ffffff);
-        }
+        .footer-bottom-link:hover { color: var(--text-primary, #ffffff); }
         
         .social-btn {
-          width: 36px; height: 36px;
-          border-radius: 8px;
-          background: rgba(255,255,255,0.05);
+          width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05);
           display: flex; align-items: center; justify-content: center;
-          color: #8892b0; text-decoration: none; font-size: 1.1rem;
-          transition: all 0.2s;
+          color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s;
         }
-        .social-btn:hover {
-          background: rgba(255,255,255,0.1);
-          color: var(--text-primary, #ffffff);
-        }
+        .social-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary, #ffffff); }
 
-        /* Existing Media Queries & Scrollbars */
+        /* FIX 6: Mobile Media Queries */
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
           .hamburger-btn { display: flex !important; }
           .sidebar-pannel { display: none !important; }
-          .footer-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
+          .footer-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
-        @media (max-width: 600px) {
-          .footer-grid {
-            grid-template-columns: 1fr;
-          }
+        /* Specific Mobile Phone Adjustments */
+        @media (max-width: 768px) {
+          .top-nav { padding: 0 1rem !important; }
+          .main-content { padding: 1rem !important; }
+          .main-footer { padding: 2rem 1rem 1rem !important; }
+          .mobile-menu-overlay { padding: 1rem !important; }
+          .footer-grid { grid-template-columns: 1fr; }
         }
 
-        .sidebar-scroll::-webkit-scrollbar {
-          width: 4px;
-        }
-        .sidebar-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 10px;
-        }
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-          background: var(--neon-cyan);
-        }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+        
+        /* Ensure all elements respect borders */
+        * { box-sizing: border-box; }
       `}</style>
     </div>
   );
