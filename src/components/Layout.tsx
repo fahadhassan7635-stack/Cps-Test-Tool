@@ -1,535 +1,644 @@
-import { useState, useMemo } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
-// Fixed the image path here
-const mouseIcon = '/logo.png';
+const DURATIONS = [1, 2, 5, 10, 15, 30, 60];
 
-interface ToolItem {
-  to: string;
-  label: string;
-  category: 'mouse' | 'keyboard' | 'aim' | 'games' | 'misc';
-}
+type Phase = 'idle' | 'running' | 'done';
 
-export default function Layout() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const location = useLocation();
+interface ClickEvent { time: number; }
 
-  const navItems = [
-    { to: '/', label: 'Home', exact: true },
-    { to: '/keyboard', label: 'Keyboard' },
-    { to: '/mouse', label: 'Mouse' },
-    { to: '/aim', label: 'Aim & Reaction' },
-    { to: '/hall-of-fame', label: 'Hall of Fame' },
-    { to: '/games', label: 'Games' }, 
-    { to: '/blog', label: 'Blog' },
-  ];
+export default function CPSTestPage() {
+  const [duration, setDuration] = useState(5);
+  const [customTime, setCustomTime] = useState<string>(''); 
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [clicks, setClicks] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(5);
+  const [cps, setCps] = useState(0);
+  const [maxCps, setMaxCps] = useState(0);
+  const [history, setHistory] = useState<{ cps: number; clicks: number; duration: number }[]>([]);
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
-  const toolsList: (ToolItem & { icon: string })[] = [
-    { to: '/cps-test', label: 'CPS Test', category: 'mouse', icon: '⚡' },
-    { to: '/double-click', label: 'Double Click Test', category: 'mouse', icon: '🖱️' },
-    { to: '/scroll-test', label: 'Scroll Wheel Test', category: 'mouse', icon: '📜' },
-    { to: '/mouse-accuracy', label: 'Mouse Accuracy', category: 'mouse', icon: '🎯' },
-    { to: '/cps-rush', label: 'CPS Rush', category: 'mouse', icon: '🔥' },
-    
-    { to: '/typing-test', label: 'Typing Speed Test', category: 'keyboard', icon: '⌨️' },
-    { to: '/key-visualizer', label: 'Key Visual', category: 'keyboard', icon: '🖥️' },
-    { to: '/spacebar', label: 'Spacebar Counter', category: 'keyboard', icon: '➖' },
-    { to: '/accuracy', label: 'Accuracy Test', category: 'keyboard', icon: '✔️' },
-    
-    { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
-    { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
-    { to: '/sniper-mode', label: 'Sniper Mode', category: 'aim', icon: '🔭' },
-    { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
-    
-    { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
-    { to: '/voyager-game', label: 'Voyager Game', category: 'games', icon: '🛸' },
-    
-    { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
-    { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
-  ];
+  const startTime = useRef<number>(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const clickEvents = useRef<ClickEvent[]>([]);
+  const rippleId = useRef(0);
+  const phaseRef = useRef<Phase>('idle');
+  const durationRef = useRef(duration);
 
-  const filteredTools = useMemo(() => {
-    if (selectedCategory === 'all') return toolsList;
-    return toolsList.filter(tool => tool.category === selectedCategory);
-  }, [selectedCategory]);
+  useEffect(() => { durationRef.current = duration; }, [duration]);
+
+  const recordClick = () => {
+    const now = performance.now();
+    clickEvents.current.push({ time: now });
+    setClicks(prev => prev + 1);
+  };
+
+  const getRating = (c: number) => {
+    if (c >= 12) return { 
+      label: 'Machine', 
+      emoji: '🤖', 
+      color: 'var(--neon-red)', 
+      stars: 5, 
+      desc: '"Unbelievable processing! Your fingers execute inputs with cybernetic efficiency. Absolute dominance!"' 
+    };
+    if (c >= 9)  return { 
+      label: 'Cheetah', 
+      emoji: '🐆', 
+      color: 'var(--neon-orange)', 
+      stars: 4, 
+      desc: '"Your fingers snap at blistering speed just like the speedie cat runs. Hail to the king of clicking!"' 
+    };
+    if (c >= 7)  return { 
+      label: 'Fox', 
+      emoji: '🦊', 
+      color: 'var(--neon-cyan)', 
+      stars: 3, 
+      desc: '"Sharp, quick, and tactical. You navigate the trigger points with impressive agility and cunning wit."' 
+    };
+    if (c >= 5)  return { 
+      label: 'Turtle', 
+      emoji: '🐢', 
+      color: 'var(--neon-green)', 
+      stars: 2, 
+      desc: '"Slow and steady pace. A safe execution strategy, but you need to unleash your inner explosive power!"' 
+    };
+    return { 
+      label: 'Snail', 
+      emoji: '🐌', 
+      color: 'var(--text-secondary)', 
+      stars: 1, 
+      desc: '"One crawl at a time. Relax your forearm muscles, upgrade your grip pattern, and try again!"' 
+    };
+  };
+
+  const endTest = useCallback(() => {
+    if (phaseRef.current !== 'running') return;
+    phaseRef.current = 'done';
+
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    const dur = durationRef.current;
+    const totalClicks = clickEvents.current.length;
+    const finalCps = parseFloat((totalClicks / dur).toFixed(2));
+    setCps(finalCps);
+    setClicks(totalClicks);
+    setPhase('done');
+    setTimeLeft(0);
+    setHistory(prev => [{ cps: finalCps, clicks: totalClicks, duration: dur }, ...prev.slice(0, 9)]);
+  }, []);
+
+  const startTest = useCallback(() => {
+    if (phaseRef.current === 'running') return;
+    phaseRef.current = 'running';
+
+    const dur = durationRef.current;
+    setPhase('running');
+    setClicks(0);
+    setCps(0);
+    setMaxCps(0);
+    setTimeLeft(dur);
+    clickEvents.current = [];
+    startTime.current = performance.now();
+
+    timerRef.current = setInterval(() => {
+      const elapsed = (performance.now() - startTime.current) / 1000;
+      const remaining = Math.max(0, dur - elapsed);
+      setTimeLeft(remaining);
+
+      const now = performance.now();
+      const recent = clickEvents.current.filter(e => now - e.time < 1000);
+      const liveCps = recent.length;
+      setCps(liveCps);
+      setMaxCps(prev => Math.max(prev, liveCps));
+
+      if (remaining <= 0) endTest();
+    }, 50);
+  }, [endTest]);
+
+  const resetTest = useCallback(() => {
+    phaseRef.current = 'idle';
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setPhase('idle');
+    setClicks(0);
+    setCps(0);
+    setMaxCps(0);
+    setTimeLeft(durationRef.current);
+    clickEvents.current = [];
+  }, []);
+
+  const handleCustomTimeSet = () => {
+    const time = parseInt(customTime);
+    if (time > 0) {
+      setDuration(time);
+      durationRef.current = time;
+      resetTest();
+      setTimeLeft(time);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.detail === 0) return;
+
+    if (phaseRef.current === 'idle') { startTest(); return; }
+    if (phaseRef.current !== 'running') return;
+
+    recordClick();
+
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = ++rippleId.current;
+    setRipples(prev => [...prev, { id, x, y }]);
+    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 600);
+  };
+
+  useEffect(() => {
+    if (phase === 'done') {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [phase]);
+
+  useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
+
+  const progress = phase === 'running' ? ((duration - timeLeft) / duration) * 100 : phase === 'done' ? 100 : 0;
+  const finalRating = phase === 'done' ? getRating(cps) : null;
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
-      <div className="grid-bg" />
+    <div className="cps-page-container" style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem', boxSizing: 'border-box', width: '100%' }}>
+      <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes modalPopIn {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+          to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes rippleAnim {
+          0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+          100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+        }
 
-      {/* TOP NAVIGATION BAR */}
-      <nav className="top-nav" style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(8,13,20,0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border)',
-        display: 'flex', alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '64px',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        /* ===== FIX: Responsive Grid Classes ===== */
+        .stats-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+        
+        .stat-box {
+          background: var(--bg-card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          padding: 1.25rem;
+          text-align: center;
+        }
+
+        .modal-header-grid {
+          display: grid;
+          grid-template-columns: 1fr 1.2fr;
+          gap: 1.25rem;
+          align-items: center;
+          min-height: 130px;
+          margin-bottom: 1.25rem;
+        }
+
+        .modal-emoji-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          border-right: 1px solid rgba(255,255,255,0.08);
+          padding-right: 1rem;
+          height: 100%;
+        }
+
+        .modal-text-container {
+          text-align: left;
+        }
+
+        .modal-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
+
+        /* ===== Mobile Responsiveness ===== */
+        @media (max-width: 600px) {
+          .cps-page-container {
+            padding: 1rem 0.5rem !important;
+          }
+          .stats-grid {
+            gap: 0.5rem;
+          }
+          .stat-box {
+            padding: 0.75rem 0.25rem;
+          }
+          .stat-box > div:first-child {
+            font-size: 1.5rem !important; /* Smaller numbers on mobile */
+          }
+          .stat-box > div:last-child {
+            font-size: 0.65rem !important; /* Smaller labels */
+          }
           
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-            <div style={{
-              width: '44px', height: '44px', borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', background: 'rgba(255,255,255,0.05)',
-            }}>
-              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <span style={{ fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              CPS<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Tools
-            </span>
-          </Link>
-        </div>
+          /* Modal Stack vertically on Mobile */
+          .modal-header-grid {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+          }
+          .modal-emoji-container {
+            border-right: none;
+            padding-right: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 0.75rem;
+            min-height: auto;
+          }
+          .modal-emoji-container span {
+            font-size: 3.5rem !important; /* Smaller emoji */
+          }
+          .modal-text-container {
+            text-align: center;
+          }
+          .modal-text-container > div:nth-child(2) {
+            font-size: 1.8rem !important; /* Smaller Rank Title */
+          }
+          .modal-text-container > div:nth-child(3) {
+            justify-content: center; /* Center stars */
+          }
+          .modal-stats-grid {
+            gap: 0.25rem;
+          }
+          .modal-stats-grid > div > div:first-child {
+            font-size: 1rem !important;
+          }
+          .modal-stats-grid > div > div:last-child {
+            font-size: 0.5rem !important;
+          }
+        }
+      `}</style>
 
-        {/* Desktop Navigation */}
-        <ul style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', listStyle: 'none', margin: 0, padding: 0 }} className="desktop-nav">
-          {navItems.map(item => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                end={item.exact}
-                style={({ isActive }) => {
-                  const isGame = item.label.includes('Games');
-                  return {
-                    padding: '0.4rem 0.9rem', borderRadius: '6px', textDecoration: 'none',
-                    fontSize: '0.9rem', fontWeight: '500',
-                    color: isActive ? (isGame ? '#ff6b35' : 'var(--neon-cyan)') : 'var(--text-secondary)',
-                    background: isActive ? (isGame ? 'rgba(255,107,53,0.12)' : 'rgba(0,245,255,0.1)') : 'transparent',
-                    transition: 'all 0.2s', display: 'block', whiteSpace: 'nowrap'
-                  };
-                }}
-              >{item.label}</NavLink>
-            </li>
-          ))}
-          <li>
-            <Link to="/cps-test" style={{
-              padding: '0.45rem 1.1rem', borderRadius: '6px', textDecoration: 'none',
-              fontSize: '0.9rem', fontWeight: '700', color: '#000',
-              background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
-              display: 'block', whiteSpace: 'nowrap', marginLeft: '10px'
-            }}>⚡ CPS Test</Link>
-          </li>
-        </ul>
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <div className="section-label">Mouse Tool</div>
+        <h1 className="tool-title">CPS Test</h1>
+        <p className="tool-subtitle">Clicks Per Second — How fast can you click?</p>
+      </div>
 
-        {/* Hamburger Menu Button */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{ display: 'none', flexDirection: 'column', gap: '5px', background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
-          className="hamburger-btn"
-          aria-label="Toggle menu"
-        >
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{ display: 'block', width: '24px', height: '2px', background: 'var(--neon-cyan)', borderRadius: '2px', transition: 'all 0.3s' }} />
-          ))}
-        </button>
-      </nav>
-
-      {/* MOBILE OVERLAY */}
-      {menuOpen && (
-        <div className="mobile-menu-overlay" style={{
-          position: 'fixed', top: '64px', left: 0, right: 0,
-          background: 'rgba(8,13,20,0.98)', backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border)', zIndex: 99,
-          display: 'flex', flexDirection: 'column', gap: '0.5rem',
-          maxHeight: 'calc(100vh - 64px)', overflowY: 'auto',
-          boxSizing: 'border-box'
-        }}>
-          {navItems.map(item => (
-            <NavLink
-              key={item.to} to={item.to} end={item.exact}
-              onClick={() => setMenuOpen(false)}
-              style={({ isActive }) => {
-                const isGame = item.label.includes('Games');
-                return {
-                  padding: '0.75rem 1rem', borderRadius: '8px', textDecoration: 'none',
-                  fontSize: '1rem', fontWeight: '500',
-                  color: isActive ? (isGame ? '#ff6b35' : 'var(--neon-cyan)') : 'var(--text-primary)',
-                  background: isActive ? (isGame ? 'rgba(255,107,53,0.12)' : 'rgba(0,245,255,0.1)') : 'transparent',
-                };
-              }}
-            >{item.label}</NavLink>
-          ))}
-          <Link
-            to="/cps-test" onClick={() => setMenuOpen(false)}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem', alignItems: 'center' }}>
+        {DURATIONS.map(d => (
+          <button
+            key={d}
+            onClick={() => { setDuration(d); durationRef.current = d; resetTest(); setTimeLeft(d); setCustomTime(''); }}
+            disabled={phase === 'running'}
             style={{
-              padding: '0.75rem 1rem', borderRadius: '8px', textDecoration: 'none',
-              fontSize: '1rem', fontWeight: '700', color: '#000',
-              background: 'linear-gradient(135deg, var(--neon-cyan), var(--neon-green))',
-              textAlign: 'center', marginTop: '0.5rem',
+              padding: '0.4rem 1rem', borderRadius: '8px',
+              border: duration === d && !customTime ? '1px solid var(--neon-green)' : '1px solid var(--border)',
+              background: duration === d && !customTime ? 'rgba(0,255,136,0.15)' : 'var(--bg-card)',
+              color: duration === d && !customTime ? 'var(--neon-green)' : 'var(--text-secondary)',
+              fontWeight: '700', cursor: phase === 'running' ? 'not-allowed' : 'pointer',
+              fontSize: '0.85rem', transition: 'all 0.2s',
             }}
-          >⚡ CPS Test</Link>
+          >{d}s</button>
+        ))}
+
+        <div style={{ 
+          display: 'flex', alignItems: 'center', gap: '0.3rem', 
+          background: 'var(--bg-card)', border: '1px solid var(--border)', 
+          borderRadius: '8px', padding: '0.2rem 0.2rem 0.2rem 0.6rem' 
+        }}>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Custom:</span>
+          <input 
+            type="number" 
+            value={customTime}
+            onChange={(e) => setCustomTime(e.target.value)}
+            disabled={phase === 'running'}
+            placeholder="sec"
+            style={{ 
+              width: '50px', background: 'transparent', border: 'none', 
+              color: 'var(--neon-cyan)', fontWeight: '700', outline: 'none', 
+              textAlign: 'center', fontSize: '0.85rem' 
+            }}
+          />
+          <button 
+            onClick={handleCustomTimeSet}
+            disabled={phase === 'running' || !customTime}
+            style={{
+              padding: '0.3rem 0.8rem', borderRadius: '6px',
+              background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)',
+              color: 'var(--neon-cyan)', fontWeight: '700', cursor: phase === 'running' || !customTime ? 'not-allowed' : 'pointer',
+              fontSize: '0.8rem', transition: 'all 0.2s',
+            }}
+          >Set</button>
+        </div>
+      </div>
+
+      {/* FIX: Applied .stats-grid and .stat-box for responsiveness */}
+      <div className="stats-grid">
+        {[
+          { value: phase === 'idle' ? '0.00' : typeof cps === 'number' && cps % 1 !== 0 ? cps.toFixed(2) : cps, label: 'CPS', color: 'var(--neon-cyan)' },
+          { value: clicks, label: 'Clicks', color: 'var(--neon-green)' },
+          { value: timeLeft.toFixed(1), label: 'Seconds Left', color: 'var(--neon-orange)' },
+        ].map(s => (
+          <div key={s.label} className="stat-box">
+            <div style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)', fontWeight: '900', color: s.color, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.25rem' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="progress-bar" style={{ marginBottom: '1.5rem' }}>
+        <div className="progress-fill" style={{ width: `${progress}%` }} />
+      </div>
+
+      <div
+        onClick={handleClick}
+        style={{
+          position: 'relative', overflow: 'hidden', width: '100%', minHeight: '220px',
+          borderRadius: '16px',
+          border: phase === 'running' ? '2px solid var(--neon-green)' : phase === 'done' ? '2px solid var(--neon-orange)' : '2px solid var(--border)',
+          background: phase === 'running' ? 'rgba(0,255,136,0.04)' : 'var(--bg-card)',
+          cursor: phase === 'done' ? 'default' : 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexDirection: 'column', gap: '0.75rem', userSelect: 'none',
+          transition: 'all 0.2s ease', 
+          marginBottom: phase === 'running' ? '1rem' : '1.5rem',
+          boxShadow: phase === 'running' ? '0 0 30px rgba(0,255,136,0.1)' : 'none',
+        }}
+      >
+        {ripples.map(r => (
+          <span key={r.id} style={{
+            position: 'absolute', left: r.x, top: r.y, width: '20px', height: '20px',
+            borderRadius: '50%', background: 'rgba(0,255,136,0.6)',
+            transform: 'translate(-50%, -50%) scale(0)',
+            animation: 'rippleAnim 0.6s ease-out forwards', pointerEvents: 'none',
+          }} />
+        ))}
+
+        {phase === 'idle' && (
+          <>
+            <span style={{ fontSize: '3rem' }}>🖱️</span>
+            <span style={{ fontSize: '1.5rem', fontWeight: '800', color: 'var(--neon-green)', textAlign: 'center' }}>Click to Start!</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>Click anywhere in this area as fast as you can</span>
+          </>
+        )}
+        {phase === 'running' && (
+          <>
+            <span style={{ fontSize: '4rem', fontWeight: '900', color: 'var(--neon-green)', fontVariantNumeric: 'tabular-nums', zIndex: 10 }}>{clicks}</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '1rem', zIndex: 10 }}>Keep clicking! 🔥</span>
+            <span style={{ color: 'var(--neon-cyan)', fontWeight: '700', zIndex: 10 }}>{timeLeft.toFixed(1)}s remaining</span>
+          </>
+        )}
+        {phase === 'done' && (
+          <>
+            <span style={{ fontSize: '3rem' }}>🏁</span>
+            <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--neon-orange)' }}>Test Complete!</span>
+          </>
+        )}
+      </div>
+
+      {phase === 'running' && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease-in' }}>
+          <button
+            onClick={(e) => { e.stopPropagation(); resetTest(); }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              background: '#1e2235', border: '1px solid #2a3047',
+              color: '#ffffff', padding: '0.6rem 1.25rem',
+              borderRadius: '8px', cursor: 'pointer',
+              fontSize: '0.95rem', fontWeight: '600',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#252a40'; e.currentTarget.style.borderColor = '#3b4363'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#1e2235'; e.currentTarget.style.borderColor = '#2a3047'; }}
+          >
+            <div style={{
+              background: '#3b82f6', color: 'white',
+              borderRadius: '4px', width: '22px', height: '22px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+            </div>
+            Reset
+          </button>
         </div>
       )}
 
-      {/* BODY SECTION */}
-      <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', alignItems: 'flex-start' }}>
-        
-        {/* SIDEBAR PANEL */}
-        <aside className="sidebar-pannel" style={{
-          width: sidebarOpen ? '280px' : '85px', 
-          opacity: 1,
-          visibility: 'visible',
-          background: 'transparent',
-          backdropFilter: 'none',
-          borderRight: '1px solid var(--border)',
-          height: 'calc(100vh - 64px)',
-          position: 'sticky',
-          top: '64px',
-          display: 'flex',
-          flexDirection: 'column',
-          zIndex: 10,
-          padding: sidebarOpen ? '1.25rem' : '1.25rem 0.5rem',
-          transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          overflow: 'hidden',
-          boxSizing: 'border-box'
-        }}>
+      {/* ===== MODERN PROFILE SPLIT RESULT MODAL ===== */}
+      {phase === 'done' && finalRating && (
+        <>
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+            zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards',
+          }} onClick={() => resetTest()} />
 
-          {/* IN-SIDEBAR HEADER */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: sidebarOpen ? 'space-between' : 'center', 
-            alignItems: 'center',
-            marginBottom: '1rem',
-            paddingRight: sidebarOpen ? '0.5rem' : '0'
+          <div style={{
+            position: 'fixed', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '95%', 
+            maxWidth: '560px',
+            background: '#0d1117',
+            border: `2px solid ${finalRating.color}`,
+            borderRadius: '20px',
+            padding: '2rem 1.5rem',
+            zIndex: 1000,
+            animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+            boxShadow: `0 0 40px ${finalRating.color}25`,
+            maxHeight: '90vh',
+            overflowY: 'auto'
           }}>
-            {sidebarOpen && (
-              <div style={{
-                background: 'linear-gradient(135deg, #00f5ff, #0cf991)',
-                color: '#000', fontSize: '1rem', fontWeight: '800',
-                padding: '0.4rem 0.8rem', borderRadius: '8px',
-                letterSpacing: '0.05em', textTransform: 'uppercase',
-                boxShadow: '0 4px 10px rgba(0, 245, 255, 0.2)', whiteSpace: 'nowrap'
-              }}>
-                🛠️ All Tools
+            <button onClick={() => resetTest()} style={{
+              position: 'absolute', top: '0.75rem', right: '0.75rem',
+              background: 'rgba(255,255,255,0.03)',
+              border: `1px solid ${finalRating.color}40`,
+              color: finalRating.color, width: '32px', height: '32px',
+              borderRadius: '50%', cursor: 'pointer', fontSize: '0.9rem',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>✕</button>
+
+            {/* FIX: Applied class for responsive modal layout */}
+            <div className="modal-header-grid">
+              <div className="modal-emoji-container">
+                <span style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}>{finalRating.emoji}</span>
               </div>
-            )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                color: 'var(--text-secondary)', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--neon-cyan)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
-            >
-              {sidebarOpen ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-              )}
-            </button>
-          </div>
-
-          {/* FILTER DROPDOWN */}
-          <div style={{ display: sidebarOpen ? 'flex' : 'none', alignItems: 'center', marginBottom: '1.25rem' }}>
-            <select 
-              value={selectedCategory} 
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              style={{
-                flex: 1, padding: '0.65rem 1rem', borderRadius: '8px',
-                background: 'rgba(15, 23, 42, 0.8)', border: '1px solid var(--border)',
-                color: 'var(--text-primary)', fontSize: '0.85rem', fontWeight: '600',
-                outline: 'none', cursor: 'pointer', letterSpacing: '0.05em'
-              }}
-            >
-              <option value="all">FILTER BY TYPE</option>
-              <option value="mouse">MOUSE TOOLS</option>
-              <option value="keyboard">KEYBOARD TOOLS</option>
-              <option value="aim">AIM & REACTION</option>
-              <option value="games">ARCADE GAMES</option>
-              <option value="misc">OTHER SECTIONS</option>
-            </select>
-          </div>
-
-          {/* SCROLLABLE TOOLS LIST */}
-          <div className="sidebar-scroll" style={{ 
-            flex: 1, overflowY: 'auto', overflowX: 'hidden', 
-            display: 'flex', flexDirection: 'column', gap: '0.35rem', paddingRight: '4px'
-          }}>
-            {filteredTools.map((tool) => {
-              const isCurrentActive = location.pathname === tool.to;
-              const isPinned = tool.to === '/cps-test';
-              return (
-                <Link
-                  key={tool.to} to={tool.to}
-                  style={{
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: sidebarOpen ? 'flex-start' : 'center',
-                    gap: sidebarOpen ? '0.75rem' : '0.4rem',
-                    padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
-                    borderRadius: '6px', textDecoration: 'none',
-                    position: isPinned ? 'sticky' : 'static', top: isPinned ? 0 : 'auto', zIndex: isPinned ? 10 : 1,
-                    background: isPinned ? (isCurrentActive ? 'rgba(0, 245, 255, 0.15)' : 'rgba(15, 23, 42, 0.95)') : (isCurrentActive ? 'rgba(0, 245, 255, 0.08)' : 'transparent'),
-                    backdropFilter: isPinned ? 'blur(5px)' : 'none',
-                    border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
-                    borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
-                    marginBottom: isPinned ? '5px' : '0',
-                    fontSize: '0.85rem', fontWeight: isCurrentActive ? '600' : '500',
-                    color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
-                    transition: 'all 0.3s ease', transform: 'translateX(0)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isCurrentActive) {
-                      e.currentTarget.style.background = isPinned ? 'rgba(0, 245, 255, 0.15)' : 'rgba(0, 245, 255, 0.1)';
-                      e.currentTarget.style.color = '#00f5ff'; 
-                      e.currentTarget.style.transform = 'translateX(6px)'; 
-                      e.currentTarget.style.border = '1px solid rgba(0, 245, 255, 0.1)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isCurrentActive) {
-                      e.currentTarget.style.background = isPinned ? 'rgba(15, 23, 42, 0.95)' : 'transparent';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.transform = 'translateX(0)';
-                      e.currentTarget.style.border = '1px solid transparent';
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: '1.1rem' }}>{tool.icon}</span>
-                  <span style={{ 
-                    display: (sidebarOpen || isPinned) ? 'block' : 'none', 
-                    textTransform: 'uppercase', fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
-                    letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
-                  }}>
-                    {tool.label}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </aside>
-
-        {/* MAIN DYNAMIC CONTENT */}
-        <main className="main-content" style={{ 
-          flex: 1, 
-          position: 'relative', 
-          zIndex: 1, 
-          transition: 'margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          width: '100%',
-          maxWidth: '100%',
-          boxSizing: 'border-box',
-          overflowX: 'hidden',
-          minWidth: 0,
-        }}>
-          <Outlet />
-        </main>
-      </div>
-
-      {/* FOOTER SECTION */}
-      <footer className="main-footer" style={{
-        background: 'rgba(8,13,20,0.95)', borderTop: '1px solid var(--border)',
-        position: 'relative', zIndex: 1, marginTop: 'auto', width: '100%', boxSizing: 'border-box'
-      }}>
-        <div className="footer-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gap: '2rem', marginBottom: '3rem' }}>
-          
-          <div style={{ paddingRight: '2rem' }}>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', marginBottom: '1rem' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'rgba(255,255,255,0.05)' }}>
-                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <div className="modal-text-container">
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Rank is</div>
+                <div style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}>{finalRating.label}!</div>
+                <div style={{ display: 'flex', gap: '3px', marginBottom: '0.5rem' }}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <span key={i} style={{ fontSize: '1.2rem', color: i < finalRating.stars ? '#ffca28' : 'rgba(255,255,255,0.1)' }}>★</span>
+                  ))}
+                </div>
+                <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>You Clicked with the speed of <strong style={{ color: '#fff', fontSize: '1.15rem', fontVariantNumeric: 'tabular-nums' }}>{cps}</strong> CPS</div>
               </div>
-              <span style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)' }}>CPS<span style={{ color: 'var(--neon-cyan, #00f5ff)' }}>Test</span> Tools</span>
-            </Link>
-            <p style={{ color: '#8892b0', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>The ultimate free platform for gamers and typists to test, train, and compete. No signup required.</p>
-            <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <a href="#" className="social-btn">𝕏</a><a href="#" className="social-btn">💬</a><a href="#" className="social-btn">▶</a><a href="#" className="social-btn">🤖</a>
+            </div>
+
+            <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.85rem 1rem', borderRadius: '12px', borderLeft: `3px solid ${finalRating.color}`, fontStyle: 'italic', color: '#cbd5e1', fontSize: '0.88rem', textAlign: 'left', marginBottom: '1.25rem', lineHeight: '1.5' }}>
+              {finalRating.desc}
+            </div>
+
+            {/* FIX: Applied class for responsive modal stats */}
+            <div className="modal-stats-grid">
+              {[
+                { value: clicks, label: 'Total Clicks', color: 'var(--neon-green)' },
+                { value: maxCps, label: 'Peak (1s)', color: 'var(--neon-cyan)' },
+                { value: `${duration}s`, label: 'Duration', color: 'var(--neon-orange)' },
+              ].map(s => (
+                <div key={s.label} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.5rem 0.25rem', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: '800', color: s.color }}>{s.value}</div>
+                  <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+              <button onClick={() => resetTest()} style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', background: 'var(--bg-card)', border: '1px solid var(--border)', color: '#fff' }}>
+                🔄 Reset
+              </button>
+              <button onClick={() => { resetTest(); startTest(); }} style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', backgroundColor: finalRating.color, border: `1px solid ${finalRating.color}`, color: '#000', fontWeight: '700' }}>
+                ▶ Try Again
+              </button>
             </div>
           </div>
+        </>
+      )}
 
-          <div>
-            <h4 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>KEYBOARD</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/typing-test', label: 'Typing Speed Test' }, { to: '/key-visualizer', label: 'Key Visualizer' }, { to: '/spacebar', label: 'Spacebar Counter' }, { to: '/accuracy', label: 'Accuracy Test' }].map(l => (
-                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
-              ))}
-            </ul>
+      {history.length > 0 && (
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '2rem' }}>
+          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
+          <div style={{ overflowX: 'auto' }}>
+            {history.map((h, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none', fontSize: '0.875rem', minWidth: '400px' }}>
+                <span style={{ color: 'var(--text-muted)' }}>#{history.length - i}</span>
+                <span style={{ color: 'var(--neon-cyan)', fontWeight: '700' }}>{h.cps} CPS</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{h.clicks} clicks</span>
+                <span style={{ color: 'var(--text-muted)' }}>{h.duration}s test</span>
+                <span style={{ color: getRating(h.cps).color, fontWeight: '600' }}>{getRating(h.cps).label}</span>
+              </div>
+            ))}
           </div>
-
-          <div>
-            <h4 style={{ color: 'var(--neon-green, #0cf991)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>MOUSE</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/cps-test', label: 'CPS Test' }, { to: '/double-click', label: 'Double Click Test' }, { to: '/scroll-test', label: 'Scroll Wheel Test' }, { to: '/mouse-accuracy', label: 'Mouse Accuracy' }, { to: '/cps-rush', label: 'CPS Rush' }].map(l => (
-                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>🚀 ARCADE GAMES</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/games', label: '🎮 All Games Center' }, { to: '/space-defense', label: '🚀 Space Defense' }, { to: '/voyager-game', label: '🛸 Voyager Game' }].map(l => (
-                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>EXPLORE</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
-              {[{ to: '/hall-of-fame', label: 'Leaderboard' }, { to: '/aim-trainer', label: 'Aim Trainer' }, { to: '/reaction-time', label: 'Reaction Time' }, { to: '/blog', label: '📖 Blog' }].map(l => (
-                <li key={l.to}><Link to={l.to} className="footer-link">{l.label}</Link></li>
-              ))}
-            </ul>
-          </div>
-
         </div>
+      )}
 
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>© Best CPS Test Tools — All rights reserved.</p>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <Link to="/privacy-policy" className="footer-bottom-link">Privacy Policy</Link>
-            <Link to="/terms" className="footer-bottom-link">Terms of Service</Link>
-            <Link to="/contact" className="footer-bottom-link">Contact</Link>
+      {/* ================= MASSIVE SEO ARTICLE SECTION ================= */}
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
+        <article style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
+          
+          <h2 style={{ fontWeight: '800', fontSize: 'clamp(1.5rem, 3vw, 2rem)', marginBottom: '1.5rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
+            The Ultimate Guide to CPS (Clicks Per Second) & Gaming Performance
+          </h2>
+          
+          <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
+            A <strong>CPS Test (Clicks Per Second Test)</strong> is an essential online benchmarking tool utilized by professional eSports players, casual gamers, and hardware enthusiasts. It accurately measures how fast you can click your mouse button within a specific time frame. Whether you are battling in a high-stakes PvP arena, building structures at lightning speed, or just testing the limits of your human reflexes, mastering your CPS is the gateway to elevating your overall gaming prowess.
+          </p>
+
+          {/* New Mouse Check Box */}
+          <div style={{ background: 'rgba(0, 245, 255, 0.05)', borderLeft: '4px solid var(--neon-cyan)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
+            <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🖱️ The Ultimate "New Mouse Check"
+            </h3>
+            <p style={{ margin: 0, color: '#9ca3af' }}>
+              Just unboxed a new gaming mouse (like a Logitech G Pro X Superlight, Razer DeathAdder, or Glorious Model O)? Our tool serves as the perfect <strong>new mouse check</strong>. You can instantly test the responsiveness of the mechanical or optical switches, verify your polling rate consistency, and ensure your hardware isn't suffering from frustrating double-clicking issues right out of the box.
+            </p>
           </div>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>Built for gamers, by gamers. 🎮</p>
-        </div>
-      </footer>
 
-      {/* STYLES */}
-      <style>{`
-        html, body {
-          margin: 0;
-          padding: 0;
-          /* FIX: Prevent horizontal scroll on mobile globally */
-          overflow-x: hidden;
-          width: 100%;
-        }
+          <h3 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '1rem' }}>
+            Why Clicking Speed Matters in Modern Gaming
+          </h3>
+          <p style={{ marginBottom: '1.5rem' }}>
+            In the modern era of competitive gaming, Actions Per Minute (APM) and raw clicking speed can dictate the outcome of a match. A higher CPS gives you a distinct mechanical advantage across a massive variety of popular titles. Our tool is highly recommended for players who regularly play:
+          </p>
 
-        * { box-sizing: border-box; }
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '3rem' }}>
+            {['Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V', 'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2', 'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us'].map((game) => (
+              <div key={game} style={{ background: 'rgba(0,0,0,0.4)', padding: '0.75rem 1rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: 'var(--neon-cyan)' }}>🎮</span> {game}
+              </div>
+            ))}
+          </div>
 
-        .top-nav { padding: 0 2rem; }
-        .main-content { padding: 2rem; }
-        .main-footer { padding: 3rem 2rem 1.5rem; }
-        .mobile-menu-overlay { padding: 1rem 2rem; }
+          {/* Detailed Q&A / How-To Section */}
+          <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '1.5rem', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
+            Pro Gamer FAQs & Strategies
+          </h2>
 
-        .footer-grid { grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; }
-        
-        .footer-link { color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
-        .footer-link:hover { color: var(--text-primary, #ffffff); }
-        
-        .footer-bottom-link { color: #64748b; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-        .footer-bottom-link:hover { color: var(--text-primary, #ffffff); }
-        
-        .social-btn { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s; }
-        .social-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary, #ffffff); }
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            
+            {/* Minecraft */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to get fast CPS in Minecraft?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                To achieve high CPS in <strong>Minecraft</strong>—which is absolutely vital for PvP combat (especially in 1.8 mechanics) and advanced speed bridging techniques like Godbridge or Breezily bridge—players utilize specialized grips. 
+                <br/><br/>
+                <strong>Jitter Clicking:</strong> Involves tensing your forearm to send rapid vibrations to your index finger, easily achieving 10-14 CPS. <br/>
+                <strong>Butterfly Clicking:</strong> Uses two fingers (index and middle) to alternate strikes on the left mouse button, pushing limits to 15-20 CPS. <br/>
+                <strong>Drag Clicking:</strong> Involves dragging your finger across the surface of the mouse button to utilize friction, generating upwards of 25+ CPS (requires a mouse with specific matte textures).
+              </p>
+            </div>
 
-        /* =============================================
-           MOBILE RESPONSIVE FIXES
-           ============================================= */
+            {/* PUBG */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to improve CPS in PUBG: Battlegrounds?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                In <strong>PUBG</strong>, raw clicking speed transforms single-fire weapons like the M16A4, Mutant, and various DMRs (SKS, Mini14) into fully automatic killing machines. To improve your CPS in PUBG, you must master <em>trigger discipline</em>. Instead of resting your entire finger flat on the mouse, curve your finger into a "claw grip" and use only the very tip to tap the button. Using our 10-second CPS tool daily helps build the muscle memory required to spam-click without throwing off your aim or recoil control.
+              </p>
+            </div>
 
-        @media (max-width: 1024px) {
-          .desktop-nav { display: none !important; }
-          .hamburger-btn { display: flex !important; }
-          .sidebar-pannel { display: none !important; }
-          .footer-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-        
-        @media (max-width: 768px) {
-          .top-nav { padding: 0 1rem !important; }
-          .main-content { padding: 1rem !important; }
-          .main-footer { padding: 2rem 1rem 1rem !important; }
-          .mobile-menu-overlay { padding: 1rem !important; }
-          .footer-grid { grid-template-columns: 1fr; }
+            {/* Valorant / FPS */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to increase clicking speed in Valorant?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                While Valorant relies heavily on tactical crosshair placement rather than spamming, fast clicking speed is the ultimate lifesaver during intense pistol rounds (using the Classic, Frenzy, or Ghost). To increase your speed, ensure your hand posture is relaxed. Tense hands lead to slower inputs. Warm up with our 5-second test before queueing for ranked matches. It gets the blood flowing to your fingertips, ensuring your single-fire tapping speed is instantly responsive when you peek a corner.
+              </p>
+            </div>
 
-          /* FIX: Stats cards row — allow horizontal scroll instead of overflow/cutoff */
-          .stats-row {
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            gap: 0.75rem !important;
-            padding-bottom: 4px;
-          }
-          .stats-row::-webkit-scrollbar { display: none; }
+            {/* Reaction Time */}
+            <div>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '0.75rem' }}>
+                How to improve reaction time in FPS games?
+              </h3>
+              <p style={{ color: '#9ca3af', margin: 0 }}>
+                In hyper-fast shooters like <strong>Counter-Strike 2 (CS2)</strong>, <strong>Call of Duty: Warzone</strong>, and <strong>Apex Legends</strong>, clicking fast means nothing if you react slowly. To improve your reaction time:
+                <br/><br/>
+                <strong>1. Optimize Hardware:</strong> Upgrade to a high refresh rate monitor (144Hz or 240Hz+) and ensure your mouse has at least a 1000Hz polling rate to minimize input delay. <br/>
+                <strong>2. Active Tracking:</strong> Keep your eyes focused on the environment looking for targets, rather than just staring blankly at your own crosshair. <br/>
+                <strong>3. Routine Practice:</strong> Combine daily use of aim trainers (like Aim Lab or KovaaK's) with our CPS checker to significantly reduce the cognitive delay between your brain spotting an enemy and your finger executing the click.
+              </p>
+            </div>
 
-          /* FIX: Each stat card — fixed min width so they don't squish */
-          .stats-card {
-            min-width: 100px !important;
-            flex-shrink: 0 !important;
-          }
+            {/* General Health Tip */}
+            <div style={{ background: 'rgba(255, 0, 0, 0.05)', border: '1px solid rgba(255,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
+              <h4 style={{ color: 'var(--neon-red)', fontSize: '1.1rem', fontWeight: '700', margin: '0 0 0.5rem 0' }}>
+                ⚠️ A Note on Physical Health
+              </h4>
+              <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.9rem' }}>
+                Attempting to reach maximum CPS via Jitter or Butterfly clicking puts strain on your forearm tendons. To avoid repetitive strain injuries or carpal tunnel syndrome, always perform wrist stretches before gaming and avoid practicing these intense clicking methods for more than a few minutes at a time.
+              </p>
+            </div>
 
-          /* FIX: Time selector buttons — wrap nicely */
-          .time-buttons-row {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 0.5rem !important;
-            justify-content: center !important;
-          }
+          </div>
+        </article>
+      </div>
 
-          .time-btn {
-            min-width: 60px !important;
-            flex: 0 0 auto !important;
-          }
-
-          /* FIX: Main click/game area — full width on mobile */
-          .click-area, .game-area {
-            width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-          }
-
-          /* FIX: Any flex row that might overflow — make scrollable */
-          .scroll-row-mobile {
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-            flex-wrap: nowrap !important;
-          }
-          .scroll-row-mobile::-webkit-scrollbar { display: none; }
-
-          /* FIX: Results/history chips — wrap instead of overflow */
-          .results-chips {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            gap: 0.5rem !important;
-          }
-
-          /* FIX: Prevent any child element from breaking out of main content */
-          .main-content > * {
-            max-width: 100% !important;
-            overflow-x: hidden;
-          }
-
-          /* FIX: Buttons full-width on small screens if they are block-level */
-          .btn-full-mobile {
-            width: 100% !important;
-            box-sizing: border-box !important;
-          }
-
-          /* FIX: Logo text size on very small screens */
-          .top-nav span[style*="1.4rem"] {
-            font-size: 1.1rem !important;
-          }
-        }
-
-        /* Extra small screens (< 400px) */
-        @media (max-width: 400px) {
-          .top-nav { padding: 0 0.75rem !important; }
-          .main-content { padding: 0.75rem !important; }
-
-          .stats-card {
-            min-width: 85px !important;
-          }
-
-          .time-btn {
-            min-width: 52px !important;
-            font-size: 0.85rem !important;
-          }
-        }
-
-        /* Sidebar scrollbar */
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
-      `}</style>
     </div>
   );
 }
