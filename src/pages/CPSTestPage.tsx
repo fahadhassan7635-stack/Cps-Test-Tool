@@ -17,6 +17,10 @@ export default function CPSTestPage() {
   const [history, setHistory] = useState<{ cps: number; clicks: number; duration: number }[]>([]);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
 
+  // 🛡️ Anti-Cheat Security Layer States & Refs
+  const [isBot, setIsBot] = useState(false);
+  const botTriggers = useRef<number>(0);
+
   const startTime = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const clickEvents = useRef<ClickEvent[]>([]);
@@ -28,6 +32,32 @@ export default function CPSTestPage() {
 
   const recordClick = () => {
     const now = performance.now();
+    
+    if (clickEvents.current.length > 0) {
+      const lastClickTime = clickEvents.current[clickEvents.current.length - 1].time;
+      const interval = now - lastClickTime;
+
+      // 🛑 Anti-Cheat Rule: Human finger interval microsecond constraint check
+      // Continuous interval less than 25ms means 40+ CPS, which is biologically impossible.
+      if (interval < 25) {
+        botTriggers.current += 1;
+      } else {
+        botTriggers.current = Math.max(0, botTriggers.current - 1);
+      }
+
+      // If 4 consecutive suspicious intervals are executed, trip the system wire
+      if (botTriggers.current >= 4) {
+        setIsBot(true);
+        phaseRef.current = 'done';
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        setPhase('done');
+        return;
+      }
+    }
+
     clickEvents.current.push({ time: now });
     setClicks(prev => prev + 1);
   };
@@ -85,8 +115,12 @@ export default function CPSTestPage() {
     setClicks(totalClicks);
     setPhase('done');
     setTimeLeft(0);
-    setHistory(prev => [{ cps: finalCps, clicks: totalClicks, duration: dur }, ...prev.slice(0, 9)]);
-  }, []);
+    
+    // Only commit to session history array if client validation is authentic
+    if (!isBot && botTriggers.current < 4) {
+      setHistory(prev => [{ cps: finalCps, clicks: totalClicks, duration: dur }, ...prev.slice(0, 9)]);
+    }
+  }, [isBot]);
 
   const startTest = useCallback(() => {
     if (phaseRef.current === 'running') return;
@@ -98,6 +132,8 @@ export default function CPSTestPage() {
     setCps(0);
     setMaxCps(0);
     setTimeLeft(dur);
+    setIsBot(false);
+    botTriggers.current = 0;
     clickEvents.current = [];
     startTime.current = performance.now();
 
@@ -126,6 +162,8 @@ export default function CPSTestPage() {
     setClicks(0);
     setCps(0);
     setMaxCps(0);
+    setIsBot(false);
+    botTriggers.current = 0;
     setTimeLeft(durationRef.current);
     clickEvents.current = [];
   }, []);
@@ -168,7 +206,15 @@ export default function CPSTestPage() {
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
   const progress = phase === 'running' ? ((duration - timeLeft) / duration) * 100 : phase === 'done' ? 100 : 0;
-  const finalRating = phase === 'done' ? getRating(cps) : null;
+  
+  // ⚡ Visual Modal Override injection if system reports bot profiling
+  const finalRating = phase === 'done' ? (isBot ? {
+    label: 'Bot Detected',
+    emoji: '🚫',
+    color: 'var(--neon-red)',
+    stars: 0,
+    desc: '"Software Macro or Auto-clicker emulation detected! Play fair to test your authentic biological human reflex limits."'
+  } : getRating(cps)) : null;
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
@@ -187,14 +233,11 @@ export default function CPSTestPage() {
           100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
         }
 
-        /* ── Mobile fixes ── */
+        /* ── Mobile UI Optimization ── */
         @media (max-width: 600px) {
-          /* Outer page padding */
           .cps-page-wrap {
             padding: 1.25rem 0.75rem !important;
           }
-
-          /* Time-selector buttons row */
           .cps-duration-row {
             gap: 0.4rem !important;
           }
@@ -203,14 +246,10 @@ export default function CPSTestPage() {
             font-size: 0.8rem !important;
             min-width: 44px !important;
           }
-
-          /* Custom time input wrapper */
           .cps-custom-wrap {
             width: 100% !important;
             justify-content: center !important;
           }
-
-          /* Stats cards — stack 3-in-a-row stays but font shrinks */
           .cps-stats-grid {
             gap: 0.5rem !important;
           }
@@ -225,8 +264,6 @@ export default function CPSTestPage() {
             font-size: 0.6rem !important;
             letter-spacing: 0.05em !important;
           }
-
-          /* Result modal layout — single column on mobile */
           .cps-modal-split {
             grid-template-columns: 1fr !important;
             min-height: unset !important;
@@ -247,16 +284,12 @@ export default function CPSTestPage() {
           .cps-modal-inner {
             padding: 1.25rem 1rem !important;
           }
-
-          /* History rows — don't overflow */
           .cps-history-row {
             font-size: 0.78rem !important;
             gap: 0.25rem !important;
             flex-wrap: wrap !important;
             padding: 0.6rem 1rem !important;
           }
-
-          /* SEO article */
           .cps-article {
             padding: 1.25rem !important;
           }
@@ -309,7 +342,7 @@ export default function CPSTestPage() {
           >{d}s</button>
         ))}
 
-        {/* Custom time */}
+        {/* Custom Input */}
         <div
           className="cps-custom-wrap"
           style={{ 
@@ -426,7 +459,7 @@ export default function CPSTestPage() {
         )}
       </div>
 
-      {/* ── RESET BUTTON (while running) ── */}
+      {/* ── RESET BUTTON ── */}
       {phase === 'running' && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease-in' }}>
           <button
@@ -458,7 +491,7 @@ export default function CPSTestPage() {
         </div>
       )}
 
-      {/* ── RESULT MODAL ── */}
+      {/* ── RESULT MODAL (Handled with Anti-bot conditional state) ── */}
       {phase === 'done' && finalRating && (
         <>
           <div style={{
@@ -495,7 +528,6 @@ export default function CPSTestPage() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>✕</button>
 
-            {/* Split layout — stacks on mobile via CSS class */}
             <div
               className="cps-modal-split"
               style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.25rem', alignItems: 'center', minHeight: '130px', marginBottom: '1.25rem' }}
@@ -573,7 +605,7 @@ export default function CPSTestPage() {
         </div>
       )}
 
-      {/* ── SEO ARTICLE ── */}
+      {/* ── SEO ENRICHED ARTICLE SECTION ── */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '2.5rem', marginTop: '3rem' }}>
         <article className="cps-article" style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
           
@@ -587,7 +619,7 @@ export default function CPSTestPage() {
 
           <div style={{ background: 'rgba(0, 245, 255, 0.05)', borderLeft: '4px solid var(--neon-cyan)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
             <h3 style={{ color: '#fff', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              🖱️ The Ultimate "New Mouse Check"
+              鼠标 🏋️ The Ultimate "New Mouse Check"
             </h3>
             <p style={{ margin: 0, color: '#9ca3af' }}>
               Just unboxed a new gaming mouse (like a Logitech G Pro X Superlight, Razer DeathAdder, or Glorious Model O)? Our tool serves as the perfect <strong>new mouse check</strong>. You can instantly test the responsiveness of the mechanical or optical switches, verify your polling rate consistency, and ensure your hardware isn't suffering from frustrating double-clicking issues right out of the box.
@@ -662,19 +694,18 @@ export default function CPSTestPage() {
               </p>
             </div>
 
-            <div style={{ background: 'rgba(255, 0, 0, 0.05)', border: '1px solid rgba(255,0,0,0.2)', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
-              <h4 style={{ color: 'var(--neon-red)', fontSize: '1.1rem', fontWeight: '700', margin: '0 0 0.5rem 0' }}>
-                ⚠️ A Note on Physical Health
-              </h4>
-              <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.9rem' }}>
-                Attempting to reach maximum CPS via Jitter or Butterfly clicking puts strain on your forearm tendons. To avoid repetitive strain injuries or carpal tunnel syndrome, always perform wrist stretches before gaming and avoid practicing these intense clicking methods for more than a few minutes at a time.
+            <div style={{ background: 'rgba(255, 0, 0, 0.05)', border: '1px solid rgba(255,0,0,0.2)', padding: '1.25rem', borderRadius: '12px', marginTop: '1.5rem' }}>
+              <h3 style={{ color: 'var(--neon-red)', fontSize: '1.3rem', fontWeight: '700', marginTop: '0', marginBottom: '0.5rem' }}>
+                ⚠️ Anti-Cheat Warning: Keep it Fair!
+              </h3>
+              <p style={{ margin: 0, color: '#9ca3af', fontSize: '0.9rem' }}>
+                Our infrastructure features advanced automated micro-interval algorithms that detect hardware macros and auto-clickers instantly. To record authentic high scores on our global leaderboard, verify your clicking capabilities utilizing raw human methods like Jitter, Butterfly, or Drag clicking.
               </p>
             </div>
 
           </div>
         </article>
       </div>
-
     </div>
   );
 }
