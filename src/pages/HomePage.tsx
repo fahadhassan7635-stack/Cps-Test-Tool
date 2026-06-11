@@ -39,6 +39,7 @@ const tools = [
   { to: '/sniper-mode', icon: '🔭', name: 'Sniper Mode', tag: 'Micro-Flicks', accent: 'var(--neon-red)' },
   { to: '/space-defense', icon: '🚀', name: 'Space Defense', tag: 'Skill Game', accent: 'var(--neon-purple)' },
   { to: '/voyager-game', icon: '🌌', name: 'Voyager Game', tag: 'Endless', accent: 'var(--neon-cyan)' },
+  { to: '/cps-rush', icon: '💥', name: 'CPS Rush', tag: 'Speed Rush', accent: 'var(--neon-red)' },
 ];
 
 const gearItems = [
@@ -54,16 +55,245 @@ const blogPosts = [
   { to: '/blog', emoji: '⚡', tag: 'Reaction', tagColor: 'var(--neon-orange)', date: 'Apr 20, 2025', title: 'Methods to Reduce Reaction Time', excerpt: 'Training schedules and warm-up drills that elite FPS players use daily.' },
 ];
 
+// ─── SEO Article Data for all tools ───────────────────────────────────────────
+const seoArticles = [
+  {
+    to: '/typing-test',
+    icon: '⌨️',
+    color: 'var(--neon-cyan)',
+    title: 'Typing Speed Test — Measure Your WPM Online',
+    badge: 'WPM',
+    content: [
+      'Our free <strong>Typing Speed Test</strong> measures how many <strong>Words Per Minute (WPM)</strong> you can type with real-time accuracy tracking. The average person types between 38–40 WPM, while professional typists hit 65–75 WPM. Competitive touch typists regularly exceed 100 WPM.',
+      'This tool uses randomized word sets, code snippets, and quote passages to simulate real-world typing scenarios. Every session tracks your raw WPM, net WPM (after accuracy penalty), error count, and accuracy percentage. Use it daily to build muscle memory on your keyboard layout — whether you\'re on QWERTY, Dvorak, or Colemak.',
+      '<strong>Pro tip:</strong> Focus on accuracy first, not speed. Typing at 80 WPM with 98% accuracy beats 120 WPM with 85% accuracy in real productivity terms.',
+    ],
+    faqs: [
+      { q: 'What is a good typing speed?', a: '60 WPM is considered proficient. 80+ WPM is excellent for office work. 100+ WPM puts you in the top 5% of typists worldwide.' },
+      { q: 'How do I improve my WPM fast?', a: 'Practice touch typing for 15 minutes daily, focus on your weakest keys, and never look at the keyboard. Consistency beats intensity.' },
+    ],
+  },
+  {
+    to: '/cps-test',
+    icon: '🖱️',
+    color: 'var(--neon-green)',
+    title: 'CPS Test — How Many Clicks Per Second Can You Do?',
+    badge: 'CPS',
+    content: [
+      'The <strong>CPS Test (Clicks Per Second Test)</strong> is the most popular tool for gamers who want to measure their mouse clicking speed. A casual user averages 5–7 CPS, while competitive Minecraft PvP players aim for 10–14 CPS using advanced clicking techniques.',
+      'This test supports multiple durations: 1 second, 5 seconds, 10 seconds, and 30 seconds. A longer test duration gives a more accurate average CPS since it smooths out burst clicks. Results are logged so you can track your improvement over time.',
+      '<strong>Clicking techniques tested:</strong> Regular clicking (3–7 CPS), Jitter clicking (10–14 CPS), Butterfly clicking (12–16 CPS), and Drag clicking (25–100+ CPS). Each technique has different use cases in games like Minecraft, Roblox, and various FPS titles.',
+    ],
+    faqs: [
+      { q: 'What is a good CPS score?', a: 'Above 8 CPS is good for casual gaming. 12+ CPS is competitive. 16+ CPS using butterfly or drag clicking is considered elite.' },
+      { q: 'Does mouse quality affect CPS?', a: 'Yes. A mouse with a higher polling rate (1000Hz+) and low debounce time registers clicks more accurately, giving you a true CPS reading.' },
+    ],
+  },
+  {
+    to: '/reaction-time',
+    icon: '⚡',
+    color: 'var(--neon-orange)',
+    title: 'Reaction Time Test — Measure Your Reflex Speed in Milliseconds',
+    badge: 'REFLEX',
+    content: [
+      'The <strong>Reaction Time Test</strong> measures how quickly you respond to a visual stimulus in milliseconds (ms). The average human reaction time is 200–250ms. Elite esports athletes and professional FPS gamers often achieve 150–180ms through consistent training and warm-up routines.',
+      'Our test uses a randomized delay system to prevent anticipation cheating. You\'ll see multiple rounds per session, and the median score is used as your result (not the average) to reduce the impact of accidental early clicks or distractions.',
+      'Reaction time is affected by sleep quality, caffeine intake, screen refresh rate, and practice. A 144Hz or 240Hz monitor can reduce perceived latency, but your actual neural response time improves only with deliberate training.',
+    ],
+    faqs: [
+      { q: 'What is a good reaction time?', a: 'Under 200ms is excellent. 150–180ms is what top esports pros average. Below 150ms is exceptional and rare.' },
+      { q: 'Can I improve my reaction time?', a: 'Yes! Regular practice, proper sleep, caffeine in moderation, and visual training exercises can shave 20–40ms off your baseline over weeks.' },
+    ],
+  },
+  {
+    to: '/aim-trainer',
+    icon: '🎯',
+    color: 'var(--neon-red)',
+    title: 'Aim Trainer — Sharpen Your FPS Aiming Skills Online',
+    badge: 'AIM',
+    content: [
+      'The <strong>Aim Trainer</strong> is designed for FPS gamers who want to improve their target acquisition speed, flick accuracy, and tracking ability — all without launching a full game. It\'s used as a warm-up tool by players of Valorant, CS2, Apex Legends, Overwatch 2, and Fortnite.',
+      'Targets spawn at randomized positions with varying sizes and speeds. Your session stats include accuracy percentage, average time-to-click per target, targets hit vs missed, and a final score. The dynamic difficulty increases target speed as your accuracy improves.',
+      '<strong>Use it as a pre-game ritual:</strong> 5 minutes on the aim trainer before a ranked session warms up your hand-eye coordination, gets your mouse sensitivity feeling natural, and puts you in a focused mental state.',
+    ],
+    faqs: [
+      { q: 'Is browser aim training actually effective?', a: 'Yes, for warming up and building habits. While specialized software like Aimlabs offers more modes, browser-based training is proven to help with consistency and muscle memory.' },
+      { q: 'What mouse sensitivity should I use for aim training?', a: 'Use the exact same sensitivity as your game. Training at a different sens will hurt, not help. Consistency is everything.' },
+    ],
+  },
+  {
+    to: '/spacebar',
+    icon: '▭',
+    color: 'var(--neon-cyan)',
+    title: 'Spacebar Counter — Test Your Space Key Speed',
+    badge: 'SPACEBAR',
+    content: [
+      'The <strong>Spacebar Counter</strong> tests how many times you can press the space bar within a set time limit. It\'s a deceptively simple test that reveals a lot about your finger stamina, rhythm, and keyboard actuation consistency.',
+      'Spacebar clicking speed matters more than you think — in games like Jump King, Only Up, Geometry Dash, and various platformers, your space bar response time and press frequency directly impact your performance. This tool is also used by speedrunners to warm up.',
+      'The test is available in 5-second, 10-second, and 30-second modes. Your score is displayed as total hits and average hits per second. Typing keyboard spacebar switches (linear vs tactile vs clicky) can produce noticeably different scores.',
+    ],
+    faqs: [
+      { q: 'What is a good spacebar speed?', a: 'Most users hit 8–12 presses per second in a 5-second burst. Consistent 10+ presses per second is considered fast.' },
+      { q: 'Does my keyboard switch type matter?', a: 'Linear switches (like Red or Silver) are fastest for rapid pressing. Clicky and tactile switches add slight resistance that can slow down your rate.' },
+    ],
+  },
+  {
+    to: '/key-visualizer',
+    icon: '👁️',
+    color: 'var(--neon-purple)',
+    title: 'Key Visualizer — Real-Time Keyboard Input Display',
+    badge: 'LIVE',
+    content: [
+      'The <strong>Key Visualizer</strong> displays every keystroke you make in real time on a virtual keyboard layout. Every key lights up as you press it — making it perfect for verifying your keyboard\'s N-key rollover (NKRO), identifying stuck or ghosting keys, and creating satisfying keyboard showcase clips.',
+      'This tool is used by keyboard enthusiasts to test new builds, by gamers to verify that all keybinds are registering without ghosting, and by streamers who want an overlay-style display showing their inputs to viewers.',
+      'It supports full keyboard layouts including TKL and full-size boards. Modifier keys (Shift, Ctrl, Alt, Win) are tracked separately. The display uses color-coded highlighting to show which keys are currently held versus recently released.',
+    ],
+    faqs: [
+      { q: 'What is keyboard ghosting?', a: 'Ghosting is when certain key combinations fail to register because the keyboard\'s controller can\'t handle simultaneous inputs. NKRO keyboards eliminate this entirely.' },
+      { q: 'Can I use this to record my typing for videos?', a: 'Yes! Use a screen recorder or OBS to capture your key visualizer session and overlay it on gaming footage or programming tutorials.' },
+    ],
+  },
+  {
+    to: '/double-click',
+    icon: '🖱️',
+    color: 'var(--neon-green)',
+    title: 'Double Click Test — Check Your Mouse Switch for Double Clicking',
+    badge: 'MOUSE',
+    content: [
+      'The <strong>Double Click Test</strong> measures the interval between two mouse clicks to determine if your mouse is registering clean single clicks or accidentally double-clicking. Mouse double-clicking is a hardware defect caused by worn-out switch debounce mechanisms — commonly seen in older Razer, Logitech, and SteelSeries mice.',
+      'This test is critical if you\'re experiencing issues in games where a single click unexpectedly selects multiple items, fires twice, or places two blocks instead of one in Minecraft. It shows you the exact millisecond interval between registered clicks.',
+      '<strong>How to read results:</strong> If your mouse registers two clicks when you physically click once, and the interval between them is under 40–50ms, your switch debounce is failing. Time to replace the switch or the mouse.',
+    ],
+    faqs: [
+      { q: 'What causes mouse double clicking?', a: 'Worn-out Omron or Kailh switch springs lose their debounce timing. The capacitor meant to filter signal noise degrades over time and with heavy use.' },
+      { q: 'Can double clicking be fixed?', a: 'Sometimes. You can replace the mouse switch (if you have soldering skills), adjust the debounce time in mouse software, or use the manufacturer\'s warranty.' },
+    ],
+  },
+  {
+    to: '/accuracy',
+    icon: '📏',
+    color: 'var(--neon-yellow)',
+    title: 'Keyboard Accuracy Test — How Precise Is Your Typing?',
+    badge: 'ACCURACY',
+    content: [
+      'The <strong>Keyboard Accuracy Test</strong> isolates your typing precision from your raw speed. While a typing speed test rewards both speed and accuracy together, this test presents letter sequences, word patterns, and tricky character combinations specifically designed to trigger common typos.',
+      'Your accuracy score is calculated as the percentage of correct keystrokes out of total keystrokes. Results also show your most frequently mistyped key pairs — extremely useful for identifying which finger transitions are weakest on your keyboard layout.',
+      'Accuracy matters more in professional settings. A programmer making frequent syntax errors, or a data entry operator mistyping figures, costs more time in corrections than the raw speed advantage gains. This test helps you identify and fix those bottlenecks specifically.',
+    ],
+    faqs: [
+      { q: 'What typing accuracy should I aim for?', a: '95%+ is the professional standard for typists. 98%+ is excellent. 100% accuracy at moderate speed beats 95% accuracy at high speed for error-prone tasks.' },
+      { q: 'How do I fix common typing errors?', a: 'Slow down on your problem key pairs and practice them in isolation. Tools like MonkeyType\'s custom word lists let you drill specific patterns.' },
+    ],
+  },
+  {
+    to: '/scroll-test',
+    icon: '↕️',
+    color: 'var(--neon-cyan)',
+    title: 'Scroll Test — Measure Your Mouse Scroll Wheel Speed',
+    badge: 'SCROLL',
+    content: [
+      'The <strong>Scroll Test</strong> measures how fast you can scroll with your mouse wheel and verifies that your scroll wheel is registering every tick accurately. It\'s a quick hardware verification tool and a surprisingly competitive speed challenge.',
+      'Scroll speed matters for productivity workflows — navigating long documents, code files, and web pages faster reduces fatigue and cognitive load. Mice with free-spin scroll wheels (like the Logitech MX Master 3) can scroll thousands of lines per second in free-spin mode.',
+      'The test records total scroll ticks per second and plots your scroll rhythm on a live graph. You can spot irregularities like missed ticks, double-tick events, or scroll wheel encoder degradation that causes inconsistent input.',
+    ],
+    faqs: [
+      { q: 'Why does my scroll wheel skip?', a: 'Scroll wheel encoders wear out over time. Dust accumulation is the most common cause. Compressed air cleaning often fixes intermittent skipping.' },
+      { q: 'What mouse has the fastest scroll wheel?', a: 'Logitech MX Master 3S and G502 X Plus have the highest-speed free-spin magnetic scroll wheels. They can scroll over 1,000 lines per second in free-spin mode.' },
+    ],
+  },
+  {
+    to: '/mouse-accuracy',
+    icon: '🖲️',
+    color: 'var(--neon-green)',
+    title: 'Mouse Accuracy Test — Track Your Cursor Precision',
+    badge: 'TRACKING',
+    content: [
+      'The <strong>Mouse Accuracy Test</strong> challenges you to click targets as quickly and precisely as possible. Unlike the aim trainer (which focuses on FPS-style targeting), this test measures your general mouse control — how smoothly you move from point A to point B and how often you land inside the target zone.',
+      'Your results include an accuracy percentage, average deviation from target center in pixels, and a movement path visualization showing how direct or curved your cursor paths are. Overshoot, undershoot, and tremor patterns are all visible in the path data.',
+      'This test is directly relevant to graphic designers, video editors, UI/UX professionals, and anyone who works with fine cursor control all day. High DPI settings cause overshooting while low DPI causes labored movements — finding your ideal DPI is something this test helps you calibrate.',
+    ],
+    faqs: [
+      { q: 'What DPI should I use for best accuracy?', a: 'Most professional FPS players use 400–800 DPI with high in-game sensitivity. Designers often prefer 800–1200 DPI. The ideal DPI is one where you feel neither rushed nor restricted.' },
+      { q: 'Does mouse pad size affect accuracy?', a: 'Absolutely. A large mouse pad lets you use lower DPI with full arm movements, which is more accurate and less fatiguing than high DPI with wrist-only movements.' },
+    ],
+  },
+  {
+    to: '/sniper-mode',
+    icon: '🔭',
+    color: 'var(--neon-red)',
+    title: 'Sniper Mode — Train Your Micro-Flick and Precision Aim',
+    badge: 'PRECISION',
+    content: [
+      '<strong>Sniper Mode</strong> is an extreme precision challenge that simulates long-range target acquisition in FPS games. Targets are small, move unpredictably, and require controlled micro-flick movements rather than large arm sweeps. It directly trains the fine motor control needed for AWP/sniper rifle aiming in games like CS2 and Valorant.',
+      'The challenge uses a zoomed-in viewport and smaller hitboxes than the standard aim trainer, forcing you to move your mouse in tiny, deliberate increments. Every shot you fire is analyzed for overshoot distance and reaction delay.',
+      'Professional snipers in esports warm up with precision drills specifically to train their hand steadiness. This mode replicates that training — helping you eliminate the "shaky crosshair syndrome" that plagues players who switch from assault rifles to sniper rifles mid-game.',
+    ],
+    faqs: [
+      { q: 'How do I stop overshooting my targets?', a: 'Lower your mouse sensitivity and practice stopping your crosshair exactly on the target before clicking. Use a controlled exhale technique — breathe out slowly as you aim.' },
+      { q: 'Is sniper aim different from regular aim?', a: 'Yes. Sniping relies on micro-adjustments and stillness, while tracking aims involve continuous movement. They use different muscle groups and require separate training.' },
+    ],
+  },
+  {
+    to: '/space-defense',
+    icon: '🚀',
+    color: 'var(--neon-purple)',
+    title: 'Space Defense — The Ultimate Click Speed Skill Game',
+    badge: 'GAME',
+    content: [
+      '<strong>Space Defense</strong> is an arcade-style skill game where enemy ships descend toward your base and you must click them to destroy them before they reach the bottom of the screen. It combines clicking speed, accuracy, and target prioritization into a single chaotic challenge.',
+      'The game features wave-based difficulty scaling — early waves train your basic clicking rhythm, while later waves introduce fast-moving enemies, armored targets requiring multiple clicks, and cluster formations that punish inaccurate clicking. Your final score is determined by enemies destroyed, accuracy, and highest wave reached.',
+      'This is the ultimate test of whether your CPS practice translates into real gaming performance. Many players who score 12+ CPS in the raw CPS test discover their effective CPS drops to 7–8 when they also need to aim accurately under pressure — exactly the gap this game trains you to close.',
+    ],
+    faqs: [
+      { q: 'What is the best strategy for high scores?', a: 'Prioritize the fastest-moving enemies first. Click clusters from the edges inward. Never panic-click the center — it wastes clicks and misses targets.' },
+      { q: 'Does Space Defense improve real game performance?', a: 'Yes. The combination of speed, accuracy, and decision-making under pressure directly maps to FPS and RTS game mechanics. Players report measurable improvement after 2 weeks of daily play.' },
+    ],
+  },
+  {
+    to: '/voyager-game',
+    icon: '🌌',
+    color: 'var(--neon-cyan)',
+    title: 'Voyager Game — Endless Reflex & Endurance Challenge',
+    badge: 'ENDLESS',
+    content: [
+      '<strong>Voyager Game</strong> is an endless skill-based game where you pilot a spacecraft through an increasingly dense asteroid field. Your ship\'s movement is controlled by mouse position, and your survival time determines your score. Asteroids accelerate as your score increases, creating a pure reflex and endurance test.',
+      'Unlike games with a fixed ending, Voyager\'s endless format creates a flow state — the kind of effortless focus where your hands react faster than your conscious mind can process. It\'s the same psychological state that elite esports players describe during peak performance.',
+      'Voyager is used by our community as a reaction time warm-up and a mental focus calibration tool. Five minutes of Voyager before a gaming session measurably improves cursor control smoothness and reaction consistency, according to user reports in our community.',
+    ],
+    faqs: [
+      { q: 'How long can top players survive?', a: 'The current platform record is over 4 minutes 30 seconds. Most players plateau between 90–180 seconds. Consistent improvement comes from smooth mouse movements rather than fast jerky reactions.' },
+      { q: 'Does Voyager Game work on mobile?', a: 'It\'s optimized for desktop mouse control. While it technically loads on mobile, touch-based control significantly changes the difficulty curve and accuracy of results.' },
+    ],
+  },
+  {
+    to: '/cps-rush',
+    icon: '💥',
+    color: 'var(--neon-red)',
+    title: 'CPS Rush — Burst Clicking Under Extreme Time Pressure',
+    badge: 'RUSH',
+    content: [
+      '<strong>CPS Rush</strong> is the most intense clicking challenge on the platform. You have only 1 second per round to click as fast as humanly possible — and then you get 2 seconds of rest before the next round begins. Ten rounds are played back-to-back, and your final score is the average of your top 7 rounds (3 lowest are dropped).',
+      'This format simulates the burst-clicking mechanics used in games like Minecraft PvP, where you need maximum CPS for short engagements rather than sustained clicking over long periods. It rewards your peak clicking performance while filtering out warm-up inconsistency.',
+      'CPS Rush sessions reveal whether your clicking technique degrades under fatigue. Players who maintain consistent CPS across all 10 rounds have more reliable technique than those whose scores drop sharply in rounds 7–10. Stamina and form are just as important as raw speed.',
+    ],
+    faqs: [
+      { q: 'What clicking technique is best for CPS Rush?', a: 'Butterfly clicking produces the highest burst CPS (12–18 CPS) and is ideal for 1-second rounds. Jitter clicking is good for sustained speed but causes hand fatigue over 10 rounds.' },
+      { q: 'Is CPS Rush different from the regular CPS test?', a: 'Yes. The regular CPS test measures sustained speed. CPS Rush measures your absolute peak burst performance under psychological time pressure — a fundamentally different skill.' },
+    ],
+  },
+];
+
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<'cps' | 'wpm' | 'reaction'>('cps');
   const [challengeTime, setChallengeTime] = useState('00:00:00');
+  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
 
   const tick = useCallback(() => {
     const now = new Date();
     const midnight = new Date();
     midnight.setHours(24, 0, 0, 0);
     const diff = midnight.getTime() - now.getTime();
-    
+
     if (diff <= 0) {
       setChallengeTime('00:00:00');
       return;
@@ -86,6 +316,7 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', paddingBottom: '3rem' }}>
 
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <section style={{ textAlign: 'center', padding: '5rem 1rem 4rem' }}>
         <div className="fade-in-up" style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -128,7 +359,7 @@ export default function HomePage() {
           maxWidth: '600px', margin: '0 auto 2.5rem',
           lineHeight: '1.7',
         }}>
-          Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!
+          The ultimate free platform to test your clicking speed, typing WPM, reaction time, aim precision, and more. 14 professional tools. No signup. No downloads. Just pure performance data.
         </p>
 
         <div className="fade-in-up d3" style={{
@@ -137,7 +368,7 @@ export default function HomePage() {
         }}>
           {[
             { value: '247K+', label: 'Players Tested' },
-            { value: '18', label: 'Free Tools' },
+            { value: '14', label: 'Free Tools' },
             { value: '4.9★', label: 'Avg Rating' },
           ].map(s => (
             <div key={s.label} style={{ textAlign: 'center' }}>
@@ -157,6 +388,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Category Cards ───────────────────────────────────────────────── */}
       <section style={{ marginBottom: '4rem' }}>
         <div className="section-label">Tools & Games</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Choose Your Arena</h2>
@@ -267,6 +499,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Quick Launch ─────────────────────────────────────────────────── */}
       <section style={{ marginBottom: '4rem' }}>
         <div className="section-label">Quick Launch</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Jump In Instantly</h2>
@@ -316,6 +549,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Leaderboard + Daily Challenge ────────────────────────────────── */}
       <section style={{ marginBottom: '5rem' }}>
         <div style={{
           display: 'grid',
@@ -389,7 +623,7 @@ export default function HomePage() {
             </div>
 
             <Link to="/hall-of-fame" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
-              View All Targets →
+              View All Records →
             </Link>
           </div>
 
@@ -452,30 +686,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Blog + Gear ──────────────────────────────────────────────────── */}
       <section style={{ marginBottom: '4rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-          
           <div>
             <div className="section-label">Knowledge Base</div>
             <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '1.5rem' }}>Improve Your Game</h2>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {blogPosts.map(post => (
-                <Link 
-                  key={post.title} 
-                  to={post.to} 
-                  style={{ 
-                    display: 'flex', gap: '1rem', padding: '1.25rem', background: 'var(--bg-card)', 
+                <Link
+                  key={post.title}
+                  to={post.to}
+                  style={{
+                    display: 'flex', gap: '1rem', padding: '1.25rem', background: 'var(--bg-card)',
                     border: '1px solid var(--border)', borderRadius: '12px', textDecoration: 'none',
                     transition: 'border-color 0.2s ease'
                   }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = post.tagColor)}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
                 >
-                  <div style={{ 
-                    width: '70px', height: '70px', flexShrink: 0, 
-                    background: `linear-gradient(135deg, ${post.tagColor}15, transparent)`, 
-                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                  <div style={{
+                    width: '70px', height: '70px', flexShrink: 0,
+                    background: `linear-gradient(135deg, ${post.tagColor}15, transparent)`,
+                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '2rem', border: `1px solid ${post.tagColor}30`
                   }}>
                     {post.emoji}
@@ -493,17 +727,17 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-            
+
             <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
               <Link to="/blog" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', textDecoration: 'none' }}>
                 Read All Articles →
               </Link>
             </div>
           </div>
-
         </div>
       </section>
 
+      {/* ── Gear Section ─────────────────────────────────────────────────── */}
       <section style={{
         marginBottom: '4rem',
         background: 'rgba(8,13,20,0.6)',
@@ -529,81 +763,242 @@ export default function HomePage() {
         </div>
       </section>
 
-      <hr style={{ borderColor: 'var(--border)', margin: '5rem 0 4rem' }} />
-      
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '3rem 2.5rem', marginTop: '3rem' }}>
-        <section style={{ maxWidth: '900px', margin: '0 auto', color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.05rem' }}>
-          
-          <h2 style={{ color: 'var(--text-primary)', fontSize: '2.25rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>
-            Why Your Click Speed and Typing WPM Actually Matter (And How to Improve)
-          </h2>
-          
-          <p style={{ marginBottom: '2rem' }}>
-            We've all been there—you miss a crucial shot in Valorant, lose a 1v1 in Minecraft bedwars, or find yourself buried under emails at work, wishing you could just type a little faster. You might even find yourself blaming your mouse or keyboard. But how much of it is your gear, and how much of it is raw skill? That’s exactly why we built this platform: to give you a free, no-nonsense way to test your limits and actually get better.
-          </p>
+      {/* ══════════════════════════════════════════════════════════════════════
+          SEO ARTICLE SECTION — All 14 Tools
+      ══════════════════════════════════════════════════════════════════════ */}
+      <hr style={{ borderColor: 'var(--border)', margin: '3rem 0' }} />
 
-          <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              ⚡ Mastering the CPS Test (Clicks Per Second)
-            </h3>
-            <p style={{ marginBottom: '1rem' }}>
-              If you’re a gamer, you know that your clicking speed can make or break a match. A standard user usually clicks around 5 to 7 times per second. But competitive players? They easily hit 10 to 14 CPS. 
-            </p>
-            <p style={{ margin: '0' }}>
-              Our <strong>CPS Test</strong> isn't just a fun mini-game; it's a training ground. Whether you are practicing "Jitter clicking" (vibrating your hand to generate rapid clicks) or "Butterfly clicking" (using two fingers to alternate clicks on the same button), testing your speed daily builds muscle memory. It helps you figure out the exact clicking technique that won't ruin your aim.
-            </p>
-          </div>
+      <section style={{ marginBottom: '4rem' }}>
+        <div className="section-label">Complete Guide</div>
+        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.25rem)', fontWeight: '800', marginBottom: '0.5rem' }}>
+          Everything You Need to Know About Our Tools
+        </h2>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem', maxWidth: '700px' }}>
+          Detailed breakdowns of every tool — what it measures, why it matters, how to improve your score, and which gear actually helps.
+        </p>
 
-          <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              ⌨️ Typing Speed: Going Beyond the Average WPM
-            </h3>
-            <p style={{ marginBottom: '1rem' }}>
-              Typing fast isn't just a flex for your resume anymore. Whether you're a programmer, a student writing a last-minute essay, or a remote worker on Slack, your <strong>Words Per Minute (WPM)</strong> dictates your workflow. The global average is around 40 WPM, but with a bit of practice, hitting 80 or even 100+ WPM is completely achievable.
-            </p>
-            <p style={{ margin: '0' }}>
-              Taking a <strong>Typing Speed Test</strong> regularly helps you identify bad habits. Are you looking down at your keyboard too much? Do you rely heavily on your index fingers? Our tools help you spot these errors, track your accuracy, and slowly transition into a true touch-typer. Plus, climbing our global WPM leaderboard is surprisingly addictive!
-            </p>
-          </div>
+        {/* Tool Navigation Pills */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2.5rem',
+        }}>
+          {seoArticles.map(a => (
+            <button
+              key={a.to}
+              onClick={() => {
+                const el = document.getElementById(`seo-${a.to.replace('/', '')}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              style={{
+                padding: '0.35rem 0.85rem',
+                borderRadius: '50px',
+                border: `1px solid ${a.color}40`,
+                background: `${a.color}10`,
+                color: a.color,
+                fontSize: '0.78rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = `${a.color}25`;
+                (e.currentTarget as HTMLButtonElement).style.borderColor = a.color;
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.background = `${a.color}10`;
+                (e.currentTarget as HTMLButtonElement).style.borderColor = `${a.color}40`;
+              }}
+            >
+              {a.icon} {a.badge}
+            </button>
+          ))}
+        </div>
 
-          <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              🎯 Reaction Time and Aim Training
-            </h3>
-            <p style={{ margin: '0' }}>
-              Have you ever wondered if your reflexes are naturally fast? Human reaction time to visual stimuli averages around 250 milliseconds. However, elite esports athletes can push that down to 150ms. Using our <strong>Reaction Time Test</strong> and <strong>Aim Trainer</strong>, you can warm up your eyes and hands before jumping into a ranked match. Think of it as stretching before a workout—it wakes up your nervous system and gets you locked in.
-            </p>
-          </div>
+        {/* Article Cards */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          {seoArticles.map(article => {
+            const isExpanded = expandedArticle === article.to;
+            return (
+              <article
+                key={article.to}
+                id={`seo-${article.to.replace('/', '')}`}
+                style={{
+                  background: 'var(--bg-card)',
+                  border: `1px solid ${isExpanded ? article.color : 'var(--border)'}`,
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  transition: 'border-color 0.3s ease',
+                  scrollMarginTop: '80px',
+                }}
+              >
+                {/* Article Header — always visible, clickable to expand */}
+                <button
+                  onClick={() => setExpandedArticle(isExpanded ? null : article.to)}
+                  style={{
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '1.5rem 1.75rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
+                    textAlign: 'left',
+                  }}
+                >
+                  {/* Icon bubble */}
+                  <div style={{
+                    width: '52px', height: '52px', flexShrink: 0,
+                    background: `${article.color}15`,
+                    border: `1px solid ${article.color}30`,
+                    borderRadius: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '1.5rem',
+                  }}>
+                    {article.icon}
+                  </div>
 
-          <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-purple)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              🛠️ Does Your Gear Actually Make a Difference?
-            </h3>
-            <p style={{ marginBottom: '1rem' }}>
-              Here is the truth: a $150 gaming mouse won't magically make you a pro, but a bad mouse will definitely hold you back. Using our suite, you can actually test your hardware. 
-            </p>
-            <ul style={{ paddingLeft: '1.5rem', marginBottom: '1rem', listStyleType: 'circle', color: 'var(--text-secondary)' }}>
-              <li style={{ marginBottom: '0.5rem' }}>Got a new mouse? Run a <strong>Double Click Test</strong> to make sure the switches aren't faulty.</li>
-              <li style={{ marginBottom: '0.5rem' }}>Bought a mechanical keyboard? Use our <strong>Key Visualizer</strong> and <strong>Spacebar Counter</strong> to check for ghosting and verify that every keystroke registers instantly.</li>
-            </ul>
-          </div>
+                  {/* Title + badge */}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
+                      <span style={{
+                        padding: '0.15rem 0.55rem',
+                        borderRadius: '4px',
+                        fontSize: '0.65rem',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.08em',
+                        background: `${article.color}20`,
+                        color: article.color,
+                      }}>{article.badge}</span>
+                    </div>
+                    <h3 style={{
+                      color: 'var(--text-primary)',
+                      fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
+                      fontWeight: '700',
+                      margin: 0,
+                      lineHeight: '1.35',
+                    }}>
+                      {article.title}
+                    </h3>
+                  </div>
 
-          <div style={{ marginTop: '3.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '2rem', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h4 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', marginBottom: '1rem', marginTop: '0' }}>
-              Ready to set a new personal record?
-            </h4>
-            <p style={{ margin: '0 0 1.5rem 0', color: 'var(--text-muted)' }}>
-              No downloads, no sketchy background apps, and no forced sign-ups. Just pure, browser-based performance testing that works on Windows, Mac, and Chromebooks alike.
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <Link to="/cps-test" style={{ color: 'var(--neon-cyan)', fontWeight: '600', textDecoration: 'none' }}>→ Try the CPS Test</Link>
-              <Link to="/typing-test" style={{ color: 'var(--neon-green)', fontWeight: '600', textDecoration: 'none' }}>→ Check your Typing WPM</Link>
-              <Link to="/reaction-time" style={{ color: 'var(--neon-orange)', fontWeight: '600', textDecoration: 'none' }}>→ Test Reaction Speed</Link>
-            </div>
-          </div>
+                  {/* Expand indicator */}
+                  <div style={{
+                    width: '32px', height: '32px', flexShrink: 0,
+                    border: `1px solid ${article.color}40`,
+                    borderRadius: '8px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: article.color,
+                    fontSize: '1rem',
+                    transition: 'transform 0.3s ease',
+                    transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                  }}>
+                    ▾
+                  </div>
+                </button>
 
-        </section>
-      </div>
+                {/* Expandable body */}
+                {isExpanded && (
+                  <div style={{
+                    padding: '0 1.75rem 1.75rem',
+                    borderTop: `1px solid ${article.color}20`,
+                  }}>
+                    {/* Main content paragraphs */}
+                    <div style={{ marginBottom: '1.75rem', paddingTop: '1.25rem' }}>
+                      {article.content.map((para, i) => (
+                        <p
+                          key={i}
+                          style={{
+                            color: 'var(--text-secondary)',
+                            lineHeight: '1.8',
+                            fontSize: '0.95rem',
+                            marginBottom: i < article.content.length - 1 ? '1rem' : '0',
+                          }}
+                          dangerouslySetInnerHTML={{ __html: para }}
+                        />
+                      ))}
+                    </div>
+
+                    {/* FAQ */}
+                    <div style={{
+                      background: 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${article.color}20`,
+                      borderRadius: '12px',
+                      padding: '1.25rem',
+                      marginBottom: '1.5rem',
+                    }}>
+                      <h4 style={{
+                        color: article.color,
+                        fontSize: '0.8rem',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        marginBottom: '1rem',
+                        marginTop: 0,
+                      }}>
+                        ❓ Frequently Asked Questions
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {article.faqs.map((faq, fi) => (
+                          <div key={fi}>
+                            <div style={{
+                              color: 'var(--text-primary)',
+                              fontWeight: '600',
+                              fontSize: '0.9rem',
+                              marginBottom: '0.3rem',
+                            }}>
+                              Q: {faq.q}
+                            </div>
+                            <div style={{
+                              color: 'var(--text-secondary)',
+                              fontSize: '0.875rem',
+                              lineHeight: '1.65',
+                              paddingLeft: '0.75rem',
+                              borderLeft: `2px solid ${article.color}40`,
+                            }}>
+                              {faq.a}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <Link
+                      to={article.to}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.6rem 1.4rem',
+                        background: `${article.color}15`,
+                        border: `1px solid ${article.color}50`,
+                        borderRadius: '8px',
+                        color: article.color,
+                        fontWeight: '700',
+                        fontSize: '0.875rem',
+                        textDecoration: 'none',
+                        transition: 'all 0.2s ease',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLAnchorElement).style.background = `${article.color}25`;
+                        (e.currentTarget as HTMLAnchorElement).style.borderColor = article.color;
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLAnchorElement).style.background = `${article.color}15`;
+                        (e.currentTarget as HTMLAnchorElement).style.borderColor = `${article.color}50`;
+                      }}
+                    >
+                      {article.icon} Launch {article.badge} Tool →
+                    </Link>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
 
     </div>
   );
