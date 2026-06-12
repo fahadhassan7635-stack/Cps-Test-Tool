@@ -49,12 +49,6 @@ const gearItems = [
   { icon: '🎧', brand: 'SteelSeries', name: 'Arctis Nova Pro', desc: 'Hi-res audio with active noise cancellation for full focus mode.', price: '$349.99' },
 ];
 
-const blogPosts = [
-  { to: '/blog', emoji: '⌨️', tag: 'Typing', tagColor: 'var(--neon-cyan)', date: 'May 2, 2025', title: 'How to Go From 60 to 120 WPM in 30 Days', excerpt: 'A proven training routine used by competitive typists to double their speed.' },
-  { to: '/blog', emoji: '🖱️', tag: 'Mouse', tagColor: 'var(--neon-green)', date: 'Apr 28, 2025', title: 'Best Gaming Mice for High CPS', excerpt: 'Which mice enable the fastest click speeds? We tested 12 mice to find out.' },
-  { to: '/blog', emoji: '⚡', tag: 'Reaction', tagColor: 'var(--neon-orange)', date: 'Apr 20, 2025', title: 'Methods to Reduce Reaction Time', excerpt: 'Training schedules and warm-up drills that elite FPS players use daily.' },
-];
-
 const seoArticles = [
   {
     to: '/typing-test',
@@ -83,7 +77,7 @@ const seoArticles = [
     content: [
       'The <strong>CPS Test</strong> is exactly what it sounds like: a timer, a clicking box, and a tracker that tells you your exact clicks per second. It\'s the go-to benchmark for Minecraft PvP players trying to prove they aren\'t using an auto-clicker.',
       'If you just casually click using your index finger, you\'ll probably land around <strong>5 to 7 CPS</strong>. Gamers using the jitter clicking technique usually sit around <strong>11 to 14 CPS</strong>. If you butterfly click, hitting 15+ is pretty standard.',
-      'We offer a few time limits, but the <strong>5-second test</strong> is the golden rule. It’s long enough to see if you can hold your speed, but short enough that your arm doesn\'t completely gas out.',
+      'We offer a few time limits, but the <strong>5-second test</strong> is the golden rule. It\'s long enough to see if you can hold your speed, but short enough that your arm doesn\'t completely gas out.',
       '<strong>A quick tip on technique:</strong> Jitter clicking is great for combat because you still have decent control over your mouse. Butterfly clicking might get you a higher score here, but good luck aiming accurately in-game while doing it.',
     ],
     faqs: [
@@ -151,7 +145,7 @@ const seoArticles = [
     title: 'Key Visualizer — Test Your Keyboard Ghosting & NKRO',
     badge: 'LIVE',
     content: [
-      'The <strong>Key Visualizer</strong> is a live, on-screen display of exactly what your keyboard is doing. It’s perfect for finding out if your keyboard has hardware issues, or for using as an overlay while streaming.',
+      'The <strong>Key Visualizer</strong> is a live, on-screen display of exactly what your keyboard is doing. It\'s perfect for finding out if your keyboard has hardware issues, or for using as an overlay while streaming.',
       'Its best feature is testing for <strong>Ghosting (NKRO)</strong>. Cheap keyboards can only process 3 or 4 keys at a time. Mash your WASD keys, hold Shift, and hit Space. Did one of those keys not light up on our visualizer? That\'s ghosting, and it will get you killed in FPS games.',
       'Streamers love this tool. If you play rhythm games, speedruns, or fighting games, you can just add this URL as a Browser Source in OBS. Your viewers will see your exact inputs in real-time without you downloading any sketchy third-party software.',
       'The visualizer shows three states: solid color when you hold a key, a fading trail when you let go, and dark when idle. It\'s also a great way to test if your custom macros are actually firing correctly.',
@@ -170,7 +164,7 @@ const seoArticles = [
     content: [
       'Is your mouse acting weird? Dragging files by accident or firing two shots instead of one? You probably have a failing switch. Our <strong>Double Click Test</strong> measures the exact time between your clicks to diagnose hardware defects.',
       'Here\'s what happens inside a dying mouse: the tiny metal spring in the switch gets worn out and starts "bouncing." When you click once, the metal bounces and touches the contact twice. To the computer, it looks like two insanely fast clicks.',
-      'Our tool creates a live interval graph. A normal, healthy human click usually has a gap of 100ms or more. If our graph shows clicks happening with a <strong>10ms to 30ms gap</strong>, that’s switch bounce. A human physically cannot double-click that fast.',
+      'Our tool creates a live interval graph. A normal, healthy human click usually has a gap of 100ms or more. If our graph shows clicks happening with a <strong>10ms to 30ms gap</strong>, that\'s switch bounce. A human physically cannot double-click that fast.',
       '<strong>How to fix it:</strong> Check if your mouse software (like Razer Synapse or Glorious Core) has a "Debounce Time" slider. Turn it up to 12ms. If you don\'t have that option, you either need to solder a new switch into the mouse, or just buy a new one.',
     ],
     faqs: [
@@ -202,7 +196,7 @@ const seoArticles = [
     title: 'Scroll Speed Test — Check Your Mouse Wheel',
     badge: 'SCROLL',
     content: [
-      'The <strong>Scroll Test</strong> tracks how many wheel ticks you can register in a second. It\'s a fun challenge, but it’s also an incredible diagnostic tool to see if your mouse\'s scroll encoder is dirty or breaking.',
+      'The <strong>Scroll Test</strong> tracks how many wheel ticks you can register in a second. It\'s a fun challenge, but it\'s also an incredible diagnostic tool to see if your mouse\'s scroll encoder is dirty or breaking.',
       'If you scroll down, but the page occasionally jumps up for a split second, your scroll encoder is dying. This test graphs out every single tick. If your graph has random dips or gaps, your hardware is at fault.',
       'If you have a mouse with an "infinite scroll" unlock wheel (like the Logitech G502 or MX Master), you can hit 60 to 80 ticks per second easily. Standard notched wheels will max out around 12 ticks per second.',
     ],
@@ -218,7 +212,7 @@ const seoArticles = [
     title: 'Mouse Accuracy Test — Find Your Perfect DPI',
     badge: 'TRACKING',
     content: [
-      'This isn\'t just about clicking a dot. The <strong>Mouse Accuracy Test</strong> tracks the exact path your cursor takes to get to the target. It’s the absolute best way to figure out if your DPI is set too high.',
+      'This isn\'t just about clicking a dot. The <strong>Mouse Accuracy Test</strong> tracks the exact path your cursor takes to get to the target. It\'s the absolute best way to figure out if your DPI is set too high.',
       'We give you a report based on a few things: Did you click inside the circle? How fast did you get there? And most importantly, <strong>Path Efficiency</strong>. Did you move in a perfectly straight line, or did your cursor curve wildly before landing on the target?',
       'If your path efficiency is terrible, you are over-correcting. This usually means your sensitivity is too high. You\'re over-shooting the target and having to pull back at the last millisecond.',
       '<strong>How to test your DPI:</strong> Run this test three times. Once at 400 DPI, once at 800, and once at 1600. Look at which setting gives you the straightest lines and least deviation. That is your natural sensitivity.',
@@ -267,7 +261,7 @@ const seoArticles = [
     title: 'Voyager — The Ultimate Evasion Warm-up',
     badge: 'ENDLESS',
     content: [
-      '<strong>Voyager</strong> is pure flow state. You control a ship with your cursor, dodging an endless, escalating field of asteroids. No shooting, just survival. It’s arguably the best overall neurological warm-up on the platform.',
+      '<strong>Voyager</strong> is pure flow state. You control a ship with your cursor, dodging an endless, escalating field of asteroids. No shooting, just survival. It\'s arguably the best overall neurological warm-up on the platform.',
       'At first, it\'s easy. But the density and speed ramp up infinitely. To survive past the two-minute mark, you have to stop looking at your ship and start looking at the empty spaces between the asteroids.',
       'This trains predictive tracking. You have to read where an object is going to be two seconds from now, and position your mouse accordingly. Playing this for 5 minutes before booting up a ranked match wakes up your spatial awareness instantly.',
     ],
@@ -697,57 +691,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Blog + Gear */}
-      <section style={{ marginBottom: '4rem' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
-          <div>
-            <div className="section-label">Knowledge Base</div>
-            <h2 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '1.5rem' }}>Improve Your Game</h2>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {blogPosts.map(post => (
-                <Link
-                  key={post.title}
-                  to={post.to}
-                  style={{
-                    display: 'flex', gap: '1rem', padding: '1.25rem', background: 'var(--bg-card)',
-                    border: '1px solid var(--border)', borderRadius: '12px', textDecoration: 'none',
-                    transition: 'border-color 0.2s ease'
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.borderColor = post.tagColor)}
-                  onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--border)')}
-                >
-                  <div style={{
-                    width: '70px', height: '70px', flexShrink: 0,
-                    background: `linear-gradient(135deg, ${post.tagColor}15, transparent)`,
-                    borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '2rem', border: `1px solid ${post.tagColor}30`
-                  }}>
-                    {post.emoji}
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
-                      <span style={{ padding: '0.15rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${post.tagColor}15`, color: post.tagColor, textTransform: 'uppercase' }}>
-                        {post.tag}
-                      </span>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{post.date}</span>
-                    </div>
-                    <h3 style={{ fontWeight: '700', fontSize: '0.95rem', color: '#fff', marginBottom: '0.3rem', lineHeight: '1.4' }}>{post.title}</h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', lineHeight: '1.5', margin: 0 }}>{post.excerpt}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <div style={{ marginTop: '1.5rem', textAlign: 'right' }}>
-              <Link to="/blog" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600', textDecoration: 'none' }}>
-                Read All Articles →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Gear Section */}
       <section style={{
         marginBottom: '4rem',
@@ -786,10 +729,7 @@ export default function HomePage() {
           Detailed breakdowns of every tool — what it measures, why it matters, how to improve your score, and which gear actually helps.
         </p>
 
-        {/* Tool Navigation Pills */}
-        <div style={{
-          display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2.5rem',
-        }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '2.5rem' }}>
           {seoArticles.map(a => (
             <button
               key={a.to}
@@ -823,7 +763,6 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Article Cards */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {seoArticles.map(article => {
             const isExpanded = expandedArticle === article.to;
@@ -904,10 +843,7 @@ export default function HomePage() {
                 </button>
 
                 {isExpanded && (
-                  <div style={{
-                    padding: '0 1.75rem 1.75rem',
-                    borderTop: `1px solid ${article.color}20`,
-                  }}>
+                  <div style={{ padding: '0 1.75rem 1.75rem', borderTop: `1px solid ${article.color}20` }}>
                     <div style={{ marginBottom: '1.75rem', paddingTop: '1.25rem' }}>
                       {article.content.map((para, i) => (
                         <p
@@ -944,12 +880,7 @@ export default function HomePage() {
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {article.faqs.map((faq, fi) => (
                           <div key={fi}>
-                            <div style={{
-                              color: 'var(--text-primary)',
-                              fontWeight: '600',
-                              fontSize: '0.9rem',
-                              marginBottom: '0.3rem',
-                            }}>
+                            <div style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '0.9rem', marginBottom: '0.3rem' }}>
                               Q: {faq.q}
                             </div>
                             <div style={{
