@@ -6,7 +6,7 @@ const posts = [
     emoji: '⌨️',
     tag: 'Typing',
     tagColor: 'var(--neon-cyan)',
-    date: 'May 2, 2025',
+    
     title: 'How to Go From 60 to 120 WPM in 30 Days',
     excerpt: 'Stop randomly smashing keys. Here is the exact roadmap used by competitive typists to double their speed without ruining their accuracy.',
     readTime: '8 min read',
