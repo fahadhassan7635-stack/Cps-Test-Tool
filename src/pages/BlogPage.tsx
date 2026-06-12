@@ -6,7 +6,6 @@ const posts = [
     emoji: '⌨️',
     tag: 'Typing',
     tagColor: 'var(--neon-cyan)',
-    
     title: 'How to Go From 60 to 120 WPM in 30 Days',
     excerpt: 'Stop randomly smashing keys. Here is the exact roadmap used by competitive typists to double their speed without ruining their accuracy.',
     readTime: '8 min read',
@@ -35,7 +34,6 @@ Stop practicing random letters. Practice the 200 most common English words. They
     emoji: '🖱️',
     tag: 'CPS',
     tagColor: 'var(--neon-green)',
-    date: 'Apr 28, 2025',
     title: 'CPS Test: What Is Clicks Per Second and How to Improve It',
     excerpt: 'Everything from Minecraft PvP mechanics to world records. Learn how to increase your raw click speed without giving yourself carpal tunnel.',
     readTime: '7 min read',
@@ -66,7 +64,6 @@ If your mouse is heavy and has stiff clicks, your CPS will naturally be lower. L
     emoji: '⚡',
     tag: 'Reaction',
     tagColor: 'var(--neon-orange)',
-    date: 'Apr 20, 2025',
     title: 'Reaction Time Test: Average Scores and How to Get Faster',
     excerpt: 'Dying before you even see the enemy? Here is the science behind gaming reaction times and the setup tweaks that actually make you faster.',
     readTime: '8 min read',
@@ -97,7 +94,6 @@ Yes, but only to a point. You can't change your basic biology, but you can train
     emoji: '🎯',
     tag: 'Aim',
     tagColor: 'var(--neon-red)',
-    date: 'Apr 10, 2025',
     title: 'Aim Trainer Guide: How to Build Elite FPS Aim From Scratch',
     excerpt: 'Stop mindlessly shooting at dots. Learn the structured routine that FPS coaches use to build god-tier mouse control.',
     readTime: '10 min read',
@@ -127,7 +123,6 @@ Stop changing your DPI every time you have a bad game. Find a sensitivity betwee
     emoji: '🚀',
     tag: 'Spacebar',
     tagColor: 'var(--neon-cyan)',
-    date: 'Apr 5, 2025',
     title: 'Spacebar Counter: How Fast Can You Press the Spacebar?',
     excerpt: 'From Geometry Dash timings to CS2 movement tech, the spacebar is your most abused key. Here is how to tap it faster.',
     readTime: '5 min read',
@@ -154,7 +149,6 @@ Not all spacebars are created equal. Linear switches (like Cherry MX Reds) are w
     emoji: '⌨️',
     tag: 'Keyboard',
     tagColor: 'var(--neon-green)',
-    date: 'Mar 30, 2025',
     title: 'Key Visualizer: How to Test Keyboard Ghosting and NKRO',
     excerpt: 'Is your budget keyboard dropping inputs during intense fights? Learn how to use a visualizer to test your hardware limits.',
     readTime: '6 min read',
@@ -179,7 +173,6 @@ If you play osu!, Clone Hero, or do speedruns, viewers want to see your inputs. 
     emoji: '🖱️',
     tag: 'Mouse',
     tagColor: 'var(--neon-red)',
-    date: 'Mar 25, 2025',
     title: 'Double Click Test: Diagnose Dying Mouse Switches',
     excerpt: 'Is your mouse firing twice when you only clicked once? Here is how to test for switch bounce and save your hardware.',
     readTime: '6 min read',
@@ -208,7 +201,6 @@ Before you throw the mouse away, try this:
     emoji: '⌨️',
     tag: 'Typing',
     tagColor: 'var(--neon-cyan)',
-    date: 'Mar 20, 2025',
     title: 'Keyboard Accuracy Test: Why Precision Beats Raw Speed',
     excerpt: 'A 100 WPM typist with bad accuracy is slower than an 80 WPM typist. Here is why the backspace key is your worst enemy.',
     readTime: '7 min read',
@@ -236,7 +228,6 @@ Our Keyboard Accuracy test forces you to slow down and exposes your worst habits
     emoji: '↕️',
     tag: 'Mouse',
     tagColor: 'var(--neon-green)',
-    date: 'Mar 15, 2025',
     title: 'Scroll Test: Measure Your Mouse Wheel Speed and Health',
     excerpt: 'From bunny-hopping in games to scrolling giant codebases. Check if your mouse encoder is skipping ticks or dying.',
     readTime: '5 min read',
@@ -262,11 +253,10 @@ In CS2 and Apex Legends, players bind jump to the scroll wheel. Why? Because sen
     emoji: '🖲️',
     tag: 'Aim',
     tagColor: 'var(--neon-red)',
-    date: 'Mar 10, 2025',
     title: 'Mouse Accuracy Test: Find Your Perfect DPI',
     excerpt: 'Higher DPI does not mean better aim. Learn how to track your cursor path and find the sensitivity that actually fits your hand.',
     readTime: '7 min read',
-    body: `Mouse accuracy is entirely different from reaction time. It’s the raw measure of your hand-eye coordination. If you consistently miss the X button on a browser window, or overshoot heads in Valorant, your sensitivity settings are messing with you.
+    body: `Mouse accuracy is entirely different from reaction time. It's the raw measure of your hand-eye coordination. If you consistently miss the X button on a browser window, or overshoot heads in Valorant, your sensitivity settings are messing with you.
 
 **The DPI Myth**
 Gaming mice advertise 25,000+ DPI like it's a superpower. It's a marketing gimmick. Most FPS pros play at 400 or 800 DPI. Why? Because at ultra-high DPI, every single heartbeat, coffee tremor, or deep breath translates into your cursor vibrating off the target.
@@ -290,7 +280,6 @@ Run the test three times. Do it once at 400 DPI, once at 800, and once at 1600. 
     emoji: '🔭',
     tag: 'Aim',
     tagColor: 'var(--neon-orange)',
-    date: 'Mar 5, 2025',
     title: 'Sniper Mode Training: Master Long-Range Precision Aim',
     excerpt: 'Sniping requires a totally different motor skill than rifle spray. Here is how to hold angles, stop shaking, and hit the micro-flicks.',
     readTime: '8 min read',
@@ -318,7 +307,6 @@ The biggest mistake snipers make is flicking too hard and shooting past the targ
     emoji: '🚀',
     tag: 'Game',
     tagColor: 'var(--neon-cyan)',
-    date: 'Feb 28, 2025',
     title: 'Space Defense Game: Master Aim Under Pressure',
     excerpt: 'Raw aim is useless if you panic when things get chaotic. Learn how to prioritize targets and maintain high CPS with accuracy.',
     readTime: '6 min read',
@@ -348,7 +336,6 @@ This game trains your brain to handle visual clutter. In games like Overwatch or
     emoji: '🌌',
     tag: 'Game',
     tagColor: 'var(--neon-green)',
-    date: 'Feb 20, 2025',
     title: 'Voyager Game: Evasion, Flow State, and Mouse Control',
     excerpt: 'Aim trainers teach you to hit targets. Voyager teaches you how to maneuver smoothly around obstacles without crashing.',
     readTime: '7 min read',
@@ -374,7 +361,6 @@ Playing Voyager for 5 minutes before booting up a ranked match is incredible. It
     emoji: '💥',
     tag: 'CPS',
     tagColor: 'var(--neon-red)',
-    date: 'Feb 15, 2025',
     title: 'CPS Rush: The Ultimate Burst Speed Challenge',
     excerpt: 'A 60-second test measures stamina. CPS Rush measures your absolute peak 1-rep max clicking speed. Can you survive 10 rounds?',
     readTime: '6 min read',
@@ -402,7 +388,6 @@ Do not play CPS Rush for an hour straight. Maximum tension bursts are taxing on 
     emoji: '🖱️',
     tag: 'Mouse',
     tagColor: 'var(--neon-green)',
-    date: 'Feb 10, 2025',
     title: 'Best Gaming Mice for High CPS and Aim — 2025 Picks',
     excerpt: 'Your hardware matters. We break down the top mice used by pros for maximizing click speed and maintaining perfect tracking.',
     readTime: '6 min read',
@@ -427,7 +412,6 @@ The budget king. For under $90, you get optical switches, an insane coating for 
     emoji: '⚡',
     tag: 'Reaction',
     tagColor: 'var(--neon-orange)',
-    date: 'Feb 5, 2025',
     title: 'Hardware Tweaks to Instantly Improve Reaction Time',
     excerpt: 'Stop blaming your reflexes. Your setup might be adding 30ms of input lag. Here is how to optimize Windows and your gear.',
     readTime: '7 min read',
@@ -509,7 +493,6 @@ export default function BlogPage() {
           >
             {post.tag}
           </span>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>{post.date}</span>
           <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>📖 {post.readTime}</span>
         </div>
 
@@ -667,7 +650,6 @@ export default function BlogPage() {
                 >
                   {p.tag}
                 </span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.date}</span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   {p.readTime}
                 </span>
