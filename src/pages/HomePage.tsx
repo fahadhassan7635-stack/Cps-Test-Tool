@@ -55,230 +55,241 @@ const blogPosts = [
   { to: '/blog', emoji: '⚡', tag: 'Reaction', tagColor: 'var(--neon-orange)', date: 'Apr 20, 2025', title: 'Methods to Reduce Reaction Time', excerpt: 'Training schedules and warm-up drills that elite FPS players use daily.' },
 ];
 
-// ─── SEO Article Data for all tools ───────────────────────────────────────────
 const seoArticles = [
   {
     to: '/typing-test',
     icon: '⌨️',
     color: 'var(--neon-cyan)',
-    title: 'Typing Speed Test — Measure Your WPM Online',
+    title: 'Typing Speed Test — Find Your True WPM Without Creating an Account',
     badge: 'WPM',
     content: [
-      'Our free <strong>Typing Speed Test</strong> measures how many <strong>Words Per Minute (WPM)</strong> you can type with real-time accuracy tracking. The average person types between 38–40 WPM, while professional typists hit 65–75 WPM. Competitive touch typists regularly exceed 100 WPM.',
-      'This tool uses randomized word sets, code snippets, and quote passages to simulate real-world typing scenarios. Every session tracks your raw WPM, net WPM (after accuracy penalty), error count, and accuracy percentage. Use it daily to build muscle memory on your keyboard layout — whether you\'re on QWERTY, Dvorak, or Colemak.',
-      '<strong>Pro tip:</strong> Focus on accuracy first, not speed. Typing at 80 WPM with 98% accuracy beats 120 WPM with 85% accuracy in real productivity terms.',
+      'Want to know exactly how fast you type? Our <strong>Typing Speed Test</strong> gives you the raw numbers instantly. You\'ll see your WPM, accuracy, and exactly how many typos you made in real-time. No sign-ups or downloads needed.',
+      'Let\'s talk numbers. The average person types around <strong>40 WPM</strong>. If you work in an office, you\'re probably hitting 60 WPM. But if you\'re a hardcore touch typist or a programmer, you should be pushing past <strong>90 to 100 WPM</strong>. Some competitive typists even hit 150+ WPM on short bursts.',
+      'We set up different modes depending on what you want to practice. Quote mode feels like actual daily typing, while our code snippets mode will heavily test your shift-key and symbol accuracy.',
+      '<strong>The secret to typing faster:</strong> Stop looking at your hands. Memorize the home row (ASDF / JKL;). Even just 10 minutes of daily practice without looking down will bump your speed by 20 WPM in a few weeks.',
     ],
     faqs: [
-      { q: 'What is a good typing speed?', a: '60 WPM is considered proficient. 80+ WPM is excellent for office work. 100+ WPM puts you in the top 5% of typists worldwide.' },
-      { q: 'How do I improve my WPM fast?', a: 'Practice touch typing for 15 minutes daily, focus on your weakest keys, and never look at the keyboard. Consistency beats intensity.' },
+      { q: 'What counts as a "good" typing speed?', a: 'Anything over 65 WPM is great for daily work. If you write code or heavy documentation, aim for 80+. If you\'re currently stuck under 40 WPM, taking a week to learn proper finger placement will change your life.' },
+      { q: 'Raw WPM vs. Net WPM: What\'s the difference?', a: 'Raw WPM is just how many keys you smashed. Net WPM is your actual usable speed because it subtracts your mistakes. If you type 100 words but mess up 20 of them, your Net WPM drops. Net is the only score that really matters.' },
+      { q: 'Can I actually reach 100 WPM?', a: 'Absolutely. Most people plateau at 70 WPM because they use bad finger habits. If you force yourself to use all ten fingers and practice for a few months, 100 WPM is totally doable.' },
     ],
   },
   {
     to: '/cps-test',
     icon: '🖱️',
     color: 'var(--neon-green)',
-    title: 'CPS Test — How Many Clicks Per Second Can You Do?',
+    title: 'CPS Test — Check Your Clicks Per Second',
     badge: 'CPS',
     content: [
-      'The <strong>CPS Test (Clicks Per Second Test)</strong> is the most popular tool for gamers who want to measure their mouse clicking speed. A casual user averages 5–7 CPS, while competitive Minecraft PvP players aim for 10–14 CPS using advanced clicking techniques.',
-      'This test supports multiple durations: 1 second, 5 seconds, 10 seconds, and 30 seconds. A longer test duration gives a more accurate average CPS since it smooths out burst clicks. Results are logged so you can track your improvement over time.',
-      '<strong>Clicking techniques tested:</strong> Regular clicking (3–7 CPS), Jitter clicking (10–14 CPS), Butterfly clicking (12–16 CPS), and Drag clicking (25–100+ CPS). Each technique has different use cases in games like Minecraft, Roblox, and various FPS titles.',
+      'The <strong>CPS Test</strong> is exactly what it sounds like: a timer, a clicking box, and a tracker that tells you your exact clicks per second. It\'s the go-to benchmark for Minecraft PvP players trying to prove they aren\'t using an auto-clicker.',
+      'If you just casually click using your index finger, you\'ll probably land around <strong>5 to 7 CPS</strong>. Gamers using the jitter clicking technique usually sit around <strong>11 to 14 CPS</strong>. If you butterfly click, hitting 15+ is pretty standard.',
+      'We offer a few time limits, but the <strong>5-second test</strong> is the golden rule. It’s long enough to see if you can hold your speed, but short enough that your arm doesn\'t completely gas out.',
+      '<strong>A quick tip on technique:</strong> Jitter clicking is great for combat because you still have decent control over your mouse. Butterfly clicking might get you a higher score here, but good luck aiming accurately in-game while doing it.',
     ],
     faqs: [
-      { q: 'What is a good CPS score?', a: 'Above 8 CPS is good for casual gaming. 12+ CPS is competitive. 16+ CPS using butterfly or drag clicking is considered elite.' },
-      { q: 'Does mouse quality affect CPS?', a: 'Yes. A mouse with a higher polling rate (1000Hz+) and low debounce time registers clicks more accurately, giving you a true CPS reading.' },
+      { q: 'How much CPS do I actually need for Minecraft?', a: 'For older combat systems (like 1.8.9), 10 CPS is the sweet spot. Going higher than 15 CPS barely registers because of the server\'s 20-tick limit anyway. Anything above that is just flexing.' },
+      { q: 'Will jitter clicking hurt my hand?', a: 'It can, especially if you tense up your wrist instead of your forearm. Take breaks. If your hand starts feeling numb or tingly, stop immediately. A high score isn\'t worth RSI (Repetitive Strain Injury).' },
+      { q: 'Why is my score lower on the 10-second test?', a: 'Because human muscles get tired fast. You can sprint for 2 seconds, but you can\'t sprint for 10. Longer tests show your stamina, not just your peak burst speed.' },
     ],
   },
   {
     to: '/reaction-time',
     icon: '⚡',
     color: 'var(--neon-orange)',
-    title: 'Reaction Time Test — Measure Your Reflex Speed in Milliseconds',
+    title: 'Reaction Time Test — How Fast Are Your Reflexes?',
     badge: 'REFLEX',
     content: [
-      'The <strong>Reaction Time Test</strong> measures how quickly you respond to a visual stimulus in milliseconds (ms). The average human reaction time is 200–250ms. Elite esports athletes and professional FPS gamers often achieve 150–180ms through consistent training and warm-up routines.',
-      'Our test uses a randomized delay system to prevent anticipation cheating. You\'ll see multiple rounds per session, and the median score is used as your result (not the average) to reduce the impact of accidental early clicks or distractions.',
-      'Reaction time is affected by sleep quality, caffeine intake, screen refresh rate, and practice. A 144Hz or 240Hz monitor can reduce perceived latency, but your actual neural response time improves only with deliberate training.',
+      'Ever wonder why you lost that sniper duel in Valorant? Your <strong>Reaction Time</strong> might be the reason. This test measures the exact millisecond gap between the screen turning green and your finger clicking the mouse.',
+      'The average person sits around <strong>200ms to 250ms</strong>. Pro FPS players? They routinely hit between <strong>150ms and 170ms</strong>. Dropping below 150ms is incredibly rare and usually means you have god-tier genetics or an insanely low-latency gaming setup.',
+      'We randomize the delay between 1.5 and 5 seconds so you can\'t guess when it\'s going to happen. Also, we calculate your score based on the <strong>median</strong>, not the average. This way, one accidental early click doesn\'t ruin your whole run.',
+      '<strong>Want a better score?</strong> Drink some coffee, get a full night\'s sleep, and use a 144Hz (or higher) monitor. Playing on a 60Hz screen adds about 16ms of pure delay that you literally can\'t fix with practice.',
     ],
     faqs: [
-      { q: 'What is a good reaction time?', a: 'Under 200ms is excellent. 150–180ms is what top esports pros average. Below 150ms is exceptional and rare.' },
-      { q: 'Can I improve my reaction time?', a: 'Yes! Regular practice, proper sleep, caffeine in moderation, and visual training exercises can shave 20–40ms off your baseline over weeks.' },
+      { q: 'What is a good reaction time for gaming?', a: 'If you\'re consistently under 200ms, you have a solid advantage over most casual players. But remember, pure reaction time is just one part of the puzzle. Crosshair placement and game sense usually win fights before reaction time even matters.' },
+      { q: 'Can I practice to get faster reflexes?', a: 'Yes and no. You can lower your score by 10-20ms just by getting used to the test and warming up. But everyone has a biological limit based on how fast their nervous system sends signals.' },
+      { q: 'Is my phone or laptop screen making me slower?', a: 'Yes. Phones, TVs, and standard office monitors have noticeable input lag. If you really want an accurate test of your body\'s speed, do this on a wired mouse with a high refresh rate gaming monitor.' },
     ],
   },
   {
     to: '/aim-trainer',
     icon: '🎯',
     color: 'var(--neon-red)',
-    title: 'Aim Trainer — Sharpen Your FPS Aiming Skills Online',
+    title: 'Browser Aim Trainer — Warm Up Before Ranked',
     badge: 'AIM',
     content: [
-      'The <strong>Aim Trainer</strong> is designed for FPS gamers who want to improve their target acquisition speed, flick accuracy, and tracking ability — all without launching a full game. It\'s used as a warm-up tool by players of Valorant, CS2, Apex Legends, Overwatch 2, and Fortnite.',
-      'Targets spawn at randomized positions with varying sizes and speeds. Your session stats include accuracy percentage, average time-to-click per target, targets hit vs missed, and a final score. The dynamic difficulty increases target speed as your accuracy improves.',
-      '<strong>Use it as a pre-game ritual:</strong> 5 minutes on the aim trainer before a ranked session warms up your hand-eye coordination, gets your mouse sensitivity feeling natural, and puts you in a focused mental state.',
+      'Don\'t feel like launching a bulky software just to warm up? Our <strong>Aim Trainer</strong> runs right in your browser. Just pick your target size, hit start, and get your wrist moving before you queue up for a match.',
+      'We built this to focus on the big three: <strong>flicking</strong> (hitting static dots fast), <strong>tracking</strong> (keeping your crosshair on a moving target), and <strong>micro-adjustments</strong> (tiny, precise movements).',
+      'The system is dynamic. If you\'re hitting 90% of your shots, the targets will start shrinking and moving faster. It constantly pushes you out of your comfort zone, which is the only way your muscle memory actually improves.',
+      '<strong>Pro tip:</strong> Don\'t chase high scores. Use this for 5 to 10 minutes max just to wake up your hand-eye coordination. You\'ll notice your first game of the day feels way less clunky.',
     ],
     faqs: [
-      { q: 'Is browser aim training actually effective?', a: 'Yes, for warming up and building habits. While specialized software like Aimlabs offers more modes, browser-based training is proven to help with consistency and muscle memory.' },
-      { q: 'What mouse sensitivity should I use for aim training?', a: 'Use the exact same sensitivity as your game. Training at a different sens will hurt, not help. Consistency is everything.' },
+      { q: 'Does a 2D browser aim trainer actually help in 3D games?', a: 'Yes. Aiming is mostly about mouse control. Whether you\'re clicking a 2D dot or a 3D head in CS2, you\'re still training the connection between your brain, your eyes, and your hand.' },
+      { q: 'What sensitivity should I use?', a: 'Whatever you use in your main game. Match your DPI and Windows mouse speed. Training on a random, super-fast sensitivity will just mess up the muscle memory you\'ve already built.' },
     ],
   },
   {
     to: '/spacebar',
     icon: '▭',
     color: 'var(--neon-cyan)',
-    title: 'Spacebar Counter — Test Your Space Key Speed',
+    title: 'Spacebar Counter — Test Your Tapping Speed',
     badge: 'SPACEBAR',
     content: [
-      'The <strong>Spacebar Counter</strong> tests how many times you can press the space bar within a set time limit. It\'s a deceptively simple test that reveals a lot about your finger stamina, rhythm, and keyboard actuation consistency.',
-      'Spacebar clicking speed matters more than you think — in games like Jump King, Only Up, Geometry Dash, and various platformers, your space bar response time and press frequency directly impact your performance. This tool is also used by speedrunners to warm up.',
-      'The test is available in 5-second, 10-second, and 30-second modes. Your score is displayed as total hits and average hits per second. Typing keyboard spacebar switches (linear vs tactile vs clicky) can produce noticeably different scores.',
+      'It sounds like a meme, but the <strong>Spacebar Counter</strong> is actually super useful. The spacebar is the biggest, most abused key on your board. Whether you\'re bunny-hopping, playing rhythm games, or just speed typing, spacebar timing is everything.',
+      'If you play Geometry Dash, you know that missing a spacebar tap by a millisecond ruins a run. Speedrunners use rapid taps to abuse movement mechanics. Even in normal typing, your thumb hits space more than any other finger hits any other key.',
+      'You can run 5s, 10s, or 30s tests. Watch the rhythm graph at the end—it shows if you keep a steady pace or if your thumb completely gives up halfway through the test.',
+      '<strong>Keyboard tip:</strong> Linear switches (like Cherry MX Reds) are way better for this than clicky switches. Since they don\'t have a tactile bump, you can rapidly flutter your thumb without fighting the keyboard\'s resistance.',
     ],
     faqs: [
-      { q: 'What is a good spacebar speed?', a: 'Most users hit 8–12 presses per second in a 5-second burst. Consistent 10+ presses per second is considered fast.' },
-      { q: 'Does my keyboard switch type matter?', a: 'Linear switches (like Red or Silver) are fastest for rapid pressing. Clicky and tactile switches add slight resistance that can slow down your rate.' },
+      { q: 'What is a fast spacebar speed?', a: 'Hitting 8 presses a second is pretty good. If you can maintain 11+ across a 10-second test, you either play way too much osu! or you have insane thumb stamina.' },
+      { q: 'Why does my keyboard miss some of my spacebar hits?', a: 'Your keyboard might have a slow debounce delay, or the switch itself is getting mushy. Some cheaper keyboards physically can\'t register inputs as fast as you can tap.' },
     ],
   },
   {
     to: '/key-visualizer',
     icon: '👁️',
     color: 'var(--neon-purple)',
-    title: 'Key Visualizer — Real-Time Keyboard Input Display',
+    title: 'Key Visualizer — Test Your Keyboard Ghosting & NKRO',
     badge: 'LIVE',
     content: [
-      'The <strong>Key Visualizer</strong> displays every keystroke you make in real time on a virtual keyboard layout. Every key lights up as you press it — making it perfect for verifying your keyboard\'s N-key rollover (NKRO), identifying stuck or ghosting keys, and creating satisfying keyboard showcase clips.',
-      'This tool is used by keyboard enthusiasts to test new builds, by gamers to verify that all keybinds are registering without ghosting, and by streamers who want an overlay-style display showing their inputs to viewers.',
-      'It supports full keyboard layouts including TKL and full-size boards. Modifier keys (Shift, Ctrl, Alt, Win) are tracked separately. The display uses color-coded highlighting to show which keys are currently held versus recently released.',
+      'The <strong>Key Visualizer</strong> is a live, on-screen display of exactly what your keyboard is doing. It’s perfect for finding out if your keyboard has hardware issues, or for using as an overlay while streaming.',
+      'Its best feature is testing for <strong>Ghosting (NKRO)</strong>. Cheap keyboards can only process 3 or 4 keys at a time. Mash your WASD keys, hold Shift, and hit Space. Did one of those keys not light up on our visualizer? That\'s ghosting, and it will get you killed in FPS games.',
+      'Streamers love this tool. If you play rhythm games, speedruns, or fighting games, you can just add this URL as a Browser Source in OBS. Your viewers will see your exact inputs in real-time without you downloading any sketchy third-party software.',
+      'The visualizer shows three states: solid color when you hold a key, a fading trail when you let go, and dark when idle. It\'s also a great way to test if your custom macros are actually firing correctly.',
     ],
     faqs: [
-      { q: 'What is keyboard ghosting?', a: 'Ghosting is when certain key combinations fail to register because the keyboard\'s controller can\'t handle simultaneous inputs. NKRO keyboards eliminate this entirely.' },
-      { q: 'Can I use this to record my typing for videos?', a: 'Yes! Use a screen recorder or OBS to capture your key visualizer session and overlay it on gaming footage or programming tutorials.' },
+      { q: 'What exactly is Keyboard Ghosting?', a: 'It\'s a hardware limitation. When you press too many keys at once, the keyboard\'s circuitry gets confused and "drops" an input. Gaming keyboards advertise "N-Key Rollover" (NKRO), meaning they can register every single key pressed at the same time.' },
+      { q: 'How do I make the background transparent for OBS?', a: 'Just add the URL as a Browser Source in OBS Studio. You can apply a simple custom CSS rule right inside OBS (`body { background: transparent !important; }`) to hide our website background and only show the floating keys.' },
     ],
   },
   {
     to: '/double-click',
     icon: '🖱️',
     color: 'var(--neon-green)',
-    title: 'Double Click Test — Check Your Mouse Switch for Double Clicking',
+    title: 'Double Click Test — Check Your Mouse for Dying Switches',
     badge: 'MOUSE',
     content: [
-      'The <strong>Double Click Test</strong> measures the interval between two mouse clicks to determine if your mouse is registering clean single clicks or accidentally double-clicking. Mouse double-clicking is a hardware defect caused by worn-out switch debounce mechanisms — commonly seen in older Razer, Logitech, and SteelSeries mice.',
-      'This test is critical if you\'re experiencing issues in games where a single click unexpectedly selects multiple items, fires twice, or places two blocks instead of one in Minecraft. It shows you the exact millisecond interval between registered clicks.',
-      '<strong>How to read results:</strong> If your mouse registers two clicks when you physically click once, and the interval between them is under 40–50ms, your switch debounce is failing. Time to replace the switch or the mouse.',
+      'Is your mouse acting weird? Dragging files by accident or firing two shots instead of one? You probably have a failing switch. Our <strong>Double Click Test</strong> measures the exact time between your clicks to diagnose hardware defects.',
+      'Here\'s what happens inside a dying mouse: the tiny metal spring in the switch gets worn out and starts "bouncing." When you click once, the metal bounces and touches the contact twice. To the computer, it looks like two insanely fast clicks.',
+      'Our tool creates a live interval graph. A normal, healthy human click usually has a gap of 100ms or more. If our graph shows clicks happening with a <strong>10ms to 30ms gap</strong>, that’s switch bounce. A human physically cannot double-click that fast.',
+      '<strong>How to fix it:</strong> Check if your mouse software (like Razer Synapse or Glorious Core) has a "Debounce Time" slider. Turn it up to 12ms. If you don\'t have that option, you either need to solder a new switch into the mouse, or just buy a new one.',
     ],
     faqs: [
-      { q: 'What causes mouse double clicking?', a: 'Worn-out Omron or Kailh switch springs lose their debounce timing. The capacitor meant to filter signal noise degrades over time and with heavy use.' },
-      { q: 'Can double clicking be fixed?', a: 'Sometimes. You can replace the mouse switch (if you have soldering skills), adjust the debounce time in mouse software, or use the manufacturer\'s warranty.' },
+      { q: 'Which gaming mice are known for double-clicking?', a: 'Older Logitech mice (like the G Pro Wireless Gen 1, G305, and early G502s) were notorious for this because of the Omron 50M switches they used. Most modern top-tier mice now use optical switches, which use light beams instead of metal contacts, making double-clicking literally impossible.' },
+      { q: 'Are you sure it\'s the mouse and not just my finger twitching?', a: 'Yes. If you look at the test results and see intervals under 50ms, it is 100% a hardware defect. Human fingers simply don\'t bounce that fast.' },
     ],
   },
   {
     to: '/accuracy',
     icon: '📏',
     color: 'var(--neon-yellow)',
-    title: 'Keyboard Accuracy Test — How Precise Is Your Typing?',
+    title: 'Keyboard Accuracy Test — Stop Making Typos',
     badge: 'ACCURACY',
     content: [
-      'The <strong>Keyboard Accuracy Test</strong> isolates your typing precision from your raw speed. While a typing speed test rewards both speed and accuracy together, this test presents letter sequences, word patterns, and tricky character combinations specifically designed to trigger common typos.',
-      'Your accuracy score is calculated as the percentage of correct keystrokes out of total keystrokes. Results also show your most frequently mistyped key pairs — extremely useful for identifying which finger transitions are weakest on your keyboard layout.',
-      'Accuracy matters more in professional settings. A programmer making frequent syntax errors, or a data entry operator mistyping figures, costs more time in corrections than the raw speed advantage gains. This test helps you identify and fix those bottlenecks specifically.',
+      'Speed means nothing if you have to hit backspace every three seconds. Our <strong>Keyboard Accuracy Test</strong> forces you to slow down and exposes exactly which fingers are making the most mistakes.',
+      'We calculate your score simply: correct keystrokes divided by total keystrokes. But more importantly, the test tracks your error patterns. Are you constantly hitting "r" instead of "t"? This tool will map out those bad habits.',
+      'We built the test phrases specifically to trip you up. You\'ll deal with tricky adjacent keys, capital letters thrown into the middle of sentences, and heavy number-row usage.',
+      '<strong>Why this matters:</strong> Every time you make a mistake, fixing it costs you about 3 to 5 seconds of time and totally breaks your flow state. A typist going 80 WPM with 99% accuracy will finish a document way faster than a 110 WPM typist with 85% accuracy.',
     ],
     faqs: [
-      { q: 'What typing accuracy should I aim for?', a: '95%+ is the professional standard for typists. 98%+ is excellent. 100% accuracy at moderate speed beats 95% accuracy at high speed for error-prone tasks.' },
-      { q: 'How do I fix common typing errors?', a: 'Slow down on your problem key pairs and practice them in isolation. Tools like MonkeyType\'s custom word lists let you drill specific patterns.' },
+      { q: 'What is a good typing accuracy percentage?', a: 'Anything below 95% means you are wasting a ton of time correcting yourself. You should aim for 97% to 98% for everyday typing. If you write code, aim for 99%—one missed semicolon can ruin your day.' },
+      { q: 'How do I stop mistyping specific keys?', a: 'Slow down. Figure out which key transition messes you up, and practice typing just those words at half speed. You have to overwrite your bad muscle memory with slow, deliberate practice.' },
     ],
   },
   {
     to: '/scroll-test',
     icon: '↕️',
     color: 'var(--neon-cyan)',
-    title: 'Scroll Test — Measure Your Mouse Scroll Wheel Speed',
+    title: 'Scroll Speed Test — Check Your Mouse Wheel',
     badge: 'SCROLL',
     content: [
-      'The <strong>Scroll Test</strong> measures how fast you can scroll with your mouse wheel and verifies that your scroll wheel is registering every tick accurately. It\'s a quick hardware verification tool and a surprisingly competitive speed challenge.',
-      'Scroll speed matters for productivity workflows — navigating long documents, code files, and web pages faster reduces fatigue and cognitive load. Mice with free-spin scroll wheels (like the Logitech MX Master 3) can scroll thousands of lines per second in free-spin mode.',
-      'The test records total scroll ticks per second and plots your scroll rhythm on a live graph. You can spot irregularities like missed ticks, double-tick events, or scroll wheel encoder degradation that causes inconsistent input.',
+      'The <strong>Scroll Test</strong> tracks how many wheel ticks you can register in a second. It\'s a fun challenge, but it’s also an incredible diagnostic tool to see if your mouse\'s scroll encoder is dirty or breaking.',
+      'If you scroll down, but the page occasionally jumps up for a split second, your scroll encoder is dying. This test graphs out every single tick. If your graph has random dips or gaps, your hardware is at fault.',
+      'If you have a mouse with an "infinite scroll" unlock wheel (like the Logitech G502 or MX Master), you can hit 60 to 80 ticks per second easily. Standard notched wheels will max out around 12 ticks per second.',
     ],
     faqs: [
-      { q: 'Why does my scroll wheel skip?', a: 'Scroll wheel encoders wear out over time. Dust accumulation is the most common cause. Compressed air cleaning often fixes intermittent skipping.' },
-      { q: 'What mouse has the fastest scroll wheel?', a: 'Logitech MX Master 3S and G502 X Plus have the highest-speed free-spin magnetic scroll wheels. They can scroll over 1,000 lines per second in free-spin mode.' },
+      { q: 'Why does my scroll wheel jump in the wrong direction?', a: 'Dust, pet hair, or just mechanical wear and tear inside the wheel encoder. Sometimes blowing hard into the wheel gaps fixes it. If not, the encoder is worn out.' },
+      { q: 'Does scrolling speed actually matter for anything?', a: 'In games like CS2 or Apex Legends, players bind "Jump" or "Tap Strafe" to the scroll wheel. A consistent, tactile scroll wheel is massive for hitting movement tech perfectly.' },
     ],
   },
   {
     to: '/mouse-accuracy',
     icon: '🖲️',
     color: 'var(--neon-green)',
-    title: 'Mouse Accuracy Test — Track Your Cursor Precision',
+    title: 'Mouse Accuracy Test — Find Your Perfect DPI',
     badge: 'TRACKING',
     content: [
-      'The <strong>Mouse Accuracy Test</strong> challenges you to click targets as quickly and precisely as possible. Unlike the aim trainer (which focuses on FPS-style targeting), this test measures your general mouse control — how smoothly you move from point A to point B and how often you land inside the target zone.',
-      'Your results include an accuracy percentage, average deviation from target center in pixels, and a movement path visualization showing how direct or curved your cursor paths are. Overshoot, undershoot, and tremor patterns are all visible in the path data.',
-      'This test is directly relevant to graphic designers, video editors, UI/UX professionals, and anyone who works with fine cursor control all day. High DPI settings cause overshooting while low DPI causes labored movements — finding your ideal DPI is something this test helps you calibrate.',
+      'This isn\'t just about clicking a dot. The <strong>Mouse Accuracy Test</strong> tracks the exact path your cursor takes to get to the target. It’s the absolute best way to figure out if your DPI is set too high.',
+      'We give you a report based on a few things: Did you click inside the circle? How fast did you get there? And most importantly, <strong>Path Efficiency</strong>. Did you move in a perfectly straight line, or did your cursor curve wildly before landing on the target?',
+      'If your path efficiency is terrible, you are over-correcting. This usually means your sensitivity is too high. You\'re over-shooting the target and having to pull back at the last millisecond.',
+      '<strong>How to test your DPI:</strong> Run this test three times. Once at 400 DPI, once at 800, and once at 1600. Look at which setting gives you the straightest lines and least deviation. That is your natural sensitivity.',
     ],
     faqs: [
-      { q: 'What DPI should I use for best accuracy?', a: 'Most professional FPS players use 400–800 DPI with high in-game sensitivity. Designers often prefer 800–1200 DPI. The ideal DPI is one where you feel neither rushed nor restricted.' },
-      { q: 'Does mouse pad size affect accuracy?', a: 'Absolutely. A large mouse pad lets you use lower DPI with full arm movements, which is more accurate and less fatiguing than high DPI with wrist-only movements.' },
+      { q: 'What DPI do pro players use?', a: 'Most FPS pros sit heavily at 800 DPI nowadays. 400 DPI requires massive arm movements, and anything over 1600 DPI usually picks up tiny, unwanted hand twitches.' },
+      { q: 'Why is my cursor path always curved?', a: 'Because your elbow and wrist act as pivot points, creating a natural arc when you move your arm. Learning to combine wrist and arm movement to draw a straight line is the secret to god-tier aim.' },
     ],
   },
   {
     to: '/sniper-mode',
     icon: '🔭',
     color: 'var(--neon-red)',
-    title: 'Sniper Mode — Train Your Micro-Flick and Precision Aim',
+    title: 'Sniper Mode — Train Your Micro-Flicks',
     badge: 'PRECISION',
     content: [
-      '<strong>Sniper Mode</strong> is an extreme precision challenge that simulates long-range target acquisition in FPS games. Targets are small, move unpredictably, and require controlled micro-flick movements rather than large arm sweeps. It directly trains the fine motor control needed for AWP/sniper rifle aiming in games like CS2 and Valorant.',
-      'The challenge uses a zoomed-in viewport and smaller hitboxes than the standard aim trainer, forcing you to move your mouse in tiny, deliberate increments. Every shot you fire is analyzed for overshoot distance and reaction delay.',
-      'Professional snipers in esports warm up with precision drills specifically to train their hand steadiness. This mode replicates that training — helping you eliminate the "shaky crosshair syndrome" that plagues players who switch from assault rifles to sniper rifles mid-game.',
+      'Standard aiming is fast and loose. Sniper aiming is completely different. <strong>Sniper Mode</strong> forces you to hit tiny targets with minimal movement, simulating what it feels like to hold an angle with an AWP or Operator.',
+      'When you use a sniper, you pre-aim an angle, hold your mouse perfectly still, and make a tiny micro-flick when the enemy appears. We track your <strong>Crosshair Stability</strong> to see how much your hand shakes while waiting for the shot.',
+      'If you have a habit of over-flicking your targets, this mode will humble you fast. A score of over 85% stability with low overshoot means your sniper mechanics are super solid.',
+      '<strong>A weird trick that works:</strong> Pay attention to your breathing. Inhale, exhale halfway, and gently hold your breath while waiting for the click. It physically stops your hand from having micro-tremors.',
     ],
     faqs: [
-      { q: 'How do I stop overshooting my targets?', a: 'Lower your mouse sensitivity and practice stopping your crosshair exactly on the target before clicking. Use a controlled exhale technique — breathe out slowly as you aim.' },
-      { q: 'Is sniper aim different from regular aim?', a: 'Yes. Sniping relies on micro-adjustments and stillness, while tracking aims involve continuous movement. They use different muscle groups and require separate training.' },
+      { q: 'How do I stop shooting past the target?', a: 'First, lower your scoped sensitivity in-game (pros often use 0.8x to 0.9x of their normal sens). Second, practice intentionally flicking past the target and smoothly pulling back, instead of trying to violently stop on a dime.' },
     ],
   },
   {
     to: '/space-defense',
     icon: '🚀',
     color: 'var(--neon-purple)',
-    title: 'Space Defense — The Ultimate Click Speed Skill Game',
+    title: 'Space Defense — Can You Click Fast Under Pressure?',
     badge: 'GAME',
     content: [
-      '<strong>Space Defense</strong> is an arcade-style skill game where enemy ships descend toward your base and you must click them to destroy them before they reach the bottom of the screen. It combines clicking speed, accuracy, and target prioritization into a single chaotic challenge.',
-      'The game features wave-based difficulty scaling — early waves train your basic clicking rhythm, while later waves introduce fast-moving enemies, armored targets requiring multiple clicks, and cluster formations that punish inaccurate clicking. Your final score is determined by enemies destroyed, accuracy, and highest wave reached.',
-      'This is the ultimate test of whether your CPS practice translates into real gaming performance. Many players who score 12+ CPS in the raw CPS test discover their effective CPS drops to 7–8 when they also need to aim accurately under pressure — exactly the gap this game trains you to close.',
+      'Anyone can hit 12 CPS on a massive, stationary square. But can you do it while tracking multiple moving targets? <strong>Space Defense</strong> combines raw click speed with target prioritization. If three ships hit the bottom, game over.',
+      'The early waves are slow and easy. By wave 8, you\'re dealing with armored targets that require multiple clicks. By wave 13, it\'s complete chaos and purely a test of how calm you can stay under pressure.',
+      'We punish spamming. The game calculates an accuracy multiplier. If you just wildly click everywhere hoping to hit something, your score will tank. Deliberately clicking 7 times a second with high accuracy will always beat frantic 14 CPS spam.',
+      'Players usually find out that their "in-game CPS" is way lower than their benchmark CPS. Closing the gap between those two numbers is exactly how you win chaotic close-range fights in games like Apex Legends.',
     ],
     faqs: [
-      { q: 'What is the best strategy for high scores?', a: 'Prioritize the fastest-moving enemies first. Click clusters from the edges inward. Never panic-click the center — it wastes clicks and misses targets.' },
-      { q: 'Does Space Defense improve real game performance?', a: 'Yes. The combination of speed, accuracy, and decision-making under pressure directly maps to FPS and RTS game mechanics. Players report measurable improvement after 2 weeks of daily play.' },
+      { q: 'What\'s the strategy for surviving the later waves?', a: 'Don\'t look at the cluster. Focus entirely on the ships closest to the bottom. Click a target twice, instantly snap to the next one. Smooth, deliberate movements will save you; panic shaking will get you killed.' },
     ],
   },
   {
     to: '/voyager-game',
     icon: '🌌',
     color: 'var(--neon-cyan)',
-    title: 'Voyager Game — Endless Reflex & Endurance Challenge',
+    title: 'Voyager — The Ultimate Evasion Warm-up',
     badge: 'ENDLESS',
     content: [
-      '<strong>Voyager Game</strong> is an endless skill-based game where you pilot a spacecraft through an increasingly dense asteroid field. Your ship\'s movement is controlled by mouse position, and your survival time determines your score. Asteroids accelerate as your score increases, creating a pure reflex and endurance test.',
-      'Unlike games with a fixed ending, Voyager\'s endless format creates a flow state — the kind of effortless focus where your hands react faster than your conscious mind can process. It\'s the same psychological state that elite esports players describe during peak performance.',
-      'Voyager is used by our community as a reaction time warm-up and a mental focus calibration tool. Five minutes of Voyager before a gaming session measurably improves cursor control smoothness and reaction consistency, according to user reports in our community.',
+      '<strong>Voyager</strong> is pure flow state. You control a ship with your cursor, dodging an endless, escalating field of asteroids. No shooting, just survival. It’s arguably the best overall neurological warm-up on the platform.',
+      'At first, it\'s easy. But the density and speed ramp up infinitely. To survive past the two-minute mark, you have to stop looking at your ship and start looking at the empty spaces between the asteroids.',
+      'This trains predictive tracking. You have to read where an object is going to be two seconds from now, and position your mouse accordingly. Playing this for 5 minutes before booting up a ranked match wakes up your spatial awareness instantly.',
     ],
     faqs: [
-      { q: 'How long can top players survive?', a: 'The current platform record is over 4 minutes 30 seconds. Most players plateau between 90–180 seconds. Consistent improvement comes from smooth mouse movements rather than fast jerky reactions.' },
-      { q: 'Does Voyager Game work on mobile?', a: 'It\'s optimized for desktop mouse control. While it technically loads on mobile, touch-based control significantly changes the difficulty curve and accuracy of results.' },
+      { q: 'What is a good survival time?', a: 'If you can hit 60 seconds, you\'ve grasped the basics. Pushing past 2 minutes requires serious focus. If you break 3 minutes, you have elite mouse control.' },
+      { q: 'How is this different from an Aim Trainer?', a: 'Aim trainers teach you to move your mouse *to* an object. Voyager teaches you to maneuver your mouse *around* objects smoothly. Both are critical components of total mouse control.' },
     ],
   },
   {
     to: '/cps-rush',
     icon: '💥',
     color: 'var(--neon-red)',
-    title: 'CPS Rush — Burst Clicking Under Extreme Time Pressure',
+    title: 'CPS Rush — Pure Burst Speed',
     badge: 'RUSH',
     content: [
-      '<strong>CPS Rush</strong> is the most intense clicking challenge on the platform. You have only 1 second per round to click as fast as humanly possible — and then you get 2 seconds of rest before the next round begins. Ten rounds are played back-to-back, and your final score is the average of your top 7 rounds (3 lowest are dropped).',
-      'This format simulates the burst-clicking mechanics used in games like Minecraft PvP, where you need maximum CPS for short engagements rather than sustained clicking over long periods. It rewards your peak clicking performance while filtering out warm-up inconsistency.',
-      'CPS Rush sessions reveal whether your clicking technique degrades under fatigue. Players who maintain consistent CPS across all 10 rounds have more reliable technique than those whose scores drop sharply in rounds 7–10. Stamina and form are just as important as raw speed.',
+      'If the standard CPS test is a sprint, <strong>CPS Rush</strong> is a 1-rep max. You get 1 second to click as fast as humanly possible, followed by a 2-second break. This repeats for 10 grueling rounds.',
+      'We take your top 7 rounds and drop the 3 lowest to calculate your score. Why? Because this test completely isolates your peak neuromuscular burst speed. Most players find they score 2 to 3 CPS higher here than they do on the 5-second test.',
+      'Look closely at your round-by-round graph. If your score steadily drops from 14 down to 9, you are tensing your hand way too hard and burning out. If you stay consistent round after round, your clicking technique is solid and sustainable.',
     ],
     faqs: [
-      { q: 'What clicking technique is best for CPS Rush?', a: 'Butterfly clicking produces the highest burst CPS (12–18 CPS) and is ideal for 1-second rounds. Jitter clicking is good for sustained speed but causes hand fatigue over 10 rounds.' },
-      { q: 'Is CPS Rush different from the regular CPS test?', a: 'Yes. The regular CPS test measures sustained speed. CPS Rush measures your absolute peak burst performance under psychological time pressure — a fundamentally different skill.' },
+      { q: 'Why is burst CPS important?', a: 'Think about a shotgun fight in Fortnite or a quick melee trade in Minecraft. You don\'t need to click for 10 seconds straight; you just need absolute maximum speed for exactly 1 second. This trains that exact scenario.' },
+      { q: 'How do I stop my arm from hurting during this?', a: 'Relax your wrist. If you are jitter clicking, the vibration should come from your forearm, not your hand. If it hurts, stop. Take the 2-second break seriously to reset your tension.' },
     ],
   },
 ];
@@ -316,7 +327,7 @@ export default function HomePage() {
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', paddingBottom: '3rem' }}>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <section style={{ textAlign: 'center', padding: '5rem 1rem 4rem' }}>
         <div className="fade-in-up" style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -388,7 +399,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Category Cards ───────────────────────────────────────────────── */}
+      {/* Category Cards */}
       <section style={{ marginBottom: '4rem' }}>
         <div className="section-label">Tools & Games</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Choose Your Arena</h2>
@@ -499,7 +510,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Quick Launch ─────────────────────────────────────────────────── */}
+      {/* Quick Launch */}
       <section style={{ marginBottom: '4rem' }}>
         <div className="section-label">Quick Launch</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Jump In Instantly</h2>
@@ -549,7 +560,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Leaderboard + Daily Challenge ────────────────────────────────── */}
+      {/* Leaderboard + Daily Challenge */}
       <section style={{ marginBottom: '5rem' }}>
         <div style={{
           display: 'grid',
@@ -686,7 +697,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Blog + Gear ──────────────────────────────────────────────────── */}
+      {/* Blog + Gear */}
       <section style={{ marginBottom: '4rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
           <div>
@@ -737,7 +748,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Gear Section ─────────────────────────────────────────────────── */}
+      {/* Gear Section */}
       <section style={{
         marginBottom: '4rem',
         background: 'rgba(8,13,20,0.6)',
@@ -763,9 +774,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ══════════════════════════════════════════════════════════════════════
-          SEO ARTICLE SECTION — All 14 Tools
-      ══════════════════════════════════════════════════════════════════════ */}
+      {/* SEO Article Section */}
       <hr style={{ borderColor: 'var(--border)', margin: '3rem 0' }} />
 
       <section style={{ marginBottom: '4rem' }}>
@@ -831,7 +840,6 @@ export default function HomePage() {
                   scrollMarginTop: '80px',
                 }}
               >
-                {/* Article Header — always visible, clickable to expand */}
                 <button
                   onClick={() => setExpandedArticle(isExpanded ? null : article.to)}
                   style={{
@@ -846,7 +854,6 @@ export default function HomePage() {
                     textAlign: 'left',
                   }}
                 >
-                  {/* Icon bubble */}
                   <div style={{
                     width: '52px', height: '52px', flexShrink: 0,
                     background: `${article.color}15`,
@@ -858,7 +865,6 @@ export default function HomePage() {
                     {article.icon}
                   </div>
 
-                  {/* Title + badge */}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
                       <span style={{
@@ -883,7 +889,6 @@ export default function HomePage() {
                     </h3>
                   </div>
 
-                  {/* Expand indicator */}
                   <div style={{
                     width: '32px', height: '32px', flexShrink: 0,
                     border: `1px solid ${article.color}40`,
@@ -898,13 +903,11 @@ export default function HomePage() {
                   </div>
                 </button>
 
-                {/* Expandable body */}
                 {isExpanded && (
                   <div style={{
                     padding: '0 1.75rem 1.75rem',
                     borderTop: `1px solid ${article.color}20`,
                   }}>
-                    {/* Main content paragraphs */}
                     <div style={{ marginBottom: '1.75rem', paddingTop: '1.25rem' }}>
                       {article.content.map((para, i) => (
                         <p
@@ -920,7 +923,6 @@ export default function HomePage() {
                       ))}
                     </div>
 
-                    {/* FAQ */}
                     <div style={{
                       background: 'rgba(255,255,255,0.03)',
                       border: `1px solid ${article.color}20`,
@@ -937,7 +939,7 @@ export default function HomePage() {
                         marginBottom: '1rem',
                         marginTop: 0,
                       }}>
-                        ❓ Frequently Asked Questions
+                        Frequently Asked Questions
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {article.faqs.map((faq, fi) => (
@@ -964,7 +966,6 @@ export default function HomePage() {
                       </div>
                     </div>
 
-                    {/* CTA */}
                     <Link
                       to={article.to}
                       style={{
