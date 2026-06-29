@@ -1,711 +1,1589 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+'use client';
 
-interface Target {
+/**
+ * SniperModePage – Production Sniper Aim Trainer
+ *
+ * Architecture overview:
+ *  - rAF loop writes ONLY to targetElRef (DOM mutation, zero React renders per frame)
+ *  - targetRef holds the authoritative physics state (position + velocity)
+ *  - Hit detection is done against targetRef (physics coords), NOT React state
+ *  - React state updates happen only on: hit, miss, timer tick, phase change
+ *  - All game logic lives in refs; React is pure presentation layer
+ *
+ * Upgrades over v1:
+ *  - Touch support: touchstart on arena (miss) and target (hit) for mobile play
+ *  - Combo label auto-clears after COMBO_LABEL_TTL_MS so it doesn't linger
+ *  - averageAccuracy tracked and displayed in all-time records panel
+ *  - aria-live regions on score + timer for screen-reader updates
+ *  - touch-action: none on target button prevents scroll hijack on mobile
+ *  - Custom CSS crosshair cursor during play for premium feel
+ *  - Defensive NaN/Infinity guards on every numeric write
+ *  - Zero-dependency Web Audio API sound engine (no libraries, no network):
+ *      hit · crit · miss · combo-unlock · countdown-beep · go-fanfare · game-over
+ *  - Mute toggle button persisted to localStorage
+ *  - AudioContext lazily created on first user gesture (browser autoplay policy)
+ */
+
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  memo,
+} from 'react';
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPES
+═══════════════════════════════════════════════════════════════ */
+type Phase = 'idle' | 'countdown' | 'running' | 'paused' | 'done';
+type Difficulty = 'easy' | 'medium' | 'hard' | 'impossible';
+
+interface TargetPhysics {
+  x: number;   // centre x
+  y: number;   // centre y
+  vx: number;  // velocity x (px/frame @60fps)
+  vy: number;  // velocity y
+  size: number; // radius
+}
+
+interface HitFeedback {
   id: number;
   x: number;
   y: number;
-  vx: number;
-  vy: number;
-  size: number;
+  text: string;
+  color: string;
 }
 
-type Phase = 'idle' | 'running' | 'done';
-type FeedbackType = 'perfect' | 'hit' | 'miss' | null;
+interface GameState {
+  score: number;
+  hits: number;
+  misses: number;
+  criticalHits: number;
+  combo: number;
+  bestCombo: number;
+  streak: number;
+  bestStreak: number;
+  timeLeft: number;
+}
 
-const HIT_RADIUS = 18;
-const PERFECT_RADIUS = 7;
-const GAME_DURATION = 30;
+interface StoredRecords {
+  bestScore: number;
+  bestStreak: number;
+  bestCombo: number;
+  gamesPlayed: number;
+  totalHits: number;
+  totalMisses: number;
+}
 
-export default function SniperModePage() {
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [score, setScore] = useState(0);
-  const [misses, setMisses] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
-  const [feedback, setFeedback] = useState<{ type: FeedbackType; text: string } | null>(null);
-  const [swayPct, setSwayPct] = useState(0.5);
+/* ═══════════════════════════════════════════════════════════════
+   CONSTANTS & CONFIG
+═══════════════════════════════════════════════════════════════ */
+const GAME_DURATION      = 30;       // seconds
+const AREA_HEIGHT        = 380;      // px – arena height
+const TIMER_INTERVAL_MS  = 100;      // ms between timer ticks
+const COUNTDOWN_FROM     = 3;        // countdown start number
+const COUNTDOWN_STEP_MS  = 850;      // ms per countdown beat
+const GO_DISPLAY_MS      = 580;      // ms "GO!" is shown before game starts
+const HIT_SCORE          = 100;      // base points for a normal hit
+const CRIT_SCORE         = 150;      // base points for a critical hit
+const CRIT_RADIUS_RATIO  = 0.38;     // fraction of target radius that counts as crit
+const MISS_PENALTY       = 0;        // points deducted on miss (0 = no penalty)
+const FEEDBACK_TTL_MS    = 750;      // ms hit-label floats before removal
+const COMBO_LABEL_TTL_MS = 1400;     // ms combo toast stays visible then auto-clears
+const PROGRESSIVE_ACCEL  = 0.000065; // speed multiplier increase per ms elapsed
+const MAX_SPEED_MULT     = 2.6;      // hard cap on progressive speed multiplier
+const LS_KEY             = 'sniper_aim_trainer_v3';
+const FRAME_REF_HZ       = 60;       // physics tuned for 60fps; dt scaling handles others
+const IMPOSSIBLE_NUDGE_P = 0.035;    // probability of random nudge per frame (impossible only)
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const areaRef = useRef<HTMLDivElement>(null);
-  const animRef = useRef<number>(0);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+/** Combo thresholds – descending order (first match wins) */
+const COMBO_THRESHOLDS: ReadonlyArray<{ hits: number; mult: number; label: string }> = [
+  { hits: 20, mult: 5, label: '×5 COMBO' },
+  { hits: 10, mult: 3, label: '×3 COMBO' },
+  { hits:  5, mult: 2, label: '×2 COMBO' },
+];
 
-  // Mutable refs for animation loop (avoid stale closures)
-  const phaseRef = useRef<Phase>('idle');
-  const targetRef = useRef<Target | null>(null);
-  const mouseRef = useRef({ x: 0, y: 0 });
-  const breathTRef = useRef(0);
-  const hitRef = useRef(0);
-  const totalRef = useRef(0);
-  const scoreRef = useRef(0);
-  const missRef = useRef(0);
+interface DifficultyDef {
+  label: string;
+  emoji: string;
+  /** Target radius in px */
+  radius: number;
+  /** Base speed in px/frame @60fps */
+  baseSpeed: number;
+  /** Score multiplier applied on top of base/crit score */
+  scoreMultiplier: number;
+  /** Randomness added to spawn velocity (0 = perfectly normalised) */
+  accelVariance: number;
+  /** Accent colour for UI */
+  color: string;
+}
 
-  const makeTarget = useCallback((): Target | null => {
-    const canvas = canvasRef.current;
-    if (!canvas) return null;
-    const w = canvas.width;
-    const h = canvas.height;
-    const size = 10;
-    return {
-      id: Date.now(),
-      x: size + 60 + Math.random() * (w - size * 2 - 120),
-      y: size + 60 + Math.random() * (h - size * 2 - 120),
-      vx: (Math.random() - 0.5) * 3.2,
-      vy: (Math.random() - 0.5) * 3.2,
-      size,
-    };
-  }, []);
+const DIFFICULTY_CONFIG: Readonly<Record<Difficulty, DifficultyDef>> = {
+  easy: {
+    label: 'Easy', emoji: '🟢',
+    radius: 32, baseSpeed: 2.0, scoreMultiplier: 1,
+    accelVariance: 0, color: '#22c55e',
+  },
+  medium: {
+    label: 'Medium', emoji: '🟡',
+    radius: 22, baseSpeed: 3.4, scoreMultiplier: 1.5,
+    accelVariance: 0.28, color: '#eab308',
+  },
+  hard: {
+    label: 'Hard', emoji: '🔴',
+    radius: 14, baseSpeed: 5.0, scoreMultiplier: 2,
+    accelVariance: 0.65, color: '#ef4444',
+  },
+  impossible: {
+    label: 'Impossible', emoji: '💀',
+    radius: 9, baseSpeed: 7.8, scoreMultiplier: 3,
+    accelVariance: 1.3, color: '#a855f7',
+  },
+};
 
-  const resizeCanvas = useCallback(() => {
-    const canvas = canvasRef.current;
-    const area = areaRef.current;
-    if (!canvas || !area) return;
-    const rect = area.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-  }, []);
+const DIFFICULTY_ORDER: Difficulty[] = ['easy', 'medium', 'hard', 'impossible'];
 
-  const getScopeOffset = useCallback(() => {
-    const t = breathTRef.current;
-    const swayX = Math.sin(t * 1.1) * 10 + Math.sin(t * 2.7) * 4;
-    const swayY = Math.cos(t * 0.9) * 8 + Math.cos(t * 2.3) * 3;
-    const pct = (Math.sin(t * 0.5) + 1) / 2;
-    setSwayPct(pct);
-    return { swayX, swayY };
-  }, []);
+const SUPPORTED_GAMES = [
+  'Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V',
+  'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2',
+  'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us',
+] as const;
 
-  const drawFrame = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const w = canvas.width;
-    const h = canvas.height;
+const DEFAULT_GAME_STATE: Readonly<GameState> = {
+  score: 0, hits: 0, misses: 0, criticalHits: 0,
+  combo: 0, bestCombo: 0, streak: 0, bestStreak: 0,
+  timeLeft: GAME_DURATION,
+};
 
-    ctx.clearRect(0, 0, w, h);
+const DEFAULT_RECORDS: Readonly<StoredRecords> = {
+  bestScore: 0, bestStreak: 0, bestCombo: 0,
+  gamesPlayed: 0, totalHits: 0, totalMisses: 0,
+};
 
-    if (phaseRef.current !== 'running') return;
+const LS_MUTE_KEY = 'sniper_aim_trainer_muted';
 
-    // Advance breath
-    breathTRef.current += 0.018;
-    const { swayX, swayY } = getScopeOffset();
+/* ═══════════════════════════════════════════════════════════════
+   SOUND ENGINE  (Web Audio API – zero dependencies, zero network)
+   All sounds are synthesized from oscillators + noise buffers.
+   The AudioContext is created lazily on the first user gesture
+   to satisfy browser autoplay policies.
+═══════════════════════════════════════════════════════════════ */
 
-    // Move target
-    const t = targetRef.current;
-    if (t) {
-      t.x += t.vx;
-      t.y += t.vy;
-      if (t.x <= t.size || t.x >= w - t.size) t.vx *= -1;
-      if (t.y <= t.size || t.y >= h - t.size) t.vy *= -1;
-      t.x = Math.max(t.size, Math.min(w - t.size, t.x));
-      t.y = Math.max(t.size, Math.min(h - t.size, t.y));
-
-      // Draw target glow rings
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, t.size * 2.8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,45,85,0.08)';
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, t.size * 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,45,85,0.15)';
-      ctx.fill();
-
-      // Target body
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, t.size, 0, Math.PI * 2);
-      ctx.fillStyle = '#ff2d55';
-      ctx.fill();
-
-      // Target center dot
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, t.size * 0.4, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
+/** Shared lazy AudioContext – one per page lifetime */
+let _audioCtx: AudioContext | null = null;
+function getAudioCtx(): AudioContext | null {
+  if (typeof window === 'undefined') return null;
+  if (!_audioCtx) {
+    try {
+      _audioCtx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    } catch {
+      return null;
     }
+  }
+  // Resume if suspended (Chrome requires a gesture before audio)
+  if (_audioCtx.state === 'suspended') {
+    _audioCtx.resume().catch(() => {});
+  }
+  return _audioCtx;
+}
 
-    // Scope center (mouse + sway)
-    const cx = mouseRef.current.x + swayX;
-    const cy = mouseRef.current.y + swayY;
+/** Master gain node – mute routes through here */
+let _masterGain: GainNode | null = null;
+function getMasterGain(): GainNode | null {
+  const ctx = getAudioCtx();
+  if (!ctx) return null;
+  if (!_masterGain) {
+    _masterGain = ctx.createGain();
+    _masterGain.gain.value = 1;
+    _masterGain.connect(ctx.destination);
+  }
+  return _masterGain;
+}
 
-    const dist = t ? Math.hypot(cx - t.x, cy - t.y) : 9999;
-    const aligned = dist <= HIT_RADIUS;
-    const perfect = dist <= PERFECT_RADIUS;
+/** Set master volume (0 = mute, 1 = full) – smooth ramp to avoid click */
+function setMasterVolume(vol: number): void {
+  const g = getMasterGain();
+  if (!g) return;
+  const ctx = getAudioCtx()!;
+  g.gain.setTargetAtTime(vol, ctx.currentTime, 0.02);
+}
 
-    const scopeColor = perfect
-      ? 'rgba(0,230,120,0.9)'
-      : aligned
-      ? 'rgba(255,215,0,0.85)'
-      : 'rgba(255,255,255,0.75)';
+/* ── Low-level helpers ── */
 
-    const scopeColorFaint = perfect
-      ? 'rgba(0,230,120,0.4)'
-      : aligned
-      ? 'rgba(255,215,0,0.4)'
-      : 'rgba(255,255,255,0.2)';
+/** One-shot oscillator burst */
+function playTone(
+  freq: number,
+  type: OscillatorType,
+  gainPeak: number,
+  startDelay: number,
+  duration: number,
+  freqEnd?: number,
+): void {
+  const ctx = getAudioCtx();
+  const master = getMasterGain();
+  if (!ctx || !master) return;
 
-    const scopeR = 54;
-    const gap = 8;
+  const now = ctx.currentTime + startDelay;
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
 
-    // Scope vignette overlay
-    const grad = ctx.createRadialGradient(cx, cy, scopeR * 0.6, cx, cy, scopeR * 2.2);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.45)');
-    ctx.beginPath();
-    ctx.rect(0, 0, w, h);
-    ctx.arc(cx, cy, scopeR, 0, Math.PI * 2, true);
-    ctx.fillStyle = grad;
-    ctx.fill('evenodd');
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, now);
+  if (freqEnd !== undefined) {
+    osc.frequency.exponentialRampToValueAtTime(Math.max(freqEnd, 1), now + duration);
+  }
 
-    // Outer ring
-    ctx.beginPath();
-    ctx.arc(cx, cy, scopeR, 0, Math.PI * 2);
-    ctx.strokeStyle = scopeColor;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+  g.gain.setValueAtTime(0, now);
+  g.gain.linearRampToValueAtTime(gainPeak, now + 0.004);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-    // Middle ring
-    ctx.beginPath();
-    ctx.arc(cx, cy, scopeR * 0.55, 0, Math.PI * 2);
-    ctx.strokeStyle = scopeColorFaint;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
+  osc.connect(g);
+  g.connect(master);
 
-    // Inner ring
-    ctx.beginPath();
-    ctx.arc(cx, cy, scopeR * 0.2, 0, Math.PI * 2);
-    ctx.strokeStyle = scopeColor;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
+  osc.start(now);
+  osc.stop(now + duration + 0.01);
+}
 
-    // Crosshair lines
-    ctx.strokeStyle = scopeColor;
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(cx - scopeR, cy); ctx.lineTo(cx - gap, cy);
-    ctx.moveTo(cx + gap, cy);   ctx.lineTo(cx + scopeR, cy);
-    ctx.moveTo(cx, cy - scopeR); ctx.lineTo(cx, cy - gap);
-    ctx.moveTo(cx, cy + gap);   ctx.lineTo(cx, cy + scopeR);
-    ctx.stroke();
+/** White-noise burst via AudioBufferSourceNode */
+function playNoise(gainPeak: number, startDelay: number, duration: number): void {
+  const ctx = getAudioCtx();
+  const master = getMasterGain();
+  if (!ctx || !master) return;
 
-    // Mil-dot ticks
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.lineWidth = 0.8;
-    const tickLen = 4;
-    for (let i = 1; i <= 3; i++) {
-      const off = scopeR * (i / 4);
-      ctx.beginPath();
-      ctx.moveTo(cx - off, cy - tickLen / 2); ctx.lineTo(cx - off, cy + tickLen / 2);
-      ctx.moveTo(cx + off, cy - tickLen / 2); ctx.lineTo(cx + off, cy + tickLen / 2);
-      ctx.moveTo(cx - tickLen / 2, cy - off); ctx.lineTo(cx + tickLen / 2, cy - off);
-      ctx.moveTo(cx - tickLen / 2, cy + off); ctx.lineTo(cx + tickLen / 2, cy + off);
-      ctx.stroke();
-    }
+  const now        = ctx.currentTime + startDelay;
+  const bufferSize = Math.ceil(ctx.sampleRate * duration);
+  const buffer     = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data       = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
 
-    // Center dot
-    ctx.beginPath();
-    ctx.arc(cx, cy, 2, 0, Math.PI * 2);
-    ctx.fillStyle = perfect ? '#00e678' : aligned ? '#ffd700' : 'rgba(255,255,255,0.9)';
-    ctx.fill();
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
 
-    animRef.current = requestAnimationFrame(drawFrame);
-  }, [getScopeOffset]);
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(gainPeak, now);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
 
-  const showFeedback = useCallback((type: FeedbackType, text: string) => {
-    setFeedback({ type, text });
-    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    feedbackTimerRef.current = setTimeout(() => setFeedback(null), 900);
-  }, []);
+  // High-pass filter so noise doesn't feel muddy
+  const hp = ctx.createBiquadFilter();
+  hp.type = 'highpass';
+  hp.frequency.value = 800;
 
-  const handleShoot = useCallback((clientX: number, clientY: number) => {
-    if (phaseRef.current !== 'running') return;
-    const canvas = canvasRef.current;
-    const area = areaRef.current;
-    if (!canvas || !area) return;
+  src.connect(hp);
+  hp.connect(g);
+  g.connect(master);
 
-    const rect = area.getBoundingClientRect();
-    const mx = clientX - rect.left;
-    const my = clientY - rect.top;
+  src.start(now);
+  src.stop(now + duration + 0.01);
+}
 
-    const t = breathTRef.current;
-    const swayX = Math.sin(t * 1.1) * 10 + Math.sin(t * 2.7) * 4;
-    const swayY = Math.cos(t * 0.9) * 8 + Math.cos(t * 2.3) * 3;
-    const cx = mx + swayX;
-    const cy = my + swayY;
+/* ── Named sound events ── */
 
-    const target = targetRef.current;
-    if (!target) return;
+/** Normal hit – crisp click + short sine blip */
+function soundHit(): void {
+  playNoise(0.18, 0, 0.04);
+  playTone(520, 'sine', 0.22, 0, 0.08, 680);
+}
 
-    const dist = Math.hypot(cx - target.x, cy - target.y);
-    totalRef.current++;
+/** Critical hit – metallic ping + shimmer */
+function soundCrit(): void {
+  playNoise(0.12, 0, 0.03);
+  playTone(880, 'sine',   0.28, 0,     0.12, 1200);
+  playTone(1320, 'sine',  0.16, 0.03,  0.10, 1760);
+  playTone(1760, 'triangle', 0.10, 0.06, 0.14);
+}
 
-    if (dist <= PERFECT_RADIUS) {
-      scoreRef.current += 200;
-      hitRef.current++;
-      setScore(scoreRef.current);
-      showFeedback('perfect', '★ Perfect Hit! +200');
-      targetRef.current = makeTarget();
-    } else if (dist <= HIT_RADIUS) {
-      scoreRef.current += 100;
-      hitRef.current++;
-      setScore(scoreRef.current);
-      showFeedback('hit', '✓ Hit! +100');
-      targetRef.current = makeTarget();
-    } else {
-      missRef.current++;
-      setMisses(missRef.current);
-      showFeedback('miss', '✕ Miss');
-    }
-  }, [makeTarget, showFeedback]);
+/** Miss – low thud */
+function soundMiss(): void {
+  playTone(120, 'sine', 0.30, 0, 0.12, 60);
+  playNoise(0.08, 0, 0.06);
+}
 
-  const startGame = useCallback(() => {
-    resizeCanvas();
-    phaseRef.current = 'running';
-    hitRef.current = 0;
-    totalRef.current = 0;
-    scoreRef.current = 0;
-    missRef.current = 0;
-    breathTRef.current = 0;
-    setPhase('running');
-    setScore(0);
-    setMisses(0);
-    setTimeLeft(GAME_DURATION);
-    setFeedback(null);
-    targetRef.current = makeTarget();
+/** Combo unlock – ascending 3-note arpeggio, pitch scales with combo tier */
+function soundCombo(tier: number): void {
+  // tier 1 = ×2 (5 hits), tier 2 = ×3 (10 hits), tier 3 = ×5 (20 hits)
+  const baseFreqs: [number, number, number][] = [
+    [440, 554, 659],   // A4 C#5 E5  – major triad
+    [523, 659, 784],   // C5 E5  G5  – higher
+    [659, 880, 1047],  // E5 A5  C6  – exciting
+  ];
+  const freqs = baseFreqs[Math.min(tier - 1, 2)];
+  freqs.forEach((f, i) => playTone(f, 'triangle', 0.22 - i * 0.04, i * 0.07, 0.14));
+}
 
-    if (animRef.current) cancelAnimationFrame(animRef.current);
-    animRef.current = requestAnimationFrame(drawFrame);
+/** Countdown beep (numbers 3–1) */
+function soundCountdownBeep(): void {
+  playTone(660, 'square', 0.14, 0, 0.09);
+}
 
-    if (timerRef.current) clearInterval(timerRef.current);
-    let elapsed = 0;
-    timerRef.current = setInterval(() => {
-      elapsed += 0.1;
-      const left = Math.max(0, GAME_DURATION - elapsed);
-      setTimeLeft(left);
-      if (left <= 0) {
-        clearInterval(timerRef.current!);
-        cancelAnimationFrame(animRef.current);
-        phaseRef.current = 'done';
-        targetRef.current = null;
-        setPhase('done');
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          ctx?.clearRect(0, 0, canvas.width, canvas.height);
-        }
-      }
-    }, 100);
-  }, [makeTarget, drawFrame, resizeCanvas]);
+/** GO! – bright two-tone fanfare */
+function soundGo(): void {
+  playTone(880,  'triangle', 0.26, 0,    0.15);
+  playTone(1320, 'triangle', 0.20, 0.08, 0.18);
+}
 
-  const resetGame = useCallback(() => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    if (animRef.current) cancelAnimationFrame(animRef.current);
-    phaseRef.current = 'idle';
-    targetRef.current = null;
-    setPhase('idle');
-    setScore(0);
-    setMisses(0);
-    setTimeLeft(GAME_DURATION);
-    setFeedback(null);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  }, []);
+/** Game over – descending minor stinger */
+function soundGameOver(): void {
+  playTone(440, 'sawtooth', 0.18, 0,    0.18, 330);
+  playTone(330, 'sawtooth', 0.14, 0.15, 0.18, 220);
+  playTone(220, 'sine',     0.22, 0.30, 0.30, 110);
+}
 
-  // Mouse/touch tracking
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    const rect = areaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    mouseRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  }, []);
+/* ═══════════════════════════════════════════════════════════════
+   PURE HELPERS
+═══════════════════════════════════════════════════════════════ */
 
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    e.preventDefault();
-    const rect = areaRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    mouseRef.current = {
-      x: e.touches[0].clientX - rect.left,
-      y: e.touches[0].clientY - rect.top,
-    };
-  }, []);
+function clamp(v: number, lo: number, hi: number): number {
+  return v < lo ? lo : v > hi ? hi : v;
+}
 
-  useEffect(() => {
-    resizeCanvas();
-    const handleResize = () => resizeCanvas();
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    };
-  }, [resizeCanvas]);
+/** Guard: replace NaN / Infinity with a safe fallback */
+function safeNum(v: number, fallback = 0): number {
+  return Number.isFinite(v) ? v : fallback;
+}
 
-  const acc = totalRef.current > 0
-    ? Math.round((hitRef.current / totalRef.current) * 100)
-    : 100;
+/** Normalise a velocity vector to the given speed, guarding against zero-length */
+function normalizeVelocity(vx: number, vy: number, speed: number): [number, number] {
+  const len = Math.sqrt(vx * vx + vy * vy) || 1;
+  return [(vx / len) * speed, (vy / len) * speed];
+}
 
-  const feedbackStyle: React.CSSProperties = {
-    position: 'absolute',
-    top: '16px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    padding: '6px 20px',
-    borderRadius: '24px',
-    fontWeight: 800,
-    fontSize: '1.05rem',
-    whiteSpace: 'nowrap',
-    pointerEvents: 'none',
-    transition: 'opacity 0.15s',
-    opacity: feedback ? 1 : 0,
-    ...(feedback?.type === 'perfect'
-      ? { background: 'rgba(0,230,120,0.15)', color: '#00e678', border: '1px solid rgba(0,230,120,0.4)' }
-      : feedback?.type === 'hit'
-      ? { background: 'rgba(255,215,0,0.13)', color: '#ffd700', border: '1px solid rgba(255,215,0,0.4)' }
-      : { background: 'rgba(255,45,85,0.13)', color: '#ff2d55', border: '1px solid rgba(255,45,85,0.4)' }),
-  };
+function getComboInfo(combo: number): { mult: number; label: string } {
+  for (const t of COMBO_THRESHOLDS) {
+    if (combo >= t.hits) return { mult: t.mult, label: t.label };
+  }
+  return { mult: 1, label: '' };
+}
 
+/** Derive lifetime average accuracy from stored records */
+function calcAvgAccuracy(r: StoredRecords): number {
+  const total = r.totalHits + r.totalMisses;
+  if (total === 0) return 100;
+  return Math.round((r.totalHits / total) * 100);
+}
+
+/* ── localStorage helpers ── */
+function loadRecords(): StoredRecords {
+  if (typeof window === 'undefined') return { ...DEFAULT_RECORDS };
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return { ...DEFAULT_RECORDS };
+    return { ...DEFAULT_RECORDS, ...(JSON.parse(raw) as Partial<StoredRecords>) };
+  } catch {
+    return { ...DEFAULT_RECORDS };
+  }
+}
+
+function saveRecords(r: StoredRecords): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(LS_KEY, JSON.stringify(r)); } catch { /* storage quota */ }
+}
+
+/* ── Physics ── */
+function spawnTarget(
+  areaWidth: number,
+  cfg: DifficultyDef,
+  existingT?: TargetPhysics | null,
+): TargetPhysics {
+  const { radius, baseSpeed, accelVariance } = cfg;
+  const pad = radius + 2;
+
+  let x: number, y: number;
+  let attempts = 0;
+  do {
+    x = clamp(pad + Math.random() * (areaWidth - pad * 2), pad, areaWidth - pad);
+    y = clamp(pad + Math.random() * (AREA_HEIGHT - pad * 2), pad, AREA_HEIGHT - pad);
+    attempts++;
+  } while (
+    existingT &&
+    Math.hypot(x - existingT.x, y - existingT.y) < radius * 3 &&
+    attempts < 8
+  );
+
+  const angle = Math.random() * Math.PI * 2;
+  const rawVx = Math.cos(angle);
+  const rawVy = Math.sin(angle);
+
+  const variance = accelVariance > 0 ? 1 + (Math.random() - 0.5) * accelVariance : 1;
+  const speed = baseSpeed * Math.max(0.5, variance);
+
+  const [vx, vy] = normalizeVelocity(rawVx, rawVy, speed);
+  return { x, y, vx, vy, size: radius };
+}
+
+function stepPhysics(
+  t: TargetPhysics,
+  areaWidth: number,
+  speedMult: number,
+  dtFactor: number,
+  isImpossible: boolean,
+  cfg: DifficultyDef,
+): TargetPhysics {
+  let { x, y, vx, vy, size } = t;
+
+  const effectiveVx = vx * speedMult * dtFactor;
+  const effectiveVy = vy * speedMult * dtFactor;
+
+  x += effectiveVx;
+  y += effectiveVy;
+
+  let newVx = vx;
+  let newVy = vy;
+
+  if (x - size < 0)             { x = size;             newVx =  Math.abs(vx); }
+  else if (x + size > areaWidth){ x = areaWidth - size; newVx = -Math.abs(vx); }
+
+  if (y - size < 0)              { y = size;             newVy =  Math.abs(vy); }
+  else if (y + size > AREA_HEIGHT){ y = AREA_HEIGHT - size; newVy = -Math.abs(vy); }
+
+  if (isImpossible && Math.random() < IMPOSSIBLE_NUDGE_P) {
+    const nudge = cfg.accelVariance * 0.35;
+    newVx += (Math.random() - 0.5) * nudge;
+    newVy += (Math.random() - 0.5) * nudge;
+    [newVx, newVy] = normalizeVelocity(newVx, newVy, cfg.baseSpeed);
+  }
+
+  return { x, y, vx: newVx, vy: newVy, size };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   MEMOISED SUB-COMPONENTS
+═══════════════════════════════════════════════════════════════ */
+
+interface StatCardProps { value: string | number; label: string; color: string; live?: boolean; }
+const StatCard = memo(function StatCard({ value, label, color, live }: StatCardProps) {
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div className="section-label">Aim Tool</div>
-        <h1 className="tool-title">Sniper Mode</h1>
-        <p className="tool-subtitle">
-          Move to align the scope center with the target — click to shoot. Compensate for breathing sway!
-        </p>
+    <div
+      role="status"
+      aria-label={`${label}: ${value}`}
+      aria-live={live ? 'polite' : undefined}
+      aria-atomic={live ? 'true' : undefined}
+      style={{
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: '12px', padding: '1rem', textAlign: 'center',
+      }}
+    >
+      <div style={{ fontSize: '1.75rem', fontWeight: 900, color }} aria-hidden="true">
+        {value}
       </div>
-
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
-        {[
-          { value: score, label: 'Score', color: 'var(--neon-cyan)' },
-          { value: `${acc}%`, label: 'Accuracy', color: 'var(--neon-green)' },
-          { value: misses, label: 'Misses', color: 'var(--neon-red)' },
-          { value: timeLeft.toFixed(1), label: 'Time', color: 'var(--neon-orange)' },
-        ].map(s => (
-          <div
-            key={s.label}
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: '12px',
-              padding: '1rem',
-              textAlign: 'center',
-            }}
-          >
-            <div style={{ fontSize: '1.75rem', fontWeight: 900, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.2rem' }}>
-              {s.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Progress bar */}
-      <div className="progress-bar" style={{ marginBottom: '1rem' }}>
-        <div
-          className="progress-fill"
-          style={{ width: `${((GAME_DURATION - timeLeft) / GAME_DURATION) * 100}%` }}
-        />
-      </div>
-
-      {/* Arena */}
-      <div
-        ref={areaRef}
-        onMouseMove={handleMouseMove}
-        onTouchMove={handleTouchMove}
-        onClick={e => handleShoot(e.clientX, e.clientY)}
-        onTouchEnd={e => {
-          e.preventDefault();
-          const t = e.changedTouches[0];
-          if (t) handleShoot(t.clientX, t.clientY);
-        }}
-        style={{
-          position: 'relative',
-          width: '100%',
-          height: '380px',
-          background: '#080d14',
-          border: `2px solid ${phase === 'running' ? 'rgba(255,45,85,0.5)' : 'var(--border)'}`,
-          borderRadius: '16px',
-          overflow: 'hidden',
-          cursor: phase === 'running' ? 'none' : 'default',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <canvas ref={canvasRef} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }} />
-
-        {/* Feedback toast */}
-        <div style={feedbackStyle}>{feedback?.text ?? ''}</div>
-
-        {/* Breath / sway meter */}
-        {phase === 'running' && (
-          <div
-            style={{
-              position: 'absolute',
-              bottom: '14px',
-              right: '14px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
-          >
-            <span style={{ fontSize: '0.62rem', color: '#6b7280', textTransform: 'uppercase' }}>Sway</span>
-            <div style={{ width: '80px', height: '5px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-              <div
-                style={{
-                  height: '100%',
-                  width: `${Math.round(swayPct * 100)}%`,
-                  background: 'rgba(0,180,255,0.7)',
-                  borderRadius: '4px',
-                  transition: 'width 0.05s',
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Idle / Done overlay */}
-        {phase !== 'running' && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '1rem',
-            }}
-          >
-            <span style={{ fontSize: '4rem' }}>🔭</span>
-            <span
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: 800,
-                color: phase === 'done' ? 'var(--neon-orange)' : 'var(--neon-red)',
-              }}
-            >
-              {phase === 'done' ? `Final Score: ${score}` : 'Align scope center — click to shoot'}
-            </span>
-            {phase === 'done' && (
-              <span style={{ color: 'var(--neon-green)' }}>
-                {acc}% Accuracy — {hitRef.current} hits / {totalRef.current} shots
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Buttons */}
-      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '2.5rem' }}>
-        {phase !== 'running' && (
-          <button className="btn btn-primary" onClick={startGame}>
-            {phase === 'done' ? '▶ Play Again' : '🔭 Start Sniper Mode'}
-          </button>
-        )}
-        {phase !== 'idle' && (
-          <button className="btn btn-secondary" onClick={resetGame}>
-            🔄 Reset
-          </button>
-        )}
-      </div>
-
-      {/* SEO / Education Section */}
-      <div
-        style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '16px',
-          padding: '2.5rem',
-          marginTop: '3rem',
-        }}
-      >
-        <article style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.8' }}>
-          <h2
-            style={{
-              fontWeight: 800,
-              fontSize: '2rem',
-              marginBottom: '1.5rem',
-              color: 'var(--neon-red)',
-              marginTop: 0,
-              letterSpacing: '-0.5px',
-            }}
-          >
-            The Ultimate Guide to Sniper Aiming & Target Tracking
-          </h2>
-
-          <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
-            The <strong>Sniper Mode Aim Trainer</strong> is an advanced visual calibration tool designed specifically
-            to evaluate and sharpen your <strong>Tracking Aim</strong>. Unlike static clicking tools, tracking requires
-            your hand muscles to maintain continuous synchronization with an unpredictable, moving target. Whether you
-            are using a sniper rifle to hit a running player or tracking a fast-moving vehicle, mastering your dynamic
-            cursor control is the ultimate key to dominating competitive tactical shooters.
-          </p>
-
-          <div
-            style={{
-              background: 'rgba(255, 45, 85, 0.05)',
-              borderLeft: '4px solid var(--neon-red)',
-              borderRadius: '0 12px 12px 0',
-              padding: '1.5rem',
-              marginBottom: '2.5rem',
-            }}
-          >
-            <h3
-              style={{
-                color: '#fff',
-                fontSize: '1.3rem',
-                fontWeight: 700,
-                marginTop: 0,
-                marginBottom: '0.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
-              🖱️ The Ultimate &quot;New Mouse&quot; Tracking Check
-            </h3>
-            <p style={{ margin: 0, color: '#9ca3af' }}>
-              Just bought a premium gaming mouse? Our Sniper Mode is the absolute best way to perform a{' '}
-              <strong>new mouse check</strong>. By tracking the small bouncing dot, you can instantly verify your
-              sensor&apos;s polling rate stability, test your PTFE mouse skates for smooth gliding, and fine-tune your
-              DPI before stepping into ranked matches.
-            </p>
-          </div>
-
-          <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>
-            Why Tracking Precision Dominates Modern Gaming
-          </h3>
-          <p style={{ marginBottom: '1.5rem' }}>
-            Sniping and tracking are universally feared skills. A player who can consistently hit a moving target
-            applies immense psychological pressure on the enemy team. Training your tracking aim dramatically boosts
-            your performance in these popular games:
-          </p>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-              gap: '1rem',
-              marginBottom: '3rem',
-            }}
-          >
-            {[
-              'Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V',
-              'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2',
-              'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us',
-            ].map(game => (
-              <div
-                key={game}
-                style={{
-                  background: 'rgba(0,0,0,0.4)',
-                  padding: '0.75rem 1rem',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  color: '#e5e7eb',
-                  fontWeight: 600,
-                  fontSize: '0.9rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                }}
-              >
-                <span style={{ color: 'var(--neon-red)' }}>🔭</span> {game}
-              </div>
-            ))}
-          </div>
-
-          <h2
-            style={{
-              fontWeight: 800,
-              fontSize: '1.8rem',
-              marginBottom: '1.5rem',
-              color: '#fff',
-              borderBottom: '1px solid var(--border)',
-              paddingBottom: '1rem',
-            }}
-          >
-            Pro Sniping Strategies & Aim FAQs
-          </h2>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <div>
-              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-                How to improve Snipe and Tracking Aim in PUBG & Warzone?
-              </h3>
-              <p style={{ color: '#9ca3af', margin: 0 }}>
-                In large-scale Battle Royales like <strong>PUBG: Battlegrounds</strong> and{' '}
-                <strong>Call of Duty: Warzone</strong>, enemies are rarely standing still. To hit a running target with
-                a Kar98k or HDR, you must master the art of &quot;leading&quot; your shot. Our Sniper Mode helps you
-                build the muscle memory required to track a target seamlessly without jittering your wrist. The
-                constant directional changes of the red dot train your eyes to predict movement vectors perfectly.
-              </p>
-            </div>
-
-            <div>
-              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-                How to increase precision with Sniper Rifles in CS2 & Valorant?
-              </h3>
-              <p style={{ color: '#9ca3af', margin: 0 }}>
-                Using the AWP in <strong>Counter-Strike 2</strong> or the Operator in Valorant requires extreme
-                discipline. If you miss your first shot, you are likely dead. Playing our Sniper Mode daily trains you
-                to click the mouse exactly when your crosshair aligns with a tiny moving hitbox, drastically improving
-                your single-shot accuracy.
-              </p>
-            </div>
-
-            <div>
-              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-                How to get better Bow Aim and PvP Tracking in Minecraft?
-              </h3>
-              <p style={{ color: '#9ca3af', margin: 0 }}>
-                While &quot;Fast CPS&quot; is famous for sword combat in <strong>Minecraft</strong>, tracking is what
-                wins ranged bow fights. Sniper mode forces you to keep your cursor glued to the target, enhancing your
-                PvP tracking skills on popular servers like Hypixel.
-              </p>
-            </div>
-
-            <div>
-              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.75rem' }}>
-                How to improve reaction time to unpredictable movement?
-              </h3>
-              <p style={{ color: '#9ca3af', margin: 0 }}>
-                When the target hits a wall, it bounces back instantly, replicating an enemy suddenly changing
-                direction. To improve your reaction time:
-                <br /><br />
-                <strong>1. Don&apos;t Predict, React:</strong> Keep your eyes locked on the dot itself, not your crosshair.
-                <br />
-                <strong>2. Relax Your Grip:</strong> A relaxed grip allows for smoother micro-adjustments.
-                <br />
-                <strong>3. Higher Refresh Rate:</strong> Playing on a 144Hz or 240Hz monitor significantly lowers visual
-                reaction latency.
-              </p>
-            </div>
-
-            <div
-              style={{
-                background: 'rgba(255, 107, 0, 0.05)',
-                border: '1px solid rgba(255,107,0,0.2)',
-                padding: '1.5rem',
-                borderRadius: '12px',
-                marginTop: '1rem',
-              }}
-            >
-              <h4 style={{ color: 'var(--neon-orange)', fontSize: '1.1rem', fontWeight: 700, margin: '0 0 0.5rem 0' }}>
-                💡 Pro Tip: Optimize Your Sensitivity (eDPI)
-              </h4>
-              <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.9rem' }}>
-                If you find yourself constantly &quot;overshooting&quot; the red target, your mouse sensitivity is too
-                high. Lowering your DPI (e.g., to 400 or 800) and using your forearm to track movements provides
-                exponentially higher consistency than relying solely on your wrist.
-              </p>
-            </div>
-          </div>
-        </article>
+      <div style={{
+        fontSize: '0.7rem', color: 'var(--text-muted)',
+        textTransform: 'uppercase', marginTop: '0.2rem', letterSpacing: '0.05em',
+      }}>
+        {label}
       </div>
     </div>
+  );
+});
+
+interface DifficultyButtonProps {
+  diff: Difficulty; selected: boolean;
+  onSelect: (d: Difficulty) => void; disabled: boolean;
+}
+const DifficultyButton = memo(function DifficultyButton({
+  diff, selected, onSelect, disabled,
+}: DifficultyButtonProps) {
+  const cfg = DIFFICULTY_CONFIG[diff];
+  return (
+    <button
+      onClick={() => !disabled && onSelect(diff)}
+      disabled={disabled}
+      aria-pressed={selected}
+      aria-label={`Select ${cfg.label} difficulty`}
+      style={{
+        flex: 1, padding: '0.6rem 0.4rem', borderRadius: '10px',
+        border: selected ? `2px solid ${cfg.color}` : '2px solid var(--border)',
+        background: selected ? `${cfg.color}1f` : 'var(--bg-card)',
+        color: selected ? cfg.color : 'var(--text-muted)',
+        fontWeight: 700, fontSize: '0.78rem',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'border-color 0.15s, background 0.15s, color 0.15s',
+        opacity: disabled ? 0.45 : 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+      }}
+    >
+      <span style={{ fontSize: '1.05rem' }} aria-hidden="true">{cfg.emoji}</span>
+      {cfg.label}
+    </button>
+  );
+});
+
+interface InfoBoxProps {
+  accent: string; bg: string; icon: string; title: string;
+  children: React.ReactNode; borderStyle?: 'left' | 'full';
+}
+const InfoBox = memo(function InfoBox({
+  accent, bg, icon, title, children, borderStyle = 'full',
+}: InfoBoxProps) {
+  const isLeft = borderStyle === 'left';
+  return (
+    <aside style={{
+      background: bg,
+      ...(isLeft
+        ? { borderLeft: `4px solid ${accent}`, borderRadius: '0 12px 12px 0' }
+        : { border: `1px solid ${accent}`, borderRadius: '12px' }),
+      padding: '1.5rem',
+      marginBottom: isLeft ? '2.5rem' : 0,
+      marginTop: isLeft ? 0 : '1rem',
+    }}>
+      <h3 style={{
+        color: isLeft ? '#fff' : 'var(--neon-orange)',
+        fontSize: isLeft ? '1.3rem' : '1.1rem',
+        fontWeight: 700, margin: '0 0 0.5rem 0',
+        display: 'flex', alignItems: 'center', gap: '8px',
+      }}>
+        <span aria-hidden="true">{icon}</span> {title}
+      </h3>
+      <p style={{ margin: 0, color: '#9ca3af', fontSize: isLeft ? undefined : '0.9rem' }}>
+        {children}
+      </p>
+    </aside>
+  );
+});
+
+const GameCard = memo(function GameCard({ name }: { name: string }) {
+  return (
+    <li style={{
+      background: 'rgba(0,0,0,0.4)', padding: '0.75rem 1rem', borderRadius: '8px',
+      border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: 600,
+      fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px', listStyle: 'none',
+    }}>
+      <span style={{ color: 'var(--neon-red)' }} aria-hidden="true">🔭</span>
+      {name}
+    </li>
+  );
+});
+
+const FaqItem = memo(function FaqItem({
+  question, children,
+}: { question: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: 700, marginBottom: '0.75rem' }}>
+        {question}
+      </h3>
+      <div style={{ color: '#9ca3af' }}>{children}</div>
+    </div>
+  );
+});
+
+const PauseOverlay = memo(function PauseOverlay({
+  onResume, onRestart,
+}: { onResume: () => void; onRestart: () => void }) {
+  return (
+    <div
+      role="dialog" aria-modal="true" aria-label="Game paused"
+      style={{
+        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: '1.2rem',
+        background: 'rgba(10,15,24,0.9)', zIndex: 30, backdropFilter: 'blur(4px)',
+      }}
+    >
+      <div style={{ fontSize: '2.5rem', fontWeight: 900, color: '#fff', letterSpacing: '0.15em' }}>
+        PAUSED
+      </div>
+      <div style={{ display: 'flex', gap: '0.8rem' }}>
+        <button className="btn btn-primary" onClick={onResume} aria-label="Resume game" autoFocus>
+          ▶ Resume
+        </button>
+        <button className="btn btn-secondary" onClick={onRestart} aria-label="Restart game">
+          🔄 Restart
+        </button>
+      </div>
+      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+        Press <kbd style={kbdStyle}>ESC</kbd> to resume
+      </p>
+    </div>
+  );
+});
+
+const CountdownOverlay = memo(function CountdownOverlay({ value }: { value: number | 'GO!' }) {
+  const isGo = value === 'GO!';
+  return (
+    <div
+      aria-live="assertive"
+      aria-label={`Countdown: ${value}`}
+      style={{
+        position: 'absolute', inset: 0, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        zIndex: 30, background: 'rgba(10,15,24,0.78)', backdropFilter: 'blur(3px)',
+      }}
+    >
+      <div key={String(value)} style={{
+        fontSize: isGo ? '4.5rem' : '6.5rem',
+        fontWeight: 900,
+        color: isGo ? 'var(--neon-green)' : '#fff',
+        textShadow: isGo ? '0 0 50px rgba(52,211,153,0.9)' : '0 0 30px rgba(255,255,255,0.6)',
+        animation: 'countdownPop 0.45s cubic-bezier(0.34,1.56,0.64,1) forwards',
+        userSelect: 'none',
+        lineHeight: 1,
+      }}>
+        {value}
+      </div>
+    </div>
+  );
+});
+
+const ComboToast = memo(function ComboToast({ label }: { label: string }) {
+  if (!label) return null;
+  return (
+    <div
+      key={label}
+      aria-live="polite"
+      style={{
+        position: 'absolute', top: '12px', left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(255,107,0,0.92)', borderRadius: '20px',
+        padding: '4px 16px', fontSize: '0.85rem', fontWeight: 800,
+        color: '#fff', zIndex: 20, whiteSpace: 'nowrap',
+        boxShadow: '0 0 20px rgba(255,107,0,0.55)',
+        animation: 'fadeInDown 0.22s ease forwards',
+        pointerEvents: 'none',
+      }}
+    >
+      {label}
+    </div>
+  );
+});
+
+const HitFeedbackLayer = memo(function HitFeedbackLayer({ feedbacks }: { feedbacks: HitFeedback[] }) {
+  return (
+    <>
+      {feedbacks.map(f => (
+        <div
+          key={f.id}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: f.x, top: f.y,
+            transform: 'translate(-50%, -50%)',
+            color: f.color,
+            fontWeight: 900, fontSize: '0.88rem',
+            pointerEvents: 'none', zIndex: 15,
+            textShadow: `0 0 10px ${f.color}`,
+            animation: `floatUp ${FEEDBACK_TTL_MS}ms ease forwards`,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {f.text}
+        </div>
+      ))}
+    </>
+  );
+});
+
+const kbdStyle: React.CSSProperties = {
+  background: 'var(--bg-card)', border: '1px solid var(--border)',
+  borderRadius: '4px', padding: '1px 5px', fontSize: '0.7rem',
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MAIN PAGE COMPONENT
+═══════════════════════════════════════════════════════════════ */
+export default function SniperModePage() {
+
+  const [phase,       setPhase]       = useState<Phase>('idle');
+  const [gameState,   setGameState]   = useState<GameState>({ ...DEFAULT_GAME_STATE });
+  const [difficulty,  setDifficulty]  = useState<Difficulty>('medium');
+  const [countdown,   setCountdown]   = useState<number | 'GO!'>(COUNTDOWN_FROM);
+  const [feedbacks,   setFeedbacks]   = useState<HitFeedback[]>([]);
+  const [records,     setRecords]     = useState<StoredRecords>({ ...DEFAULT_RECORDS });
+  const [comboLabel,  setComboLabel]  = useState('');
+  const [muted,       setMuted]       = useState(false);
+
+  const areaRef          = useRef<HTMLDivElement>(null);
+  const targetElRef      = useRef<HTMLButtonElement>(null);
+  const animRafRef       = useRef<number>(0);
+  const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownTORef   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const comboLabelTORef  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mutedRef         = useRef(false); // mirror for closures that can't read state
+
+  const targetRef        = useRef<TargetPhysics | null>(null);
+  const gameStateRef     = useRef<GameState>({ ...DEFAULT_GAME_STATE });
+  const phaseRef         = useRef<Phase>('idle');
+  const difficultyRef    = useRef<Difficulty>('medium');
+
+  const startTimestampRef = useRef<number>(0);
+  const lastRafRef        = useRef<number>(0);
+
+  const hitGuardRef      = useRef(false);
+  const gameInitRef      = useRef(false);
+  const feedbackIdRef    = useRef(0);
+
+  // Load records and persisted mute preference on client mount
+  useEffect(() => {
+    setRecords(loadRecords());
+    try {
+      const saved = localStorage.getItem(LS_MUTE_KEY);
+      if (saved === 'true') {
+        mutedRef.current = true;
+        setMuted(true);
+        setMasterVolume(0);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  const accuracy = useMemo(() => {
+    const total = gameState.hits + gameState.misses;
+    return total > 0 ? Math.round((gameState.hits / total) * 100) : 100;
+  }, [gameState.hits, gameState.misses]);
+
+  const progressPct = ((GAME_DURATION - gameState.timeLeft) / GAME_DURATION) * 100;
+  const isPlaying   = phase === 'running';
+  const canSetDiff  = phase === 'idle' || phase === 'done';
+  const diffCfg     = DIFFICULTY_CONFIG[difficulty];
+
+  /* ─────────────────────────────────────────────────────────────
+     SYNC helpers
+  ───────────────────────────────────────────────────────────── */
+  const commitPhase = useCallback((p: Phase) => {
+    phaseRef.current = p;
+    setPhase(p);
+  }, []);
+
+  const commitGameState = useCallback((gs: GameState) => {
+    // Defensive: replace any NaN/Infinity that could sneak in
+    const safe: GameState = {
+      score:        safeNum(gs.score),
+      hits:         safeNum(gs.hits),
+      misses:       safeNum(gs.misses),
+      criticalHits: safeNum(gs.criticalHits),
+      combo:        safeNum(gs.combo),
+      bestCombo:    safeNum(gs.bestCombo),
+      streak:       safeNum(gs.streak),
+      bestStreak:   safeNum(gs.bestStreak),
+      timeLeft:     safeNum(gs.timeLeft, GAME_DURATION),
+    };
+    gameStateRef.current = safe;
+    setGameState({ ...safe });
+  }, []);
+
+  const selectDifficulty = useCallback((d: Difficulty) => {
+    if (!canSetDiff) return;
+    difficultyRef.current = d;
+    setDifficulty(d);
+  }, [canSetDiff]);
+
+  /* ─────────────────────────────────────────────────────────────
+     MUTE TOGGLE
+  ───────────────────────────────────────────────────────────── */
+  const toggleMute = useCallback(() => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setMuted(next);
+    setMasterVolume(next ? 0 : 1);
+    try { localStorage.setItem(LS_MUTE_KEY, String(next)); } catch { /* quota */ }
+  }, []);
+
+  /* ─────────────────────────────────────────────────────────────
+     COMBO LABEL – auto-clears after TTL so it never lingers
+  ───────────────────────────────────────────────────────────── */
+  const showComboLabel = useCallback((label: string) => {
+    if (!label) return;
+    setComboLabel(label);
+    if (comboLabelTORef.current) clearTimeout(comboLabelTORef.current);
+    comboLabelTORef.current = setTimeout(() => {
+      setComboLabel('');
+      comboLabelTORef.current = null;
+    }, COMBO_LABEL_TTL_MS);
+  }, []);
+
+  /* ─────────────────────────────────────────────────────────────
+     STOP ALL
+  ───────────────────────────────────────────────────────────── */
+  const stopAll = useCallback(() => {
+    cancelAnimationFrame(animRafRef.current);
+    animRafRef.current = 0;
+    if (timerIntervalRef.current)  { clearInterval(timerIntervalRef.current);  timerIntervalRef.current = null; }
+    if (countdownTORef.current)    { clearTimeout(countdownTORef.current);     countdownTORef.current = null; }
+    if (comboLabelTORef.current)   { clearTimeout(comboLabelTORef.current);    comboLabelTORef.current = null; }
+    lastRafRef.current = 0;
+    hitGuardRef.current = false;
+    gameInitRef.current = false;
+  }, []);
+
+  /* ─────────────────────────────────────────────────────────────
+     UPDATE TARGET ELEMENT (direct DOM, zero React involvement)
+  ───────────────────────────────────────────────────────────── */
+  const applyTargetTransform = useCallback((t: TargetPhysics) => {
+    const el = targetElRef.current;
+    if (!el) return;
+    el.style.transform = `translate3d(${t.x - t.size}px,${t.y - t.size}px,0)`;
+  }, []);
+
+  /* ─────────────────────────────────────────────────────────────
+     ANIMATION LOOP
+  ───────────────────────────────────────────────────────────── */
+  const animate = useCallback((timestamp: number) => {
+    if (phaseRef.current !== 'running') return;
+
+    const area = areaRef.current;
+    const t    = targetRef.current;
+    if (!area || !t) return;
+
+    const prev   = lastRafRef.current || timestamp;
+    const rawDt  = timestamp - prev;
+    const dt     = Math.min(rawDt, 50);
+    lastRafRef.current = timestamp;
+    const dtFactor = dt / (1000 / FRAME_REF_HZ);
+
+    const elapsed   = timestamp - startTimestampRef.current;
+    const speedMult = clamp(1 + elapsed * PROGRESSIVE_ACCEL, 1, MAX_SPEED_MULT);
+
+    const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
+    const { width: areaWidth } = area.getBoundingClientRect();
+
+    const next = stepPhysics(t, areaWidth, speedMult, dtFactor, difficultyRef.current === 'impossible', cfg);
+    targetRef.current = next;
+
+    applyTargetTransform(next);
+
+    animRafRef.current = requestAnimationFrame(animate);
+  }, [applyTargetTransform]);
+
+  /* ─────────────────────────────────────────────────────────────
+     TIMER
+  ───────────────────────────────────────────────────────────── */
+  const startTimer = useCallback(() => {
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+
+    timerIntervalRef.current = setInterval(() => {
+      if (phaseRef.current !== 'running') return;
+
+      const gs   = gameStateRef.current;
+      const next = parseFloat((Math.max(0, gs.timeLeft - TIMER_INTERVAL_MS / 1000)).toFixed(1));
+      const updated: GameState = { ...gs, timeLeft: next };
+      commitGameState(updated);
+
+      if (next <= 0) {
+        clearInterval(timerIntervalRef.current!);
+        timerIntervalRef.current = null;
+        cancelAnimationFrame(animRafRef.current);
+        animRafRef.current = 0;
+
+        const rec  = loadRecords();
+        const newRec: StoredRecords = {
+          bestScore:   Math.max(rec.bestScore, updated.score),
+          bestStreak:  Math.max(rec.bestStreak, updated.bestStreak),
+          bestCombo:   Math.max(rec.bestCombo, updated.bestCombo),
+          gamesPlayed: rec.gamesPlayed + 1,
+          totalHits:   rec.totalHits  + updated.hits,
+          totalMisses: rec.totalMisses + updated.misses,
+        };
+        saveRecords(newRec);
+        setRecords(newRec);
+
+        targetRef.current = null;
+        if (targetElRef.current) targetElRef.current.style.display = 'none';
+        soundGameOver();
+        commitPhase('done');
+      }
+    }, TIMER_INTERVAL_MS);
+  }, [commitGameState, commitPhase]);
+
+  /* ─────────────────────────────────────────────────────────────
+     LAUNCH GAME
+  ───────────────────────────────────────────────────────────── */
+  const launchGame = useCallback(() => {
+    if (gameInitRef.current) return;
+    gameInitRef.current = true;
+
+    const area = areaRef.current;
+    if (!area) { gameInitRef.current = false; return; }
+
+    const { width: areaWidth } = area.getBoundingClientRect();
+    const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
+
+    const gs: GameState = { ...DEFAULT_GAME_STATE };
+    commitGameState(gs);
+    setFeedbacks([]);
+    setComboLabel('');
+    hitGuardRef.current = false;
+
+    const t = spawnTarget(areaWidth, cfg, null);
+    targetRef.current = t;
+
+    const el = targetElRef.current;
+    if (el) {
+      const diameter = t.size * 2;
+      el.style.display = 'block';
+      el.style.width   = `${diameter}px`;
+      el.style.height  = `${diameter}px`;
+      el.style.borderRadius = '50%';
+      applyTargetTransform(t);
+    }
+
+    startTimestampRef.current = performance.now();
+    lastRafRef.current = 0;
+    animRafRef.current = requestAnimationFrame(animate);
+
+    startTimer();
+    commitPhase('running');
+  }, [commitGameState, commitPhase, animate, startTimer, applyTargetTransform]);
+
+  /* ─────────────────────────────────────────────────────────────
+     COUNTDOWN SEQUENCE
+  ───────────────────────────────────────────────────────────── */
+  const beginCountdown = useCallback(() => {
+    if (phaseRef.current === 'countdown' || phaseRef.current === 'running') return;
+    stopAll();
+    commitPhase('countdown');
+
+    if (targetElRef.current) targetElRef.current.style.display = 'none';
+    targetRef.current = null;
+
+    let count: number | 'GO!' = COUNTDOWN_FROM;
+    setCountdown(count);
+
+    const tick = () => {
+      if (phaseRef.current !== 'countdown') return;
+      const next = typeof count === 'number' ? count - 1 : 0;
+      if (next > 0) {
+        count = next;
+        setCountdown(count);
+        soundCountdownBeep();
+        countdownTORef.current = setTimeout(tick, COUNTDOWN_STEP_MS);
+      } else {
+        count = 'GO!';
+        setCountdown('GO!');
+        soundGo();
+        countdownTORef.current = setTimeout(() => {
+          setCountdown(COUNTDOWN_FROM);
+          launchGame();
+        }, GO_DISPLAY_MS);
+      }
+    };
+    soundCountdownBeep(); // first beep for the initial "3"
+    countdownTORef.current = setTimeout(tick, COUNTDOWN_STEP_MS);
+  }, [stopAll, commitPhase, launchGame]);
+
+  /* ─────────────────────────────────────────────────────────────
+     PAUSE / RESUME
+  ───────────────────────────────────────────────────────────── */
+  const pause = useCallback(() => {
+    if (phaseRef.current !== 'running') return;
+    cancelAnimationFrame(animRafRef.current);
+    animRafRef.current = 0;
+    if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
+    lastRafRef.current = 0;
+    commitPhase('paused');
+  }, [commitPhase]);
+
+  const resume = useCallback(() => {
+    if (phaseRef.current !== 'paused') return;
+    commitPhase('running');
+    animRafRef.current = requestAnimationFrame(animate);
+    startTimer();
+  }, [commitPhase, animate, startTimer]);
+
+  const handleReset = useCallback(() => {
+    stopAll();
+    targetRef.current = null;
+    if (targetElRef.current) targetElRef.current.style.display = 'none';
+    const gs = { ...DEFAULT_GAME_STATE };
+    commitGameState(gs);
+    setFeedbacks([]);
+    setComboLabel('');
+    commitPhase('idle');
+  }, [stopAll, commitGameState, commitPhase]);
+
+  /* ─────────────────────────────────────────────────────────────
+     ESC KEY
+  ───────────────────────────────────────────────────────────── */
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (phaseRef.current === 'running') pause();
+      else if (phaseRef.current === 'paused') resume();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [pause, resume]);
+
+  useEffect(() => () => stopAll(), [stopAll]);
+
+  /* ─────────────────────────────────────────────────────────────
+     HIT LOGIC – shared by mouse and touch
+  ───────────────────────────────────────────────────────────── */
+  const processHit = useCallback((clientX: number, clientY: number) => {
+    if (phaseRef.current !== 'running') return;
+    if (hitGuardRef.current) return;
+    hitGuardRef.current = true;
+    requestAnimationFrame(() => { hitGuardRef.current = false; });
+
+    const t    = targetRef.current;
+    const area = areaRef.current;
+    if (!t || !area) return;
+
+    const rect   = area.getBoundingClientRect();
+    const clickX = clientX - rect.left;
+    const clickY = clientY - rect.top;
+    const dist   = Math.sqrt((clickX - t.x) ** 2 + (clickY - t.y) ** 2);
+    const isCrit = dist < t.size * CRIT_RADIUS_RATIO;
+
+    const gs        = gameStateRef.current;
+    const newCombo  = gs.combo + 1;
+    const { mult, label: comboLbl } = getComboInfo(newCombo);
+    const cfg       = DIFFICULTY_CONFIG[difficultyRef.current];
+    const base      = isCrit ? CRIT_SCORE : HIT_SCORE;
+    const earned    = safeNum(Math.max(0, Math.round(base * mult * cfg.scoreMultiplier)));
+
+    const newStreak    = gs.streak + 1;
+    const newBestStreak = Math.max(gs.bestStreak, newStreak);
+    const newBestCombo  = Math.max(gs.bestCombo, newCombo);
+
+    const updated: GameState = {
+      ...gs,
+      score:        safeNum(Math.max(0, gs.score + earned)),
+      hits:         gs.hits + 1,
+      criticalHits: gs.criticalHits + (isCrit ? 1 : 0),
+      combo:        newCombo,
+      bestCombo:    newBestCombo,
+      streak:       newStreak,
+      bestStreak:   newBestStreak,
+    };
+    commitGameState(updated);
+
+    // Sound: crit or normal hit, then combo unlock if threshold crossed
+    if (isCrit) soundCrit(); else soundHit();
+    // Fire combo sound when a new threshold is first reached (exact boundary)
+    const prevComboInfo = getComboInfo(gs.combo);
+    const nextComboInfo = getComboInfo(newCombo);
+    if (nextComboInfo.mult > prevComboInfo.mult) {
+      const tier = COMBO_THRESHOLDS.findIndex(t => t.mult === nextComboInfo.mult) + 1;
+      setTimeout(() => soundCombo(tier), 60); // slight delay so it layers after hit
+    }
+
+    if (comboLbl) showComboLabel(comboLbl);
+
+    const fid = ++feedbackIdRef.current;
+    setFeedbacks(prev => [
+      ...prev.slice(-7),
+      {
+        id: fid, x: t.x, y: t.y,
+        text:  isCrit ? `⚡ CRIT +${earned}` : `+${earned}`,
+        color: isCrit ? '#facc15' : '#34d399',
+      },
+    ]);
+    setTimeout(() => setFeedbacks(prev => prev.filter(f => f.id !== fid)), FEEDBACK_TTL_MS);
+
+    const { width: areaWidth } = area.getBoundingClientRect();
+    const next = spawnTarget(areaWidth, cfg, t);
+    targetRef.current = next;
+
+    const el = targetElRef.current;
+    if (el) {
+      const diameter = next.size * 2;
+      el.style.width  = `${diameter}px`;
+      el.style.height = `${diameter}px`;
+      applyTargetTransform(next);
+    }
+  }, [commitGameState, applyTargetTransform, showComboLabel]);
+
+  /* ─────────────────────────────────────────────────────────────
+     HIT HANDLER – mouse
+  ───────────────────────────────────────────────────────────── */
+  const handleHit = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    processHit(e.clientX, e.clientY);
+  }, [processHit]);
+
+  /* ─────────────────────────────────────────────────────────────
+     HIT HANDLER – touch (for mobile)
+  ───────────────────────────────────────────────────────────── */
+  const handleHitTouch = useCallback((e: React.TouchEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    e.preventDefault(); // prevent ghost mouse event
+    const touch = e.changedTouches[0];
+    if (touch) processHit(touch.clientX, touch.clientY);
+  }, [processHit]);
+
+  /* ─────────────────────────────────────────────────────────────
+     MISS HANDLER – mouse
+  ───────────────────────────────────────────────────────────── */
+  const handleMiss = useCallback(() => {
+    if (phaseRef.current !== 'running') return;
+    soundMiss();
+    const gs = gameStateRef.current;
+    const updated: GameState = {
+      ...gs,
+      misses: gs.misses + 1,
+      combo:  0,
+      score:  safeNum(Math.max(0, gs.score + MISS_PENALTY)),
+    };
+    commitGameState(updated);
+    setComboLabel('');
+    if (comboLabelTORef.current) { clearTimeout(comboLabelTORef.current); comboLabelTORef.current = null; }
+  }, [commitGameState]);
+
+  /* ─────────────────────────────────────────────────────────────
+     MISS HANDLER – touch (tap on arena background, not target)
+  ───────────────────────────────────────────────────────────── */
+  const handleMissTouch = useCallback((e: React.TouchEvent<HTMLDivElement>) => {
+    if (phaseRef.current !== 'running') return;
+    // Only count as miss if the touch originated directly on the arena (not the target button)
+    if ((e.target as HTMLElement).tagName === 'BUTTON') return;
+    e.preventDefault();
+    handleMiss();
+  }, [handleMiss]);
+
+  /* ─────────────────────────────────────────────────────────────
+     DERIVED RECORDS
+  ───────────────────────────────────────────────────────────── */
+  const avgAccuracy = useMemo(() => calcAvgAccuracy(records), [records]);
+
+  /* ─────────────────────────────────────────────────────────────
+     RENDER
+  ───────────────────────────────────────────────────────────── */
+  return (
+    <>
+      <style>{`
+        @keyframes countdownPop {
+          0%   { transform: scale(1.7) translateY(10px); opacity: 0; }
+          60%  { transform: scale(0.96) translateY(0);   opacity: 1; }
+          100% { transform: scale(1)   translateY(0);   opacity: 1; }
+        }
+        @keyframes floatUp {
+          0%   { opacity: 1; transform: translate(-50%, -50%); }
+          100% { opacity: 0; transform: translate(-50%, -170%); }
+        }
+        @keyframes fadeInDown {
+          0%   { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+          100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        @keyframes targetPulse {
+          0%   { box-shadow: 0 0 0 0   rgba(255,45,85,0.65), 0 0 14px rgba(255,45,85,0.8); }
+          70%  { box-shadow: 0 0 0 9px rgba(255,45,85,0),    0 0 14px rgba(255,45,85,0.8); }
+          100% { box-shadow: 0 0 0 0   rgba(255,45,85,0),    0 0 14px rgba(255,45,85,0.8); }
+        }
+
+        /* Premium SVG crosshair cursor during play */
+        .arena-playing {
+          cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='7' stroke='%23ff2d55' stroke-width='1.5' fill='none'/%3E%3Cline x1='16' y1='2' x2='16' y2='10' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='16' y1='22' x2='16' y2='30' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='2' y1='16' x2='10' y2='16' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='22' y1='16' x2='30' y2='16' stroke='%23ff2d55' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, crosshair;
+        }
+      `}</style>
+
+      <main
+        style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}
+        aria-label="Sniper Aim Trainer game and guide"
+      >
+
+        <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div className="section-label">Aim Tool</div>
+          <h1 className="tool-title">
+            Sniper Aim Trainer – Free Online Tracking Aim Test
+          </h1>
+          <p className="tool-subtitle">Track and hit the small moving target — precision matters!</p>
+        </header>
+
+        <section aria-label="Game arena">
+
+          {/* Difficulty selector */}
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{
+              fontSize: '0.7rem', color: 'var(--text-muted)',
+              textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem',
+            }}>
+              Difficulty
+            </div>
+            <div role="group" aria-label="Select difficulty" style={{ display: 'flex', gap: '0.5rem' }}>
+              {DIFFICULTY_ORDER.map(d => (
+                <DifficultyButton
+                  key={d} diff={d}
+                  selected={difficulty === d}
+                  onSelect={selectDifficulty}
+                  disabled={!canSetDiff}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Primary stat row – score and timer are aria-live for screen readers */}
+          <div
+            role="group" aria-label="Game statistics"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}
+          >
+            <StatCard value={gameState.score}                label="Score"    color="var(--neon-cyan)"   live={isPlaying} />
+            <StatCard value={`${accuracy}%`}                label="Accuracy" color="var(--neon-green)"  />
+            <StatCard value={gameState.misses}              label="Misses"   color="var(--neon-red)"    />
+            <StatCard value={gameState.timeLeft.toFixed(1)} label="Time"     color="var(--neon-orange)" live={isPlaying} />
+          </div>
+
+          {/* Secondary stat row */}
+          <div
+            role="group" aria-label="Combo and streak statistics"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1rem' }}
+          >
+            <StatCard value={gameState.combo}      label="Combo"       color="var(--neon-orange)" />
+            <StatCard value={gameState.bestCombo}  label="Best Combo"  color="#a855f7"            />
+            <StatCard value={gameState.streak}     label="Streak"      color="var(--neon-cyan)"   />
+            <StatCard value={gameState.bestStreak} label="Best Streak" color="var(--neon-green)"  />
+          </div>
+
+          {/* Progress bar */}
+          <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuenow={Math.round(progressPct)}
+            aria-valuemin={0} aria-valuemax={100}
+            aria-label="Time elapsed"
+            style={{ marginBottom: '1rem' }}
+          >
+            <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+          </div>
+
+          {/* ── Arena ── */}
+          <div
+            ref={areaRef}
+            onClick={isPlaying ? handleMiss : undefined}
+            onTouchStart={isPlaying ? handleMissTouch : undefined}
+            role="application"
+            aria-label={
+              phase === 'running'   ? 'Click the moving red target. Clicking elsewhere counts as a miss.' :
+              phase === 'paused'    ? 'Game paused.' :
+              phase === 'done'      ? `Game over. Final score: ${gameState.score}. Accuracy: ${accuracy}%.` :
+              phase === 'countdown' ? 'Get ready…' :
+              'Game arena. Press Start to begin.'
+            }
+            className={isPlaying ? 'arena-playing' : undefined}
+            style={{
+              position: 'relative', width: '100%', height: `${AREA_HEIGHT}px`,
+              background: '#0a0f18',
+              border: `2px solid ${isPlaying ? 'rgba(255,45,85,0.5)' : 'var(--border)'}`,
+              borderRadius: '16px', overflow: 'hidden',
+              cursor: isPlaying ? undefined : 'default', // cursor set by class above when playing
+              marginBottom: '1.5rem',
+              contain: 'layout style paint',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              touchAction: 'none', // prevent scroll interference on mobile
+            }}
+          >
+            {/* Decorative crosshair guides */}
+            {isPlaying && (
+              <>
+                <div aria-hidden="true" style={{
+                  position: 'absolute', top: '50%', left: 0, right: 0,
+                  height: '1px', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
+                }} />
+                <div aria-hidden="true" style={{
+                  position: 'absolute', left: '50%', top: 0, bottom: 0,
+                  width: '1px', background: 'rgba(255,255,255,0.04)', pointerEvents: 'none',
+                }} />
+              </>
+            )}
+
+            {isPlaying && <ComboToast label={comboLabel} />}
+
+            {phase === 'countdown' && <CountdownOverlay value={countdown} />}
+
+            {phase === 'paused' && <PauseOverlay onResume={resume} onRestart={handleReset} />}
+
+            {(phase === 'idle' || phase === 'done') && (
+              <div aria-hidden="true" style={{
+                position: 'absolute', inset: 0, display: 'flex',
+                flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem',
+              }}>
+                <span style={{ fontSize: '4rem' }}>🔭</span>
+                <span style={{
+                  fontSize: '1.5rem', fontWeight: 800,
+                  color: phase === 'done' ? 'var(--neon-orange)' : 'var(--neon-red)',
+                }}>
+                  {phase === 'done' ? `Final Score: ${gameState.score}` : 'Click Start — Hit the Moving Target'}
+                </span>
+                {phase === 'done' && (
+                  <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.88rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <span style={{ color: 'var(--neon-green)' }}>{accuracy}% Accuracy</span>
+                    <span style={{ color: '#a855f7' }}>Best Combo ×{gameState.bestCombo}</span>
+                    <span style={{ color: 'var(--neon-cyan)' }}>Best Streak {gameState.bestStreak}</span>
+                    <span style={{ color: gameState.criticalHits > 0 ? '#facc15' : 'var(--text-muted)' }}>
+                      {gameState.criticalHits} Crits
+                    </span>
+                  </div>
+                )}
+                {phase === 'done' && records.gamesPlayed > 0 && (
+                  <div style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+                    All-time best: {records.bestScore} pts &middot; {records.gamesPlayed} games played
+                  </div>
+                )}
+              </div>
+            )}
+
+            <HitFeedbackLayer feedbacks={feedbacks} />
+
+            {/*
+              Moving target button – permanently mounted, shown/hidden via style.display.
+              touch-action: none prevents scroll-while-aiming on mobile.
+            */}
+            <button
+              ref={targetElRef}
+              onClick={handleHit}
+              onTouchStart={handleHitTouch}
+              aria-label="Hit this target"
+              style={{
+                display: 'none',
+                position: 'absolute',
+                left: 0, top: 0,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(255,45,85,1) 20%, rgba(255,107,0,0.8) 60%, transparent 100%)',
+                border: `2px solid ${diffCfg.color}`,
+                cursor: 'crosshair',
+                animation: 'targetPulse 1.15s infinite',
+                zIndex: 10, padding: 0,
+                willChange: 'transform',
+                touchAction: 'none', // prevent scroll hijack on mobile
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            />
+          </div>
+
+          {/* Controls */}
+          <div
+            role="group" aria-label="Game controls"
+            style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '1rem', flexWrap: 'wrap' }}
+          >
+            {(phase === 'idle' || phase === 'done') && (
+              <button
+                className="btn btn-primary"
+                onClick={beginCountdown}
+                aria-label={phase === 'done' ? 'Play again' : 'Start Sniper Mode'}
+              >
+                {phase === 'done' ? '▶ Play Again' : '🔭 Start Sniper Mode'}
+              </button>
+            )}
+            {phase === 'running' && (
+              <button className="btn btn-secondary" onClick={pause} aria-label="Pause game (ESC)">
+                ⏸ Pause
+              </button>
+            )}
+            {(phase === 'running' || phase === 'paused' || phase === 'done') && (
+              <button className="btn btn-secondary" onClick={handleReset} aria-label="Reset game">
+                🔄 Reset
+              </button>
+            )}
+            {/* Mute toggle – always visible so players can silence before starting */}
+            <button
+              className="btn btn-secondary"
+              onClick={toggleMute}
+              aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
+              aria-pressed={muted}
+              style={{ minWidth: '2.8rem', fontSize: '1.1rem', padding: '0.5rem 0.85rem' }}
+            >
+              {muted ? '🔇' : '🔊'}
+            </button>
+          </div>
+
+          {phase === 'running' && (
+            <p
+              style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '2.5rem' }}
+              aria-hidden="true"
+            >
+              Press <kbd style={kbdStyle}>ESC</kbd> to pause
+            </p>
+          )}
+
+          {/* All-time records panel – now includes avg accuracy */}
+          {records.gamesPlayed > 0 && (phase === 'idle' || phase === 'done') && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '2.5rem' }}>
+              <StatCard value={records.bestScore}  label="Best Score"  color="var(--neon-cyan)"  />
+              <StatCard value={records.bestStreak} label="Best Streak" color="var(--neon-green)" />
+              <StatCard value={records.bestCombo}  label="Best Combo"  color="#a855f7"           />
+              <StatCard value={`${avgAccuracy}%`}  label="Avg Accuracy" color="var(--neon-orange)" />
+            </div>
+          )}
+
+        </section>
+
+        {/* ══════════════════════════════════════
+            SEO ARTICLE
+        ══════════════════════════════════════ */}
+        <article
+          aria-label="Sniper aim trainer guide and tips"
+          style={{
+            background: 'var(--bg-card)', border: '1px solid var(--border)',
+            borderRadius: '16px', padding: '2.5rem', marginTop: '3rem',
+          }}
+        >
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.8 }}>
+
+            <header>
+              <h2 style={{
+                fontWeight: 800, fontSize: '2rem', marginBottom: '1.5rem',
+                color: 'var(--neon-red)', marginTop: 0, letterSpacing: '-0.5px',
+              }}>
+                What Is a Sniper Aim Trainer?
+              </h2>
+              <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
+                This <strong>sniper aim trainer</strong> is a free online tracking aim test designed to sharpen
+                your <strong>tracking aim</strong> — the ability to keep your crosshair locked onto a continuously
+                moving target. Unlike static click tests, this <strong>online aim trainer</strong> challenges your
+                hand-eye coordination with an unpredictable, bouncing dot that replicates real enemy movement in
+                FPS games. Whether you want to boost your <strong>mouse accuracy</strong>, build consistent{' '}
+                <strong>aim practice</strong> habits, or dominate sniper duels in competitive shooters, this tool
+                provides targeted, measurable training — with four difficulty modes, a progressive speed system,
+                a combo multiplier, critical hits, and persistent records that track your improvement over time.
+              </p>
+            </header>
+
+            <InfoBox
+              accent="var(--neon-red)" bg="rgba(255, 45, 85, 0.05)"
+              icon="🖱️" title='The "New Mouse" Tracking Calibration Test'
+              borderStyle="left"
+            >
+              Just got a new gaming mouse? Use this sniper aim trainer to verify your sensor&apos;s polling
+              rate stability, test your PTFE skates for smooth glide, and dial in your DPI before stepping into
+              ranked matches. Overshooting the dot consistently means your sensitivity is too high — trailing
+              it means you need more speed or a larger mousepad.
+            </InfoBox>
+
+            <section aria-labelledby="tracking-section-heading">
+              <h2
+                id="tracking-section-heading"
+                style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}
+              >
+                How to Improve Tracking Aim for FPS Games
+              </h2>
+              <p style={{ marginBottom: '1rem' }}>
+                Consistent tracking aim is one of the most feared skills in competitive gaming. A player who
+                keeps their crosshair glued to a moving enemy applies constant pressure and converts more shots
+                into eliminations. This aim trainer sharpens that skill through repeated, focused repetitions
+                — the only reliable path to durable muscle memory.
+              </p>
+              <p style={{ marginBottom: '1.5rem' }}>
+                Daily sessions with a <strong>tracking aim trainer</strong> like this one measurably improve
+                performance across popular titles:
+              </p>
+              <ul
+                aria-label="Supported games"
+                style={{
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                  gap: '1rem', marginBottom: '3rem', padding: 0,
+                }}
+              >
+                {SUPPORTED_GAMES.map(game => <GameCard key={game} name={game} />)}
+              </ul>
+            </section>
+
+            <section aria-labelledby="tips-heading">
+              <h2
+                id="tips-heading"
+                style={{
+                  fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                  color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+                }}
+              >
+                Best Aim Training Tips for FPS Games
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <FaqItem question="How do I improve sniper tracking in PUBG and Warzone?">
+                  In large-scale battle royales like <strong>PUBG: Battlegrounds</strong> and{' '}
+                  <strong>Call of Duty: Warzone</strong>, enemies are rarely stationary. To land shots with a
+                  Kar98k or HDR on a moving target, you must learn to &quot;lead&quot; your crosshair — placing
+                  it slightly ahead of your target&apos;s travel direction. This trainer&apos;s bouncing dot
+                  forces you to maintain smooth, continuous cursor movement and builds the muscle memory needed
+                  to track lateral strafes and diagonal rushes without jerking your wrist.
+                </FaqItem>
+
+                <FaqItem question="How can I improve AWP and sniper precision in CS2 and Valorant?">
+                  The AWP in <strong>Counter-Strike 2</strong> and the Operator in Valorant punish every miss
+                  severely — a missed shot often means death. Alongside disciplined crosshair placement, you
+                  need the ability to micro-track an enemy who jiggle-peeks or swings wide. Regular sessions
+                  with this <strong>mouse aim trainer</strong> train you to click precisely when your reticle
+                  aligns with a small, moving hitbox, sharpening the single-shot discipline these rifles demand.
+                </FaqItem>
+
+                <FaqItem question="How does tracking aim training help with Minecraft PvP bow fights?">
+                  Bow aiming in <strong>Minecraft</strong> PvP requires your cursor to stay locked on an
+                  opponent while both players strafe simultaneously. If your crosshair drifts even slightly,
+                  your arrows miss entirely. Sniper mode forces tight, sustained cursor control and translates
+                  directly to improved ranged accuracy on servers like Hypixel and competitive UHC play.
+                </FaqItem>
+
+                <FaqItem question="How do I react faster to sudden direction changes in FPS games?">
+                  When the target bounces off a wall in this trainer, it instantly reverses direction —
+                  mimicking the unpredictable strafes of real players in <strong>Fortnite</strong>,{' '}
+                  <strong>Apex Legends</strong>, and similar games. Three principles accelerate your reaction:
+                  <br /><br />
+                  <strong>1. React, don&apos;t predict.</strong> Keep your eyes on the dot itself, not where
+                  you think it&apos;s going — prediction causes overshooting.<br />
+                  <strong>2. Relax your grip.</strong> Grip tension reduces fine motor control. A relaxed hold
+                  enables faster micro-adjustments.<br />
+                  <strong>3. Upgrade your refresh rate.</strong> On a 144 Hz or 240 Hz monitor the dot&apos;s
+                  movement appears significantly smoother, reducing perceived visual lag.
+                </FaqItem>
+              </div>
+
+              <InfoBox
+                accent="rgba(255,107,0,0.2)" bg="rgba(255, 107, 0, 0.05)"
+                icon="💡" title="Professional Aim Training Tips: Optimise Your eDPI"
+                borderStyle="full"
+              >
+                Your effective DPI (eDPI = hardware DPI × in-game sensitivity) is the single biggest variable
+                in tracking consistency. If you constantly overshoot the red target, your eDPI is too high; if
+                you trail behind it, increase sensitivity or use a larger mousepad. Most top-level FPS players
+                use 400–800 DPI and move primarily from the elbow and forearm rather than the wrist for long
+                tracking sweeps. Reduce your DPI, reclaim control, and let this aim trainer confirm the
+                improvement session by session.
+              </InfoBox>
+            </section>
+
+            <section aria-labelledby="faq-heading" style={{ marginTop: '3rem' }}>
+              <h2
+                id="faq-heading"
+                style={{
+                  fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                  color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+                }}
+              >
+                Frequently Asked Questions
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <FaqItem question="Is this sniper aim trainer free to use?">
+                  Yes. This is a completely free, browser-based <strong>online aim trainer</strong>. No
+                  downloads, accounts, or subscriptions are required. Open the page and start training
+                  immediately on any device with a mouse or touchscreen.
+                </FaqItem>
+
+                <FaqItem question="What do the difficulty modes change?">
+                  Each difficulty adjusts four variables simultaneously: target radius, movement speed,
+                  movement unpredictability, and score multiplier. Easy gives you a large, slow target at ×1
+                  score. Impossible gives you a tiny, erratic, fast target at ×3 score — designed to push
+                  elite players to their absolute limit.
+                </FaqItem>
+
+                <FaqItem question="How does the combo system work?">
+                  Landing 5 consecutive hits without missing activates a ×2 combo multiplier. 10 hits unlocks
+                  ×3. 20 hits unlocks ×5. A miss resets your combo to zero. Combine Impossible difficulty
+                  with a long combo for maximum score output.
+                </FaqItem>
+
+                <FaqItem question="What is a critical hit?">
+                  Clicking within the central 38% of the target&apos;s radius registers as a Critical Hit,
+                  worth 150 base points instead of 100 — before combo and difficulty multipliers are applied.
+                  Aim precisely for the centre of the dot to maximise your score.
+                </FaqItem>
+
+                <FaqItem question="How long should I train each day?">
+                  Focused sessions of 15–30 minutes produce better results than long, fatigued marathons. Aim
+                  for three to five short sessions per week, track your accuracy score each time, and look for
+                  a consistent upward trend over two to four weeks.
+                </FaqItem>
+
+                <FaqItem question="Does aim training transfer to real games?">
+                  Studies on perceptual-motor learning confirm that deliberate, repetitive practice on isolated
+                  skills — like cursor tracking — transfers to related real-world tasks. The bouncing movement
+                  in this trainer closely approximates enemy strafing patterns in FPS titles, making it a
+                  high-fidelity training stimulus. Pair it with in-game practice for the fastest improvement.
+                </FaqItem>
+              </div>
+            </section>
+
+          </div>
+        </article>
+      </main>
+    </>
   );
 }
