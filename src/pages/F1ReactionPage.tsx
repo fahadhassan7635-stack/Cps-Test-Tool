@@ -10,12 +10,13 @@ const COPIED_RESET_MS = 2500;
 const MAX_HISTORY_DISPLAY = 20;
 const MAX_HISTORY_CHART = 10;
 const MAX_HISTORY_STORAGE = 1000;
-const MIN_BUTTON_SIZE = 44;
-const MIN_REACTION_MS = 50;
+const MIN_BUTTON_SIZE = 48; // increased for better mobile touch
+const MIN_REACTION_MS = 80;
 const MAX_REACTION_MS = 5000;
 const MAX_FALSE_STARTS = 999_999;
 const START_TIME_UNSET = -1;
-const SEQUENCE_LOCK_MS = 100;
+const SEQUENCE_LOCK_MS = 150;
+const MAX_AUDIO_NODES = 32;
 
 const MODE_DELAYS: Record<Mode, [number, number]> = {
   Rookie: [800, 2500],
@@ -47,20 +48,20 @@ const CONFETTI_COLORS = [THEME.cyan, THEME.green, THEME.orange, '#fff'];
 const CONFETTI_COUNT = 60;
 
 const STORAGE_KEYS = {
-  history: 'f1rt_hist',
-  fouls: 'f1rt_fouls',
+  history: 'f1rt_hist_v2', // bumped version to avoid old corrupt data
+  fouls: 'f1rt_fouls_v2',
   muted: 'f1rt_muted',
 } as const;
 
 const ACHIEVEMENTS: Achievement[] = [
-  { id: 'a1', icon: '🏁', label: 'First Race',  check: (h) => h.length >= 1 },
-  { id: 'a2', icon: '⚡', label: 'Sub 300ms',   check: (h) => h.some((x) => x.time < 300) },
-  { id: 'a3', icon: '🔥', label: 'Sub 250ms',   check: (h) => h.some((x) => x.time < 250) },
-  { id: 'a4', icon: '🚀', label: 'Sub 200ms',   check: (h) => h.some((x) => x.time < 200) },
-  { id: 'a5', icon: '👽', label: 'Sub 150ms',   check: (h) => h.some((x) => x.time < 150) },
-  { id: 'a6', icon: '🥈', label: '10 Races',    check: (h) => h.length >= 10 },
-  { id: 'a7', icon: '🥇', label: '50 Races',    check: (h) => h.length >= 50 },
-  { id: 'a8', icon: '🏆', label: '100 Races',   check: (h) => h.length >= 100 },
+  { id: 'a1', icon: '🏁', label: 'First Race', check: (h) => h.length >= 1 },
+  { id: 'a2', icon: '⚡', label: 'Sub 300ms', check: (h) => h.some((x) => x.time < 300) },
+  { id: 'a3', icon: '🔥', label: 'Sub 250ms', check: (h) => h.some((x) => x.time < 250) },
+  { id: 'a4', icon: '🚀', label: 'Sub 200ms', check: (h) => h.some((x) => x.time < 200) },
+  { id: 'a5', icon: '👽', label: 'Sub 150ms', check: (h) => h.some((x) => x.time < 150) },
+  { id: 'a6', icon: '🥈', label: '10 Races', check: (h) => h.length >= 10 },
+  { id: 'a7', icon: '🥇', label: '50 Races', check: (h) => h.length >= 50 },
+  { id: 'a8', icon: '🏆', label: '100 Races', check: (h) => h.length >= 100 },
 ];
 
 const FAQ_ITEMS = [
@@ -87,44 +88,55 @@ const FAQ_ITEMS = [
 ];
 
 const SCORE_CHART_ROWS = [
-  { range: '< 150 ms',     rating: 'F1 Driver Level', equivalent: 'God-Tier Speed (Verstappen / Hamilton Level)',  color: '#e040fb' },
-  { range: '150 – 200 ms', rating: 'Alien Reflexes',  equivalent: 'Tier-1 Esports Professional Athlete',          color: '#00e5ff' },
-  { range: '200 – 250 ms', rating: 'Excellent',        equivalent: 'Hardcore High-Tier Competitive Gamer',         color: '#00f5b4' },
-  { range: '250 – 300 ms', rating: 'Great',            equivalent: 'Standard Average Human Response Baseline',     color: '#ff7a00' },
-  { range: '300 – 400 ms', rating: 'Average',          equivalent: 'Casual Gamer / Occasional Player',             color: '#94a3b8' },
-  { range: '> 400 ms',     rating: 'Rookie',           equivalent: 'Needs Dedicated Warm-Ups and Focus Training',  color: '#64748b' },
+  { range: '< 150 ms', rating: 'F1 Driver Level', equivalent: 'God-Tier Speed (Verstappen / Hamilton Level)', color: '#e040fb' },
+  { range: '150 – 200 ms', rating: 'Alien Reflexes', equivalent: 'Tier-1 Esports Professional Athlete', color: '#00e5ff' },
+  { range: '200 – 250 ms', rating: 'Excellent', equivalent: 'Hardcore High-Tier Competitive Gamer', color: '#00f5b4' },
+  { range: '250 – 300 ms', rating: 'Great', equivalent: 'Standard Average Human Response Baseline', color: '#ff7a00' },
+  { range: '300 – 400 ms', rating: 'Average', equivalent: 'Casual Gamer / Occasional Player', color: '#94a3b8' },
+  { range: '> 400 ms', rating: 'Rookie', equivalent: 'Needs Dedicated Warm-Ups and Focus Training', color: '#64748b' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Phase = 'idle' | 'lighting' | 'ready' | 'foul' | 'result';
-type Mode  = 'Rookie' | 'Pro' | 'F1 Elite';
+type Mode = 'Rookie' | 'Pro' | 'F1 Elite';
 
 interface HistoryItem {
-  id:   string;
+  id: string;
   time: number;
   mode: Mode;
   date: number;
+  checksum: number;
 }
 
 interface Achievement {
-  id:    string;
-  icon:  string;
+  id: string;
+  icon: string;
   label: string;
   check: (hist: HistoryItem[]) => boolean;
 }
 
 interface ConfettiPiece {
-  id:       number;
-  color:    string;
-  left:     string;
-  size:     string;
-  delay:    string;
-  radius:   string;
+  id: number;
+  color: string;
+  left: string;
+  size: string;
+  delay: string;
+  radius: string;
   duration: string;
 }
 
-// ─── Pure helpers (defined outside component — never recreated) ───────────────
+// ─── Pure helpers ─────────────────────────────────────────────────────────────
+
+function computeChecksum(time: number, mode: string, date: number): number {
+  const raw = `${time}|${mode}|${date}|f1rt-integrity`;
+  let h = 0x811c9dc5;
+  for (let i = 0; i < raw.length; i++) {
+    h ^= raw.charCodeAt(i);
+    h = (Math.imul(h, 0x01000193) >>> 0);
+  }
+  return h >>> 0;
+}
 
 function safeParseJSON<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -153,27 +165,38 @@ function safeLocalStorageSet(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
   } catch {
-    // Quota exceeded or private-browsing restriction — fail silently
+    // Quota exceeded or private-browsing — fail silently
   }
 }
 
 function isValidHistoryItem(item: unknown): item is HistoryItem {
   if (!item || typeof item !== 'object') return false;
   const h = item as Record<string, unknown>;
-  return (
-    typeof h.id   === 'string' &&
-    h.id.length    >  0        &&
-    h.id.length    <= 20       &&
-    typeof h.time === 'number' &&
-    Number.isFinite(h.time)    &&
-    h.time >= MIN_REACTION_MS  &&   // physically impossible to react faster
-    h.time <= MAX_REACTION_MS  &&   // cap absurdly large values
-    typeof h.mode === 'string' &&
-    ['Rookie', 'Pro', 'F1 Elite'].includes(h.mode as string) &&
-    typeof h.date === 'number' &&
-    Number.isFinite(h.date)    &&
-    h.date > 0
-  );
+
+  if (typeof h.id !== 'string') return false;
+  if (h.id.length < 1 || h.id.length > 40) return false;
+  // FIX #6: case-insensitive regex to accept uppercase hex from crypto.randomUUID
+  if (!/^[a-zA-Z0-9]+$/.test(h.id as string)) return false;
+
+  if (typeof h.time !== 'number') return false;
+  if (!Number.isFinite(h.time)) return false;
+  if (h.time < MIN_REACTION_MS) return false;
+  if (h.time > MAX_REACTION_MS) return false;
+  if (!Number.isInteger(h.time)) return false;
+
+  if (typeof h.mode !== 'string') return false;
+  if (!(['Rookie', 'Pro', 'F1 Elite'] as string[]).includes(h.mode)) return false;
+
+  if (typeof h.date !== 'number') return false;
+  if (!Number.isFinite(h.date)) return false;
+  if (h.date <= 0) return false;
+  if (h.date > Date.now() + 60_000) return false;
+
+  if (typeof h.checksum !== 'number') return false;
+  const expected = computeChecksum(h.time as number, h.mode as string, h.date as number);
+  if ((h.checksum as number) !== expected) return false;
+
+  return true;
 }
 
 function sanitizeHistory(raw: unknown): HistoryItem[] {
@@ -181,7 +204,6 @@ function sanitizeHistory(raw: unknown): HistoryItem[] {
   return raw.filter(isValidHistoryItem).slice(0, MAX_HISTORY_STORAGE);
 }
 
-// Safe replacement for Math.min(...array) — no call-stack overflow
 function arrayMin(arr: number[]): number {
   if (arr.length === 0) return Infinity;
   let min = arr[0];
@@ -189,6 +211,15 @@ function arrayMin(arr: number[]): number {
     if (arr[i] < min) min = arr[i];
   }
   return min;
+}
+
+function arrayMax(arr: number[]): number {
+  if (arr.length === 0) return -Infinity;
+  let max = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] > max) max = arr[i];
+  }
+  return max;
 }
 
 function getRating(ms: number): { text: string; color: string } {
@@ -208,19 +239,22 @@ function getBarColor(ms: number): string {
 
 function generateConfetti(): ConfettiPiece[] {
   return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
-    id:       i,
-    color:    CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    left:     `${Math.random() * 100}%`,
-    size:     `${4 + Math.random() * 8}px`,
-    delay:    `${(Math.random() * 0.5).toFixed(3)}s`,
-    radius:   Math.random() > 0.5 ? '50%' : '2px',
-    // Pre-generate duration so Math.random() never runs inside JSX render
+    id: i,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    left: `${Math.random() * 100}%`,
+    size: `${4 + Math.random() * 8}px`,
+    delay: `${(Math.random() * 0.5).toFixed(3)}s`,
+    radius: Math.random() > 0.5 ? '50%' : '2px',
     duration: `${(1.5 + Math.random() * 2).toFixed(3)}s`,
   }));
 }
 
+// FIX #6: always lowercase output so regex always passes
 function generateId(): string {
-  return Math.random().toString(36).slice(2, 9);
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID().replace(/-/g, '').toLowerCase().slice(0, 16);
+  }
+  return Math.random().toString(36).slice(2, 11) + Math.random().toString(36).slice(2, 7);
 }
 
 function vibrateDevice(pattern: number | number[]): void {
@@ -231,61 +265,87 @@ function vibrateDevice(pattern: number | number[]): void {
   }
 }
 
+const trustedPerfNow: () => number = (() => {
+  try {
+    return Performance.prototype.now.bind(performance);
+  } catch {
+    return () => Date.now();
+  }
+})();
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function F1ReactionTimePage() {
-  const [phase,        setPhase]        = useState<Phase>('idle');
-  const [mode,         setMode]         = useState<Mode>('Pro');
-  const [lights,       setLights]       = useState<number>(0);
+  const [phase, setPhase] = useState<Phase>('idle');
+  const [mode, setMode] = useState<Mode>('Pro');
+  const [lights, setLights] = useState<number>(0);
   const [reactionTime, setReactionTime] = useState<number | null>(null);
-  const [isNewRecord,  setIsNewRecord]  = useState<boolean>(false);
-  const [isMuted,      setIsMuted]      = useState<boolean>(false);
-  const [history,      setHistory]      = useState<HistoryItem[]>([]);
-  const [falseStarts,  setFalseStarts]  = useState<number>(0);
-  const [copied,       setCopied]       = useState<boolean>(false);
-  const [confetti,     setConfetti]     = useState<ConfettiPiece[]>([]);
-  const [openFaq,      setOpenFaq]      = useState<number | null>(null);
+  const [isNewRecord, setIsNewRecord] = useState<boolean>(false);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [falseStarts, setFalseStarts] = useState<number>(0);
+  const [copied, setCopied] = useState<boolean>(false);
+  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  // Refs — never trigger re-renders
-  const startTime      = useRef<number>(START_TIME_UNSET);
-  const timers         = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const audioCtx       = useRef<AudioContext | null>(null);
-  const copiedTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const confettiTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isProcessing   = useRef<boolean>(false);   // double-tap guard
-  const sequenceGen    = useRef<number>(0);         // stale-timer guard
-  const isMutedRef     = useRef<boolean>(isMuted);  // audio reads this synchronously
+  // Refs
+  const startTime = useRef<number>(START_TIME_UNSET);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const audioCtx = useRef<AudioContext | null>(null);
+  const activeAudioNodes = useRef<number>(0);
+  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confettiTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isProcessing = useRef<boolean>(false);
+  const processingLockAt = useRef<number>(0);
+  const sequenceGen = useRef<number>(0);
+  const isMutedRef = useRef<boolean>(isMuted);
+  const phaseRef = useRef<Phase>('idle');
+  // FIX mobile: track last pointer event to prevent ghost clicks
+  const lastPointerType = useRef<string>('');
+  const lastEventTime = useRef<number>(0);
+  const mountedRef = useRef<boolean>(true);
+  const historyRef = useRef<HistoryItem[]>([]); // FIX #2: ref mirror for history
 
-  // Keep audio ref in sync without re-renders
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Keep refs in sync
   useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { historyRef.current = history; }, [history]); // FIX #2
 
   // ── Load persisted state ───────────────────────────────────────────────────
   useEffect(() => {
     const rawHistory = safeParseJSON(safeLocalStorageGet(STORAGE_KEYS.history), []);
-    setHistory(sanitizeHistory(rawHistory));
+    const loaded = sanitizeHistory(rawHistory);
+    setHistory(loaded);
+    historyRef.current = loaded;
 
     const storedFouls = safeParseInt(safeLocalStorageGet(STORAGE_KEYS.fouls), 0);
-    setFalseStarts(
-      storedFouls >= 0 && storedFouls < MAX_FALSE_STARTS ? storedFouls : 0,
-    );
+    setFalseStarts(storedFouls >= 0 && storedFouls < MAX_FALSE_STARTS ? storedFouls : 0);
 
     setIsMuted(safeLocalStorageGet(STORAGE_KEYS.muted) === 'true');
   }, []);
 
-  // ── Global cleanup on unmount ──────────────────────────────────────────────
+  // FIX #1: unmount cleanup uses refs directly — no stale closure
   useEffect(() => {
     return () => {
-      clearAllTimers();
-      if (copiedTimer.current)   clearTimeout(copiedTimer.current);
+      timers.current.forEach(clearTimeout);
+      timers.current = [];
+      if (copiedTimer.current) clearTimeout(copiedTimer.current);
       if (confettiTimer.current) clearTimeout(confettiTimer.current);
       try { audioCtx.current?.close(); } catch { /* ignore */ }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Audio helpers ──────────────────────────────────────────────────────────
+  // FIX #3: init audio regardless of muted state so unmute works later
   const initAudio = useCallback(() => {
-    if (audioCtx.current || isMutedRef.current) return;
+    if (audioCtx.current) return;
     try {
       const Ctor =
         window.AudioContext ||
@@ -296,21 +356,22 @@ export default function F1ReactionTimePage() {
     }
   }, []);
 
-  const resumeCtx = () => {
+  const resumeCtx = useCallback(() => {
     if (audioCtx.current?.state === 'suspended') {
       audioCtx.current.resume().catch(() => {});
     }
-  };
+  }, []);
 
   const playTone = useCallback(
     (freq: number, type: OscillatorType, dur: number, freqEnd?: number) => {
       if (isMutedRef.current || !audioCtx.current) return;
+      if (activeAudioNodes.current >= MAX_AUDIO_NODES) return;
       resumeCtx();
       try {
-        const ctx  = audioCtx.current;
-        const osc  = ctx.createOscillator();
+        const ctx = audioCtx.current;
+        const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-
+        activeAudioNodes.current += 2;
         osc.type = type;
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
         if (freqEnd) {
@@ -318,72 +379,77 @@ export default function F1ReactionTimePage() {
         }
         gain.gain.setValueAtTime(0.4, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + dur);
-
-        // Fix #5 — disconnect nodes after stop to prevent memory accumulation
         osc.onended = () => {
-          try { osc.disconnect();  } catch { /* ignore */ }
+          activeAudioNodes.current = Math.max(0, activeAudioNodes.current - 2);
+          try { osc.disconnect(); } catch { /* ignore */ }
           try { gain.disconnect(); } catch { /* ignore */ }
         };
       } catch {
-        // Audio error — non-fatal
+        activeAudioNodes.current = Math.max(0, activeAudioNodes.current - 2);
       }
     },
-    [],
+    [resumeCtx],
   );
 
   const playLight = useCallback(() => playTone(440, 'sine', 0.08), [playTone]);
-  const playFoul  = useCallback(() => playTone(150, 'sawtooth', 0.35, 50), [playTone]);
+  const playFoul = useCallback(() => playTone(150, 'sawtooth', 0.35, 50), [playTone]);
 
   const playRecord = useCallback(() => {
     if (isMutedRef.current || !audioCtx.current) return;
+    if (activeAudioNodes.current >= MAX_AUDIO_NODES) return;
     resumeCtx();
     const ctx = audioCtx.current;
     const notes: [number, number][] = [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.35]];
     notes.forEach(([f, t]) => {
+      if (activeAudioNodes.current >= MAX_AUDIO_NODES) return;
       try {
-        const osc  = ctx.createOscillator();
+        const osc = ctx.createOscillator();
         const gain = ctx.createGain();
+        activeAudioNodes.current += 2;
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(f, ctx.currentTime + t);
-        gain.gain.setValueAtTime(0,    ctx.currentTime + t);
+        gain.gain.setValueAtTime(0, ctx.currentTime + t);
         gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + t + 0.02);
-        gain.gain.linearRampToValueAtTime(0,    ctx.currentTime + t + 0.12);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + t + 0.12);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(ctx.currentTime + t);
-        osc.stop(ctx.currentTime  + t + 0.15);
+        osc.stop(ctx.currentTime + t + 0.15);
         osc.onended = () => {
-          try { osc.disconnect();  } catch { /* ignore */ }
+          activeAudioNodes.current = Math.max(0, activeAudioNodes.current - 2);
+          try { osc.disconnect(); } catch { /* ignore */ }
           try { gain.disconnect(); } catch { /* ignore */ }
         };
       } catch {
-        // Audio error — non-fatal
+        activeAudioNodes.current = Math.max(0, activeAudioNodes.current - 2);
       }
     });
-  }, []);
+  }, [resumeCtx]);
 
   // ── Timer helpers ──────────────────────────────────────────────────────────
-  const clearAllTimers = () => {
+  const clearAllTimers = useCallback(() => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
-  };
+  }, []);
 
-  const addTimer = (fn: () => void, delay: number) => {
+  const addTimer = useCallback((fn: () => void, delay: number) => {
     const id = setTimeout(fn, delay);
     timers.current.push(id);
     return id;
-  };
+  }, []);
 
   // ── Confetti ───────────────────────────────────────────────────────────────
   const spawnConfetti = useCallback(() => {
+    if (!mountedRef.current) return;
     setConfetti(generateConfetti());
     if (confettiTimer.current) clearTimeout(confettiTimer.current);
-    confettiTimer.current = setTimeout(() => setConfetti([]), CONFETTI_DURATION_MS);
+    confettiTimer.current = setTimeout(() => {
+      if (mountedRef.current) setConfetti([]);
+    }, CONFETTI_DURATION_MS);
   }, []);
 
   // ── Start sequence ─────────────────────────────────────────────────────────
@@ -391,9 +457,10 @@ export default function F1ReactionTimePage() {
     initAudio();
     clearAllTimers();
     isProcessing.current = false;
-    startTime.current    = START_TIME_UNSET;
+    processingLockAt.current = 0;
+    startTime.current = START_TIME_UNSET;
+    lastEventTime.current = 0;
 
-    // Fix #8 — increment generation; stale closures check this before acting
     const gen = ++sequenceGen.current;
 
     setReactionTime(null);
@@ -403,7 +470,8 @@ export default function F1ReactionTimePage() {
 
     for (let i = 1; i <= LIGHT_COUNT; i++) {
       addTimer(() => {
-        if (sequenceGen.current !== gen) return; // stale — discard
+        if (sequenceGen.current !== gen) return;
+        if (!mountedRef.current) return;
         setLights(i);
         playLight();
         vibrateDevice(20);
@@ -414,29 +482,39 @@ export default function F1ReactionTimePage() {
     const rand = Math.random() * (max - min) + min;
 
     addTimer(() => {
-      if (sequenceGen.current !== gen) return; // stale — discard
+      if (sequenceGen.current !== gen) return;
+      if (!mountedRef.current) return;
+      const capturedStart = trustedPerfNow();
+      startTime.current = capturedStart;
       setPhase('ready');
       setLights(0);
-      // Fix #3 — only set startTime here, never at component init
-      startTime.current = performance.now();
     }, LIGHTS_COMPLETE_MS + rand);
-  }, [mode, initAudio, playLight]);
+  }, [mode, initAudio, clearAllTimers, addTimer, playLight]);
 
-  // ── Interaction handler ────────────────────────────────────────────────────
+  // ── Core interaction handler ───────────────────────────────────────────────
   const handleInteraction = useCallback(
     (e?: React.SyntheticEvent) => {
       if (e) {
-        if (e.type === 'touchstart') e.preventDefault();
+        e.preventDefault();
         e.stopPropagation();
       }
+
+      // FIX mobile #8: use pointerType from the stored ref to prevent
+      // both touchstart + mousedown firing on the same tap
+      const now = trustedPerfNow();
+      if (now - lastEventTime.current < 32) return; // ~2 frames debounce
+      lastEventTime.current = now;
+
       vibrateDevice(30);
 
-      if (phase === 'idle' || phase === 'result' || phase === 'foul') {
+      const currentPhase = phaseRef.current;
+
+      if (currentPhase === 'idle' || currentPhase === 'result' || currentPhase === 'foul') {
         startSequence();
 
-      } else if (phase === 'lighting') {
+      } else if (currentPhase === 'lighting') {
         clearAllTimers();
-        sequenceGen.current++; // invalidate any queued timers
+        sequenceGen.current++;
         setPhase('foul');
         setLights(0);
         setFalseStarts((prev) => {
@@ -447,54 +525,92 @@ export default function F1ReactionTimePage() {
         playFoul();
         vibrateDevice([100, 50, 100]);
 
-      } else if (phase === 'ready') {
-        // Fix #4 — double-tap / double-event guard
-        if (isProcessing.current) return;
-        isProcessing.current = true;
+      } else if (currentPhase === 'ready') {
+        // ── Double-event guard ─────────────────────────────────────────────
+        if (isProcessing.current) {
+          if (now - processingLockAt.current > 2000) {
+            isProcessing.current = false;
+            processingLockAt.current = 0;
+          } else {
+            return;
+          }
+        }
 
-        // Fix #3 — guard against unset startTime
+        isProcessing.current = true;
+        processingLockAt.current = now;
+
         if (startTime.current === START_TIME_UNSET) {
           isProcessing.current = false;
           return;
         }
 
-        const time = Math.round(performance.now() - startTime.current);
+        const rawTime = trustedPerfNow() - startTime.current;
 
-        // Fix #3 — sanity-clamp reaction time
-        if (time < MIN_REACTION_MS || time > MAX_REACTION_MS) {
+        if (rawTime < MIN_REACTION_MS || rawTime > MAX_REACTION_MS) {
           isProcessing.current = false;
           return;
         }
 
+        const time = Math.round(rawTime);
+
+        // FIX #2: read history from ref, not closure — no side effects in updater
+        const currentHistory = historyRef.current;
+        const prevBest = currentHistory.length
+          ? arrayMin(currentHistory.map((h) => h.time))
+          : Infinity;
+        const isRecord = time < prevBest;
+
+        // Set state cleanly — no side effects inside updater
         setReactionTime(time);
+        setIsNewRecord(isRecord);
         setPhase('result');
 
-        setHistory((prevHistory) => {
-          // Fix #1 — use arrayMin() instead of Math.min(...arr)
-          const pb     = prevHistory.length ? arrayMin(prevHistory.map((h) => h.time)) : Infinity;
-          const record = time < pb;
-          setIsNewRecord(record);
+        // Side effects outside the updater
+        if (isRecord) {
+          playRecord();
+          spawnConfetti();
+          vibrateDevice([50, 30, 50, 30, 100]);
+        }
 
-          if (record) {
-            playRecord();
-            spawnConfetti();
-            vibrateDevice([50, 30, 50, 30, 100]);
-          }
+        const stamp = Date.now();
+        const checksum = computeChecksum(time, mode, stamp);
+        const newItem: HistoryItem = {
+          id: generateId(),
+          time,
+          mode,
+          date: stamp,
+          checksum,
+        };
 
-          const newHistory: HistoryItem[] = [
-            { id: generateId(), time, mode, date: Date.now() },
-            ...prevHistory,
-          ].slice(0, MAX_HISTORY_STORAGE); // cap growth
-
-          safeLocalStorageSet(STORAGE_KEYS.history, JSON.stringify(newHistory));
-          return newHistory;
+        // Pure updater — only computes next state
+        setHistory((prev) => {
+          const next = [newItem, ...prev].slice(0, MAX_HISTORY_STORAGE);
+          historyRef.current = next; // keep ref in sync
+          safeLocalStorageSet(STORAGE_KEYS.history, JSON.stringify(next));
+          return next;
         });
 
-        // Release lock after state settles
-        setTimeout(() => { isProcessing.current = false; }, SEQUENCE_LOCK_MS);
+        // FIX #4: mountedRef guard inside the timeout
+        setTimeout(() => {
+          if (!mountedRef.current) return;
+          isProcessing.current = false;
+          processingLockAt.current = 0;
+        }, SEQUENCE_LOCK_MS);
       }
     },
-    [phase, mode, startSequence, playFoul, playRecord, spawnConfetti],
+    [startSequence, clearAllTimers, playFoul, playRecord, spawnConfetti, mode],
+  );
+
+  // ── Pointer-based arena handler (FIX mobile #8) ───────────────────────────
+  // Single onPointerDown replaces onMouseDown + onTouchStart combo
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      // Only primary button / first touch
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      lastPointerType.current = e.pointerType;
+      handleInteraction(e as unknown as React.SyntheticEvent);
+    },
+    [handleInteraction],
   );
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────────
@@ -505,7 +621,7 @@ export default function F1ReactionTimePage() {
         e.preventDefault();
         handleInteraction();
       }
-      if (e.key.toLowerCase() === 'r' && phase !== 'lighting') {
+      if (e.key.toLowerCase() === 'r' && phaseRef.current !== 'lighting') {
         startSequence();
       }
       if (e.key.toLowerCase() === 's') {
@@ -518,21 +634,19 @@ export default function F1ReactionTimePage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [phase, handleInteraction, startSequence]);
+  }, [handleInteraction, startSequence]);
 
   // ── Derived analytics ──────────────────────────────────────────────────────
   const analytics = useMemo(() => {
-    // Fix #1 — arrayMin instead of Math.min(...arr) everywhere
-    const pb          = history.length ? arrayMin(history.map((h) => h.time)) : null;
+    const pb = history.length ? arrayMin(history.map((h) => h.time)) : null;
     const recentSlice = history.slice(0, MAX_HISTORY_CHART);
-    const avg         = recentSlice.length
+    const avg = recentSlice.length
       ? Math.round(recentSlice.reduce((a, b) => a + b.time, 0) / recentSlice.length)
       : null;
-    const reversed  = recentSlice.slice().reverse();
-    const times     = reversed.map((h) => h.time);
-    const maxT      = times.length ? arrayMin(times.map((t) => -t)) * -1 : 1; // max via arrayMin trick
-    const maxTime   = times.length ? times.reduce((a, b) => (b > a ? b : a), times[0]) : 1;
-    const minTime   = times.length ? arrayMin(times) : 0;
+    const reversed = recentSlice.slice().reverse();
+    const times = reversed.map((h) => h.time);
+    const maxTime = times.length ? arrayMax(times) : 1;
+    const minTime = times.length ? arrayMin(times) : 0;
     const timeRange = maxTime - minTime || 1;
     return { pbValue: pb, avgValue: avg, recentReverse: reversed, maxTime, minTime, timeRange };
   }, [history]);
@@ -546,12 +660,13 @@ export default function F1ReactionTimePage() {
 
   // ── Toggle helpers ─────────────────────────────────────────────────────────
   const toggleMute = useCallback(() => {
+    initAudio(); // ensure context exists when unmuting
     setIsMuted((prev) => {
       const next = !prev;
       safeLocalStorageSet(STORAGE_KEYS.muted, String(next));
       return next;
     });
-  }, []);
+  }, [initAudio]);
 
   const toggleFaq = useCallback((index: number) => {
     setOpenFaq((prev) => (prev === index ? null : index));
@@ -560,7 +675,7 @@ export default function F1ReactionTimePage() {
   // ── Share ──────────────────────────────────────────────────────────────────
   const shareScore = useCallback(async () => {
     if (!reactionTime) return;
-    const r    = getRating(reactionTime);
+    const r = getRating(reactionTime);
     const text = `🏎️ F1 Lights Out Reaction Test\n⏱️ My time: ${reactionTime}ms\n🏆 Rating: ${r.text}\nCan you beat me?`;
     try {
       if (navigator.share) {
@@ -570,33 +685,34 @@ export default function F1ReactionTimePage() {
           await navigator.clipboard.writeText(`${text}\n${window.location.href}`);
           setCopied(true);
           if (copiedTimer.current) clearTimeout(copiedTimer.current);
-          copiedTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
+          copiedTimer.current = setTimeout(() => {
+            if (mountedRef.current) setCopied(false);
+          }, COPIED_RESET_MS);
         } catch {
-          // Fix #9 — final fallback so user can always copy manually
           window.prompt('Copy your score:', `${text}\n${window.location.href}`);
         }
       }
     } catch {
-      // User cancelled share sheet — not an error
+      // User cancelled share sheet
     }
   }, [reactionTime]);
 
-  // ── Arena styles (derived, not recreated per render unless phase changes) ──
+  // ── Arena derived styles ───────────────────────────────────────────────────
   const arenaBorderColor =
-    phase === 'foul'  ? 'rgba(255,42,75,0.3)'   :
-    phase === 'ready' ? 'rgba(0,245,180,0.2)'   :
+    phase === 'foul' ? 'rgba(255,42,75,0.3)' :
+    phase === 'ready' ? 'rgba(0,245,180,0.2)' :
     THEME.border;
 
   const arenaBgColor =
-    phase === 'foul'  ? 'rgba(255,42,75,0.03)'  :
-    phase === 'ready' ? 'rgba(0,245,180,0.02)'  :
+    phase === 'foul' ? 'rgba(255,42,75,0.03)' :
+    phase === 'ready' ? 'rgba(0,245,180,0.02)' :
     THEME.cardBg;
 
   const ariaLabel =
-    phase === 'idle'    ? 'Press to start the reaction test' :
-    phase === 'lighting'? 'Wait for lights to go out — pressing now triggers a false start' :
-    phase === 'ready'   ? 'Lights out! Tap or press now!' :
-    phase === 'foul'    ? 'False start! Tap to try again' :
+    phase === 'idle' ? 'Press to start the reaction test' :
+    phase === 'lighting' ? 'Wait for lights to go out — pressing now triggers a false start' :
+    phase === 'ready' ? 'Lights out! Tap or press now!' :
+    phase === 'foul' ? 'False start! Tap to try again' :
     reactionTime !== null ? `Your reaction time was ${reactionTime} milliseconds. Tap to retry.` :
     'Reaction test arena';
 
@@ -619,7 +735,6 @@ export default function F1ReactionTimePage() {
         boxSizing: 'border-box',
       }}
     >
-      {/* ── Global styles ── */}
       <style>{`
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; -webkit-text-size-adjust: 100%; }
@@ -633,11 +748,13 @@ export default function F1ReactionTimePage() {
         }
         .table-scroll   { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .history-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        button { touch-action: manipulation; }
+        button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
         :focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
+        /* Mobile: prevent text selection during rapid taps */
+        .arena-zone { -webkit-user-select: none; user-select: none; }
       `}</style>
 
-      {/* ── Confetti (aria-hidden — purely decorative) ── */}
+      {/* Confetti */}
       <div
         aria-hidden="true"
         style={{
@@ -650,14 +767,11 @@ export default function F1ReactionTimePage() {
           <div
             key={piece.id}
             style={{
-              position: 'absolute',
-              top: '-10px',
+              position: 'absolute', top: '-10px',
               left: piece.left,
               backgroundColor: piece.color,
-              width: piece.size,
-              height: piece.size,
+              width: piece.size, height: piece.size,
               borderRadius: piece.radius,
-              // Fix #6 — use pre-generated duration, no Math.random() in JSX
               animation: `fall ${piece.duration} ${piece.delay} linear forwards`,
             }}
           />
@@ -666,17 +780,12 @@ export default function F1ReactionTimePage() {
 
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
 
-        {/* ════════════════════════════════════════════════════
-            HEADER
-        ════════════════════════════════════════════════════ */}
+        {/* ── Header ── */}
         <header
           style={{
-            display: 'flex',
-            alignItems: 'flex-start',
+            display: 'flex', alignItems: 'flex-start',
             justifyContent: 'space-between',
-            gap: '1rem',
-            marginBottom: '1.5rem',
-            flexWrap: 'wrap',
+            gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap',
           }}
         >
           <div>
@@ -716,17 +825,14 @@ export default function F1ReactionTimePage() {
             </p>
           </div>
 
-          {/* Mode selector + mute */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
             <div
               role="group"
               aria-label="Difficulty mode"
               style={{
-                display: 'flex',
-                backgroundColor: THEME.cardBg,
+                display: 'flex', backgroundColor: THEME.cardBg,
                 border: `1px solid ${THEME.border}`,
-                borderRadius: '10px',
-                padding: '4px', gap: '2px',
+                borderRadius: '10px', padding: '4px', gap: '2px',
               }}
             >
               {(['Rookie', 'Pro', 'F1 Elite'] as Mode[]).map((m) => (
@@ -772,19 +878,14 @@ export default function F1ReactionTimePage() {
           </div>
         </header>
 
-        {/* ════════════════════════════════════════════════════
-            ARENA
-        ════════════════════════════════════════════════════ */}
+        {/* ── Arena ── */}
+        {/* FIX mobile: single onPointerDown, no onMouseDown/onTouchStart split */}
         <main
+          className="arena-zone"
           role="button"
           tabIndex={0}
           aria-label={ariaLabel}
-          // Fix #4 — suppress mouse event when touch already handled it
-          onMouseDown={(e) => {
-            if ((e.nativeEvent as PointerEvent).pointerType === 'touch') return;
-            if (e.button === 0) handleInteraction(e);
-          }}
-          onTouchStart={handleInteraction}
+          onPointerDown={handlePointerDown}
           onKeyDown={(e) => {
             if (e.code === 'Space' || e.key === 'Enter') {
               e.preventDefault();
@@ -792,13 +893,11 @@ export default function F1ReactionTimePage() {
             }
           }}
           style={{
-            position: 'relative',
-            borderRadius: '16px',
+            position: 'relative', borderRadius: '16px',
             border: `1px solid ${arenaBorderColor}`,
             backgroundColor: arenaBgColor,
             cursor: 'pointer',
-            userSelect: 'none',
-            touchAction: 'manipulation',
+            touchAction: 'manipulation', // FIX mobile: prevents 300ms tap delay
             minHeight: 'clamp(280px,45vw,340px)',
             display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'space-between',
@@ -806,9 +905,10 @@ export default function F1ReactionTimePage() {
             backdropFilter: 'blur(4px)',
             outline: 'none',
             transition: 'border-color 0.2s, background-color 0.2s',
+            // FIX mobile: ensure full-width tap target
+            width: '100%',
           }}
         >
-          {/* Bottom glow strip */}
           <div
             aria-hidden="true"
             style={{
@@ -819,18 +919,16 @@ export default function F1ReactionTimePage() {
             }}
           />
 
-          {/* ── Gantry ── */}
+          {/* Gantry */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem', zIndex: 2, width: '100%' }}>
             <div
               role="img"
               aria-label={`Starting lights gantry: ${lights} of ${LIGHT_COUNT} lit`}
               style={{
-                background: '#090d14',
-                border: `1px solid ${THEME.border}`,
+                background: '#090d14', border: `1px solid ${THEME.border}`,
                 borderRadius: '14px',
                 padding: 'clamp(10px,3vw,20px) clamp(12px,4vw,28px)',
-                display: 'flex',
-                gap: 'clamp(8px,2.5vw,20px)',
+                display: 'flex', gap: 'clamp(8px,2.5vw,20px)',
                 boxShadow: 'inset 0 8px 24px rgba(0,0,0,.5)',
                 flexWrap: 'nowrap',
               }}
@@ -838,14 +936,11 @@ export default function F1ReactionTimePage() {
               {Array.from({ length: LIGHT_COUNT }).map((_, i) => {
                 const isOn = lights > i;
                 const bulbStyle: React.CSSProperties = {
-                  width: 'clamp(30px,7vw,60px)',
-                  height: 'clamp(30px,7vw,60px)',
-                  borderRadius: '50%',
-                  border: '3px solid #1a2332',
+                  width: 'clamp(28px,6.5vw,60px)', height: 'clamp(28px,6.5vw,60px)',
+                  borderRadius: '50%', border: '3px solid #1a2332',
                   backgroundColor: isOn ? THEME.f1Red : '#070a0f',
                   boxShadow: isOn ? `0 0 20px ${THEME.f1Red}, 0 0 40px rgba(255,42,75,0.4)` : 'none',
-                  transition: 'all 60ms linear',
-                  flexShrink: 0,
+                  transition: 'all 60ms linear', flexShrink: 0,
                 };
                 return (
                   <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,2vw,14px)' }}>
@@ -867,7 +962,7 @@ export default function F1ReactionTimePage() {
             </div>
           </div>
 
-          {/* ── Phase display ── */}
+          {/* Phase display */}
           <div
             style={{
               display: 'flex', flexDirection: 'column',
@@ -877,7 +972,6 @@ export default function F1ReactionTimePage() {
               width: '100%', padding: '0 0.5rem',
             }}
           >
-            {/* IDLE */}
             {phase === 'idle' && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem' }}>
                 <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(1.4rem,4vw,2.4rem)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: '#fff', margin: 0 }}>
@@ -887,7 +981,7 @@ export default function F1ReactionTimePage() {
                   Tap the screen or press SPACE when the lights go out.
                 </p>
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleInteraction(); }}
+                  onPointerDown={(e) => { e.stopPropagation(); handleInteraction(); }}
                   aria-label="Start the reaction test"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '8px',
@@ -899,6 +993,7 @@ export default function F1ReactionTimePage() {
                     borderRadius: '10px', border: 'none', cursor: 'pointer',
                     boxShadow: '0 4px 14px rgba(0,245,180,0.3)',
                     minHeight: `${MIN_BUTTON_SIZE}px`,
+                    touchAction: 'manipulation',
                   }}
                 >
                   🏁 Start Engine
@@ -906,7 +1001,6 @@ export default function F1ReactionTimePage() {
               </div>
             )}
 
-            {/* LIGHTING */}
             {phase === 'lighting' && (
               <p
                 aria-live="assertive"
@@ -921,7 +1015,6 @@ export default function F1ReactionTimePage() {
               </p>
             )}
 
-            {/* READY */}
             {phase === 'ready' && (
               <p
                 aria-live="assertive"
@@ -929,7 +1022,8 @@ export default function F1ReactionTimePage() {
                   fontFamily: "'Barlow Condensed', sans-serif",
                   fontSize: 'clamp(2.5rem,10vw,6rem)', fontWeight: 900,
                   textTransform: 'uppercase', letterSpacing: '4px',
-                  color: THEME.cyan, textShadow: 'rgba(0,229,255,.4) 0 0 30px',
+                  color: THEME.cyan,
+                  textShadow: 'rgba(0,229,255,.4) 0 0 30px',
                   margin: 0,
                 }}
               >
@@ -937,7 +1031,6 @@ export default function F1ReactionTimePage() {
               </p>
             )}
 
-            {/* FOUL */}
             {phase === 'foul' && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.5rem' }}>
                 <p
@@ -960,7 +1053,6 @@ export default function F1ReactionTimePage() {
               </div>
             )}
 
-            {/* RESULT */}
             {phase === 'result' && reactionTime !== null && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.5rem' }}>
                 {isNewRecord && (
@@ -994,7 +1086,7 @@ export default function F1ReactionTimePage() {
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                   <button
-                    onClick={(e) => { e.stopPropagation(); startSequence(); }}
+                    onPointerDown={(e) => { e.stopPropagation(); startSequence(); }}
                     aria-label="Retry the reaction test"
                     style={{
                       display: 'flex', alignItems: 'center', gap: '6px',
@@ -1004,12 +1096,13 @@ export default function F1ReactionTimePage() {
                       letterSpacing: '1px', textTransform: 'uppercase',
                       padding: '0 20px', minHeight: `${MIN_BUTTON_SIZE}px`,
                       borderRadius: '8px', cursor: 'pointer',
+                      touchAction: 'manipulation',
                     }}
                   >
                     ↺ Retry
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); shareScore(); }}
+                    onPointerDown={(e) => { e.stopPropagation(); shareScore(); }}
                     aria-label={copied ? 'Score copied to clipboard' : 'Share your score'}
                     style={{
                       display: 'flex', alignItems: 'center', gap: '6px',
@@ -1020,6 +1113,7 @@ export default function F1ReactionTimePage() {
                       padding: '0 20px', minHeight: `${MIN_BUTTON_SIZE}px`,
                       borderRadius: '8px', cursor: 'pointer',
                       boxShadow: '0 2px 10px rgba(0,229,255,0.3)',
+                      touchAction: 'manipulation',
                     }}
                   >
                     {copied ? '✓ Copied!' : '↗ Share'}
@@ -1030,7 +1124,6 @@ export default function F1ReactionTimePage() {
           </div>
         </main>
 
-        {/* Keyboard hints */}
         <p
           aria-hidden="true"
           style={{
@@ -1042,9 +1135,7 @@ export default function F1ReactionTimePage() {
           [SPACE / ENTER] React &nbsp;•&nbsp; [R] Restart &nbsp;•&nbsp; [S] Toggle Sound
         </p>
 
-        {/* ════════════════════════════════════════════════════
-            STATS DASHBOARD
-        ════════════════════════════════════════════════════ */}
+        {/* ── Stats ── */}
         <section aria-label="Performance statistics">
           <div
             style={{
@@ -1054,10 +1145,10 @@ export default function F1ReactionTimePage() {
             }}
           >
             {[
-              { icon: '🏆', label: 'Personal Best',  value: pbValue  !== null ? `${pbValue}ms`  : '—', color: THEME.cyan      },
-              { icon: '📊', label: 'Avg (Last 10)',   value: avgValue !== null ? `${avgValue}ms` : '—', color: THEME.green     },
-              { icon: '🏎️', label: 'Total Races',     value: String(history.length),                    color: THEME.textLight },
-              { icon: '⚡', label: 'False Starts',    value: String(falseStarts),                       color: THEME.orange    },
+              { icon: '🏆', label: 'Personal Best', value: pbValue !== null ? `${pbValue}ms` : '—', color: THEME.cyan },
+              { icon: '📊', label: 'Avg (Last 10)', value: avgValue !== null ? `${avgValue}ms` : '—', color: THEME.green },
+              { icon: '🏎️', label: 'Total Races', value: String(history.length), color: THEME.textLight },
+              { icon: '⚡', label: 'False Starts', value: String(falseStarts), color: THEME.orange },
             ].map((stat, idx) => (
               <div
                 key={idx}
@@ -1100,9 +1191,7 @@ export default function F1ReactionTimePage() {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════════════
-            ACHIEVEMENTS + HISTORY
-        ════════════════════════════════════════════════════ */}
+        {/* ── Achievements + History ── */}
         <div
           style={{
             display: 'grid',
@@ -1110,13 +1199,11 @@ export default function F1ReactionTimePage() {
             gap: '.75rem', marginTop: '.75rem',
           }}
         >
-          {/* Achievements */}
           <section
             aria-label="Achievements"
             style={{
               background: THEME.cardBg, border: `1px solid ${THEME.border}`,
-              borderRadius: '12px',
-              padding: 'clamp(1rem,3vw,1.25rem)',
+              borderRadius: '12px', padding: 'clamp(1rem,3vw,1.25rem)',
               backdropFilter: 'blur(4px)',
             }}
           >
@@ -1160,13 +1247,11 @@ export default function F1ReactionTimePage() {
             </div>
           </section>
 
-          {/* History */}
           <section
             aria-label="Recent race history"
             style={{
               background: THEME.cardBg, border: `1px solid ${THEME.border}`,
-              borderRadius: '12px',
-              padding: 'clamp(1rem,3vw,1.25rem)',
+              borderRadius: '12px', padding: 'clamp(1rem,3vw,1.25rem)',
               backdropFilter: 'blur(4px)',
             }}
           >
@@ -1189,7 +1274,6 @@ export default function F1ReactionTimePage() {
               </p>
             ) : (
               <>
-                {/* Mini bar chart */}
                 <div
                   aria-hidden="true"
                   style={{
@@ -1217,8 +1301,7 @@ export default function F1ReactionTimePage() {
                 <div className="history-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', maxHeight: '170px' }}>
                   {history.slice(0, MAX_HISTORY_DISPLAY).map((h, i) => {
                     const rating = getRating(h.time);
-                    // Fix #1 — arrayMin for personal-best check
-                    const isPB   = h.time === arrayMin(history.map((x) => x.time));
+                    const isPB = h.time === arrayMin(history.map((x) => x.time));
                     return (
                       <div
                         key={h.id}
@@ -1227,8 +1310,7 @@ export default function F1ReactionTimePage() {
                           justifyContent: 'space-between',
                           padding: '8px 12px', borderRadius: '8px',
                           backgroundColor: '#0c111a',
-                          border: `1px solid ${THEME.border}`,
-                          gap: '8px',
+                          border: `1px solid ${THEME.border}`, gap: '8px',
                         }}
                       >
                         <span style={{ fontSize: '.7rem', color: THEME.textMuted, fontFamily: "'JetBrains Mono', monospace", width: '28px', flexShrink: 0 }}>
@@ -1249,15 +1331,11 @@ export default function F1ReactionTimePage() {
           </section>
         </div>
 
-        {/* ════════════════════════════════════════════════════
-            SEO ARTICLE
-        ════════════════════════════════════════════════════ */}
+        {/* ── SEO Article ── */}
         <article
           style={{
-            marginTop: '4rem',
-            borderTop: `1px solid ${THEME.border}`,
-            paddingTop: '2.5rem',
-            lineHeight: '1.7',
+            marginTop: '4rem', borderTop: `1px solid ${THEME.border}`,
+            paddingTop: '2.5rem', lineHeight: '1.7',
           }}
         >
           <p style={{ fontSize: 'clamp(0.9rem,2vw,1rem)', color: '#94a3b8', marginBottom: '1.5rem' }}>
@@ -1270,7 +1348,6 @@ export default function F1ReactionTimePage() {
             dominate their split-second cognitive response.
           </p>
 
-          {/* ── How to Use ── */}
           <h2 style={h2Style}>How to Use the F1 Reaction Time Test</h2>
           <ol style={listStyle}>
             <li><strong>Choose your difficulty</strong> — Rookie gives more time; F1 Elite pushes you to the limit with longer, more unpredictable delays.</li>
@@ -1299,7 +1376,6 @@ export default function F1ReactionTimePage() {
             ))}
           </ul>
 
-          {/* ── What Is a Good Reaction Time ── */}
           <h2 style={h2Style}>What Is a Good Reaction Time?</h2>
           <p style={bodyText}>
             The average human simple visual reaction time is approximately <strong>250 ms</strong>. Trained
@@ -1314,13 +1390,11 @@ export default function F1ReactionTimePage() {
             finger completing the motion. Reducing that window directly improves CPS scores.
           </p>
 
-          {/* ── Score Chart ── */}
           <h2 style={h2Style}>Reaction Time Score Chart</h2>
           <p style={{ ...bodyText, marginBottom: '1rem' }}>
             Use this table to benchmark your result against competitive tiers:
           </p>
 
-          {/* Fix #10 — constrained wrapper prevents full-page overflow */}
           <div
             className="table-scroll"
             style={{ width: '100%', maxWidth: '100%', marginBottom: '1.5rem', border: `1px solid ${THEME.border}`, borderRadius: '10px' }}
@@ -1348,7 +1422,6 @@ export default function F1ReactionTimePage() {
             </table>
           </div>
 
-          {/* ── How to Improve ── */}
           <h2 style={h2Style}>How to Improve Your Reaction Time</h2>
           <p style={{ ...bodyText, marginBottom: '1rem' }}>
             Consistent, targeted training is the most reliable path to shaving milliseconds off your score:
@@ -1369,7 +1442,6 @@ export default function F1ReactionTimePage() {
             gameplay where premature inputs result in cooldown or action cancellation.
           </p>
 
-          {/* ── Why This Helps Gamers ── */}
           <h2 style={h2Style}>Why This Test Helps Gamers</h2>
           <p style={{ ...bodyText, marginBottom: '1rem' }}>
             Integrating consistent F1 reaction training accelerates performance across multiple competitive disciplines:
@@ -1390,7 +1462,6 @@ export default function F1ReactionTimePage() {
             panel above.
           </p>
 
-          {/* ── FAQ ── */}
           <h2 style={h2Style}>Frequently Asked Questions</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
             {FAQ_ITEMS.map((faq, index) => (
@@ -1412,6 +1483,7 @@ export default function F1ReactionTimePage() {
                     cursor: 'pointer',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     gap: '12px', minHeight: `${MIN_BUTTON_SIZE}px`, lineHeight: 1.4,
+                    touchAction: 'manipulation',
                   }}
                 >
                   <span>{faq.q}</span>
@@ -1452,40 +1524,33 @@ export default function F1ReactionTimePage() {
   );
 }
 
-// ─── Shared style objects (outside render — never recreated) ──────────────────
+// ─── Shared style objects ─────────────────────────────────────────────────────
 
 const h2Style: React.CSSProperties = {
   fontFamily: "'Barlow Condensed', sans-serif",
   fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-  fontWeight: 800,
-  color: '#fff',
-  textTransform: 'uppercase',
-  letterSpacing: '0.5px',
+  fontWeight: 800, color: '#fff',
+  textTransform: 'uppercase', letterSpacing: '0.5px',
   margin: '2.5rem 0 1rem 0',
 };
 
 const h3Style = (color: string): React.CSSProperties => ({
   fontFamily: "'Barlow Condensed', sans-serif",
   fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-  fontWeight: 700,
-  color,
+  fontWeight: 700, color,
   textTransform: 'uppercase',
   margin: '1.75rem 0 0.75rem 0',
 });
 
 const bodyText: React.CSSProperties = {
   fontSize: 'clamp(0.9rem, 2vw, 0.98rem)',
-  color: '#94a3b8',
-  marginBottom: '1.25rem',
+  color: '#94a3b8', marginBottom: '1.25rem',
 };
 
 const listStyle: React.CSSProperties = {
-  color: '#94a3b8',
-  paddingLeft: '1.5rem',
-  marginBottom: '1.5rem',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '0.5rem',
+  color: '#94a3b8', paddingLeft: '1.5rem',
+  marginBottom: '1.5rem', display: 'flex',
+  flexDirection: 'column', gap: '0.5rem',
   fontSize: 'clamp(0.9rem, 2vw, 0.98rem)',
 };
 
