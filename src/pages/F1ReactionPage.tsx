@@ -9,7 +9,13 @@ const CONFETTI_DURATION_MS = 3000;
 const COPIED_RESET_MS = 2500;
 const MAX_HISTORY_DISPLAY = 20;
 const MAX_HISTORY_CHART = 10;
+const MAX_HISTORY_STORAGE = 1000;
 const MIN_BUTTON_SIZE = 44;
+const MIN_REACTION_MS = 50;
+const MAX_REACTION_MS = 5000;
+const MAX_FALSE_STARTS = 999_999;
+const START_TIME_UNSET = -1;
+const SEQUENCE_LOCK_MS = 100;
 
 const MODE_DELAYS: Record<Mode, [number, number]> = {
   Rookie: [800, 2500],
@@ -17,13 +23,13 @@ const MODE_DELAYS: Record<Mode, [number, number]> = {
   'F1 Elite': [2500, 6000],
 };
 
-const RATING_THRESHOLDS = [
+const RATING_THRESHOLDS: { max: number; text: string; color: string }[] = [
   { max: 150, text: 'F1 Driver Level', color: '#e040fb' },
   { max: 200, text: 'Alien Reflexes', color: '#00e5ff' },
   { max: 250, text: 'Excellent', color: '#00f5b4' },
   { max: 300, text: 'Great', color: '#ff7a00' },
   { max: 400, text: 'Average', color: '#94a3b8' },
-] as const;
+];
 
 const THEME = {
   bg: '#070b12',
@@ -47,14 +53,14 @@ const STORAGE_KEYS = {
 } as const;
 
 const ACHIEVEMENTS: Achievement[] = [
-  { id: 'a1', icon: '🏁', label: 'First Race', check: (h) => h.length >= 1 },
-  { id: 'a2', icon: '⚡', label: 'Sub 300ms', check: (h) => h.some((x) => x.time < 300) },
-  { id: 'a3', icon: '🔥', label: 'Sub 250ms', check: (h) => h.some((x) => x.time < 250) },
-  { id: 'a4', icon: '🚀', label: 'Sub 200ms', check: (h) => h.some((x) => x.time < 200) },
-  { id: 'a5', icon: '👽', label: 'Sub 150ms', check: (h) => h.some((x) => x.time < 150) },
-  { id: 'a6', icon: '🥈', label: '10 Races', check: (h) => h.length >= 10 },
-  { id: 'a7', icon: '🥇', label: '50 Races', check: (h) => h.length >= 50 },
-  { id: 'a8', icon: '🏆', label: '100 Races', check: (h) => h.length >= 100 },
+  { id: 'a1', icon: '🏁', label: 'First Race',  check: (h) => h.length >= 1 },
+  { id: 'a2', icon: '⚡', label: 'Sub 300ms',   check: (h) => h.some((x) => x.time < 300) },
+  { id: 'a3', icon: '🔥', label: 'Sub 250ms',   check: (h) => h.some((x) => x.time < 250) },
+  { id: 'a4', icon: '🚀', label: 'Sub 200ms',   check: (h) => h.some((x) => x.time < 200) },
+  { id: 'a5', icon: '👽', label: 'Sub 150ms',   check: (h) => h.some((x) => x.time < 150) },
+  { id: 'a6', icon: '🥈', label: '10 Races',    check: (h) => h.length >= 10 },
+  { id: 'a7', icon: '🥇', label: '50 Races',    check: (h) => h.length >= 50 },
+  { id: 'a8', icon: '🏆', label: '100 Races',   check: (h) => h.length >= 100 },
 ];
 
 const FAQ_ITEMS = [
@@ -81,43 +87,44 @@ const FAQ_ITEMS = [
 ];
 
 const SCORE_CHART_ROWS = [
-  { range: '< 150 ms', rating: 'F1 Driver Level', equivalent: 'God-Tier Speed (Verstappen / Hamilton Level)', color: '#e040fb' },
-  { range: '150 – 200 ms', rating: 'Alien Reflexes', equivalent: 'Tier-1 Esports Professional Athlete', color: '#00e5ff' },
-  { range: '200 – 250 ms', rating: 'Excellent', equivalent: 'Hardcore High-Tier Competitive Gamer', color: '#00f5b4' },
-  { range: '250 – 300 ms', rating: 'Great', equivalent: 'Standard Average Human Response Baseline', color: '#ff7a00' },
-  { range: '300 – 400 ms', rating: 'Average', equivalent: 'Casual Gamer / Occasional Player', color: '#94a3b8' },
-  { range: '> 400 ms', rating: 'Rookie', equivalent: 'Needs Dedicated Warm-Ups and Focus Training', color: '#64748b' },
+  { range: '< 150 ms',     rating: 'F1 Driver Level', equivalent: 'God-Tier Speed (Verstappen / Hamilton Level)',  color: '#e040fb' },
+  { range: '150 – 200 ms', rating: 'Alien Reflexes',  equivalent: 'Tier-1 Esports Professional Athlete',          color: '#00e5ff' },
+  { range: '200 – 250 ms', rating: 'Excellent',        equivalent: 'Hardcore High-Tier Competitive Gamer',         color: '#00f5b4' },
+  { range: '250 – 300 ms', rating: 'Great',            equivalent: 'Standard Average Human Response Baseline',     color: '#ff7a00' },
+  { range: '300 – 400 ms', rating: 'Average',          equivalent: 'Casual Gamer / Occasional Player',             color: '#94a3b8' },
+  { range: '> 400 ms',     rating: 'Rookie',           equivalent: 'Needs Dedicated Warm-Ups and Focus Training',  color: '#64748b' },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Phase = 'idle' | 'lighting' | 'ready' | 'foul' | 'result';
-type Mode = 'Rookie' | 'Pro' | 'F1 Elite';
+type Mode  = 'Rookie' | 'Pro' | 'F1 Elite';
 
 interface HistoryItem {
-  id: string;
+  id:   string;
   time: number;
   mode: Mode;
   date: number;
 }
 
 interface Achievement {
-  id: string;
-  icon: string;
+  id:    string;
+  icon:  string;
   label: string;
   check: (hist: HistoryItem[]) => boolean;
 }
 
 interface ConfettiPiece {
-  id: number;
-  color: string;
-  left: string;
-  size: string;
-  delay: string;
-  radius: string;
+  id:       number;
+  color:    string;
+  left:     string;
+  size:     string;
+  delay:    string;
+  radius:   string;
+  duration: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Pure helpers (defined outside component — never recreated) ───────────────
 
 function safeParseJSON<T>(value: string | null, fallback: T): T {
   if (!value) return fallback;
@@ -146,7 +153,7 @@ function safeLocalStorageSet(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
   } catch {
-    // Silently fail (e.g. private browsing quota exceeded)
+    // Quota exceeded or private-browsing restriction — fail silently
   }
 }
 
@@ -154,19 +161,34 @@ function isValidHistoryItem(item: unknown): item is HistoryItem {
   if (!item || typeof item !== 'object') return false;
   const h = item as Record<string, unknown>;
   return (
-    typeof h.id === 'string' &&
+    typeof h.id   === 'string' &&
+    h.id.length    >  0        &&
+    h.id.length    <= 20       &&
     typeof h.time === 'number' &&
-    Number.isFinite(h.time) &&
-    h.time > 0 &&
+    Number.isFinite(h.time)    &&
+    h.time >= MIN_REACTION_MS  &&   // physically impossible to react faster
+    h.time <= MAX_REACTION_MS  &&   // cap absurdly large values
     typeof h.mode === 'string' &&
     ['Rookie', 'Pro', 'F1 Elite'].includes(h.mode as string) &&
-    typeof h.date === 'number'
+    typeof h.date === 'number' &&
+    Number.isFinite(h.date)    &&
+    h.date > 0
   );
 }
 
 function sanitizeHistory(raw: unknown): HistoryItem[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter(isValidHistoryItem).slice(0, 1000);
+  return raw.filter(isValidHistoryItem).slice(0, MAX_HISTORY_STORAGE);
+}
+
+// Safe replacement for Math.min(...array) — no call-stack overflow
+function arrayMin(arr: number[]): number {
+  if (arr.length === 0) return Infinity;
+  let min = arr[0];
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] < min) min = arr[i];
+  }
+  return min;
 }
 
 function getRating(ms: number): { text: string; color: string } {
@@ -186,12 +208,14 @@ function getBarColor(ms: number): string {
 
 function generateConfetti(): ConfettiPiece[] {
   return Array.from({ length: CONFETTI_COUNT }, (_, i) => ({
-    id: i,
-    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-    left: `${Math.random() * 100}%`,
-    size: `${4 + Math.random() * 8}px`,
-    delay: `${Math.random() * 0.5}s`,
-    radius: Math.random() > 0.5 ? '50%' : '2px',
+    id:       i,
+    color:    CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+    left:     `${Math.random() * 100}%`,
+    size:     `${4 + Math.random() * 8}px`,
+    delay:    `${(Math.random() * 0.5).toFixed(3)}s`,
+    radius:   Math.random() > 0.5 ? '50%' : '2px',
+    // Pre-generate duration so Math.random() never runs inside JSX render
+    duration: `${(1.5 + Math.random() * 2).toFixed(3)}s`,
   }));
 }
 
@@ -210,76 +234,83 @@ function vibrateDevice(pattern: number | number[]): void {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function F1ReactionTimePage() {
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [mode, setMode] = useState<Mode>('Pro');
-  const [lights, setLights] = useState<number>(0);
+  const [phase,        setPhase]        = useState<Phase>('idle');
+  const [mode,         setMode]         = useState<Mode>('Pro');
+  const [lights,       setLights]       = useState<number>(0);
   const [reactionTime, setReactionTime] = useState<number | null>(null);
-  const [isNewRecord, setIsNewRecord] = useState<boolean>(false);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
-  const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [falseStarts, setFalseStarts] = useState<number>(0);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isNewRecord,  setIsNewRecord]  = useState<boolean>(false);
+  const [isMuted,      setIsMuted]      = useState<boolean>(false);
+  const [history,      setHistory]      = useState<HistoryItem[]>([]);
+  const [falseStarts,  setFalseStarts]  = useState<number>(0);
+  const [copied,       setCopied]       = useState<boolean>(false);
+  const [confetti,     setConfetti]     = useState<ConfettiPiece[]>([]);
+  const [openFaq,      setOpenFaq]      = useState<number | null>(null);
 
-  const startTime = useRef<number>(0);
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const audioCtx = useRef<AudioContext | null>(null);
-  const copiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const confettiTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Refs — never trigger re-renders
+  const startTime      = useRef<number>(START_TIME_UNSET);
+  const timers         = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const audioCtx       = useRef<AudioContext | null>(null);
+  const copiedTimer    = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const confettiTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isProcessing   = useRef<boolean>(false);   // double-tap guard
+  const sequenceGen    = useRef<number>(0);         // stale-timer guard
+  const isMutedRef     = useRef<boolean>(isMuted);  // audio reads this synchronously
 
-  // ── Persist muted state without stale closure ──────────────────────────────
-  const isMutedRef = useRef(isMuted);
-  useEffect(() => {
-    isMutedRef.current = isMuted;
-  }, [isMuted]);
+  // Keep audio ref in sync without re-renders
+  useEffect(() => { isMutedRef.current = isMuted; }, [isMuted]);
 
   // ── Load persisted state ───────────────────────────────────────────────────
   useEffect(() => {
     const rawHistory = safeParseJSON(safeLocalStorageGet(STORAGE_KEYS.history), []);
     setHistory(sanitizeHistory(rawHistory));
-    setFalseStarts(safeParseInt(safeLocalStorageGet(STORAGE_KEYS.fouls), 0));
+
+    const storedFouls = safeParseInt(safeLocalStorageGet(STORAGE_KEYS.fouls), 0);
+    setFalseStarts(
+      storedFouls >= 0 && storedFouls < MAX_FALSE_STARTS ? storedFouls : 0,
+    );
+
     setIsMuted(safeLocalStorageGet(STORAGE_KEYS.muted) === 'true');
   }, []);
 
-  // ── Cleanup on unmount ─────────────────────────────────────────────────────
+  // ── Global cleanup on unmount ──────────────────────────────────────────────
   useEffect(() => {
     return () => {
-      clearTimers();
-      if (copiedTimer.current) clearTimeout(copiedTimer.current);
+      clearAllTimers();
+      if (copiedTimer.current)   clearTimeout(copiedTimer.current);
       if (confettiTimer.current) clearTimeout(confettiTimer.current);
-      try {
-        audioCtx.current?.close();
-      } catch {
-        // Ignore
-      }
+      try { audioCtx.current?.close(); } catch { /* ignore */ }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Audio ──────────────────────────────────────────────────────────────────
+  // ── Audio helpers ──────────────────────────────────────────────────────────
   const initAudio = useCallback(() => {
-    if (!audioCtx.current && !isMutedRef.current) {
-      try {
-        const AudioContextCtor =
-          window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-        if (AudioContextCtor) {
-          audioCtx.current = new AudioContextCtor();
-        }
-      } catch {
-        // Audio not available
-      }
+    if (audioCtx.current || isMutedRef.current) return;
+    try {
+      const Ctor =
+        window.AudioContext ||
+        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (Ctor) audioCtx.current = new Ctor();
+    } catch {
+      // Audio API unavailable
     }
   }, []);
+
+  const resumeCtx = () => {
+    if (audioCtx.current?.state === 'suspended') {
+      audioCtx.current.resume().catch(() => {});
+    }
+  };
 
   const playTone = useCallback(
     (freq: number, type: OscillatorType, dur: number, freqEnd?: number) => {
       if (isMutedRef.current || !audioCtx.current) return;
-      const ctx = audioCtx.current;
-      if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-
+      resumeCtx();
       try {
-        const osc = ctx.createOscillator();
+        const ctx  = audioCtx.current;
+        const osc  = ctx.createOscillator();
         const gain = ctx.createGain();
+
         osc.type = type;
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
         if (freqEnd) {
@@ -287,60 +318,65 @@ export default function F1ReactionTimePage() {
         }
         gain.gain.setValueAtTime(0.4, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
         osc.stop(ctx.currentTime + dur);
+
+        // Fix #5 — disconnect nodes after stop to prevent memory accumulation
+        osc.onended = () => {
+          try { osc.disconnect();  } catch { /* ignore */ }
+          try { gain.disconnect(); } catch { /* ignore */ }
+        };
       } catch {
-        // Audio error
+        // Audio error — non-fatal
       }
     },
     [],
   );
 
   const playLight = useCallback(() => playTone(440, 'sine', 0.08), [playTone]);
-  const playFoul = useCallback(() => playTone(150, 'sawtooth', 0.35, 50), [playTone]);
+  const playFoul  = useCallback(() => playTone(150, 'sawtooth', 0.35, 50), [playTone]);
 
   const playRecord = useCallback(() => {
     if (isMutedRef.current || !audioCtx.current) return;
+    resumeCtx();
     const ctx = audioCtx.current;
-    if (ctx.state === 'suspended') ctx.resume().catch(() => {});
-
-    const notes: [number, number][] = [
-      [523, 0],
-      [659, 0.1],
-      [784, 0.2],
-      [1047, 0.35],
-    ];
+    const notes: [number, number][] = [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.35]];
     notes.forEach(([f, t]) => {
       try {
-        const osc = ctx.createOscillator();
+        const osc  = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(f, ctx.currentTime + t);
-        gain.gain.setValueAtTime(0, ctx.currentTime + t);
+        gain.gain.setValueAtTime(0,    ctx.currentTime + t);
         gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + t + 0.02);
-        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + t + 0.12);
+        gain.gain.linearRampToValueAtTime(0,    ctx.currentTime + t + 0.12);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(ctx.currentTime + t);
-        osc.stop(ctx.currentTime + t + 0.15);
+        osc.stop(ctx.currentTime  + t + 0.15);
+        osc.onended = () => {
+          try { osc.disconnect();  } catch { /* ignore */ }
+          try { gain.disconnect(); } catch { /* ignore */ }
+        };
       } catch {
-        // Audio error
+        // Audio error — non-fatal
       }
     });
   }, []);
 
   // ── Timer helpers ──────────────────────────────────────────────────────────
-  const clearTimers = () => {
+  const clearAllTimers = () => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
   };
 
   const addTimer = (fn: () => void, delay: number) => {
-    const t = setTimeout(fn, delay);
-    timers.current.push(t);
-    return t;
+    const id = setTimeout(fn, delay);
+    timers.current.push(id);
+    return id;
   };
 
   // ── Confetti ───────────────────────────────────────────────────────────────
@@ -353,7 +389,13 @@ export default function F1ReactionTimePage() {
   // ── Start sequence ─────────────────────────────────────────────────────────
   const startSequence = useCallback(() => {
     initAudio();
-    clearTimers();
+    clearAllTimers();
+    isProcessing.current = false;
+    startTime.current    = START_TIME_UNSET;
+
+    // Fix #8 — increment generation; stale closures check this before acting
+    const gen = ++sequenceGen.current;
+
     setReactionTime(null);
     setIsNewRecord(false);
     setPhase('lighting');
@@ -361,6 +403,7 @@ export default function F1ReactionTimePage() {
 
     for (let i = 1; i <= LIGHT_COUNT; i++) {
       addTimer(() => {
+        if (sequenceGen.current !== gen) return; // stale — discard
         setLights(i);
         playLight();
         vibrateDevice(20);
@@ -371,8 +414,10 @@ export default function F1ReactionTimePage() {
     const rand = Math.random() * (max - min) + min;
 
     addTimer(() => {
+      if (sequenceGen.current !== gen) return; // stale — discard
       setPhase('ready');
       setLights(0);
+      // Fix #3 — only set startTime here, never at component init
       startTime.current = performance.now();
     }, LIGHTS_COMPLETE_MS + rand);
   }, [mode, initAudio, playLight]);
@@ -388,24 +433,45 @@ export default function F1ReactionTimePage() {
 
       if (phase === 'idle' || phase === 'result' || phase === 'foul') {
         startSequence();
+
       } else if (phase === 'lighting') {
-        clearTimers();
+        clearAllTimers();
+        sequenceGen.current++; // invalidate any queued timers
         setPhase('foul');
         setLights(0);
         setFalseStarts((prev) => {
-          const next = prev + 1;
+          const next = Math.min(prev + 1, MAX_FALSE_STARTS);
           safeLocalStorageSet(STORAGE_KEYS.fouls, String(next));
           return next;
         });
         playFoul();
         vibrateDevice([100, 50, 100]);
+
       } else if (phase === 'ready') {
+        // Fix #4 — double-tap / double-event guard
+        if (isProcessing.current) return;
+        isProcessing.current = true;
+
+        // Fix #3 — guard against unset startTime
+        if (startTime.current === START_TIME_UNSET) {
+          isProcessing.current = false;
+          return;
+        }
+
         const time = Math.round(performance.now() - startTime.current);
+
+        // Fix #3 — sanity-clamp reaction time
+        if (time < MIN_REACTION_MS || time > MAX_REACTION_MS) {
+          isProcessing.current = false;
+          return;
+        }
+
         setReactionTime(time);
         setPhase('result');
 
         setHistory((prevHistory) => {
-          const pb = prevHistory.length ? Math.min(...prevHistory.map((h) => h.time)) : Infinity;
+          // Fix #1 — use arrayMin() instead of Math.min(...arr)
+          const pb     = prevHistory.length ? arrayMin(prevHistory.map((h) => h.time)) : Infinity;
           const record = time < pb;
           setIsNewRecord(record);
 
@@ -418,10 +484,14 @@ export default function F1ReactionTimePage() {
           const newHistory: HistoryItem[] = [
             { id: generateId(), time, mode, date: Date.now() },
             ...prevHistory,
-          ];
+          ].slice(0, MAX_HISTORY_STORAGE); // cap growth
+
           safeLocalStorageSet(STORAGE_KEYS.history, JSON.stringify(newHistory));
           return newHistory;
         });
+
+        // Release lock after state settles
+        setTimeout(() => { isProcessing.current = false; }, SEQUENCE_LOCK_MS);
       }
     },
     [phase, mode, startSequence, playFoul, playRecord, spawnConfetti],
@@ -451,47 +521,30 @@ export default function F1ReactionTimePage() {
   }, [phase, handleInteraction, startSequence]);
 
   // ── Derived analytics ──────────────────────────────────────────────────────
-  const { pbValue, avgValue, recentReverse, maxTime, minTime, timeRange } = useMemo(() => {
-    const pb = history.length ? Math.min(...history.map((h) => h.time)) : null;
-    const recentTimes = history.slice(0, MAX_HISTORY_CHART).map((h) => h.time);
-    const avg = recentTimes.length
-      ? Math.round(recentTimes.reduce((a, b) => a + b, 0) / recentTimes.length)
+  const analytics = useMemo(() => {
+    // Fix #1 — arrayMin instead of Math.min(...arr) everywhere
+    const pb          = history.length ? arrayMin(history.map((h) => h.time)) : null;
+    const recentSlice = history.slice(0, MAX_HISTORY_CHART);
+    const avg         = recentSlice.length
+      ? Math.round(recentSlice.reduce((a, b) => a + b.time, 0) / recentSlice.length)
       : null;
-    const reversed = history.slice(0, MAX_HISTORY_CHART).reverse();
-    const max = reversed.length ? Math.max(...reversed.map((h) => h.time)) : 1;
-    const min = reversed.length ? Math.min(...reversed.map((h) => h.time)) : 0;
-    const range = max - min || 1;
-    return { pbValue: pb, avgValue: avg, recentReverse: reversed, maxTime: max, minTime: min, timeRange: range };
+    const reversed  = recentSlice.slice().reverse();
+    const times     = reversed.map((h) => h.time);
+    const maxT      = times.length ? arrayMin(times.map((t) => -t)) * -1 : 1; // max via arrayMin trick
+    const maxTime   = times.length ? times.reduce((a, b) => (b > a ? b : a), times[0]) : 1;
+    const minTime   = times.length ? arrayMin(times) : 0;
+    const timeRange = maxTime - minTime || 1;
+    return { pbValue: pb, avgValue: avg, recentReverse: reversed, maxTime, minTime, timeRange };
   }, [history]);
+
+  const { pbValue, avgValue, recentReverse, minTime, timeRange } = analytics;
 
   const unlockedAchievements = useMemo(
     () => ACHIEVEMENTS.map((a) => ({ ...a, unlocked: a.check(history) })),
     [history],
   );
 
-  // ── Share ──────────────────────────────────────────────────────────────────
-  const shareScore = useCallback(async () => {
-    if (!reactionTime) return;
-    const r = getRating(reactionTime);
-    const text = `🏎️ F1 Lights Out Reaction Test\n⏱️ My time: ${reactionTime}ms\n🏆 Rating: ${r.text}\nCan you beat me?`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: 'F1 Reaction Test', text });
-      } else {
-        await navigator.clipboard.writeText(`${text}\n${window.location.href}`);
-        setCopied(true);
-        if (copiedTimer.current) clearTimeout(copiedTimer.current);
-        copiedTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
-      }
-    } catch {
-      // User cancelled or clipboard not available
-    }
-  }, [reactionTime]);
-
-  const toggleFaq = useCallback((index: number) => {
-    setOpenFaq((prev) => (prev === index ? null : index));
-  }, []);
-
+  // ── Toggle helpers ─────────────────────────────────────────────────────────
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
       const next = !prev;
@@ -500,20 +553,52 @@ export default function F1ReactionTimePage() {
     });
   }, []);
 
-  // ── Arena border color ─────────────────────────────────────────────────────
+  const toggleFaq = useCallback((index: number) => {
+    setOpenFaq((prev) => (prev === index ? null : index));
+  }, []);
+
+  // ── Share ──────────────────────────────────────────────────────────────────
+  const shareScore = useCallback(async () => {
+    if (!reactionTime) return;
+    const r    = getRating(reactionTime);
+    const text = `🏎️ F1 Lights Out Reaction Test\n⏱️ My time: ${reactionTime}ms\n🏆 Rating: ${r.text}\nCan you beat me?`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'F1 Reaction Test', text });
+      } else {
+        try {
+          await navigator.clipboard.writeText(`${text}\n${window.location.href}`);
+          setCopied(true);
+          if (copiedTimer.current) clearTimeout(copiedTimer.current);
+          copiedTimer.current = setTimeout(() => setCopied(false), COPIED_RESET_MS);
+        } catch {
+          // Fix #9 — final fallback so user can always copy manually
+          window.prompt('Copy your score:', `${text}\n${window.location.href}`);
+        }
+      }
+    } catch {
+      // User cancelled share sheet — not an error
+    }
+  }, [reactionTime]);
+
+  // ── Arena styles (derived, not recreated per render unless phase changes) ──
   const arenaBorderColor =
-    phase === 'foul'
-      ? 'rgba(255,42,75,0.3)'
-      : phase === 'ready'
-        ? 'rgba(0,245,180,0.2)'
-        : THEME.border;
+    phase === 'foul'  ? 'rgba(255,42,75,0.3)'   :
+    phase === 'ready' ? 'rgba(0,245,180,0.2)'   :
+    THEME.border;
 
   const arenaBgColor =
-    phase === 'foul'
-      ? 'rgba(255,42,75,0.03)'
-      : phase === 'ready'
-        ? 'rgba(0,245,180,0.02)'
-        : THEME.cardBg;
+    phase === 'foul'  ? 'rgba(255,42,75,0.03)'  :
+    phase === 'ready' ? 'rgba(0,245,180,0.02)'  :
+    THEME.cardBg;
+
+  const ariaLabel =
+    phase === 'idle'    ? 'Press to start the reaction test' :
+    phase === 'lighting'? 'Wait for lights to go out — pressing now triggers a false start' :
+    phase === 'ready'   ? 'Lights out! Tap or press now!' :
+    phase === 'foul'    ? 'False start! Tap to try again' :
+    reactionTime !== null ? `Your reaction time was ${reactionTime} milliseconds. Tap to retry.` :
+    'Reaction test arena';
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -521,20 +606,20 @@ export default function F1ReactionTimePage() {
       style={{
         backgroundColor: THEME.bg,
         backgroundImage: `
-          linear-gradient(rgba(27, 38, 54, 0.15) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(27, 38, 54, 0.15) 1px, transparent 1px)
+          linear-gradient(rgba(27,38,54,0.15) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(27,38,54,0.15) 1px, transparent 1px)
         `,
         backgroundSize: '40px 40px',
         color: THEME.textLight,
         fontFamily: "'Inter', sans-serif",
         minHeight: '100vh',
-        padding: 'clamp(1rem, 3vw, 2rem) clamp(0.75rem, 3vw, 1rem)',
+        padding: 'clamp(1rem,3vw,2rem) clamp(0.75rem,3vw,1rem)',
         overflowX: 'hidden',
         WebkitTapHighlightColor: 'transparent',
         boxSizing: 'border-box',
       }}
     >
-      {/* Global styles */}
+      {/* ── Global styles ── */}
       <style>{`
         *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; -webkit-text-size-adjust: 100%; }
@@ -544,30 +629,21 @@ export default function F1ReactionTimePage() {
         }
         @keyframes pulse {
           0%, 100% { opacity: 0.4; }
-          50%       { opacity: 1; }
+          50%       { opacity: 1;   }
         }
-        /* Scrollable table on narrow screens */
-        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        /* History scroll */
+        .table-scroll   { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .history-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        /* Prevent iOS double-tap zoom on buttons */
         button { touch-action: manipulation; }
-        /* Focus ring for keyboard nav */
         :focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
       `}</style>
 
-      {/* Confetti layer */}
+      {/* ── Confetti (aria-hidden — purely decorative) ── */}
       <div
         aria-hidden="true"
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: 999,
-          overflow: 'hidden',
+          position: 'fixed', top: 0, left: 0,
+          width: '100%', height: '100%',
+          pointerEvents: 'none', zIndex: 999, overflow: 'hidden',
         }}
       >
         {confetti.map((piece) => (
@@ -581,7 +657,8 @@ export default function F1ReactionTimePage() {
               width: piece.size,
               height: piece.size,
               borderRadius: piece.radius,
-              animation: `fall ${1.5 + Math.random() * 2}s ${piece.delay} linear forwards`,
+              // Fix #6 — use pre-generated duration, no Math.random() in JSX
+              animation: `fall ${piece.duration} ${piece.delay} linear forwards`,
             }}
           />
         ))}
@@ -589,7 +666,9 @@ export default function F1ReactionTimePage() {
 
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
 
-        {/* ── Header ── */}
+        {/* ════════════════════════════════════════════════════
+            HEADER
+        ════════════════════════════════════════════════════ */}
         <header
           style={{
             display: 'flex',
@@ -604,20 +683,14 @@ export default function F1ReactionTimePage() {
             <div
               aria-hidden="true"
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                backgroundColor: 'rgba(0, 229, 255, 0.05)',
-                border: '1px solid rgba(0, 229, 255, 0.2)',
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                backgroundColor: 'rgba(0,229,255,0.05)',
+                border: '1px solid rgba(0,229,255,0.2)',
                 color: THEME.cyan,
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '2px',
-                padding: '5px 14px',
-                borderRadius: '100px',
-                marginBottom: '12px',
-                textTransform: 'uppercase',
+                fontSize: '11px', fontWeight: 700, letterSpacing: '2px',
+                padding: '5px 14px', borderRadius: '100px',
+                marginBottom: '12px', textTransform: 'uppercase',
               }}
             >
               <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: THEME.cyan }} />
@@ -627,13 +700,10 @@ export default function F1ReactionTimePage() {
             <h1
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: 'clamp(2rem, 6vw, 4.2rem)',
-                fontWeight: 900,
-                letterSpacing: '-1px',
-                lineHeight: 0.95,
-                color: '#fff',
+                fontSize: 'clamp(2rem,6vw,4.2rem)',
+                fontWeight: 900, letterSpacing: '-1px',
+                lineHeight: 0.95, color: '#fff',
                 textTransform: 'uppercase',
-                marginBottom: '12px',
                 margin: '0 0 12px 0',
               }}
             >
@@ -641,30 +711,13 @@ export default function F1ReactionTimePage() {
               <span style={{ color: THEME.green }}>TIME TEST</span>
             </h1>
 
-            <p
-              style={{
-                fontSize: 'clamp(0.85rem, 2vw, 0.95rem)',
-                color: '#64748b',
-                fontWeight: 400,
-                maxWidth: '500px',
-                lineHeight: 1.4,
-                margin: 0,
-              }}
-            >
+            <p style={{ fontSize: 'clamp(0.85rem,2vw,0.95rem)', color: '#64748b', fontWeight: 400, maxWidth: '500px', lineHeight: 1.4, margin: 0 }}>
               Wait for all 5 red lights — when they go out, react instantly.
             </p>
           </div>
 
           {/* Mode selector + mute */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              flexWrap: 'wrap',
-              marginTop: '10px',
-            }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
             <div
               role="group"
               aria-label="Difficulty mode"
@@ -673,8 +726,7 @@ export default function F1ReactionTimePage() {
                 backgroundColor: THEME.cardBg,
                 border: `1px solid ${THEME.border}`,
                 borderRadius: '10px',
-                padding: '4px',
-                gap: '2px',
+                padding: '4px', gap: '2px',
               }}
             >
               {(['Rookie', 'Pro', 'F1 Elite'] as Mode[]).map((m) => (
@@ -686,18 +738,15 @@ export default function F1ReactionTimePage() {
                   aria-label={`Set difficulty to ${m}`}
                   style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontSize: 'clamp(11px, 2vw, 13px)',
-                    fontWeight: 700,
-                    letterSpacing: '.5px',
-                    padding: `${Math.max(6, (MIN_BUTTON_SIZE - 18) / 2)}px clamp(10px, 2vw, 14px)`,
+                    fontSize: 'clamp(11px,2vw,13px)', fontWeight: 700, letterSpacing: '.5px',
+                    padding: '0 clamp(10px,2vw,14px)',
                     minHeight: `${MIN_BUTTON_SIZE}px`,
-                    border: 'none',
-                    borderRadius: '7px',
+                    border: 'none', borderRadius: '7px',
                     cursor: phase === 'lighting' ? 'not-allowed' : 'pointer',
                     transition: 'all .15s',
                     backgroundColor: mode === m ? THEME.green : 'transparent',
                     color: mode === m ? '#000' : THEME.textMuted,
-                    boxShadow: mode === m ? '0 2px 12px rgba(0, 245, 180, 0.4)' : 'none',
+                    boxShadow: mode === m ? '0 2px 12px rgba(0,245,180,0.4)' : 'none',
                   }}
                 >
                   {m}
@@ -710,18 +759,12 @@ export default function F1ReactionTimePage() {
               aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
               aria-pressed={isMuted}
               style={{
-                width: `${MIN_BUTTON_SIZE}px`,
-                height: `${MIN_BUTTON_SIZE}px`,
-                border: `1px solid ${THEME.border}`,
-                borderRadius: '10px',
-                backgroundColor: THEME.cardBg,
-                color: THEME.textMuted,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                flexShrink: 0,
+                width: `${MIN_BUTTON_SIZE}px`, height: `${MIN_BUTTON_SIZE}px`,
+                border: `1px solid ${THEME.border}`, borderRadius: '10px',
+                backgroundColor: THEME.cardBg, color: THEME.textMuted,
+                cursor: 'pointer', display: 'flex',
+                alignItems: 'center', justifyContent: 'center',
+                fontSize: '16px', flexShrink: 0,
               }}
             >
               {isMuted ? '🔇' : '🔊'}
@@ -729,24 +772,18 @@ export default function F1ReactionTimePage() {
           </div>
         </header>
 
-        {/* ── Arena ── */}
+        {/* ════════════════════════════════════════════════════
+            ARENA
+        ════════════════════════════════════════════════════ */}
         <main
           role="button"
           tabIndex={0}
-          aria-label={
-            phase === 'idle'
-              ? 'Press to start the reaction test'
-              : phase === 'lighting'
-              ? 'Wait for lights to go out — press now to trigger false start'
-              : phase === 'ready'
-              ? 'Lights out! Tap or press now!'
-              : phase === 'foul'
-              ? 'False start! Tap to try again'
-              : reactionTime !== null
-              ? `Your reaction time was ${reactionTime} milliseconds. Tap to retry.`
-              : 'Reaction test arena'
-          }
-          onMouseDown={(e) => { if (e.button === 0) handleInteraction(e); }}
+          aria-label={ariaLabel}
+          // Fix #4 — suppress mouse event when touch already handled it
+          onMouseDown={(e) => {
+            if ((e.nativeEvent as PointerEvent).pointerType === 'touch') return;
+            if (e.button === 0) handleInteraction(e);
+          }}
           onTouchStart={handleInteraction}
           onKeyDown={(e) => {
             if (e.code === 'Space' || e.key === 'Enter') {
@@ -762,72 +799,58 @@ export default function F1ReactionTimePage() {
             cursor: 'pointer',
             userSelect: 'none',
             touchAction: 'manipulation',
-            minHeight: 'clamp(280px, 45vw, 340px)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: 'clamp(1.25rem, 4vw, 2rem) clamp(0.75rem, 3vw, 1rem)',
+            minHeight: 'clamp(280px,45vw,340px)',
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'space-between',
+            padding: 'clamp(1.25rem,4vw,2rem) clamp(0.75rem,3vw,1rem)',
             backdropFilter: 'blur(4px)',
             outline: 'none',
+            transition: 'border-color 0.2s, background-color 0.2s',
           }}
         >
+          {/* Bottom glow strip */}
           <div
             aria-hidden="true"
             style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
+              position: 'absolute', bottom: 0, left: 0, right: 0,
               height: '3px',
               background: `linear-gradient(90deg, transparent, ${THEME.cyan}, transparent)`,
               opacity: 0.3,
             }}
           />
 
-          {/* Gantry */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '.75rem',
-              zIndex: 2,
-              width: '100%',
-            }}
-          >
+          {/* ── Gantry ── */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem', zIndex: 2, width: '100%' }}>
             <div
               role="img"
-              aria-label={`Starting lights: ${lights} of 5 lit`}
+              aria-label={`Starting lights gantry: ${lights} of ${LIGHT_COUNT} lit`}
               style={{
                 background: '#090d14',
                 border: `1px solid ${THEME.border}`,
                 borderRadius: '14px',
-                padding: 'clamp(10px, 3vw, 20px) clamp(12px, 4vw, 28px)',
+                padding: 'clamp(10px,3vw,20px) clamp(12px,4vw,28px)',
                 display: 'flex',
-                gap: 'clamp(8px, 2.5vw, 20px)',
+                gap: 'clamp(8px,2.5vw,20px)',
                 boxShadow: 'inset 0 8px 24px rgba(0,0,0,.5)',
                 flexWrap: 'nowrap',
               }}
             >
               {Array.from({ length: LIGHT_COUNT }).map((_, i) => {
                 const isOn = lights > i;
-                const lightStyle: React.CSSProperties = {
-                  width: 'clamp(30px, 7vw, 60px)',
-                  height: 'clamp(30px, 7vw, 60px)',
+                const bulbStyle: React.CSSProperties = {
+                  width: 'clamp(30px,7vw,60px)',
+                  height: 'clamp(30px,7vw,60px)',
                   borderRadius: '50%',
                   border: '3px solid #1a2332',
                   backgroundColor: isOn ? THEME.f1Red : '#070a0f',
-                  boxShadow: isOn
-                    ? `0 0 20px ${THEME.f1Red}, 0 0 40px rgba(255,42,75,0.4)`
-                    : 'none',
+                  boxShadow: isOn ? `0 0 20px ${THEME.f1Red}, 0 0 40px rgba(255,42,75,0.4)` : 'none',
                   transition: 'all 60ms linear',
                   flexShrink: 0,
                 };
                 return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px, 2vw, 14px)' }}>
-                    <div style={lightStyle} />
-                    <div style={lightStyle} />
+                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(6px,2vw,14px)' }}>
+                    <div style={bulbStyle} />
+                    <div style={bulbStyle} />
                   </div>
                 );
               })}
@@ -836,68 +859,45 @@ export default function F1ReactionTimePage() {
               aria-hidden="true"
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: '10px',
-                letterSpacing: '3px',
-                color: THEME.textMuted,
-                textTransform: 'uppercase',
+                fontSize: '10px', letterSpacing: '3px',
+                color: THEME.textMuted, textTransform: 'uppercase',
               }}
             >
               Starting Lights Gantry
             </div>
           </div>
 
-          {/* State machine display */}
+          {/* ── Phase display ── */}
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center',
-              gap: '.75rem',
-              zIndex: 2,
-              minHeight: '140px',
-              justifyContent: 'center',
-              width: '100%',
-              padding: '0 0.5rem',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', textAlign: 'center',
+              gap: '.75rem', zIndex: 2,
+              minHeight: '140px', justifyContent: 'center',
+              width: '100%', padding: '0 0.5rem',
             }}
           >
+            {/* IDLE */}
             {phase === 'idle' && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem' }}>
-                <p
-                  style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontSize: 'clamp(1.4rem, 4vw, 2.4rem)',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    color: '#fff',
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(1.4rem,4vw,2.4rem)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', color: '#fff', margin: 0 }}>
                   Ready to Test?
                 </p>
-                <p style={{ fontSize: 'clamp(0.8rem, 2vw, 0.85rem)', color: THEME.textMuted, margin: 0 }}>
+                <p style={{ fontSize: 'clamp(0.8rem,2vw,0.85rem)', color: THEME.textMuted, margin: 0 }}>
                   Tap the screen or press SPACE when the lights go out.
                 </p>
                 <button
                   onClick={(e) => { e.stopPropagation(); handleInteraction(); }}
                   aria-label="Start the reaction test"
                   style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    backgroundColor: THEME.green,
-                    color: '#000',
+                    display: 'inline-flex', alignItems: 'center', gap: '8px',
+                    backgroundColor: THEME.green, color: '#000',
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontSize: 'clamp(0.9rem, 3vw, 1rem)',
-                    fontWeight: 800,
-                    letterSpacing: '2px',
-                    textTransform: 'uppercase',
-                    padding: 'clamp(12px, 2vw, 14px) clamp(24px, 5vw, 32px)',
-                    borderRadius: '10px',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(0, 245, 180, 0.3)',
+                    fontSize: 'clamp(0.9rem,3vw,1rem)', fontWeight: 800,
+                    letterSpacing: '2px', textTransform: 'uppercase',
+                    padding: 'clamp(12px,2vw,14px) clamp(24px,5vw,32px)',
+                    borderRadius: '10px', border: 'none', cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(0,245,180,0.3)',
                     minHeight: `${MIN_BUTTON_SIZE}px`,
                   }}
                 >
@@ -906,34 +906,30 @@ export default function F1ReactionTimePage() {
               </div>
             )}
 
+            {/* LIGHTING */}
             {phase === 'lighting' && (
               <p
                 aria-live="assertive"
                 style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontSize: 'clamp(1.8rem, 6vw, 3.5rem)',
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  letterSpacing: '4px',
-                  color: THEME.f1Red,
-                  margin: 0,
+                  fontSize: 'clamp(1.8rem,6vw,3.5rem)', fontWeight: 900,
+                  textTransform: 'uppercase', letterSpacing: '4px',
+                  color: THEME.f1Red, margin: 0,
                 }}
               >
                 Wait For Lights...
               </p>
             )}
 
+            {/* READY */}
             {phase === 'ready' && (
               <p
                 aria-live="assertive"
                 style={{
                   fontFamily: "'Barlow Condensed', sans-serif",
-                  fontSize: 'clamp(2.5rem, 10vw, 6rem)',
-                  fontWeight: 900,
-                  textTransform: 'uppercase',
-                  letterSpacing: '4px',
-                  color: THEME.cyan,
-                  textShadow: 'rgba(0,229,255,.4) 0 0 30px',
+                  fontSize: 'clamp(2.5rem,10vw,6rem)', fontWeight: 900,
+                  textTransform: 'uppercase', letterSpacing: '4px',
+                  color: THEME.cyan, textShadow: 'rgba(0,229,255,.4) 0 0 30px',
                   margin: 0,
                 }}
               >
@@ -941,31 +937,30 @@ export default function F1ReactionTimePage() {
               </p>
             )}
 
+            {/* FOUL */}
             {phase === 'foul' && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.5rem' }}>
                 <p
                   aria-live="assertive"
                   style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontSize: 'clamp(1.6rem, 5vw, 3rem)',
-                    fontWeight: 900,
-                    textTransform: 'uppercase',
-                    color: THEME.f1Red,
-                    letterSpacing: '2px',
-                    margin: 0,
+                    fontSize: 'clamp(1.6rem,5vw,3rem)', fontWeight: 900,
+                    textTransform: 'uppercase', color: THEME.f1Red,
+                    letterSpacing: '2px', margin: 0,
                   }}
                 >
                   ⛔ Jump Start!
                 </p>
-                <p style={{ fontSize: 'clamp(0.8rem, 2vw, 0.85rem)', color: '#f87171', margin: 0 }}>
+                <p style={{ fontSize: 'clamp(0.8rem,2vw,0.85rem)', color: '#f87171', margin: 0 }}>
                   You reacted before the lights went out.
                 </p>
-                <p style={{ fontSize: 'clamp(0.7rem, 2vw, 0.75rem)', color: THEME.textMuted, marginTop: '8px' }}>
+                <p style={{ fontSize: 'clamp(0.7rem,2vw,0.75rem)', color: THEME.textMuted, margin: '8px 0 0 0' }}>
                   Tap anywhere to try again
                 </p>
               </div>
             )}
 
+            {/* RESULT */}
             {phase === 'result' && reactionTime !== null && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.5rem' }}>
                 {isNewRecord && (
@@ -973,12 +968,9 @@ export default function F1ReactionTimePage() {
                     aria-live="polite"
                     style={{
                       fontFamily: "'Barlow Condensed', sans-serif",
-                      fontSize: 'clamp(0.75rem, 2vw, 0.85rem)',
-                      fontWeight: 700,
-                      letterSpacing: '3px',
-                      color: THEME.orange,
-                      textTransform: 'uppercase',
-                      margin: 0,
+                      fontSize: 'clamp(0.75rem,2vw,0.85rem)', fontWeight: 700,
+                      letterSpacing: '3px', color: THEME.orange,
+                      textTransform: 'uppercase', margin: 0,
                     }}
                   >
                     ★ New Personal Best ★
@@ -986,38 +978,18 @@ export default function F1ReactionTimePage() {
                 )}
                 <div
                   aria-live="polite"
+                  aria-label={`${reactionTime} milliseconds`}
                   style={{
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 'clamp(3rem, 12vw, 7rem)',
-                    fontWeight: 700,
-                    lineHeight: 1,
-                    letterSpacing: '-2px',
+                    fontSize: 'clamp(3rem,12vw,7rem)', fontWeight: 700,
+                    lineHeight: 1, letterSpacing: '-2px',
                     color: getRating(reactionTime).color,
                   }}
                 >
                   {reactionTime}
-                  <span
-                    style={{
-                      fontSize: 'clamp(1rem, 3vw, 2rem)',
-                      fontWeight: 400,
-                      color: THEME.textMuted,
-                      marginLeft: '4px',
-                    }}
-                  >
-                    ms
-                  </span>
+                  <span style={{ fontSize: 'clamp(1rem,3vw,2rem)', fontWeight: 400, color: THEME.textMuted, marginLeft: '4px' }}>ms</span>
                 </div>
-                <p
-                  style={{
-                    fontFamily: "'Barlow Condensed', sans-serif",
-                    fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)',
-                    fontWeight: 700,
-                    letterSpacing: '1px',
-                    color: '#fff',
-                    textTransform: 'uppercase',
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 'clamp(0.9rem,2.5vw,1.1rem)', fontWeight: 700, letterSpacing: '1px', color: '#fff', textTransform: 'uppercase', margin: 0 }}>
                   Rating: {getRating(reactionTime).text}
                 </p>
                 <div style={{ display: 'flex', gap: '10px', marginTop: '.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -1025,21 +997,13 @@ export default function F1ReactionTimePage() {
                     onClick={(e) => { e.stopPropagation(); startSequence(); }}
                     aria-label="Retry the reaction test"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      backgroundColor: '#1e293b',
-                      border: `1px solid ${THEME.border}`,
-                      color: '#f0f0f0',
-                      fontFamily: "'Barlow Condensed', sans-serif",
-                      fontSize: 'clamp(0.8rem, 2vw, 0.85rem)',
-                      fontWeight: 700,
-                      letterSpacing: '1px',
-                      textTransform: 'uppercase',
-                      padding: '10px 20px',
-                      minHeight: `${MIN_BUTTON_SIZE}px`,
-                      borderRadius: '8px',
-                      cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      backgroundColor: '#1e293b', border: `1px solid ${THEME.border}`,
+                      color: '#f0f0f0', fontFamily: "'Barlow Condensed', sans-serif",
+                      fontSize: 'clamp(0.8rem,2vw,0.85rem)', fontWeight: 700,
+                      letterSpacing: '1px', textTransform: 'uppercase',
+                      padding: '0 20px', minHeight: `${MIN_BUTTON_SIZE}px`,
+                      borderRadius: '8px', cursor: 'pointer',
                     }}
                   >
                     ↺ Retry
@@ -1048,21 +1012,13 @@ export default function F1ReactionTimePage() {
                     onClick={(e) => { e.stopPropagation(); shareScore(); }}
                     aria-label={copied ? 'Score copied to clipboard' : 'Share your score'}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      backgroundColor: THEME.cyan,
-                      border: 'none',
-                      color: '#000',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      backgroundColor: THEME.cyan, border: 'none', color: '#000',
                       fontFamily: "'Barlow Condensed', sans-serif",
-                      fontSize: 'clamp(0.8rem, 2vw, 0.85rem)',
-                      fontWeight: 700,
-                      letterSpacing: '1px',
-                      textTransform: 'uppercase',
-                      padding: '10px 20px',
-                      minHeight: `${MIN_BUTTON_SIZE}px`,
-                      borderRadius: '8px',
-                      cursor: 'pointer',
+                      fontSize: 'clamp(0.8rem,2vw,0.85rem)', fontWeight: 700,
+                      letterSpacing: '1px', textTransform: 'uppercase',
+                      padding: '0 20px', minHeight: `${MIN_BUTTON_SIZE}px`,
+                      borderRadius: '8px', cursor: 'pointer',
                       boxShadow: '0 2px 10px rgba(0,229,255,0.3)',
                     }}
                   >
@@ -1079,80 +1035,60 @@ export default function F1ReactionTimePage() {
           aria-hidden="true"
           style={{
             textAlign: 'center',
-            fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)',
-            color: THEME.textMuted,
-            letterSpacing: '.5px',
-            marginTop: '.5rem',
+            fontSize: 'clamp(0.65rem,1.5vw,0.75rem)',
+            color: THEME.textMuted, letterSpacing: '.5px', marginTop: '.5rem',
           }}
         >
           [SPACE / ENTER] React &nbsp;•&nbsp; [R] Restart &nbsp;•&nbsp; [S] Toggle Sound
         </p>
 
-        {/* ── Stats dashboard ── */}
+        {/* ════════════════════════════════════════════════════
+            STATS DASHBOARD
+        ════════════════════════════════════════════════════ */}
         <section aria-label="Performance statistics">
           <div
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-              gap: '.75rem',
-              marginTop: '1rem',
+              gap: '.75rem', marginTop: '1rem',
             }}
           >
             {[
-              { icon: '🏆', label: 'Personal Best', value: pbValue ? `${pbValue}ms` : '—', color: THEME.cyan },
-              { icon: '📊', label: 'Avg (Last 10)', value: avgValue ? `${avgValue}ms` : '—', color: THEME.green },
-              { icon: '🏎️', label: 'Total Races', value: String(history.length), color: THEME.textLight },
-              { icon: '⚡', label: 'False Starts', value: String(falseStarts), color: THEME.orange },
+              { icon: '🏆', label: 'Personal Best',  value: pbValue  !== null ? `${pbValue}ms`  : '—', color: THEME.cyan      },
+              { icon: '📊', label: 'Avg (Last 10)',   value: avgValue !== null ? `${avgValue}ms` : '—', color: THEME.green     },
+              { icon: '🏎️', label: 'Total Races',     value: String(history.length),                    color: THEME.textLight },
+              { icon: '⚡', label: 'False Starts',    value: String(falseStarts),                       color: THEME.orange    },
             ].map((stat, idx) => (
               <div
                 key={idx}
                 style={{
-                  background: THEME.cardBg,
-                  border: `1px solid ${THEME.border}`,
+                  background: THEME.cardBg, border: `1px solid ${THEME.border}`,
                   borderRadius: '12px',
-                  padding: 'clamp(0.75rem, 2vw, 1rem) clamp(0.9rem, 2.5vw, 1.2rem)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '.75rem',
+                  padding: 'clamp(0.75rem,2vw,1rem) clamp(0.9rem,2.5vw,1.2rem)',
+                  display: 'flex', flexDirection: 'column', gap: '.75rem',
                   backdropFilter: 'blur(4px)',
                 }}
               >
                 <div
                   aria-hidden="true"
                   style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: '8px',
-                    background: '#1e293b',
-                    border: `1px solid ${THEME.border}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '18px',
-                    flexShrink: 0,
+                    width: '36px', height: '36px', borderRadius: '8px',
+                    background: '#1e293b', border: `1px solid ${THEME.border}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '18px', flexShrink: 0,
                   }}
                 >
                   {stat.icon}
                 </div>
                 <div>
-                  <div
-                    style={{
-                      fontSize: '.65rem',
-                      fontWeight: 600,
-                      letterSpacing: '2px',
-                      textTransform: 'uppercase',
-                      color: THEME.textMuted,
-                      marginBottom: '2px',
-                    }}
-                  >
+                  <div style={{ fontSize: '.65rem', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: THEME.textMuted, marginBottom: '2px' }}>
                     {stat.label}
                   </div>
                   <div
                     aria-label={`${stat.label}: ${stat.value}`}
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 'clamp(1.2rem, 4vw, 1.8rem)',
-                      fontWeight: 700,
+                      fontSize: 'clamp(1.2rem,4vw,1.8rem)', fontWeight: 700,
                       color: stat.color,
                     }}
                   >
@@ -1164,39 +1100,33 @@ export default function F1ReactionTimePage() {
           </div>
         </section>
 
-        {/* ── Panels: Achievements + History ── */}
+        {/* ════════════════════════════════════════════════════
+            ACHIEVEMENTS + HISTORY
+        ════════════════════════════════════════════════════ */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: '.75rem',
-            marginTop: '.75rem',
+            gap: '.75rem', marginTop: '.75rem',
           }}
         >
           {/* Achievements */}
           <section
             aria-label="Achievements"
             style={{
-              background: THEME.cardBg,
-              border: `1px solid ${THEME.border}`,
+              background: THEME.cardBg, border: `1px solid ${THEME.border}`,
               borderRadius: '12px',
-              padding: 'clamp(1rem, 3vw, 1.25rem)',
+              padding: 'clamp(1rem,3vw,1.25rem)',
               backdropFilter: 'blur(4px)',
             }}
           >
             <h2
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: '.85rem',
-                fontWeight: 700,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                color: THEME.cyan,
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                margin: '0 0 1rem 0',
+                fontSize: '.85rem', fontWeight: 700,
+                letterSpacing: '2px', textTransform: 'uppercase',
+                color: THEME.cyan, margin: '0 0 1rem 0',
+                display: 'flex', alignItems: 'center', gap: '8px',
               }}
             >
               <span aria-hidden="true" style={{ fontSize: '16px' }}>🏅</span>
@@ -1211,17 +1141,11 @@ export default function F1ReactionTimePage() {
                     role="status"
                     aria-label={`${achv.label} — ${achv.unlocked ? 'unlocked' : 'locked'}`}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '6px 12px',
-                      minHeight: '32px',
-                      borderRadius: '8px',
-                      fontSize: '.7rem',
-                      fontWeight: 700,
-                      letterSpacing: '.5px',
-                      textTransform: 'uppercase',
-                      transition: 'all .2s',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                      padding: '6px 12px', minHeight: '32px',
+                      borderRadius: '8px', fontSize: '.7rem',
+                      fontWeight: 700, letterSpacing: '.5px',
+                      textTransform: 'uppercase', transition: 'all .2s',
                       border: `1px solid ${isGold ? 'rgba(255,122,0,.3)' : achv.unlocked ? THEME.border : '#1e293b'}`,
                       backgroundColor: isGold ? 'rgba(255,122,0,.1)' : achv.unlocked ? '#1e293b' : 'transparent',
                       color: isGold ? THEME.orange : achv.unlocked ? '#fff' : '#334155',
@@ -1240,26 +1164,19 @@ export default function F1ReactionTimePage() {
           <section
             aria-label="Recent race history"
             style={{
-              background: THEME.cardBg,
-              border: `1px solid ${THEME.border}`,
+              background: THEME.cardBg, border: `1px solid ${THEME.border}`,
               borderRadius: '12px',
-              padding: 'clamp(1rem, 3vw, 1.25rem)',
+              padding: 'clamp(1rem,3vw,1.25rem)',
               backdropFilter: 'blur(4px)',
             }}
           >
             <h2
               style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
-                fontSize: '.85rem',
-                fontWeight: 700,
-                letterSpacing: '2px',
-                textTransform: 'uppercase',
-                color: THEME.green,
-                marginBottom: '1rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                margin: '0 0 1rem 0',
+                fontSize: '.85rem', fontWeight: 700,
+                letterSpacing: '2px', textTransform: 'uppercase',
+                color: THEME.green, margin: '0 0 1rem 0',
+                display: 'flex', alignItems: 'center', gap: '8px',
               }}
             >
               <span aria-hidden="true" style={{ fontSize: '16px' }}>📈</span>
@@ -1276,12 +1193,9 @@ export default function F1ReactionTimePage() {
                 <div
                   aria-hidden="true"
                   style={{
-                    height: '60px',
-                    display: 'flex',
-                    alignItems: 'flex-end',
-                    gap: '4px',
-                    marginBottom: '.75rem',
-                    padding: '0 2px',
+                    height: '60px', display: 'flex',
+                    alignItems: 'flex-end', gap: '4px',
+                    marginBottom: '.75rem', padding: '0 2px',
                   }}
                 >
                   {recentReverse.map((h) => {
@@ -1289,77 +1203,41 @@ export default function F1ReactionTimePage() {
                     return (
                       <div
                         key={h.id}
-                        style={{
-                          flex: 1,
-                          borderRadius: '3px 3px 0 0',
-                          minHeight: '4px',
-                          height: `${heightPct}%`,
-                          backgroundColor: getBarColor(h.time),
-                          opacity: 0.85,
-                        }}
                         title={`${h.time}ms`}
+                        style={{
+                          flex: 1, borderRadius: '3px 3px 0 0',
+                          minHeight: '4px', height: `${heightPct}%`,
+                          backgroundColor: getBarColor(h.time), opacity: 0.85,
+                        }}
                       />
                     );
                   })}
                 </div>
 
-                <div
-                  className="history-scroll"
-                  style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', maxHeight: '170px' }}
-                >
+                <div className="history-scroll" style={{ display: 'flex', flexDirection: 'column', gap: '.4rem', maxHeight: '170px' }}>
                   {history.slice(0, MAX_HISTORY_DISPLAY).map((h, i) => {
                     const rating = getRating(h.time);
-                    const isPB = h.time === Math.min(...history.map((x) => x.time));
+                    // Fix #1 — arrayMin for personal-best check
+                    const isPB   = h.time === arrayMin(history.map((x) => x.time));
                     return (
                       <div
                         key={h.id}
                         style={{
-                          display: 'flex',
-                          alignItems: 'center',
+                          display: 'flex', alignItems: 'center',
                           justifyContent: 'space-between',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
+                          padding: '8px 12px', borderRadius: '8px',
                           backgroundColor: '#0c111a',
                           border: `1px solid ${THEME.border}`,
                           gap: '8px',
                         }}
                       >
-                        <span
-                          style={{
-                            fontSize: '.7rem',
-                            color: THEME.textMuted,
-                            fontFamily: "'JetBrains Mono', monospace",
-                            width: '28px',
-                            flexShrink: 0,
-                          }}
-                        >
+                        <span style={{ fontSize: '.7rem', color: THEME.textMuted, fontFamily: "'JetBrains Mono', monospace", width: '28px', flexShrink: 0 }}>
                           #{history.length - i}
                         </span>
-                        <span
-                          style={{
-                            fontFamily: "'JetBrains Mono', monospace",
-                            fontSize: '1rem',
-                            fontWeight: 700,
-                            color: rating.color,
-                            flexShrink: 0,
-                          }}
-                        >
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '1rem', fontWeight: 700, color: rating.color, flexShrink: 0 }}>
                           {h.time}ms{isPB ? ' ★' : ''}
                         </span>
-                        <span
-                          style={{
-                            fontSize: '.6rem',
-                            fontWeight: 700,
-                            letterSpacing: '1.5px',
-                            textTransform: 'uppercase',
-                            color: THEME.textMuted,
-                            backgroundColor: THEME.cardBg,
-                            padding: '2px 8px',
-                            borderRadius: '4px',
-                            border: `1px solid ${THEME.border}`,
-                            flexShrink: 0,
-                          }}
-                        >
+                        <span style={{ fontSize: '.6rem', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', color: THEME.textMuted, backgroundColor: THEME.cardBg, padding: '2px 8px', borderRadius: '4px', border: `1px solid ${THEME.border}`, flexShrink: 0 }}>
                           {h.mode}
                         </span>
                       </div>
@@ -1371,7 +1249,9 @@ export default function F1ReactionTimePage() {
           </section>
         </div>
 
-        {/* ── SEO Article ── */}
+        {/* ════════════════════════════════════════════════════
+            SEO ARTICLE
+        ════════════════════════════════════════════════════ */}
         <article
           style={{
             marginTop: '4rem',
@@ -1380,281 +1260,143 @@ export default function F1ReactionTimePage() {
             lineHeight: '1.7',
           }}
         >
-          {/* Main article intro — H1 is above, this is the first H2 */}
-          <p style={{ fontSize: 'clamp(0.9rem, 2vw, 1rem)', color: '#94a3b8', marginBottom: '1.5rem' }}>
+          <p style={{ fontSize: 'clamp(0.9rem,2vw,1rem)', color: '#94a3b8', marginBottom: '1.5rem' }}>
             In high-stakes competitive esports and real-life motorsports, victory is decided in fractions of a
             millisecond. Whether you are aiming to land a precision headshot in an FPS title or execute the
-            perfect grid launch in Formula 1, your <strong>reaction time</strong> is the ultimate baseline. Our
-            professional <strong>F1 Reaction Time Test</strong> — popularly known as the{' '}
+            perfect grid launch in Formula 1, your <strong>reaction time</strong> is the ultimate baseline.
+            Our professional <strong>F1 Reaction Time Test</strong> — popularly known as the{' '}
             <em>F1 Lights Out Test</em> — faithfully replicates the official FIA Grand Prix starting-light
             sequence to help casual gamers, pro esports players and enthusiasts measure, optimize, and
             dominate their split-second cognitive response.
           </p>
 
-          {/* H2 — How to Use */}
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              margin: '2.5rem 0 1rem 0',
-            }}
-          >
-            How to Use the F1 Reaction Time Test
-          </h2>
-          <ol style={{ color: '#94a3b8', paddingLeft: '1.5rem', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            <li><strong>Choose your difficulty</strong> — Rookie gives more reaction time; F1 Elite pushes you to the limit with longer, more unpredictable delays.</li>
+          {/* ── How to Use ── */}
+          <h2 style={h2Style}>How to Use the F1 Reaction Time Test</h2>
+          <ol style={listStyle}>
+            <li><strong>Choose your difficulty</strong> — Rookie gives more time; F1 Elite pushes you to the limit with longer, more unpredictable delays.</li>
             <li><strong>Press Start Engine</strong> (or tap the arena / press SPACE).</li>
             <li><strong>Watch the five red lights</strong> illuminate one by one.</li>
             <li><strong>React the instant all lights go out</strong> — tap, click, or press SPACE.</li>
             <li><strong>Read your result</strong>, compare with your personal best, and share with friends.</li>
           </ol>
-          <p style={{ color: '#94a3b8', marginBottom: '1.25rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          <p style={bodyText}>
             Tapping before the lights go out registers a <em>Jump Start</em> (false start), just like in real
-            Formula 1. The randomized delay after the fifth light prevents pattern learning, keeping every run
-            genuinely challenging.
+            Formula 1. The randomized delay after the fifth light prevents pattern learning, keeping every
+            run genuinely challenging.
           </p>
 
-          <h3
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-              fontWeight: 700,
-              color: THEME.cyan,
-              textTransform: 'uppercase',
-              margin: '1.75rem 0 0.75rem 0',
-            }}
-          >
-            Keyboard Shortcuts
-          </h3>
-          <ul style={{ color: '#94a3b8', paddingLeft: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: 'clamp(0.85rem, 2vw, 0.95rem)' }}>
-            <li><kbd style={{ backgroundColor: '#1e293b', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${THEME.border}`, fontSize: '0.85em' }}>SPACE</kbd> or <kbd style={{ backgroundColor: '#1e293b', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${THEME.border}`, fontSize: '0.85em' }}>ENTER</kbd> — React / Start</li>
-            <li><kbd style={{ backgroundColor: '#1e293b', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${THEME.border}`, fontSize: '0.85em' }}>R</kbd> — Restart immediately</li>
-            <li><kbd style={{ backgroundColor: '#1e293b', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${THEME.border}`, fontSize: '0.85em' }}>S</kbd> — Toggle sound on / off</li>
+          <h3 style={h3Style(THEME.cyan)}>Keyboard Shortcuts</h3>
+          <ul style={{ ...listStyle, listStyleType: 'none', paddingLeft: 0 }}>
+            {[
+              ['SPACE / ENTER', 'React / Start'],
+              ['R', 'Restart immediately'],
+              ['S', 'Toggle sound on / off'],
+            ].map(([key, desc]) => (
+              <li key={key}>
+                <kbd style={{ backgroundColor: '#1e293b', padding: '2px 7px', borderRadius: '4px', border: `1px solid ${THEME.border}`, fontSize: '0.85em' }}>{key}</kbd>
+                {' — '}{desc}
+              </li>
+            ))}
           </ul>
 
-          {/* H2 — What Is a Good Reaction Time? */}
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              margin: '2.5rem 0 1rem 0',
-            }}
-          >
-            What Is a Good Reaction Time?
-          </h2>
-          <p style={{ color: '#94a3b8', marginBottom: '1.25rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          {/* ── What Is a Good Reaction Time ── */}
+          <h2 style={h2Style}>What Is a Good Reaction Time?</h2>
+          <p style={bodyText}>
             The average human simple visual reaction time is approximately <strong>250 ms</strong>. Trained
             esports athletes and motorsport professionals consistently achieve <strong>150–200 ms</strong>
-            through deliberate practice and optimized hardware setups. Sub-150 ms results are exceptionally
-            rare and place you in genuine F1-driver territory.
+            through deliberate practice and optimized hardware. Sub-150 ms results are exceptionally rare
+            and place you in genuine F1-driver territory.
           </p>
-          <p style={{ color: '#94a3b8', marginBottom: '1.25rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          <p style={bodyText}>
             Many players believe that scaling up scores on a <strong>CPS Test (Clicks Per Second)</strong> is
             purely about finger-muscle speed. In reality, clicking velocity is tethered to neuromuscular
             response latency — the precise window between your brain registering a visual trigger and your
             finger completing the motion. Reducing that window directly improves CPS scores.
           </p>
 
-          {/* H2 — Score Chart */}
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              margin: '2.5rem 0 1rem 0',
-            }}
-          >
-            Reaction Time Score Chart
-          </h2>
-          <p style={{ color: '#94a3b8', marginBottom: '1rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          {/* ── Score Chart ── */}
+          <h2 style={h2Style}>Reaction Time Score Chart</h2>
+          <p style={{ ...bodyText, marginBottom: '1rem' }}>
             Use this table to benchmark your result against competitive tiers:
           </p>
 
-          <div className="table-scroll" style={{ marginBottom: '1.5rem', border: `1px solid ${THEME.border}`, borderRadius: '10px' }}>
+          {/* Fix #10 — constrained wrapper prevents full-page overflow */}
+          <div
+            className="table-scroll"
+            style={{ width: '100%', maxWidth: '100%', marginBottom: '1.5rem', border: `1px solid ${THEME.border}`, borderRadius: '10px' }}
+          >
             <table
-              style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'clamp(0.8rem, 2vw, 0.95rem)', minWidth: '480px' }}
+              style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 'clamp(0.8rem,2vw,0.95rem)', minWidth: '480px' }}
               aria-label="Reaction time score benchmarks"
             >
               <thead>
                 <tr style={{ backgroundColor: '#1e293b', color: '#fff' }}>
-                  <th style={{ padding: '12px 16px', borderBottom: `1px solid ${THEME.border}` }}>Reaction Time</th>
-                  <th style={{ padding: '12px 16px', borderBottom: `1px solid ${THEME.border}` }}>Rating</th>
-                  <th style={{ padding: '12px 16px', borderBottom: `1px solid ${THEME.border}` }}>Real-World Equivalent</th>
+                  <th style={thStyle}>Reaction Time</th>
+                  <th style={thStyle}>Rating</th>
+                  <th style={thStyle}>Real-World Equivalent</th>
                 </tr>
               </thead>
               <tbody>
                 {SCORE_CHART_ROWS.map((row, i) => (
-                  <tr key={row.rating} style={{ backgroundColor: i % 2 !== 0 ? 'rgba(25, 30, 45, 0.4)' : 'transparent' }}>
-                    <td style={{ padding: '12px 16px', borderBottom: i < SCORE_CHART_ROWS.length - 1 ? `1px solid ${THEME.border}` : 'none', color: row.color, fontWeight: 'bold' }}>
-                      {row.range}
-                    </td>
-                    <td style={{ padding: '12px 16px', borderBottom: i < SCORE_CHART_ROWS.length - 1 ? `1px solid ${THEME.border}` : 'none' }}>
-                      {row.rating}
-                    </td>
-                    <td style={{ padding: '12px 16px', borderBottom: i < SCORE_CHART_ROWS.length - 1 ? `1px solid ${THEME.border}` : 'none' }}>
-                      {row.equivalent}
-                    </td>
+                  <tr key={row.rating} style={{ backgroundColor: i % 2 !== 0 ? 'rgba(25,30,45,0.4)' : 'transparent' }}>
+                    <td style={{ ...tdStyle, borderBottom: i < SCORE_CHART_ROWS.length - 1 ? `1px solid ${THEME.border}` : 'none', color: row.color, fontWeight: 'bold' }}>{row.range}</td>
+                    <td style={{ ...tdStyle, borderBottom: i < SCORE_CHART_ROWS.length - 1 ? `1px solid ${THEME.border}` : 'none' }}>{row.rating}</td>
+                    <td style={{ ...tdStyle, borderBottom: i < SCORE_CHART_ROWS.length - 1 ? `1px solid ${THEME.border}` : 'none' }}>{row.equivalent}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* H2 — How to Improve */}
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              margin: '2.5rem 0 1rem 0',
-            }}
-          >
-            How to Improve Your Reaction Time
-          </h2>
-          <p style={{ color: '#94a3b8', marginBottom: '1rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
-            Consistent, targeted training is the most reliable path to shaving milliseconds off your score.
-            Consider these evidence-backed strategies:
+          {/* ── How to Improve ── */}
+          <h2 style={h2Style}>How to Improve Your Reaction Time</h2>
+          <p style={{ ...bodyText, marginBottom: '1rem' }}>
+            Consistent, targeted training is the most reliable path to shaving milliseconds off your score:
           </p>
-          <ul style={{ color: '#94a3b8', paddingLeft: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
-            <li>
-              <strong>Daily short sessions:</strong> Ten focused runs per day builds neural pathways more
-              effectively than occasional marathon sessions.
-            </li>
-            <li>
-              <strong>Optimize hardware:</strong> A monitor with 1 ms response time and 144 Hz+ refresh rate,
-              paired with a high-polling-rate mouse (1000 Hz+), minimizes system-introduced latency.
-            </li>
-            <li>
-              <strong>Physical readiness:</strong> Stay hydrated, warm your fingers before testing, and avoid
-              testing when fatigued — reaction time degrades measurably with fatigue and dehydration.
-            </li>
-            <li>
-              <strong>Eliminate distractions:</strong> Background noise, notifications, and divided attention
-              all increase processing delay by tens of milliseconds.
-            </li>
-            <li>
-              <strong>Escalate difficulty gradually:</strong> Start on Rookie mode to build confidence, then
-              progress through Pro and F1 Elite as your baseline improves.
-            </li>
+          <ul style={listStyle}>
+            <li><strong>Daily short sessions:</strong> Ten focused runs per day builds neural pathways more effectively than occasional marathon sessions.</li>
+            <li><strong>Optimize hardware:</strong> A monitor with 1 ms response time and 144 Hz+ refresh rate, paired with a high-polling-rate mouse (1000 Hz+), minimizes system-introduced latency.</li>
+            <li><strong>Physical readiness:</strong> Stay hydrated, warm your fingers before testing, and avoid testing when fatigued — reaction time degrades measurably with both.</li>
+            <li><strong>Eliminate distractions:</strong> Background noise, notifications, and divided attention all increase processing delay by tens of milliseconds.</li>
+            <li><strong>Escalate difficulty gradually:</strong> Start on Rookie mode, then progress through Pro and F1 Elite as your baseline improves.</li>
           </ul>
 
-          <h3
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-              fontWeight: 700,
-              color: THEME.green,
-              textTransform: 'uppercase',
-              margin: '1.75rem 0 0.75rem 0',
-            }}
-          >
-            Avoiding False Starts
-          </h3>
-          <p style={{ color: '#94a3b8', marginBottom: '1.25rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          <h3 style={h3Style(THEME.green)}>Avoiding False Starts</h3>
+          <p style={bodyText}>
             Advanced clicking techniques such as Jitter Clicking or Butterfly Clicking require precise rhythm
             control. The strict Jump Start penalty system in this simulator conditions you to wait for the
             correct visual stimulus rather than anticipating it — a skill directly transferable to competitive
             gameplay where premature inputs result in cooldown or action cancellation.
           </p>
 
-          {/* H2 — Why This Helps Gamers */}
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              margin: '2.5rem 0 1rem 0',
-            }}
-          >
-            Why This Test Helps Gamers
-          </h2>
-          <p style={{ color: '#94a3b8', marginBottom: '1rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          {/* ── Why This Helps Gamers ── */}
+          <h2 style={h2Style}>Why This Test Helps Gamers</h2>
+          <p style={{ ...bodyText, marginBottom: '1rem' }}>
             Integrating consistent F1 reaction training accelerates performance across multiple competitive disciplines:
           </p>
-          <ul style={{ color: '#94a3b8', paddingLeft: '1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
-            <li>
-              <strong>FPS titles (CS2, Valorant, Apex):</strong> Lower reaction time translates directly to
-              faster first-shot execution and reduced time-to-kill.
-            </li>
-            <li>
-              <strong>Fighting games:</strong> Frame-precise punish windows demand sub-200 ms response to
-              capitalize on opponent recovery gaps.
-            </li>
-            <li>
-              <strong>Battle Royale:</strong> Faster looting, quicker weapon swaps and earlier aiming
-              decisions all compound reaction speed advantages.
-            </li>
-            <li>
-              <strong>CPS benchmarks:</strong> Optimizing click latency compresses starting delay on
-              high-speed click counters, producing cleaner initial bursts and higher measured CPS scores.
-            </li>
-            <li>
-              <strong>Real motorsport simulators:</strong> iRacing and F1 24 both reward consistent,
-              well-timed throttle and brake inputs — skills this test directly trains.
-            </li>
+          <ul style={listStyle}>
+            <li><strong>FPS titles (CS2, Valorant, Apex):</strong> Lower reaction time translates directly to faster first-shot execution and reduced time-to-kill.</li>
+            <li><strong>Fighting games:</strong> Frame-precise punish windows demand sub-200 ms response to capitalize on opponent recovery gaps.</li>
+            <li><strong>Battle Royale:</strong> Faster looting, quicker weapon swaps, and earlier aiming decisions all compound reaction-speed advantages.</li>
+            <li><strong>CPS benchmarks:</strong> Optimizing click latency compresses starting delay on high-speed click counters, producing cleaner bursts and higher measured CPS.</li>
+            <li><strong>Racing simulators (iRacing, F1 24):</strong> Consistent, well-timed throttle and brake inputs — skills this test directly trains.</li>
           </ul>
 
-          <h3
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
-              fontWeight: 700,
-              color: THEME.cyan,
-              textTransform: 'uppercase',
-              margin: '1.75rem 0 0.75rem 0',
-            }}
-          >
-            Shifting Into Elite Pro Tiers
-          </h3>
-          <p style={{ color: '#94a3b8', marginBottom: '1.25rem', fontSize: 'clamp(0.9rem, 2vw, 0.98rem)' }}>
+          <h3 style={h3Style(THEME.cyan)}>Shifting Into Elite Pro Tiers</h3>
+          <p style={bodyText}>
             While the global median reaction time sits around 250 ms, elite esports professionals and actual
             F1 grid drivers operate closer to the sub-150 ms mark. Regular structured training actively
-            conditions your neural pathways to narrow that window — not through luck, but through measurable,
-            progressive improvement tracked in your personal history panel above.
+            conditions your neural pathways to narrow that window — tracked visibly in your personal history
+            panel above.
           </p>
 
-          {/* H2 — FAQ */}
-          <h2
-            style={{
-              fontFamily: "'Barlow Condensed', sans-serif",
-              fontSize: 'clamp(1.4rem, 4vw, 2rem)',
-              fontWeight: 800,
-              color: '#fff',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-              margin: '2.5rem 0 1rem 0',
-            }}
-          >
-            Frequently Asked Questions
-          </h2>
-
+          {/* ── FAQ ── */}
+          <h2 style={h2Style}>Frequently Asked Questions</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
             {FAQ_ITEMS.map((faq, index) => (
               <div
                 key={index}
-                style={{
-                  backgroundColor: THEME.cardBg,
-                  border: `1px solid ${THEME.border}`,
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                }}
+                style={{ backgroundColor: THEME.cardBg, border: `1px solid ${THEME.border}`, borderRadius: '8px', overflow: 'hidden' }}
               >
                 <button
                   onClick={() => toggleFaq(index)}
@@ -1663,29 +1405,20 @@ export default function F1ReactionTimePage() {
                   id={`faq-question-${index}`}
                   style={{
                     width: '100%',
-                    padding: 'clamp(12px, 3vw, 14px) clamp(14px, 4vw, 20px)',
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    color: '#fff',
-                    textAlign: 'left',
-                    fontWeight: 600,
-                    fontSize: 'clamp(0.88rem, 2vw, 1rem)',
+                    padding: 'clamp(12px,3vw,14px) clamp(14px,4vw,20px)',
+                    backgroundColor: 'transparent', border: 'none',
+                    color: '#fff', textAlign: 'left',
+                    fontWeight: 600, fontSize: 'clamp(0.88rem,2vw,1rem)',
                     cursor: 'pointer',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: '12px',
-                    minHeight: `${MIN_BUTTON_SIZE}px`,
-                    lineHeight: 1.4,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    gap: '12px', minHeight: `${MIN_BUTTON_SIZE}px`, lineHeight: 1.4,
                   }}
                 >
                   <span>{faq.q}</span>
                   <span
                     aria-hidden="true"
                     style={{
-                      color: THEME.cyan,
-                      flexShrink: 0,
-                      fontSize: '0.75rem',
+                      color: THEME.cyan, flexShrink: 0, fontSize: '0.75rem',
                       transition: 'transform 0.2s',
                       transform: openFaq === index ? 'rotate(180deg)' : 'rotate(0deg)',
                       display: 'inline-block',
@@ -1700,9 +1433,9 @@ export default function F1ReactionTimePage() {
                     role="region"
                     aria-labelledby={`faq-question-${index}`}
                     style={{
-                      padding: '10px clamp(14px, 4vw, 20px) clamp(12px, 3vw, 14px)',
+                      padding: `10px clamp(14px,4vw,20px) clamp(12px,3vw,14px)`,
                       color: '#94a3b8',
-                      fontSize: 'clamp(0.85rem, 2vw, 0.92rem)',
+                      fontSize: 'clamp(0.85rem,2vw,0.92rem)',
                       borderTop: `1px solid ${THEME.border}`,
                       lineHeight: 1.65,
                     }}
@@ -1718,3 +1451,50 @@ export default function F1ReactionTimePage() {
     </div>
   );
 }
+
+// ─── Shared style objects (outside render — never recreated) ──────────────────
+
+const h2Style: React.CSSProperties = {
+  fontFamily: "'Barlow Condensed', sans-serif",
+  fontSize: 'clamp(1.4rem, 4vw, 2rem)',
+  fontWeight: 800,
+  color: '#fff',
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+  margin: '2.5rem 0 1rem 0',
+};
+
+const h3Style = (color: string): React.CSSProperties => ({
+  fontFamily: "'Barlow Condensed', sans-serif",
+  fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
+  fontWeight: 700,
+  color,
+  textTransform: 'uppercase',
+  margin: '1.75rem 0 0.75rem 0',
+});
+
+const bodyText: React.CSSProperties = {
+  fontSize: 'clamp(0.9rem, 2vw, 0.98rem)',
+  color: '#94a3b8',
+  marginBottom: '1.25rem',
+};
+
+const listStyle: React.CSSProperties = {
+  color: '#94a3b8',
+  paddingLeft: '1.5rem',
+  marginBottom: '1.5rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
+  fontSize: 'clamp(0.9rem, 2vw, 0.98rem)',
+};
+
+const thStyle: React.CSSProperties = {
+  padding: '12px 16px',
+  borderBottom: '1px solid #1b2636',
+  whiteSpace: 'nowrap',
+};
+
+const tdStyle: React.CSSProperties = {
+  padding: '12px 16px',
+};
