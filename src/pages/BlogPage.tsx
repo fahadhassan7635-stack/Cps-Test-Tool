@@ -6,58 +6,51 @@ const posts = [
     emoji: '⌨️',
     tag: 'Typing',
     tagColor: 'var(--neon-cyan)',
-    title: 'How to Go From 60 to 120 WPM in 30 Days',
-    excerpt: 'Stop randomly smashing keys. Here is the exact roadmap used by competitive typists to double their speed without ruining their accuracy.',
+    title: 'WPM Typing Test Guide: How to Actually Hit 120+ WPM',
+    excerpt: 'Stuck at 60 WPM? Stop randomly smashing keys. Here is the exact typing practice routine used by competitive typists to double their speed without hand pain.',
     readTime: '8 min read',
-    body: `Stuck at 60 WPM? You're not alone. Hitting 120 WPM isn't about moving your fingers faster—it's about moving them smarter. If you're tired of being average, here is the exact 30-day roadmap to double your speed.
+    body: `If you are stuck hovering around 60 to 70 WPM, I know exactly how frustrating it is. You feel like your fingers are moving as fast as humanly possible, but the numbers just won't go up. Mashing the keyboard harder isn't the fix. Hitting 120+ WPM requires a complete reset of how your brain maps your keyboard.
 
-**Week 1: Unlearn Your Bad Habits**
-Stop looking at your hands. Seriously. Put a towel over your keyboard if you have to. Learn the home row (ASDF and JKL;) properly. You will type slower this week. Accept it, and let your muscle memory reset.
+**Stop Looking at Your Hands (Seriously)**
+This is the hardest pill to swallow. If you are looking down, you have a hard speed cap of about 80 WPM. Put a towel over your hands while you take a typing test. You are going to drop down to 30 WPM for a few days, and it will be miserable. But once your muscle memory locks in the home row (ASDF and JKL;), your speed will permanently skyrocket.
 
-**Week 2: The Accuracy Phase**
-Speed comes from not hitting the backspace key. If you are typing 100 WPM but hitting backspace every four seconds, you are actually typing 60 WPM. Slow down and aim for a strict 98% accuracy rate.
+**Accuracy is Speed in Disguise**
+Here is the math nobody talks about: hitting the backspace key costs you an entire word's worth of time. If you type at 120 WPM but your accuracy is 85%, your actual output is slower than a guy typing 80 WPM with 99% accuracy. Slow down. Don't speed up until you can hit 98% accuracy consistently on a WPM typing test.
 
-**Week 3: Push Your Limits**
-Now we sprint. Do 60-second bursts where you intentionally type just a little faster than you're comfortable with. You will make mistakes, but you are forcing your brain to process words faster. 
+**The 15-Minute Daily Routine**
+Don't grind a typing test for 3 hours straight on a Sunday. Your fingers will fatigue, and you'll build bad habits. 
+- 5 minutes: Warm up with a basic alphabet typing drill.
+- 5 minutes: Practice the 200 most common English words (they make up half of everything you type online).
+- 5 minutes: Try to set a new personal best on a 60-second typing test.
 
-**Week 4: Real-World Application**
-Stop practicing random letters. Practice the 200 most common English words. They make up 50% of everything you will ever type. 
-
-**The Hard Truth:**
-- 15 minutes of daily practice beats a 2-hour marathon on Sunday
-- Fix the specific keys you always miss instead of just typing randomly
-- Good posture actually matters for wrist stamina
-- A mechanical keyboard won't magically fix bad finger placement`,
+**Does Hardware Matter?**
+Yes and no. A $200 custom mechanical keyboard won't magically make you type 140 WPM. However, switching from a mushy laptop membrane keyboard to a board with tactile switches (like Cherry MX Browns) will absolutely reduce your typo rate, giving you an instant small boost in your effective WPM.`
   },
   {
     id: 2,
     emoji: '🖱️',
     tag: 'CPS',
     tagColor: 'var(--neon-green)',
-    title: 'CPS Test: What Is Clicks Per Second and How to Improve It',
-    excerpt: 'Everything from Minecraft PvP mechanics to world records. Learn how to increase your raw click speed without giving yourself carpal tunnel.',
+    title: 'CPS Test Secrets: How to Increase Your Clicks Per Second',
+    excerpt: 'Want to take less knockback in Minecraft PvP? Here is the truth about jitter clicking, butterfly clicking, and getting a higher score on a CPS test.',
     readTime: '7 min read',
-    body: `Clicks Per Second (CPS) is the holy grail metric for Minecraft PvP, osu! players, and clicker game addicts. If you want to know how you stack up or how to physically click faster, here is the breakdown.
+    body: `If you play Minecraft PvP, Bedwars, or literally any clicker game, you already know that your Clicks Per Second (CPS) is the holy grail metric. Getting your CPS higher isn't just about trying harder; it is an entirely physical skill. If you want to boost your score on a CPS test, here is how the top players actually do it.
 
-**Where Do You Stand?**
-Let's be real about the numbers:
-- 1 to 5 CPS: You are just casually browsing the web
-- 6 to 9 CPS: Average gamer. Totally fine for most casual games
-- 10 to 14 CPS: Sweaty PvP territory. This is where you start taking less knockback in Minecraft
-- 15+ CPS: You are either butterfly clicking like a madman or breaking your mouse
+**The Reality of CPS Scores**
+Before we get into techniques, let's look at the benchmarks:
+- 1 to 5 CPS: Casual web browsing speed. 
+- 6 to 9 CPS: Average gamer. You'll survive most casual games.
+- 10 to 14 CPS: Sweaty PvP territory. This is where you start taking noticeably less knockback in Minecraft.
+- 15+ CPS: You are using advanced clicking methods, or your mouse is doing the heavy lifting for you.
 
-**How People Actually Click Faster**
-- Normal Clicking: Just your index finger. Caps out around 8 CPS. Safe, accurate, and won't ruin your aim.
-- Jitter Clicking: Flexing your forearm to vibrate your finger. Gets you 10 to 14 CPS but makes your crosshair shake violently.
-- Butterfly Clicking: Slapping the left click with two fingers interchangeably. Insanely fast (15+ CPS), but banned on a lot of servers.
+**How to Physically Click Faster**
+You can't just normal-click your way to 15 CPS. Your index finger simply doesn't have the fast-twitch muscle fibers for it.
+- **Jitter Clicking:** You tense up your forearm so hard that your hand physically vibrates over the left click. It gets you up to 14 CPS easily, but it makes your crosshair shake violently. (Also, doing this for hours hurts. A lot.)
+- **Butterfly Clicking:** You alternate slapping the left click with your index and middle fingers. It looks goofy, but it easily pushes 15 to 20 CPS. 
+- **Drag Clicking:** Dragging your finger across a matte mouse button so friction causes the switch to bounce dozens of times a second. Great for bridging in Minecraft, terrible for actual combat.
 
-**Hardware Matters**
-If your mouse is heavy and has stiff clicks, your CPS will naturally be lower. Look for mice with optical switches—they don't have the internal debounce delay that slows down mechanical switches.
-
-**Quick Tips to Improve:**
-- Do 5-second tests. 60-second tests just ruin your stamina
-- Angle your hand so your finger rests naturally, don't force an awkward grip
-- Stretch your wrists! Carpal tunnel is not worth a Bedwars win`,
+**The Hardware Cheat Code**
+If your mouse has heavy, stiff switches, your CPS is going to suck no matter how good your technique is. You want a gaming mouse with optical switches or very light mechanical switches (like the Razer DeathAdder or Logitech G Pro X). Also, check your mouse software to see if you can lower the "Debounce Time". Lower debounce means the mouse registers clicks faster, instantly boosting your CPS test results.`
   },
   {
     id: 3,
@@ -65,29 +58,25 @@ If your mouse is heavy and has stiff clicks, your CPS will naturally be lower. L
     tag: 'Reaction',
     tagColor: 'var(--neon-orange)',
     title: 'Reaction Time Test: Average Scores and How to Get Faster',
-    excerpt: 'Dying before you even see the enemy? Here is the science behind gaming reaction times and the setup tweaks that actually make you faster.',
+    excerpt: 'Dying before you even see the enemy in Valorant or CS2? Here is the science behind gaming reaction times and the setup tweaks that actually make you faster.',
     readTime: '8 min read',
-    body: `In games like Valorant or CS2, dying before you even realize you saw the guy is the worst feeling. Your reaction time dictates who wins the duel. Here is how to measure it and actually make it faster.
+    body: `We've all been there: you hold an angle in CS2 or Valorant, someone peeks, and you're dead before your brain even processes they were on your screen. You take a reaction time test, get 250ms, and assume you just have slow genetics. But what if your brain is fine, and your setup is just terrible?
 
-**What Is a Good Reaction Time?**
-- 150ms or less: Absolute freak of nature. Pro player genetics or a god-tier setup
-- 150 to 190ms: Super competitive. You probably win most of your raw aim duels
-- 200 to 250ms: The global average. Totally normal
-- 250ms+: You might be playing on a TV, or you desperately need some coffee
+**What is a Good Reaction Time?**
+- Under 150ms: Absolute freak of nature. Pro player genetics (or you guessed early).
+- 160ms to 190ms: Super competitive. You are going to win the vast majority of raw aim duels.
+- 200ms to 250ms: The global average. Totally normal for a healthy adult.
+- 260ms+: You are probably sleep-deprived, playing on a TV, or using wireless gear from 2012.
 
 **The Secret Killers of Reaction Time**
-Most people don't have slow brains, they just have bad habits and bad setups:
-- Sleep: Playing on 5 hours of sleep adds about 30ms to your delay. It's like playing on a bad server.
-- Refresh Rate: A 60Hz monitor puts you 16ms behind a 144Hz monitor automatically.
-- Cold Hands: If your hands are freezing, your fingers physically cannot click fast enough.
+Your biological reaction time is only part of the equation. "System Latency" is the massive hidden delay that is holding you back.
+- **Refresh Rate:** If you are playing on a 60Hz monitor, you are literally seeing the game 16 milliseconds in the past compared to a 144Hz player. Upgrading your monitor is the only true "pay to win" hardware in gaming.
+- **Sleep & Hydration:** Playing on 5 hours of sleep adds about 30ms to your delay. It's the equivalent of playing on a server with high ping. 
+- **Cold Hands:** If your room is freezing, the blood flow to your fingers drops, making it physically impossible to click the mouse fast enough when you react.
 
-**Can You Actually Get Faster?**
-Yes, but only to a point. You can't change your basic biology, but you can train your anticipation. Pros don't just react faster; they pre-aim where the action is going to happen so they have less thinking to do.
-
-**The Pre-Game Warmup:**
-- Do 5 minutes of raw reaction testing before booting up ranked
-- Drink some water (even mild dehydration kills your focus)
-- Make sure your room isn't freezing cold`,
+**Can You Actually Train Your Brain?**
+You can't change your fundamental biology, but you can train your anticipation. Pro players don't just have insane raw reaction times; they pre-aim exactly where the enemy is going to be so they don't have to think, they just have to click. 
+Before booting up a ranked match, spend 5 minutes running a reaction time test. It wakes up your central nervous system and gets your eyes dialed in.`
   },
   {
     id: 4,
@@ -95,54 +84,49 @@ Yes, but only to a point. You can't change your basic biology, but you can train
     tag: 'Aim',
     tagColor: 'var(--neon-red)',
     title: 'Aim Trainer Guide: How to Build Elite FPS Aim From Scratch',
-    excerpt: 'Stop mindlessly shooting at dots. Learn the structured routine that FPS coaches use to build god-tier mouse control.',
+    excerpt: 'Stop mindlessly shooting at dots. Learn the structured routine that FPS coaches use to build god-tier mouse control and tracking.',
     readTime: '10 min read',
-    body: `Booting up an aim trainer and wildly flicking at dots for an hour isn't going to make you a Radiant player. You need a structured routine. Here is how to actually build raw mechanical aim from the ground up.
+    body: `Booting up an aim trainer and wildly flicking at targets for an hour while listening to Spotify isn't going to make you a Radiant player. You are just reinforcing bad habits. If you want raw mechanical aim, you need a structured routine.
 
-**Step 1: Fix Your Sensitivity**
-Stop changing your DPI every time you have a bad game. Find a sensitivity between 200 and 400 eDPI (your mouse DPI multiplied by in-game sens) and stick to it. Muscle memory takes weeks to build.
+**Step 1: Fix Your Sensitivity Once and For All**
+Stop changing your DPI every time you miss an easy shot in Apex or Overwatch. Find a sensitivity between 200 and 400 eDPI (your mouse DPI multiplied by your in-game sensitivity) and never touch it again. Muscle memory takes weeks to build, and you destroy it every time you tweak the slider.
 
 **The Holy Trinity of Aiming**
-- Flicking: Snapping to a target instantly. Looks flashy, but is actually the least reliable way to aim.
-- Tracking: Keeping your crosshair glued to a moving target. Essential for Apex Legends or Overwatch.
-- Micro-adjustments: That tiny little movement to hit the headshot when your flick was slightly off. This is what wins fights.
+An aim trainer breaks your mouse control down into three distinct skills:
+- **Flicking:** Snapping your crosshair to a target instantly. It looks amazing on a Twitch highlight reel, but it's actually the least reliable way to aim.
+- **Tracking:** Keeping your crosshair glued to a target that is strafing unpredictably. This is what separates average Apex Legends players from predators.
+- **Micro-adjustments:** That tiny little movement you make to hit the headshot when your initial flick was slightly off. This is what actually wins gunfights in tactical shooters.
 
 **The 30-Day Blueprint**
-- Week 1: Go slow. Focus on drawing a straight line from point A to point B without curving your mouse path.
-- Week 2: Add tracking. Stop tensing your arm so hard; keep your wrist relaxed.
-- Week 3: Shrink the targets. Force yourself to be precise, not just fast.
-- Week 4: Play dynamic scenarios where targets move unpredictably.
+- Week 1: Go painfully slow. Focus exclusively on drawing a perfectly straight line from point A to point B without curving your mouse path.
+- Week 2: Add tracking scenarios. Stop death-gripping your mouse. Keep your wrist and forearm completely relaxed.
+- Week 3: Shrink the targets. Force yourself to be precise instead of just fast. Speed comes naturally from precision.
+- Week 4: Play dynamic scenarios where targets move vertically and horizontally at random intervals.
 
-**Things to Remember:**
-- Good crosshair placement beats good flicking 9 times out of 10
-- 15 minutes of focused aim training is better than 2 hours of autopilot grinding
-- Aim trainers are a gym, not the main game. Don't stress over high scores`,
+Remember, an aim trainer is just a gym. Don't stress over getting a high score on the leaderboard. Focus on perfect technique, and the kills will follow in-game.`
   },
   {
     id: 5,
     emoji: '🚀',
     tag: 'Spacebar',
     tagColor: 'var(--neon-cyan)',
-    title: 'Spacebar Counter: How Fast Can You Press the Spacebar?',
-    excerpt: 'From Geometry Dash timings to CS2 movement tech, the spacebar is your most abused key. Here is how to tap it faster.',
+    title: 'Spacebar Counter: How to Maximize Your Spacebar CPS Test Score',
+    excerpt: 'From Geometry Dash timings to CS2 movement tech, the spacebar is your most abused key. Here is how to tap it faster and score higher on a spacebar counter.',
     readTime: '5 min read',
-    body: `It sounds like a meme, but spacebar speed is a legitimate skill. The spacebar is the biggest, most abused key on your board. Whether you're bunny-hopping in CS2, playing rhythm games like osu!, or just speed typing, spacebar timing is everything.
+    body: `It sounds like a meme, but spacebar speed is a highly specialized, legitimate skill. The spacebar is the biggest, most heavily utilized key on your board. Whether you are chaining bunny-hops in CS2, tapping out extreme demons in Geometry Dash, or playing rhythm games like osu!mania, your spacebar timing is everything.
 
-**What Is a Fast Spacebar Speed?**
-Hitting 8 presses a second is solid. If you can maintain 11+ across a 10-second test, you either play way too much Geometry Dash or you have insane thumb stamina. 
+**What is a Good Spacebar Speed?**
+If you run a 10-second spacebar counter test, hitting 7 to 8 presses a second is a solid baseline for a gamer. If you can maintain 11+ CPS across a full test, you either have insane thumb stamina or you have been grinding rhythm games for years. 
 
-**Techniques to Increase Speed**
-- Single thumb: Keep your thumb rigid and vibrate your wrist. Good for short bursts.
-- Two-thumb technique: Alternate left and right thumbs rapidly. This easily boosts your score by 20%.
-- The hover: Don't let your thumb leave the surface of the keycap. Minimize travel distance.
+**Techniques to Increase Your Spacebar CPS**
+You can't just mash your thumb normally and expect to hit double digits.
+- **The Rigid Thumb:** Keep your thumb perfectly straight and rigid, and vibrate your wrist instead of moving the thumb joint. This is great for short, 5-second burst tests.
+- **Two-Thumb Technique:** Hover your left and right thumbs over opposite sides of the spacebar and alternate tapping them rapidly. This easily boosts your CPS test score by 20 to 30%.
+- **The Hover:** Do not let your finger fully leave the surface of the keycap. Minimize the travel distance so you are only resetting the switch just enough to actuate it again.
 
-**Why Your Keyboard Matters**
-Not all spacebars are created equal. Linear switches (like Cherry MX Reds) are way better for rapid tapping than clicky switches. Since they don't have a tactile bump, you can rapidly flutter your thumb without fighting the keyboard's resistance. 
-
-**Pro Tips:**
-- Warm up your hands. Cold thumbs lock up instantly
-- Cheaper membrane keyboards might literally not register hits as fast as you can press
-- Test on the 10-second mode to see if your stamina drops off a cliff`,
+**Why Your Keyboard Hardware Matters**
+Not all spacebars are created equal. Linear switches (like Cherry MX Reds or Speed Silvers) are vastly superior for rapid tapping compared to heavy clicky switches. Because linears don't have a tactile bump, you can rapidly flutter your thumb without fighting the keyboard's internal resistance. 
+Also, cheap membrane keyboards are notorious for having terrible stabilizers. If your spacebar feels mushy or binds when you press it on the edge, it is physically holding your spacebar test score back.`
   },
   {
     id: 6,
@@ -150,51 +134,49 @@ Not all spacebars are created equal. Linear switches (like Cherry MX Reds) are w
     tag: 'Keyboard',
     tagColor: 'var(--neon-green)',
     title: 'Key Visualizer: How to Test Keyboard Ghosting and NKRO',
-    excerpt: 'Is your budget keyboard dropping inputs during intense fights? Learn how to use a visualizer to test your hardware limits.',
+    excerpt: 'Is your budget gaming keyboard dropping inputs during intense fights? Learn how to use a keyboard visualizer to test your hardware limits.',
     readTime: '6 min read',
-    body: `A Key Visualizer is a live, on-screen display of exactly what your keyboard is doing. Sure, it looks cool on a Twitch stream, but it's actually the ultimate diagnostic tool to find out if your keyboard is holding you back.
+    body: `A Key Visualizer is a live, on-screen display of exactly what your keyboard is doing. Sure, it looks cool as a stream overlay, but it's actually the ultimate diagnostic tool to find out if your keyboard is secretly getting you killed in-game.
 
 **What Is Keyboard Ghosting?**
-This is the main reason you need a visualizer. Cheap keyboards can only process 3 or 4 keys at a time. Mash your WASD keys, hold Shift, and hit Space. Did one of those keys not light up on the visualizer? That's ghosting. It means your keyboard literally stopped sending signals, which will get you killed in FPS games.
+This is the number one reason you need a keyboard tester. Cheap, non-gaming keyboards can only process 3 or 4 keys at a single time due to how their internal wiring matrix is built. Try this: hold down W and D (like you are moving diagonally), hold Shift to sprint, and hit Spacebar to jump. Did the spacebar not light up on the key visualizer? That is ghosting. Your keyboard literally dropped the input. In an FPS game, that means you just failed a jump peek and died.
 
-**N-Key Rollover (NKRO)**
-Gaming keyboards advertise "NKRO". This means no matter how many keys you press at the exact same time, every single one registers. Test this by pressing down your entire left hand on the board. 
+**N-Key Rollover (NKRO) Explained**
+Premium gaming keyboards advertise "NKRO" or "N-Key Rollover". This means no matter how many keys you press at the exact same time, every single one registers independently. You can test this on our visualizer by literally pressing down your entire left hand on the board. If every key lights up, your board has true NKRO.
 
 **For Streamers and Rhythm Gamers**
-If you play osu!, Clone Hero, or do speedruns, viewers want to see your inputs. You can add our Key Visualizer as a Browser Source in OBS. Just drop the URL in, set a transparent background, and you instantly have a live input overlay.
+If you play osu!, Clone Hero, Geometry Dash, or do speedruns, your viewers want to see your live inputs. You can add our Key Visualizer as a Browser Source in OBS. Just drop the URL in, set a transparent background with CSS, and you instantly have a clean, lag-free input overlay for your stream.
 
-**Things to Look Out For:**
-- Keys that flicker or double-register on a single press (hardware defect)
-- Finding out which finger you incorrectly favor for hitting the spacebar
-- Testing if your custom AutoHotkey or QMK macros are firing properly`,
+**Things to Look Out For During a Test:**
+- Keys that flicker rapidly or double-register on a single, firm press (this means the switch contact leaf is failing).
+- Broken stabilizers that cause a key to not register if pressed too far on the left or right edge.
+- Making sure your custom AutoHotkey scripts or QMK macros are firing the exact sequence you programmed.`
   },
   {
     id: 7,
     emoji: '🖱️',
     tag: 'Mouse',
     tagColor: 'var(--neon-red)',
-    title: 'Double Click Test: Diagnose Dying Mouse Switches',
-    excerpt: 'Is your mouse firing twice when you only clicked once? Here is how to test for switch bounce and save your hardware.',
+    title: 'Double Click Test: How to Diagnose Dying Mouse Switches',
+    excerpt: 'Is your mouse firing twice when you only clicked once? Here is how to use a double click test to diagnose switch bounce and save your hardware.',
     readTime: '6 min read',
-    body: `We have all been there. You click to drag a file, and it opens it instead. Or you shoot a single bullet in a game, and your gun fires twice. You aren't going crazy—your mouse switch is probably dying. 
+    body: `We have all experienced this nightmare. You click once to drag a file on your desktop, and it opens it instead. Or you try to tap-fire a single bullet in CS2, and your gun shoots twice, ruining your recoil reset. You aren't going crazy—your mouse switch is dying. 
 
 **What Is Switch Bounce?**
-Inside a gaming mouse is a tiny metal spring. When you click, the metal touches a contact point. Over time, that spring gets weak. When you click it once, the metal physically "bounces" against the contact multiple times. To your computer, it looks like you just double-clicked at the speed of light.
+Inside a traditional gaming mouse is a tiny, incredibly thin metal spring. When you click, that metal touches a contact point to send a signal. Over time (usually after a few million clicks), that spring gets weak. When you click it once, the metal physically "bounces" against the contact multiple times before settling. To your PC, it looks like you just double-clicked at the speed of light.
 
-**How to Read the Test Results**
+**How to Read Double Click Test Results**
 Our Double Click Test measures the exact millisecond gap between your clicks. 
-- Human double-clicks usually have a gap of 80ms to 150ms.
-- If our graph shows a gap of 10ms to 30ms, that is a hardware defect. A human finger cannot physically bounce that fast.
+- A normal, intentional human double-click usually has a gap of 80ms to 150ms.
+- If our graph shows a gap of 10ms to 30ms, that is a guaranteed hardware defect. A human finger cannot physically release and re-click a mouse that fast.
 
-**How to Fix It**
-Before you throw the mouse away, try this:
-- Increase Debounce Time: Open your mouse software (Razer Synapse, Logitech G Hub) and look for debounce settings. Turn it up to 10ms or 12ms.
-- The Windows Fix: Max out the double-click speed in your Windows Control Panel. It's a band-aid, but it works temporarily.
+**How to Fix a Double Clicking Mouse**
+Before you throw a $150 mouse in the trash, try these fixes:
+- **Increase Debounce Time:** Open your mouse software (like Razer Synapse, Logitech G Hub, or Glorious Core) and look for "debounce" settings. Turn it up to 10ms or 12ms. This tells the mouse to ignore the physical bounce.
+- **The Windows Fix:** Go to the Windows Control Panel mouse settings and max out the double-click speed slider. It's a temporary software band-aid, but it works.
 
-**The Harsh Reality:**
-- Older Logitech mice (using Omron 50M switches) are notorious for this issue
-- Modern optical switches (which use lasers instead of metal springs) literally cannot double-click
-- If your mouse is out of warranty, soldering a new switch costs 2 dollars and takes 10 minutes`,
+**The Harsh Reality of Gaming Mice:**
+Older Logitech mice (especially those using the infamous Omron 50M switches) are notorious for developing double-click issues within a year. Modern mice are moving to Optical Switches, which use lasers instead of metal springs to register clicks. Optical switches literally cannot double-click, making them the superior choice for competitive gamers.`
   },
   {
     id: 8,
@@ -202,26 +184,26 @@ Before you throw the mouse away, try this:
     tag: 'Typing',
     tagColor: 'var(--neon-cyan)',
     title: 'Keyboard Accuracy Test: Why Precision Beats Raw Speed',
-    excerpt: 'A 100 WPM typist with bad accuracy is slower than an 80 WPM typist. Here is why the backspace key is your worst enemy.',
+    excerpt: 'A 100 WPM typist with bad accuracy is vastly slower than an 80 WPM typist. Here is why the backspace key is your worst enemy.',
     readTime: '7 min read',
-    body: `Everyone flexes their WPM, but nobody talks about the metric that actually dictates real-world speed: accuracy. Hitting keys fast means absolutely nothing if you have to hit the backspace key every five seconds.
+    body: `Everyone loves to flex their high WPM screenshots on Discord, but nobody talks about the metric that actually dictates your real-world typing speed: raw accuracy. Mashing keys fast means absolutely nothing if you have to hit the backspace key every single sentence.
 
 **The Backspace Penalty**
-Think about what happens when you make a typo. You have to realize you made the mistake, stop your flow, hit backspace, type the correct key, and restart your momentum. That single typo just cost you the time it takes to type an entire word. 
+Think about the mechanics of making a typo. You have to visually realize you made the mistake, stop your forward momentum, stretch your pinky to hit backspace, re-type the correct key, and then try to regain your rhythm. That single typo just cost you the time it would have taken to type an entire word. 
 
 **The Math Doesn't Lie**
-- A typist going 80 WPM at 99% accuracy will finish an email faster than a 110 WPM typist going 85% accuracy.
-- In programming, 99% accuracy isn't optional. One missed semicolon breaks the whole build.
+- A typist cruising at 80 WPM at 99% accuracy will finish drafting an email faster than a 110 WPM typist going at 85% accuracy.
+- If you work in programming or data entry, 99% accuracy isn't a luxury, it is mandatory. One missed semicolon breaks the whole build.
 
-**How to Fix Your Sloppy Typing**
-Our Keyboard Accuracy test forces you to slow down and exposes your worst habits. 
-- Find your problem keys. Are you constantly hitting 'r' instead of 't'? Your muscle memory is slightly skewed.
-- Practice typing words that contain those specific keys at half speed.
+**How to Fix Your Sloppy Typing Habits**
+Our Keyboard Accuracy test is designed to force you to slow down and expose your worst habits. 
+- **Identify Problem Keys:** Look at your test results. Are you constantly hitting 'r' instead of 't'? Your muscle memory for your left index finger is slightly skewed.
+- **Isolate the Weakness:** Practice typing specific words that contain those exact keys at half your normal speed until your brain remaps the distance.
 
 **The Golden Rules of Accuracy:**
-- 95% is the absolute minimum standard. Anything lower, and you are wasting your own time
-- Rushing causes tension, and tension causes typos. Relax your hands
-- Don't practice with random words. Practice with punctuation and numbers, as that's where most errors happen`,
+- 95% accuracy is the absolute minimum standard. If you drop below this on a typing test, you are just wasting your own time. Slow down.
+- Rushing causes forearm tension, and physical tension causes typos. Relax your wrists and let your fingers glide.
+- Don't just practice with lowercase words. Practice tests with heavy punctuation, numbers, and capital letters, as that is where 90% of real-world errors actually happen.`
   },
   {
     id: 9,
@@ -229,51 +211,49 @@ Our Keyboard Accuracy test forces you to slow down and exposes your worst habits
     tag: 'Mouse',
     tagColor: 'var(--neon-green)',
     title: 'Scroll Test: Measure Your Mouse Wheel Speed and Health',
-    excerpt: 'From bunny-hopping in games to scrolling giant codebases. Check if your mouse encoder is skipping ticks or dying.',
+    excerpt: 'From bunny-hopping in Apex Legends to scrolling giant codebases. Check if your mouse scroll wheel encoder is skipping ticks or dying.',
     readTime: '5 min read',
-    body: `Nobody thinks about their scroll wheel until it starts acting up. Whether you are navigating massive spreadsheets or binding "Jump" to scroll-down in Apex Legends, your mouse wheel needs to be fast and flawless.
+    body: `Nobody thinks about their mouse scroll wheel until it starts acting up. Whether you are navigating massive 10,000-line spreadsheets, or binding "Jump" to scroll-down to hit tap-strafes in Apex Legends, your mouse wheel needs to be incredibly fast and perfectly flawless.
 
 **Why Test Your Scroll Wheel?**
-Over time, the mechanical encoder inside your mouse gets filled with dust, pet hair, or just wears out. You might scroll down, but the screen jumps up for a split second. Our Scroll Test graphs out every single tick. If your graph has random dips or backward spikes, your hardware is failing.
+Over time, the mechanical rotary encoder inside your mouse gets filled with dust, pet hair, or just naturally wears out. You might be scrolling down a web page, but the screen randomly jumps up for a split second. Our Scroll Test visualizes and graphs out every single tick your mouse sends. If your graph shows random dips, backward spikes, or missed inputs, your hardware is failing.
 
-**Wheel Types and Speeds**
-- Standard Notched Wheels: You feel a physical "bump" every step. These usually max out around 10 to 15 ticks per second. Great for precise weapon switching.
-- Infinite Scroll Wheels: Mice like the Logitech G502 let you unlock the wheel to spin freely. You can easily hit 60 to 80 ticks per second. 
+**Wheel Types and Max Speeds**
+- **Standard Notched Wheels:** You feel a distinct physical "bump" for every step. These usually max out around 10 to 15 ticks per second for a normal human scrolling fast. They are essential for precise weapon switching in FPS games.
+- **Infinite Scroll Wheels:** Mice like the Logitech G502 or MX Master let you unlock the wheel to spin freely on a ball bearing. You can easily hit 60 to 80 ticks per second. 
 
-**Gaming Applications**
-In CS2 and Apex Legends, players bind jump to the scroll wheel. Why? Because sending 10 jump inputs in a fraction of a second guarantees you hit the exact frame required for bunny-hopping or tap-strafing.
+**Gaming Applications for High Scroll Speeds**
+In games like CS2 and Apex Legends, high-level players bind jump to the scroll wheel. Why? Because sending 10 jump inputs in a fraction of a second guarantees you hit the exact frame required for a bunny-hop when you hit the ground. A failing scroll wheel means dead-sliding and losing your momentum.
 
 **Quick Fixes for Bad Wheels:**
-- Blow compressed air directly into the gaps of the wheel. It fixes 80% of skipping issues
-- Don't press down too hard while scrolling; it grinds the encoder faster
-- If you use infinite scroll for gaming, be careful not to accidentally bump it mid-fight`,
+- Blow a can of compressed air directly into the gaps on the side of the wheel. It genuinely fixes 80% of skipping issues caused by dust interfering with the optical encoder.
+- Stop pressing down so hard while scrolling; excessive downward force grinds the mechanical encoder housing faster.`
   },
   {
     id: 10,
     emoji: '🖲️',
     tag: 'Aim',
     tagColor: 'var(--neon-red)',
-    title: 'Mouse Accuracy Test: Find Your Perfect DPI',
-    excerpt: 'Higher DPI does not mean better aim. Learn how to track your cursor path and find the sensitivity that actually fits your hand.',
+    title: 'Mouse Accuracy Test: Find Your Perfect Gaming DPI',
+    excerpt: 'Higher DPI does not mean better aim. Learn how to track your cursor path and find the exact sensitivity that fits your muscle memory.',
     readTime: '7 min read',
-    body: `Mouse accuracy is entirely different from reaction time. It's the raw measure of your hand-eye coordination. If you consistently miss the X button on a browser window, or overshoot heads in Valorant, your sensitivity settings are messing with you.
+    body: `Mouse accuracy is entirely different from reaction time. It is the raw measure of your hand-eye coordination. If you consistently overshoot heads in Valorant, or find yourself constantly adjusting your crosshair after a flick, your mouse sensitivity settings are actively working against you.
 
-**The DPI Myth**
-Gaming mice advertise 25,000+ DPI like it's a superpower. It's a marketing gimmick. Most FPS pros play at 400 or 800 DPI. Why? Because at ultra-high DPI, every single heartbeat, coffee tremor, or deep breath translates into your cursor vibrating off the target.
+**The 25,000 DPI Myth**
+Gaming mouse boxes advertise 25,000+ DPI like it's a superpower. It is a pure marketing gimmick. Look at the desks of professional FPS players—99% of them play at 400 or 800 DPI. Why? Because at ultra-high DPI, every single heartbeat, desk bump, or micro-tremor translates into your cursor vibrating off the target. High DPI introduces human error.
 
-**Path Efficiency Explained**
-Our accuracy test doesn't just check if you hit the dot; it tracks the line you drew to get there. 
-- A straight line means your muscle memory matches your sensitivity perfectly.
-- A curved arc means you are pivoting entirely from your wrist instead of using your arm.
-- A zig-zag at the end means your sensitivity is too high, and you are overshooting and having to pull back.
+**Understanding Path Efficiency**
+Our mouse accuracy test doesn't just check if you clicked the target; it tracks the exact pixel-path you drew to get there. 
+- A perfectly straight line means your muscle memory is fully synced with your sensitivity.
+- A sweeping curved arc means you are pivoting entirely from your wrist bone instead of using your forearm.
+- A zig-zag or hook at the end of the line means your sensitivity is too high—you are physically overshooting the target and having to pull the mouse backward to correct it.
 
 **How to Find Your Perfect DPI**
-Run the test three times. Do it once at 400 DPI, once at 800, and once at 1600. Look at the data. The setting that gives you the straightest path and the highest hit percentage is your natural DPI. Stick to it.
+Run our accuracy test three times. Do it once at 400 DPI, once at 800, and once at 1600. Analyze the data. The setting that gives you the straightest path and the highest first-click hit percentage is your natural DPI. Lock it in and never change it again.
 
 **Pro Advice for Better Control:**
-- Turn off "Enhance Pointer Precision" in Windows. It's mouse acceleration, and it ruins muscle memory
-- Get a massive mousepad. Arm-aiming is far more accurate than wrist-aiming
-- Clean your mouse skates. Friction variance kills precision`,
+- Turn off "Enhance Pointer Precision" in Windows mouse settings. This is built-in mouse acceleration, and it completely ruins muscle memory because your cursor moves different distances based on how fast you swipe.
+- Get a massive desk-sized mousepad. Arm-aiming at low sensitivity is mathematically far more accurate than wrist-aiming at high sensitivity.`
   },
   {
     id: 11,
@@ -281,160 +261,152 @@ Run the test three times. Do it once at 400 DPI, once at 800, and once at 1600. 
     tag: 'Aim',
     tagColor: 'var(--neon-orange)',
     title: 'Sniper Mode Training: Master Long-Range Precision Aim',
-    excerpt: 'Sniping requires a totally different motor skill than rifle spray. Here is how to hold angles, stop shaking, and hit the micro-flicks.',
+    excerpt: 'Sniping requires a totally different motor skill than spraying an assault rifle. Here is how to hold angles, stop shaking, and hit the micro-flicks.',
     readTime: '8 min read',
-    body: `Standard aiming is fast, loose, and allows for corrections. Sniper aiming is completely different. When you hold an AWP or an Operator, you don't get a second chance. You need absolute, unwavering precision.
+    body: `Standard aiming is fast, loose, and allows for on-the-fly corrections. Sniper aiming is completely unforgiving. When you hold an AWP in CS2 or an Operator in Valorant, you don't get a second chance to spray. You need absolute, unwavering precision on the very first click.
 
-**The Difference in Mechanics**
-When using an assault rifle, you react, flick, and pull down for recoil. When sniping, you pre-aim an angle, hold your mouse perfectly still, wait for the target to walk into your crosshair, and make a tiny micro-flick. It requires extreme patience and zero hand tremors.
+**The Difference in Aim Mechanics**
+When using an assault rifle, you react, flick, and instantly pull down to control recoil. When sniping, the meta is completely different: you pre-aim an angle, hold your mouse perfectly still, wait for the target's shoulder to walk into your crosshair, and make a tiny micro-flick if necessary. It requires extreme patience and zero hand tremors.
 
 **The Shaky Hand Problem**
-If you notice your crosshair vibrating while holding an angle, you have too much tension in your arm. 
-Here is a trick real shooters use: Pay attention to your breathing. Inhale, exhale halfway, and hold your breath gently while waiting for the click. It physically stabilizes your chest and arm.
+If you notice your crosshair vibrating while holding a tight angle, you have too much tension in your arm, or your posture is terrible. 
+Here is a trick real-world marksmen use: Pay attention to your breathing. Inhale, exhale halfway, and hold your breath gently while waiting for the click. It physically stabilizes your chest, shoulder, and arm.
 
-**How to Stop Overshooting**
-The biggest mistake snipers make is flicking too hard and shooting past the target. 
-- First, lower your scoped sensitivity in-game. Pros often set their scope multiplier to 0.8x or 0.9x.
-- Second, practice the "pull and hold." Intentionally flick slightly past the target, and smoothly drag back to it, rather than trying to violently stop on a dime.
+**How to Stop Overshooting Flicks**
+The biggest mistake amateur snipers make is flicking too hard and shooting past the target. 
+- **Lower your scoped sensitivity:** Go into your game settings and find the scoped multiplier. Pros often set this to 0.8x or 0.9x so their sniper movements are slightly slower than their hip-fire.
+- **The Pull and Hold:** Intentionally practice flicking slightly past the target, and smoothly dragging back to it, rather than trying to violently stop your mouse on a dime. 
 
 **Training Tips for Snipers:**
-- Never practice sniper flicks and tracking in the same session. It confuses your brain
-- Play off-angles. Your raw aim doesn't matter if the enemy pre-fires your obvious hiding spot
-- Don't stare at the crosshair. Stare at the corner the enemy is going to peek from`,
+- Never practice sniper flicks and tracking heavy weapons in the same session. It confuses your muscle memory.
+- Play off-angles. Your raw aim doesn't matter at all if the enemy just pre-fires your obvious hiding spot.`
   },
   {
     id: 12,
     emoji: '🚀',
     tag: 'Game',
     tagColor: 'var(--neon-cyan)',
-    title: 'Space Defense Game: Master Aim Under Pressure',
-    excerpt: 'Raw aim is useless if you panic when things get chaotic. Learn how to prioritize targets and maintain high CPS with accuracy.',
+    title: 'Space Defense Game: Master Aiming Under High Pressure',
+    excerpt: 'Raw aim is useless if you panic when things get chaotic on screen. Learn how to prioritize targets and maintain high CPS with actual accuracy.',
     readTime: '6 min read',
-    body: `Anyone can hit 12 CPS on a massive, stationary square. Anyone can hit a headshot when they have 5 seconds to line it up. But can you maintain your clicking speed while tracking multiple moving targets? Space Defense bridges the gap between raw stats and actual gaming pressure.
+    body: `Anyone can hit 12 CPS on a massive, stationary square. Anyone can hit a headshot when they have 5 full seconds to line it up on a bot. But can you maintain your clicking speed while tracking multiple fast-moving targets across the screen? Space Defense bridges the massive gap between raw statistical aim and actual in-game gaming pressure.
 
 **The Trap of Panic Clicking**
-The game punishes you for spamming. If you wildly click empty space hoping to hit a ship, your accuracy multiplier tanks. The player who clicks deliberately at 7 CPS with 90% accuracy will completely obliterate the player frantically mashing 14 CPS at 40% accuracy.
+The game severely punishes you for spamming. If you wildly click empty space hoping to hit a ship, your accuracy multiplier tanks. The player who clicks deliberately at 7 CPS with 90% accuracy will completely obliterate the score of the player frantically mashing 14 CPS at 40% accuracy.
 
-**Target Prioritization**
-High-scoring players don't look at the cluster of enemies at the top of the screen. They develop an instant hierarchy:
-1. Fastest threats near the bottom
-2. Armored threats that require multiple clicks
-3. Clustered threats on the edges
+**Target Prioritization is Everything**
+High-scoring players don't look at the massive cluster of enemies spawning at the top of the screen. They develop an instant visual hierarchy:
+1. Fastest threats near the bottom of the screen (immediate danger).
+2. Armored threats that require multiple clicks to destroy.
+3. Clustered threats on the edges.
 
-If you look at the whole swarm, your brain freezes. Focus on the lowest line of defense.
+If you stare at the whole swarm, your brain freezes. Focus exclusively on the lowest line of defense.
 
 **Why This Helps Your Real Gameplay**
-This game trains your brain to handle visual clutter. In games like Overwatch or Apex Legends, team fights are a mess of visual effects and multiple targets. Space Defense trains you to ignore the noise, pick a target, track it smoothly, and execute your clicks without tensing up your arm.
-
-**Strategies for High Waves:**
-- Stop aiming where the ship is; click slightly ahead of its path
-- Do not hold your breath. Oxygen starvation ruins fine motor control
-- Keep your wrist planted. Large arm movements are too slow for the later waves`,
+This game trains your brain to handle visual clutter. In games like Overwatch, Apex Legends, or even League of Legends team fights, the screen is a mess of particle effects and multiple targets. Space Defense trains you to ignore the noise, pick a single target, track it smoothly, execute your clicks, and immediately transition to the next without tensing up your arm.`
   },
   {
     id: 13,
     emoji: '🌌',
     tag: 'Game',
     tagColor: 'var(--neon-green)',
-    title: 'Voyager Game: Evasion, Flow State, and Mouse Control',
-    excerpt: 'Aim trainers teach you to hit targets. Voyager teaches you how to maneuver smoothly around obstacles without crashing.',
+    title: 'Voyager Game: Evasion, Flow State, and Smooth Mouse Control',
+    excerpt: 'Standard aim trainers teach you to hit targets. Voyager teaches you how to maneuver smoothly around obstacles without crashing and burning.',
     readTime: '7 min read',
-    body: `The Voyager game is pure flow state. You pilot a spacecraft with your cursor through an endlessly accelerating asteroid field. There is no shooting, no enemies to click—just pure, unadulterated mouse control and spatial awareness.
+    body: `The Voyager game is an exercise in pure flow state. You pilot a spacecraft with your mouse cursor through an endlessly accelerating, infinitely generating asteroid field. There is no shooting, no crosshairs, and no enemies to click—just pure, unadulterated mouse control and spatial awareness.
 
-**Why Evasion Matters**
-Aim trainers teach you to move your mouse *to* an object. Voyager teaches you to maneuver your mouse *around* objects smoothly. If your mouse movements are jerky and anxious, you will crash immediately. You have to glide.
+**Why Evasion Matters Just as Much as Aim**
+Aim trainers teach you to aggressively move your mouse *to* an object. Voyager teaches you to maneuver your mouse *around* objects smoothly. If your mouse movements are jerky, tense, and anxious, you will crash immediately as the speed ramps up. You have to learn to glide.
 
 **The "Look Ahead" Technique**
-Beginners crash because they are staring at their own ship. Expert players don't even look at their ship—they are staring at the top half of the screen, mapping out the gaps 2 or 3 seconds before they even reach them. Your peripheral vision will keep your ship safe; your central focus needs to be on the future.
+Beginners crash early because they are staring directly at their own ship. Expert players don't even look at their ship—they are staring at the top half of the screen, mapping out the gaps 2 or 3 seconds before they even reach them. Your peripheral vision is incredibly good at keeping your ship safe; your central focus needs to be on predicting the future path.
 
 **Inducing the Flow State**
-To survive past the two-minute mark, you have to let your subconscious take over. 
-- Turn off your second monitor stream. 
-- Put on instrumental music. 
-- Let your eyes relax and take in the whole screen rather than darting around.
+To survive past the two-minute mark at high speeds, you have to let your subconscious motor skills take over. 
+- Turn off your second monitor stream or YouTube video. 
+- Put on a playlist of instrumental or synth-wave music. 
+- Let your eyes relax and take in the whole screen rather than darting aggressively from rock to rock.
 
-**The Ultimate Warm-Up:**
-Playing Voyager for 5 minutes before booting up a ranked match is incredible. It forces simultaneous activation of visual processing and fine motor control. It wakes your brain up faster than any coffee ever could.`,
+Playing Voyager for 5 minutes before booting up a ranked match is the ultimate warm-up. It forces simultaneous activation of visual processing and fine motor control, waking your brain up faster than any energy drink ever could.`
   },
   {
     id: 14,
     emoji: '💥',
     tag: 'CPS',
     tagColor: 'var(--neon-red)',
-    title: 'CPS Rush: The Ultimate Burst Speed Challenge',
-    excerpt: 'A 60-second test measures stamina. CPS Rush measures your absolute peak 1-rep max clicking speed. Can you survive 10 rounds?',
+    title: 'CPS Rush: The Ultimate Burst Speed CPS Challenge',
+    excerpt: 'A standard 60-second test measures stamina. CPS Rush measures your absolute peak 1-rep max clicking speed. Can you survive 10 rounds of hell?',
     readTime: '6 min read',
-    body: `If the standard CPS test is a long-distance run, CPS Rush is a 1-rep max deadlift. You get 1 second to click as fast as humanly possible, followed by a 2-second break. Repeat for 10 grueling rounds. 
+    body: `If the standard CPS test is a long-distance marathon, CPS Rush is a 1-rep max deadlift. You get exactly 1 second to click as fast as humanly possible, followed by a brief 2-second break. You repeat this for 10 grueling rounds. 
 
-**Why Burst Speed Matters**
-Think about a shotgun fight in Fortnite, or a quick sword trade in Minecraft. You don't need to click for 10 seconds straight; you just need absolute maximum speed for exactly 1 second to win the exchange. This test isolates that exact scenario.
+**Why Burst Speed Matters in Gaming**
+Think about a pump shotgun box-fight in Fortnite, or a quick sword trade in Minecraft. You rarely need to click for 10 seconds straight; you just need absolute maximum clicking speed for exactly 1 second to win the exchange. This test isolates that exact, high-intensity scenario.
 
-**Reading Your Results**
-Because this test is so short, most players will score 2 to 3 CPS higher here than they do on the standard 5-second test. 
-But look closely at your round-by-round graph. 
-- If your score is 14, 14, 13, 14... you have great technique.
-- If your score goes 15, 12, 9, 7... you are tensing your hand way too hard and instantly burning out your fast-twitch muscles.
+**Reading Your Round-by-Round Results**
+Because this test is incredibly short, most players will score 2 to 3 CPS higher on a given round here than they do on the standard 5-second test. 
+But you need to look closely at your round-by-round graph to see your endurance. 
+- If your score is 14, 14, 13, 14... you have fantastic technique and stamina.
+- If your score goes 15, 12, 9, 7... you are tensing your hand way too hard on the first round and instantly burning out your fast-twitch muscles.
 
 **How to Dominate the Rush**
-- Relax during the 2-second break. Physically lift your finger off the mouse and breathe.
-- If you are jitter clicking, the vibration should come from your forearm, not a death grip on the mouse.
-- Use a mouse with low actuation force. Stiff clicks will ruin your 1-second burst potential.
+- Force yourself to relax during the 2-second break. Physically lift your finger off the mouse, take a breath, and reset your grip.
+- If you are jitter clicking, the vibration needs to come from your forearm, not from a tense death-grip on the mouse itself.
+- Use a mouse with low actuation force. Heavy, stiff clicks will completely ruin your 1-second burst potential.
 
-**A Quick Warning:**
-Do not play CPS Rush for an hour straight. Maximum tension bursts are taxing on your tendons. Do a few runs, get your high score, and give your hand a rest.`,
+**A Quick Medical Warning:**
+Do not play CPS Rush for an hour straight. Maximum tension bursts are incredibly taxing on your finger and wrist tendons. Do a few runs, get your high score, and give your hand a long rest.`
   },
   {
     id: 15,
     emoji: '🖱️',
     tag: 'Mouse',
     tagColor: 'var(--neon-green)',
-    title: 'Best Gaming Mice for High CPS and Aim — 2025 Picks',
-    excerpt: 'Your hardware matters. We break down the top mice used by pros for maximizing click speed and maintaining perfect tracking.',
+    title: 'Best Gaming Mice for High CPS and Aim — 2025 Tier List',
+    excerpt: 'Your hardware absolutely matters. We break down the top mice used by pros for maximizing click speed, CPS tests, and maintaining perfect tracking.',
     readTime: '6 min read',
-    body: `Let's get one thing straight: a good mouse won't magically make you a pro. But a bad mouse will absolutely hold you back. Heavy shells, stiff switches, and bad sensors put a physical ceiling on your CPS and reaction time. Here is what the elite players are actually using right now.
+    body: `Let's get one thing straight immediately: buying a $150 mouse won't magically make you a professional gamer. But a bad mouse will absolutely put a hard ceiling on your skills. Heavy shells, stiff switches, and bad sensors limit your CPS and reaction time. Here is the hardware the elite players are actually using right now.
 
 **#1 Logitech G Pro X Superlight 2**
-There is a reason half the pro scene uses this. At 60 grams, it feels like nothing is in your hand. The new hybrid optical-mechanical switches mean you get the satisfying "click" feel, but the laser actuation means zero debounce delay. Perfect for rapid clicking.
+There is a reason half the professional eSports scene uses this mouse. At 60 grams, it feels like nothing is in your hand. The new hybrid optical-mechanical switches mean you get the satisfying physical "click" feel, but the laser actuation means zero debounce delay. It is perfect for rapid clicking and tracking.
 
 **#2 Razer DeathAdder V3 Pro**
-If you have larger hands and hate the symmetrical egg shape of the Superlight, this is the king. Razer's optical switches are widely considered the fastest on the market for pure CPS spamming. It's incredibly easy to jitter click on this shell.
+If you have larger hands and hate the symmetrical egg shape of the Superlight, this ergonomic beast is the king. Razer's optical switches are widely considered the fastest on the market for pure CPS spamming. It is incredibly easy to jitter click or butterfly click on this shell design.
 
 **#3 Endgame Gear XM2we**
-The budget king. For under $90, you get optical switches, an insane coating for sweaty hands, and a shape that forces you into a perfect claw grip. It's built like a tank.
+The undisputed budget king. For under $90, you get premium optical switches, an insane matte coating for sweaty hands, and a shape that forces your hand into a perfect, aggressive claw grip. It is built like an absolute tank.
 
 **What to Look For When Buying:**
-- Weight: Keep it under 70g. Heavier mice cause micro-fatigue during long aim training sessions.
-- Switches: Optical > Mechanical. Opticals literally cannot double-click and have lower input lag.
-- Skates: PTF/Teflon feet are mandatory. If your mouse feels "sticky" on the pad, upgrade the skates, not the whole mouse.`,
+- **Weight:** Keep it under 70g. Heavier mice cause micro-fatigue during long aim training sessions.
+- **Switches:** Optical switches are vastly superior to Mechanical. Opticals literally cannot double-click and have lower input lag.
+- **Skates:** Virgin grade PTF/Teflon feet are mandatory. If your mouse feels "sticky" or muddy on the pad, upgrade the skates, don't buy a whole new mouse.`
   },
   {
     id: 16,
     emoji: '⚡',
     tag: 'Reaction',
     tagColor: 'var(--neon-orange)',
-    title: 'Hardware Tweaks to Instantly Improve Reaction Time',
-    excerpt: 'Stop blaming your reflexes. Your setup might be adding 30ms of input lag. Here is how to optimize Windows and your gear.',
+    title: 'System Tweaks to Instantly Improve PC Reaction Time',
+    excerpt: 'Stop blaming your reflexes. Your PC setup might be adding 30ms of hidden input lag. Here is how to optimize Windows and your gaming gear.',
     readTime: '7 min read',
-    body: `You might think your reaction time is slow, but your computer might just be processing things like a toaster. Input lag is the silent killer in competitive gaming. Here is how to strip away the delay and get true 1-to-1 responsiveness.
+    body: `You might think your reaction time is terrible, but your computer might just be processing inputs like a toaster. Input lag is the silent killer in competitive gaming. It doesn't matter how fast you click if your PC takes 30 milliseconds to render the gunshot on screen. Here is how to strip away the delay and get true 1-to-1 responsiveness.
 
-**The Monitor Bottleneck**
-If you are playing on a 60Hz monitor, you are seeing frames 16.6 milliseconds after they happen. A 144Hz monitor cuts that down to 6.9ms. A 240Hz monitor drops it to 4.1ms. Upgrading your monitor is the only "pay to win" shortcut in gaming. It literally lets you see the enemy earlier.
+**The Monitor Refresh Rate Bottleneck**
+If you are playing on a standard 60Hz monitor, you are seeing frames 16.6 milliseconds after they actually happen on the server. A 144Hz monitor cuts that delay down to 6.9ms. A 240Hz monitor drops it to an insane 4.1ms. Upgrading from 60Hz to 144Hz+ is the most impactful hardware upgrade you can make for competitive gaming.
 
-**Optimize Windows for Gaming**
-Windows has a ton of background junk that causes micro-stutters:
-- Turn on "Game Mode" in Windows settings
-- Turn OFF "Enhance Pointer Precision" (this is built-in mouse acceleration)
-- Make sure your mouse is plugged directly into the motherboard IO, not a USB hub or monitor passthrough.
+**Optimize Windows for Gaming Latency**
+Windows has a ton of background bloatware that causes micro-stutters and input delay:
+- Turn on "Game Mode" in Windows settings to prioritize CPU resources.
+- Turn OFF "Enhance Pointer Precision" in mouse settings. (This is built-in mouse acceleration and it ruins raw input).
+- Make sure your mouse is plugged directly into the motherboard IO on the back of your PC, not into a cheap USB hub or monitor passthrough.
 
-**Polling Rate Matters**
-Go into your mouse software. Is your polling rate set to 125Hz or 500Hz? Change it to 1000Hz immediately. This tells the mouse to report its position to the PC one thousand times a second, rather than just 125. 
+**Mouse Polling Rate Matters**
+Go into your mouse software (Synapse, G Hub, etc.). Is your polling rate set to 125Hz or 500Hz? Change it to 1000Hz immediately. This tells the mouse to report its position to the PC one thousand times a second. (Note: 4000Hz and 8000Hz mice exist now, but they can cause CPU stuttering on older PCs, so stick to 1000Hz unless you have a top-tier CPU).
 
 **NVIDIA Reflex & AMD Anti-Lag**
-If your game supports it (Valorant, CS2, Apex do), turn these settings ON in the video menus. They prevent your CPU and GPU from holding frames in a queue, dropping your overall system latency by a massive margin.
+If your game supports it (Valorant, CS2, and Apex Legends do), turn these settings ON in the video menus. They prevent your CPU and GPU from holding frames in a render queue, dropping your overall system latency by a massive margin.
 
-**The Reality Check:**
-Once you do all these tweaks, take the Reaction Time Test again. If your score drops by 20ms, it wasn't your brain holding you back—it was your hardware.`,
-  },
+Do these tweaks, restart your PC, and take our Reaction Time Test again. You will likely shave 15 to 20ms off your score instantly.`
+  }
 ];
 
 export default function BlogPage() {
