@@ -697,7 +697,6 @@ const FAQS = [
     q: 'How long should I aim train per day?',
     a: 'Research and pro player routines suggest 15–30 minutes of focused aim training before gaming sessions is optimal. Beyond 45 minutes, diminishing returns and mental fatigue can reduce accuracy gains. Quality and focus matter more than raw time.',
   },
-  // ── NEW FAQs ────────────────────────────────────────────────────────────────
   {
     q: 'What is the best sensitivity for Valorant aim training?',
     a: 'Most Valorant pro players use an eDPI (in-game sensitivity × DPI) between 200–400. Start with 400 DPI and 0.4 in-game sensitivity (160 eDPI) then adjust upward until flicks feel natural. Lower eDPI favors precision; higher eDPI suits close-range duels. Use this aim trainer to test each sensitivity change before locking it in-game.',
@@ -741,6 +740,30 @@ const GAMES = [
   'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us',
   'Valorant', 'Apex Legends',
 ] as const;
+
+// ─── useFullscreenLayout hook ─────────────────────────────────────────────────
+// Game area height কে dynamically fullscreen এ adjust করে
+function useFullscreenGameHeight(isFullscreen: boolean): number {
+  const [gameH, setGameH] = useState(420);
+
+  useEffect(() => {
+    if (!isFullscreen) { setGameH(420); return; }
+
+    const calc = () => {
+      // viewport থেকে header/settings/stats/controls এর approximate height বাদ দিয়ে game area height set করো
+      const vh = window.innerHeight;
+      // উপরের elements এর approximate height: settings~70, stats~90, progress~12, combo~30, shortcuts~30, controls~60, padding~20
+      const reserved = 320;
+      setGameH(Math.max(250, vh - reserved));
+    };
+
+    calc();
+    window.addEventListener('resize', calc);
+    return () => window.removeEventListener('resize', calc);
+  }, [isFullscreen]);
+
+  return gameH;
+}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AimTrainerPage() {
@@ -799,6 +822,9 @@ export default function AimTrainerPage() {
   const startTimeRef     = useRef(0);
   const pausedAtRef      = useRef(0);
   const exitFsOnEndRef   = useRef(false);
+
+  // ── Dynamic game area height ───────────────────────────────────────────────
+  const gameAreaHeight = useFullscreenGameHeight(isFullscreen);
 
   useEffect(() => { soundOnRef.current    = soundOn;    }, [soundOn]);
   useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
@@ -1180,7 +1206,9 @@ export default function AimTrainerPage() {
           to   { stroke-dashoffset: 0;    }
         }
 
-        /* ── Fullscreen: game zone fills the entire screen ─────────── */
+        /* ════════════════════════════════════════════════════════════
+           FULLSCREEN — সব পুরো screen জুড়ে
+        ════════════════════════════════════════════════════════════ */
         :fullscreen .aim-fs-root,
         :-webkit-full-screen .aim-fs-root,
         :-moz-full-screen .aim-fs-root {
@@ -1189,24 +1217,75 @@ export default function AimTrainerPage() {
           width: 100vw !important;
           height: 100vh !important;
           max-width: none !important;
-          padding: 0.75rem !important;
+          padding: 0 !important;
+          margin: 0 !important;
           overflow: hidden !important;
           background: var(--bg, #0a0a0f) !important;
           box-sizing: border-box !important;
         }
+        :fullscreen .aim-fs-root > main,
+        :-webkit-full-screen .aim-fs-root > main,
+        :-moz-full-screen .aim-fs-root > main {
+          flex: 1 1 auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+          max-width: none !important;
+          width: 100% !important;
+          height: 100% !important;
+          max-height: 100vh !important;
+          padding: 0.5rem 1rem !important;
+          margin: 0 !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+        }
+        /* fullscreen এ header লুকাও */
+        :fullscreen .aim-fs-header,
+        :-webkit-full-screen .aim-fs-header,
+        :-moz-full-screen .aim-fs-header {
+          display: none !important;
+        }
+        /* fullscreen এ game area বাকি সব জায়গা নেবে */
         :fullscreen .aim-game-area,
         :-webkit-full-screen .aim-game-area,
         :-moz-full-screen .aim-game-area {
           flex: 1 1 auto !important;
           height: auto !important;
-          min-height: 0 !important;
+          min-height: 200px !important;
+          max-height: none !important;
+          margin-bottom: 0.5rem !important;
         }
+        /* fullscreen এ article, history, hr লুকাও */
         :fullscreen .aim-article-section,
         :-webkit-full-screen .aim-article-section,
         :-moz-full-screen .aim-article-section,
         :fullscreen .aim-history-section,
         :-webkit-full-screen .aim-history-section,
-        :-moz-full-screen .aim-history-section {
+        :-moz-full-screen .aim-history-section,
+        :fullscreen .aim-fs-hr,
+        :-webkit-full-screen .aim-fs-hr,
+        :-moz-full-screen .aim-fs-hr {
+          display: none !important;
+        }
+        /* fullscreen এ settings, stats, controls compact */
+        :fullscreen .aim-settings-row,
+        :-webkit-full-screen .aim-settings-row,
+        :-moz-full-screen .aim-settings-row {
+          margin-bottom: 0.4rem !important;
+        }
+        :fullscreen .aim-stats-grid,
+        :-webkit-full-screen .aim-stats-grid,
+        :-moz-full-screen .aim-stats-grid {
+          margin-bottom: 0.3rem !important;
+        }
+        :fullscreen .aim-controls,
+        :-webkit-full-screen .aim-controls,
+        :-moz-full-screen .aim-controls {
+          margin-bottom: 0.3rem !important;
+        }
+        /* fullscreen এ results panel লুকাও — modal দিয়ে দেখাবে */
+        :fullscreen .aim-results-panel,
+        :-webkit-full-screen .aim-results-panel,
+        :-moz-full-screen .aim-results-panel {
           display: none !important;
         }
 
@@ -1234,12 +1313,20 @@ export default function AimTrainerPage() {
       {/* containerRef = fullscreen target */}
       <div ref={containerRef} className="aim-fs-root">
         <main
-          style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem', width: '100%', boxSizing: 'border-box' }}
+          style={{
+            maxWidth: '900px',
+            margin: '0 auto',
+            padding: '2rem 1.5rem',
+            width: '100%',
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
           role="main"
           aria-label="Aim Trainer"
         >
           {/* ── Header ────────────────────────────────────────────────── */}
-          <header style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <header className="aim-fs-header" style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
             <div className="section-label">Aim Tool</div>
             <h1 className="tool-title">Aim Trainer</h1>
             <p className="tool-subtitle">
@@ -1366,16 +1453,21 @@ export default function AimTrainerPage() {
               phase === 'paused'  ? 'Game paused' : undefined
             }
             style={{
-              position: 'relative', width: '100%', height: '420px',
+              position: 'relative',
+              width: '100%',
+              // fullscreen এ dynamic height, otherwise fixed 420px
+              height: isFullscreen ? `${gameAreaHeight}px` : '420px',
               background: 'var(--bg-card)',
               border: `2px solid ${phase === 'running' ? diffCfg.color : phase === 'paused' ? 'var(--neon-orange)' : 'var(--border)'}`,
-              borderRadius: '16px', overflow: 'hidden',
+              borderRadius: '16px',
+              overflow: 'hidden',
               cursor: phase === 'running' ? 'crosshair' : 'default',
               marginBottom: '1.25rem',
               touchAction: phase === 'running' ? 'none' : 'auto',
               boxShadow: phase === 'running' ? `0 0 30px ${diffCfg.color}22` : 'none',
               transition: 'border-color 0.3s,box-shadow 0.3s',
-              userSelect: 'none', WebkitUserSelect: 'none',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
             }}
           >
             {/* Countdown overlay */}
@@ -1444,7 +1536,9 @@ export default function AimTrainerPage() {
             <ResultsModal result={result} onPlayAgain={beginCountdown} onChangeDifficulty={openDifficultyFromModal} onClose={closeModal} />
           ) : (
             phase === 'done' && result && (
-              <ResultsPanel result={result} accHistory={accHistory} onPlayAgain={beginCountdown} onReset={resetGame} />
+              <div className="aim-results-panel">
+                <ResultsPanel result={result} accHistory={accHistory} onPlayAgain={beginCountdown} onReset={resetGame} />
+              </div>
             )
           )}
 
@@ -1470,12 +1564,11 @@ export default function AimTrainerPage() {
           {/* ═══════════════════════════════════════════════════════════
               SEO ARTICLE
           ══════════════════════════════════════════════════════════════ */}
-          <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
+          <hr className="aim-fs-hr" style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
 
           <article className="aim-article-section aim-article-wrap" style={{ paddingTop: '3rem' }}>
             <section style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.85' }}>
 
-              {/* H2 #1 */}
               <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.25rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
                 The Ultimate Guide to Aim Training &amp; Mouse Accuracy
               </h2>
@@ -1493,7 +1586,6 @@ export default function AimTrainerPage() {
                 </p>
               </div>
 
-              {/* H2 #2 */}
               <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 How to Increase Aim Accuracy
               </h2>
@@ -1501,26 +1593,22 @@ export default function AimTrainerPage() {
                 Accuracy is the product of three combined factors: <em>muscle memory</em>, <em>visual processing speed</em>, and <em>hardware reliability</em>. Improving all three simultaneously accelerates your progress far faster than focusing on any one area.
               </p>
               <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <li><strong style={{ color: '#fff' }}>Daily deliberate practice:</strong> Short focused sessions (15–20 min) build muscle memory faster than sporadic long sessions. Aim for consistency over duration.</li>
-                <li><strong style={{ color: '#fff' }}>Lower your DPI:</strong> Many new players set DPI too high, which amplifies micro-tremors. Most pros use 400–800 DPI on large mousepads.</li>
+                <li><strong style={{ color: '#fff' }}>Daily deliberate practice:</strong> Short focused sessions (15–20 min) build muscle memory faster than sporadic long sessions.</li>
+                <li><strong style={{ color: '#fff' }}>Lower your DPI:</strong> Many new players set DPI too high. Most pros use 400–800 DPI on large mousepads.</li>
                 <li><strong style={{ color: '#fff' }}>Fix your crosshair placement:</strong> Pre-aim at head level where enemies appear. React less — predict more.</li>
-                <li><strong style={{ color: '#fff' }}>Reduce input lag:</strong> A 60Hz monitor adds up to 16ms of display latency per frame. Upgrading to 144Hz or 240Hz gives your real reaction time a fair chance.</li>
-                <li><strong style={{ color: '#fff' }}>Slow down to speed up:</strong> When accuracy drops below 70%, slow your movement and re-establish precision before ramping back up to speed.</li>
+                <li><strong style={{ color: '#fff' }}>Reduce input lag:</strong> Upgrading to 144Hz or 240Hz gives your real reaction time a fair chance.</li>
+                <li><strong style={{ color: '#fff' }}>Slow down to speed up:</strong> When accuracy drops below 70%, slow your movement first.</li>
               </ul>
 
-              {/* H2 #3 */}
               <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
                 Best DPI and Sensitivity for FPS Games
               </h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                DPI (dots per inch) determines how far your cursor moves per inch of physical mouse movement. Despite what gaming peripheral marketing suggests, <em>higher DPI is not better</em> for accuracy. Here is how to find your optimal sensitivity:
-              </p>
-              <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.88rem', color: '#9ca3af' }}>
+              <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem 1.25rem', marginBottom: '2rem', fontSize: '0.88rem', color: '#9ca3af' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', textAlign: 'center' }}>
                   {[
-                    { role: 'Rifler / Entry',    dpi: '400–800',  sens: '1.5–2.5', edpi: '600–2000'  },
-                    { role: 'AWPer / Sniper',    dpi: '400–800',  sens: '0.8–1.5', edpi: '320–1200'  },
-                    { role: 'Casual / Shooter',  dpi: '800–1600', sens: '1.0–2.0', edpi: '800–3200'  },
+                    { role: 'Rifler / Entry',   dpi: '400–800',  sens: '1.5–2.5', edpi: '600–2000' },
+                    { role: 'AWPer / Sniper',   dpi: '400–800',  sens: '0.8–1.5', edpi: '320–1200' },
+                    { role: 'Casual / Shooter', dpi: '800–1600', sens: '1.0–2.0', edpi: '800–3200' },
                   ].map(row => (
                     <div key={row.role}>
                       <div style={{ color: 'var(--neon-cyan)', fontWeight: '700', marginBottom: '0.3rem' }}>{row.role}</div>
@@ -1531,159 +1619,17 @@ export default function AimTrainerPage() {
                   ))}
                 </div>
               </div>
-              <p style={{ marginBottom: '2rem', color: '#9ca3af' }}>
-                <strong style={{ color: '#fff' }}>eDPI</strong> (effective DPI = DPI × in-game sensitivity) is the universal comparison metric. The sweet spot for most CS2 and Valorant pros sits between 800–1600 eDPI.
-              </p>
 
-              {/* H2 #4 */}
-              <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Mouse Polling Rate Guide
-              </h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                Polling rate (measured in Hz) is how often your mouse reports its position to your PC each second. A <strong>1000Hz</strong> mouse sends a position update every 1 millisecond.
-              </p>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <li><strong style={{ color: '#fff' }}>125Hz:</strong> Outdated. Avoid for competitive play.</li>
-                <li><strong style={{ color: '#fff' }}>500Hz:</strong> Acceptable entry level.</li>
-                <li><strong style={{ color: '#fff' }}>1000Hz:</strong> Industry standard.</li>
-                <li><strong style={{ color: '#fff' }}>4000–8000Hz:</strong> Ultra-high polling for 240Hz+ monitors.</li>
-              </ul>
-
-              {/* H2 #5 */}
-              <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Best Mouse for FPS Gaming
-              </h2>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <li><strong style={{ color: '#fff' }}>Zero hardware acceleration:</strong> Non-negotiable for consistent muscle memory.</li>
-                <li><strong style={{ color: '#fff' }}>Light weight (under 80g):</strong> Reduces wrist fatigue and enables faster flick movements.</li>
-                <li><strong style={{ color: '#fff' }}>Ambidextrous or ergonomic shape:</strong> Grip style fit reduces strain.</li>
-                <li><strong style={{ color: '#fff' }}>Quality switches:</strong> Optical switches eliminate debounce delay entirely.</li>
-                <li><strong style={{ color: '#fff' }}>Low-friction feet:</strong> PTFE feet allow smooth, consistent glide.</li>
-              </ul>
-
-              {/* H2 #6 */}
-              <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Daily Aim Training Routine
-              </h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>A structured daily routine produces compounding improvement. Here is a proven 20-minute warm-up protocol:</p>
+              <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>Daily Aim Training Routine</h2>
               <ol style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <li><strong style={{ color: '#fff' }}>5 minutes — Tracking (Easy mode):</strong> Start slow, re-establish the mind-muscle connection.</li>
-                <li><strong style={{ color: '#fff' }}>5 minutes — Click Timing (Medium mode):</strong> Prioritize hit rate over raw speed. Target 80%+ accuracy.</li>
-                <li><strong style={{ color: '#fff' }}>5 minutes — Speed Challenge (Hard/Impossible mode):</strong> Push your ceiling.</li>
-                <li><strong style={{ color: '#fff' }}>5 minutes — In-game warm-up:</strong> Apply your training in a bot lobby or deathmatch.</li>
+                <li><strong style={{ color: '#fff' }}>5 min — Easy mode:</strong> Re-establish mind-muscle connection.</li>
+                <li><strong style={{ color: '#fff' }}>5 min — Medium mode:</strong> Prioritize 80%+ accuracy over speed.</li>
+                <li><strong style={{ color: '#fff' }}>5 min — Hard/Impossible:</strong> Push your ceiling.</li>
+                <li><strong style={{ color: '#fff' }}>5 min — In-game warm-up:</strong> Apply training in a bot lobby.</li>
               </ol>
 
-              {/* H2 #7 */}
-              <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Common Aim Mistakes Beginners Make
-              </h2>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <li><strong style={{ color: '#fff' }}>1. Gripping the mouse too hard:</strong> Tension destroys micro-accuracy. Hold firmly but relaxed.</li>
-                <li><strong style={{ color: '#fff' }}>2. DPI too high:</strong> High DPI amplifies every tiny tremor. Slow down and use larger arm movements.</li>
-                <li><strong style={{ color: '#fff' }}>3. Looking at the cursor instead of the target:</strong> Train your eyes to focus on the target location.</li>
-                <li><strong style={{ color: '#fff' }}>4. Skipping warm-up:</strong> Cold muscles result in your first 5–10 minutes being your worst.</li>
-                <li><strong style={{ color: '#fff' }}>5. Training at maximum speed immediately:</strong> Build accuracy to 80%+ first, then increase speed.</li>
-                <li><strong style={{ color: '#fff' }}>6. Inconsistent mousepad surface:</strong> Dirty or worn mousepads corrupt muscle memory.</li>
-                <li><strong style={{ color: '#fff' }}>7. Ignoring the combo system:</strong> Each miss is data — identify if it was reaction, positioning, or speed error.</li>
-              </ul>
-
-              {/* H2 #8 — NEW */}
-              <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                How to Read Your Accuracy Graph
-              </h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                After each session, this aim trainer generates a real-time accuracy graph showing your hit percentage at each second of gameplay. Reading it correctly accelerates your improvement:
-              </p>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <li><strong style={{ color: '#fff' }}>Sharp early drop:</strong> You rushed before your muscle memory warmed up. Add a 3-minute Easy mode pre-session before Hard/Impossible.</li>
-                <li><strong style={{ color: '#fff' }}>Gradual late drop:</strong> Aim fatigue or mental depletion. Take 5-minute breaks and reduce session length until fitness improves.</li>
-                <li><strong style={{ color: '#fff' }}>Flat high line (90%+):</strong> Difficulty is too low. Increase one level or reduce target lifetime to challenge yourself.</li>
-                <li><strong style={{ color: '#fff' }}>Oscillating peaks and valleys:</strong> Inconsistent grip or mouse surface friction. Check your mousepad condition and grip pressure.</li>
-                <li><strong style={{ color: '#fff' }}>Steady upward slope:</strong> You are warming up correctly within the session — this is the ideal pattern for improvement.</li>
-              </ul>
-
-              {/* H2 #9 — NEW */}
-              <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Understanding Your Performance Grade (D → S+)
-              </h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                Every completed session earns a performance grade based on a weighted score combining three metrics:
-              </p>
-              <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.88rem', color: '#9ca3af' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', textAlign: 'center' }}>
-                  {[
-                    { metric: 'Accuracy', weight: '40%', tip: 'Hits ÷ total clicks' },
-                    { metric: 'Reaction Time', weight: '30%', tip: 'Lower ms = higher score' },
-                    { metric: 'Hits/Second', weight: '30%', tip: '5 hps = 100 score' },
-                  ].map(row => (
-                    <div key={row.metric}>
-                      <div style={{ color: 'var(--neon-cyan)', fontWeight: '700', marginBottom: '0.3rem' }}>{row.metric}</div>
-                      <div style={{ color: '#FFD700', fontSize: '1.1rem', fontWeight: '800' }}>{row.weight}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>{row.tip}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <li><strong style={{ color: '#FFD700' }}>S+</strong> — 95+ weighted score. Elite tier. Sub-200ms reactions with 90%+ accuracy at speed.</li>
-                <li><strong style={{ color: 'var(--neon-cyan)' }}>S</strong>  — 85–94. Competitive rank. Consistent and fast with very few misses.</li>
-                <li><strong style={{ color: 'var(--neon-green)' }}>A</strong>  — 72–84. Above average. Ready for ranked queues with continued training.</li>
-                <li><strong style={{ color: '#6B7FFF' }}>B</strong>  — 58–71. Solid foundation. Focus on reducing misses and lowering reaction time.</li>
-                <li><strong style={{ color: 'var(--neon-orange)' }}>C</strong>  — 42–57. Developing. Prioritize accuracy before pushing speed.</li>
-                <li><strong style={{ color: 'var(--neon-red)' }}>D</strong>  — Below 42. Starting point. Follow the daily routine above consistently for 2 weeks.</li>
-              </ul>
-
-              {/* H2 #10 */}
-              <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>What is Flick Aim?</h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                <strong>Flick aiming</strong> is the technique of rapidly snapping your crosshair from its current position to a new target in one explosive motion, usually in under 100 milliseconds. Train flick aim with <strong>Hard</strong> or <strong>Impossible</strong> difficulty and a 30-second session.
-              </p>
-              <p style={{ marginBottom: '2rem', color: '#9ca3af' }}>
-                Flick aim is trained through subconscious distance estimation. Your brain learns to predict exactly how far to move the mouse through thousands of repetitions — automating the motion into motor cortex memory.
-              </p>
-
-              {/* H2 #11 */}
-              <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>What is Tracking Aim?</h2>
-              <p style={{ marginBottom: '2rem', color: '#9ca3af' }}>
-                <strong>Tracking aim</strong> is the ability to maintain your crosshair on a moving target over time. Unlike flick aim (burst targeting), tracking requires sustained smooth mouse control matching the target&apos;s exact speed and direction. Tracking is most critical in battle royale games where enemies strafe at mid-range. Train tracking with dedicated tracking tools, then use this trainer for snap-targeting practice.
-              </p>
-
-              {/* H2 #12 */}
-              <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>Static Aim vs Dynamic Aim</h2>
-              <p style={{ marginBottom: '2rem', color: '#9ca3af' }}>
-                <strong>Static aim</strong> — clicking a stationary target — is the fundamental test of precision and response speed that this trainer measures. Master static first, then add tracking, then combine under real-match pressure. Our Aim Trainer covers the static layer with measurable, trackable results.
-              </p>
-
-              {/* H2 #13 */}
-              <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>Does Aim Training Really Improve Gaming?</h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                Research in motor learning and eSports performance science consistently shows structured targeting tasks improve both speed and accuracy of motor responses. A 2021 study in <em>Human Movement Science</em> found targeted click-training significantly reduced average reaction time after just two weeks of daily 15-minute sessions.
-              </p>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                <li><strong style={{ color: '#fff' }}>Consistency beats intensity:</strong> Daily 15-minute sessions outperform occasional 2-hour grinds.</li>
-                <li><strong style={{ color: '#fff' }}>Apply immediately in-game:</strong> Train → compete → train. Transfer is strongest when applied immediately.</li>
-                <li><strong style={{ color: '#fff' }}>Track progress objectively:</strong> Use the accuracy graph and session history — emotion-based self-assessment is unreliable.</li>
-                <li><strong style={{ color: '#fff' }}>Hardware matters at the ceiling:</strong> Once you hit 85%+ accuracy consistently, monitor Hz and polling rate become worth addressing.</li>
-              </ul>
-
-              {/* H2 #14 — NEW */}
-              <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Aim Training for Specific Games
-              </h2>
-              <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-                Different games require different mechanical emphases. Here is how to adapt your aim trainer sessions per title:
-              </p>
-              <ul style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <li><strong style={{ color: '#fff' }}>Counter-Strike 2:</strong> Focus on Hard mode, 60s sessions. CS2 rewards precise single-shot accuracy over spray speed. Target reaction times under 250ms.</li>
-                <li><strong style={{ color: '#fff' }}>Valorant:</strong> Medium mode, 30s sessions with strict accuracy goals (85%+). Valorant agents move predictably — practice head-level crosshair placement above all else.</li>
-                <li><strong style={{ color: '#fff' }}>Apex Legends:</strong> Impossible mode, 10s burst sessions. Apex rewards rapid multi-target transitions and fast TTK (time to kill) so raw speed matters more than in CS2.</li>
-                <li><strong style={{ color: '#fff' }}>Fortnite:</strong> Mix Hard and Medium sessions. Building peek angles create close-range burst scenarios — train both fast flicks (Impossible) and precise mid-range shots (Medium).</li>
-                <li><strong style={{ color: '#fff' }}>Minecraft PvP:</strong> Easy to Medium mode simulates the slower, wider hitboxes of Minecraft combat. Focus on combo streaks rather than reaction time.</li>
-                <li><strong style={{ color: '#fff' }}>Call of Duty Warzone:</strong> Hard mode, 60s sessions. Warzone&apos;s high TTK means sustained tracking accuracy is more important than initial flick speed.</li>
-              </ul>
-
               {/* Games Grid */}
-              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem', marginTop: '0.5rem' }}>Why Aim Matters in These Top Games</h3>
+              <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem' }}>Why Aim Matters in These Top Games</h3>
               <div className="aim-games-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: '0.75rem', marginBottom: '3rem' }}>
                 {GAMES.map(game => (
                   <div key={game} style={{ padding: '0.65rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
@@ -1697,7 +1643,6 @@ export default function AimTrainerPage() {
                 <h2 style={{ fontWeight: '800', fontSize: '1.6rem', marginBottom: '0', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
                   Pro FPS Strategies &amp; Frequently Asked Questions
                 </h2>
-
                 {[...FAQS].map(({ q, a }, i) => (
                   <div key={i} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
                     <h3 itemProp="name" style={{ color: 'var(--neon-cyan)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem', marginTop: 0 }}>{q}</h3>
@@ -1707,11 +1652,9 @@ export default function AimTrainerPage() {
                   </div>
                 ))}
 
-                {/* H2 #15 — Extra FAQ block */}
                 <h2 style={{ fontWeight: '800', fontSize: '1.6rem', marginBottom: '0', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem', marginTop: '1rem' }}>
                   Advanced Aim Training Questions
                 </h2>
-
                 {[...FAQS_EXTRA].map(({ q, a }, i) => (
                   <div key={`extra-${i}`} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
                     <h3 itemProp="name" style={{ color: 'var(--neon-cyan)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem', marginTop: 0 }}>{q}</h3>
@@ -1721,11 +1664,10 @@ export default function AimTrainerPage() {
                   </div>
                 ))}
 
-                {/* Pro Tip box */}
                 <div style={{ border: '1px solid rgba(255,107,0,0.2)', padding: '1.25rem 1.5rem', borderRadius: '12px' }}>
                   <h4 style={{ color: 'var(--neon-orange)', fontSize: '1rem', fontWeight: '700', margin: '0 0 0.4rem 0' }}>💡 Pro Tip: Warm Up Before Every Ranked Session</h4>
                   <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.875rem', lineHeight: '1.7' }}>
-                    Use this Aim Trainer for 5–10 minutes before launching competitive matches. Start on Easy to wake up your muscle memory, finish on Hard to sharpen your reflexes. Low DPI (400–800) arm-aiming builds consistency; save wrist aiming for micro-adjustments only. Your first in-game kills will confirm the difference.
+                    Use this Aim Trainer for 5–10 minutes before launching competitive matches. Start on Easy to wake up your muscle memory, finish on Hard to sharpen your reflexes.
                   </p>
                 </div>
               </div>
