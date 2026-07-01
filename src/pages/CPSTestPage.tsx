@@ -436,36 +436,34 @@ SessionHistory.displayName = 'SessionHistory';
 // ─────────────────────────────────────────────
 const FaqSection = memo(() => {
   const [open, setOpen] = useState<number | null>(null);
+  
   return (
-    <section
-      aria-label="Frequently Asked Questions"
-      style={{
-        background: 'var(--bg-card,#1e2235)',
-        border: '1px solid var(--border,#2a3047)',
-        borderRadius: '16px',
-        padding: '2rem 2rem 1rem',
-        marginTop: '2rem',
-      }}
-    >
+    <section aria-label="Frequently Asked Questions" style={{ marginBottom: '3rem', marginTop: '2rem' }}>
       <h2
         style={{
           fontWeight: '800',
           fontSize: '1.75rem',
-          color: 'var(--neon-cyan,#00f5ff)',
+          color: '#fff',
           marginTop: 0,
           marginBottom: '1.5rem',
+          borderBottom: '1px solid #1f2937',
+          paddingBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
         }}
       >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
         Frequently Asked Questions
       </h2>
-      <div role="list">
+      <div role="list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {FAQ_DATA.map((faq, i) => {
           const isOpen = open === i;
           return (
             <div
               key={i}
               role="listitem"
-              style={{ borderBottom: i < FAQ_DATA.length - 1 ? '1px solid var(--border,#2a3047)' : 'none' }}
+              style={{ border: '1px solid', borderColor: isOpen ? 'rgba(0,240,255,0.4)' : '#1f2937', borderRadius: '10px', overflow: 'hidden', transition: 'border-color 0.2s' }}
             >
               <button
                 aria-expanded={isOpen}
@@ -475,62 +473,45 @@ const FaqSection = memo(() => {
                 style={{
                   width: '100%',
                   textAlign: 'left',
-                  background: 'transparent',
+                  background: isOpen ? 'rgba(0,240,255,0.05)' : '#0b111e',
                   border: 'none',
-                  padding: '1.1rem 0',
+                  padding: '14px 18px',
                   cursor: 'pointer',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  gap: '1rem',
+                  gap: '12px',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: '0.95rem'
                 }}
               >
-                <span
-                  style={{
-                    fontWeight: '700',
-                    fontSize: '0.95rem',
-                    color: isOpen ? 'var(--neon-cyan,#00f5ff)' : '#fff',
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  {faq.q}
-                </span>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    fontSize: '1.1rem',
-                    flexShrink: 0,
-                    color: isOpen ? 'var(--neon-cyan,#00f5ff)' : 'var(--text-muted,#8395a7)',
-                    transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.25s ease, color 0.2s',
-                    display: 'inline-block',
-                  }}
-                >
-                  +
-                </span>
+                <span>{faq.q}</span>
+                {isOpen ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="18 15 12 9 6 15"></polyline></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                )}
               </button>
-              <div
-                id={`faq-answer-${i}`}
-                role="region"
-                aria-labelledby={`faq-question-${i}`}
-                style={{
-                  maxHeight: isOpen ? '400px' : '0',
-                  overflow: 'hidden',
-                  transition: 'max-height 0.3s ease',
-                }}
-              >
-                <p
-                  style={{
-                    color: '#9ca3af',
-                    fontSize: '0.9rem',
-                    lineHeight: '1.75',
-                    padding: '0 0 1.25rem',
-                    margin: 0,
-                  }}
+              {isOpen && (
+                <div
+                  id={`faq-answer-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-question-${i}`}
+                  style={{ padding: '0 18px 16px', backgroundColor: 'rgba(0,240,255,0.03)' }}
                 >
-                  {faq.a}
-                </p>
-              </div>
+                  <p
+                    style={{
+                      color: '#9ca3af',
+                      fontSize: '0.95rem',
+                      lineHeight: '1.7',
+                      margin: 0,
+                    }}
+                  >
+                    {faq.a}
+                  </p>
+                </div>
+              )}
             </div>
           );
         })}
@@ -544,15 +525,8 @@ FaqSection.displayName = 'FaqSection';
 // SEO ARTICLE (memoised heavy component — ~3000 words)
 // ─────────────────────────────────────────────
 const SeoArticle = memo(() => (
-  <section
-    style={{
-      background: 'var(--bg-card,#1e2235)',
-      border: '1px solid var(--border,#2a3047)',
-      borderRadius: '16px',
-      padding: '2.5rem',
-      marginTop: '3rem',
-    }}
-  >
+  <>
+    <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
     <article
       className="cps-article"
       style={{ color: 'var(--text-secondary,#cbd5e1)', fontSize: '0.95rem', lineHeight: '1.8' }}
@@ -953,7 +927,7 @@ const SeoArticle = memo(() => (
         and ensure you take frequent breaks to prevent physical fatigue or repetitive strain injuries.
       </p>
     </article>
-  </section>
+  </>
 ));
 SeoArticle.displayName = 'SeoArticle';
 
@@ -970,10 +944,6 @@ export default function CPSTestPage() {
   const [maxCps, setMaxCps] = useState(0);
   const [history, setHistory] = useState<{ cps: number; clicks: number; duration: number }[]>([]);
   const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
-
-  // 🔲 Full Screen State & Ref
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const clickAreaRef = useRef<HTMLDivElement>(null);
 
   // 🛡️ Anti-Cheat Security Layer States & Refs
   const [isBot, setIsBot] = useState(false);
@@ -1131,8 +1101,6 @@ export default function CPSTestPage() {
     setTimeLeft(0);
     lastEndTimeRef.current = Date.now(); // Mark time test ended for close button cooldown
     
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    
     playSound('complete'); // Play retro success chime on test complete
     
     // Only commit to session history array if client validation is authentic
@@ -1196,11 +1164,11 @@ export default function CPSTestPage() {
 
   const handleCustomTimeSet = () => {
     const time = parseInt(customTime);
-    // Validate input value (now unlimited maximum time)
+    // SECURITY/CRASH FIX: Validate input value. Limit custom time to a maximum of 300 seconds (5 minutes)
     if (isNaN(time) || time <= 0) {
       return;
     }
-    const validatedTime = time;
+    const validatedTime = Math.min(time, 300);
     setDuration(validatedTime);
     durationRef.current = validatedTime;
     resetTest();
@@ -1235,14 +1203,6 @@ export default function CPSTestPage() {
 
     setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 600);
   };
-
-  useEffect(() => {
-    const onFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
-  }, []);
 
   useEffect(() => {
     if (phase === 'done') {
@@ -1338,6 +1298,7 @@ export default function CPSTestPage() {
             disabled={phase === 'running'}
             placeholder="sec"
             min="1"
+            max="300"
             style={{ 
               width: '50px', background: 'transparent', border: 'none', 
               color: 'var(--neon-cyan, #00f5ff)', fontWeight: '700', outline: 'none', 
@@ -1402,18 +1363,12 @@ export default function CPSTestPage() {
       <div
         role="button"
         tabIndex={0}
-        ref={clickAreaRef}
         aria-label="Click area to start CPS test"
         onClick={handleClick}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e as any); }}
         style={{
-          position: isFullscreen && !document.fullscreenElement ? 'fixed' : 'relative',
-          top: isFullscreen && !document.fullscreenElement ? '0' : 'auto',
-          left: isFullscreen && !document.fullscreenElement ? '0' : 'auto',
-          zIndex: isFullscreen && !document.fullscreenElement ? 9999 : 'auto',
-          overflow: 'hidden', width: '100%', minHeight: '220px',
-          height: isFullscreen ? '100vh' : 'auto',
-          borderRadius: isFullscreen ? '0' : '16px',
+          position: 'relative', overflow: 'hidden', width: '100%', minHeight: '220px',
+          borderRadius: '16px',
           border: phase === 'running' ? '2px solid var(--neon-green, #00ff88)' : phase === 'done' ? '2px solid var(--neon-orange, #ff9f43)' : '2px solid var(--border, #2a3047)',
           background: phase === 'running' ? 'rgba(0,255,136,0.04)' : 'var(--bg-card, #1e2235)',
           cursor: phase === 'done' ? 'default' : 'pointer',
@@ -1424,46 +1379,6 @@ export default function CPSTestPage() {
           boxShadow: phase === 'running' ? '0 0 30px rgba(0,255,136,0.1)' : 'none',
         }}
       >
-        {/* Fullscreen Toggle Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isFullscreen) {
-              if (clickAreaRef.current?.requestFullscreen) {
-                clickAreaRef.current.requestFullscreen().catch(() => {
-                  setIsFullscreen(true); // Fallback if blocked
-                });
-              } else {
-                setIsFullscreen(true); // Fallback if unsupported
-              }
-            } else {
-              if (document.fullscreenElement) {
-                document.exitFullscreen().catch(() => {
-                  setIsFullscreen(false);
-                });
-              } else {
-                setIsFullscreen(false); // Exit fallback
-              }
-            }
-          }}
-          aria-label="Toggle Fullscreen"
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            background: 'rgba(255,255,255,0.1)',
-            border: 'none',
-            color: 'var(--text-secondary, #cbd5e1)',
-            padding: '0.4rem 0.6rem',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            zIndex: 20,
-            fontSize: '0.9rem',
-          }}
-        >
-          {isFullscreen ? '↙️ Exit Full Screen' : '⛶ Full Screen'}
-        </button>
-
         {ripples.map(r => (
           <span key={r.id} style={{
             position: 'absolute', left: r.x, top: r.y, width: '16px', height: '16px',
