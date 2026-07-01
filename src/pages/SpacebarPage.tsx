@@ -654,13 +654,9 @@ function SpacebarArticleContent() {
   const li: React.CSSProperties = { marginBottom: '0.55rem' };
 
   return (
-    <article style={{
-      background: 'var(--bg-card)',
-      border: '1px solid var(--border)',
-      borderRadius: '16px',
-      padding: '2rem',
-      marginTop: '2rem',
-    }}>
+    <>
+      <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
+      <article style={{ borderTop: '1px solid var(--border)', paddingTop: '3rem' }}>
       <section style={{ color: 'var(--text-secondary)', fontSize: '0.91rem', lineHeight: '1.78' }}>
 
         {/* ── 1 ── */}
@@ -938,6 +934,15 @@ function SpacebarArticleContent() {
           This tool is built with a privacy-first architecture. All computation occurs exclusively within your browser's JavaScript runtime. No keystroke data, scores, or personal information is transmitted to any external server. Session history is stored in component state and disappears when you close or refresh the page. No cookies are set, no local storage is written, and no analytics pixels or fingerprinting scripts are embedded.
         </p>
 
+        {/* ── KPS Test SEO Article ── */}
+        <h2 style={h2}>KPS Test (Keystrokes Per Second) — What It Is and Why It Matters</h2>
+        <p style={p}>
+          A <strong>KPS Test</strong> (Keystrokes Per Second) is an advanced metric used to evaluate a user's raw keyboard tapping speed and rhythmic consistency. While traditional CPS tests focus on mouse clicking, a KPS test directly measures the actuation rate of your keyboard keys, most commonly the spacebar. Keystroke speed is a fundamental skill for competitive typists, rhythm game players (like osu!mania or StepMania), and professional gamers who rely on high-frequency inputs for actions like strafe-jumping or animation canceling.
+        </p>
+        <p style={p}>
+          Our Spacebar Counter effectively functions as a highly accurate KPS Test. By utilizing the <code>performance.now()</code> API, it tracks every single keystroke down to the millisecond. By practicing your KPS, you can build vital forearm stamina, improve thumb-finger independence, and optimize your keyboard switch actuation. A typical beginner will average around 4–6 KPS, while elite players and eSports professionals can sustain a blistering 10–14 KPS through techniques like jitter tapping and the butterfly method.
+        </p>
+
         {/* ── 32 — FAQ ── */}
         <div
           itemScope
@@ -991,6 +996,7 @@ function SpacebarArticleContent() {
         </p>
       </section>
     </article>
+    </>
   );
 }
 
