@@ -33,22 +33,22 @@ const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
   Easy: {
     minSize: 65, maxSize: 90, spawnInterval: 1200,
     targetLifetime: 3000, maxTargets: 3,
-    label: 'Easy', color: 'var(--neon-green)', scoreMultiplier: 1,
+    label: 'Easy', color: 'var(--neon-green, #10b981)', scoreMultiplier: 1,
   },
   Medium: {
     minSize: 40, maxSize: 70, spawnInterval: 800,
     targetLifetime: 2000, maxTargets: 5,
-    label: 'Medium', color: 'var(--neon-cyan)', scoreMultiplier: 2,
+    label: 'Medium', color: 'var(--neon-cyan, #00f5ff)', scoreMultiplier: 2,
   },
   Hard: {
     minSize: 25, maxSize: 50, spawnInterval: 500,
     targetLifetime: 1200, maxTargets: 7,
-    label: 'Hard', color: 'var(--neon-orange)', scoreMultiplier: 3,
+    label: 'Hard', color: 'var(--neon-orange, #f97316)', scoreMultiplier: 3,
   },
   Impossible: {
     minSize: 15, maxSize: 35, spawnInterval: 280,
     targetLifetime: 700, maxTargets: 10,
-    label: 'Impossible', color: 'var(--neon-red)', scoreMultiplier: 5,
+    label: 'Impossible', color: 'var(--neon-red, #ff2d55)', scoreMultiplier: 5,
   },
 };
 
@@ -697,26 +697,6 @@ const FAQS = [
     q: 'How long should I aim train per day?',
     a: 'Research and pro player routines suggest 15–30 minutes of focused aim training before gaming sessions is optimal. Beyond 45 minutes, diminishing returns and mental fatigue can reduce accuracy gains. Quality and focus matter more than raw time.',
   },
-  {
-    q: 'What is the best sensitivity for Valorant aim training?',
-    a: 'Most Valorant pro players use an eDPI (in-game sensitivity × DPI) between 200–400. Start with 400 DPI and 0.4 in-game sensitivity (160 eDPI) then adjust upward until flicks feel natural. Lower eDPI favors precision; higher eDPI suits close-range duels. Use this aim trainer to test each sensitivity change before locking it in-game.',
-  },
-  {
-    q: 'How do I fix mouse acceleration for gaming?',
-    a: 'Disable "Enhance pointer precision" in Windows Mouse Settings (Control Panel → Mouse → Pointer Options). Then confirm your mouse driver has hardware acceleration set to off or 0. Raw input in your game settings further bypasses Windows acceleration. After disabling, run a 30-second Impossible session here — consistent crosshair movement at all speeds confirms acceleration is fully off.',
-  },
-  {
-    q: 'What causes aim fatigue and how do I prevent it?',
-    a: 'Aim fatigue occurs from muscle overuse, eye strain, and mental depletion. Prevent it by: using a large mousepad to avoid tense micro-movements, keeping your wrist elevated off the desk, taking 5-minute breaks every 45 minutes, and maintaining a consistent DPI rather than wildly switching. Tracking your accuracy graph over a session reveals when fatigue sets in — usually a sharp accuracy drop after 20–30 minutes.',
-  },
-  {
-    q: 'Is 60Hz enough for aim training or do I need 144Hz?',
-    a: '60Hz introduces up to 16.6ms of additional display latency per frame. At 144Hz that drops to ~7ms; at 240Hz it is ~4ms. For casual play 60Hz is functional, but your true reaction time is masked by display latency. If your measured reaction time in this trainer seems consistently slower than 250ms, a monitor upgrade may reveal hidden speed your hands already have.',
-  },
-  {
-    q: 'How does the combo system in this aim trainer work?',
-    a: 'Every consecutive hit adds +1 to your combo multiplier. Missing any click resets your combo to zero. Milestone combos (×10, ×20, and every ×25 after) trigger a visual and audio burst. Your maximum combo is recorded in results and factors into your performance grade — a high combo streak proves both speed and miss-control simultaneously.',
-  },
 ] as const;
 
 const FAQS_EXTRA = [
@@ -725,12 +705,20 @@ const FAQS_EXTRA = [
     a: 'eDPI (effective DPI) = hardware DPI × in-game sensitivity multiplier. Two players with completely different hardware setups have identical crosshair movement if their eDPI matches. This makes eDPI the universal comparison metric across games and hardware. Pros in CS2, Valorant, and Apex typically use 200–800 eDPI for precision play.',
   },
   {
-    q: 'Can aim training help reduce spray transfer and recoil control?',
-    a: 'Directly — yes. Recoil control requires continuously correcting your crosshair downward against weapon rise, which is a tracking sub-skill. Click-accuracy training sharpens the hand-eye feedback loop so corrections become faster and more precise. Pair this trainer with dedicated recoil pattern practice for maximum spray control improvement.',
+    q: 'What is the best mouse grip for aim training?',
+    a: 'There are three main grips: Palm (stable, good for tracking/low sens), Claw (balanced, good for quick flicks), and Fingertip (highest micro-precision, fast vertical adjustments). Choose the one that feels most natural to you. Changing your grip requires rebuilding muscle memory, so consistency is key.',
   },
   {
-    q: 'Should I use raw input or buffered input in FPS games?',
-    a: 'Always enable raw input in competitive FPS games. Raw input bypasses Windows pointer acceleration and DPI scaling, reading the mouse sensor directly at the hardware level. This makes your crosshair movement exactly 1:1 with your physical hand movement at all speeds — which is the foundational requirement for building consistent muscle memory.',
+    q: 'Tracking vs. Flicking: Which is more important?',
+    a: 'Flicking (moving crosshair quickly to a single spot) is crucial for games like Valorant and CS2 where time-to-kill is instant. Tracking (keeping the crosshair on a moving target) dominates in games like Apex Legends, Overwatch, and Fortnite. A well-rounded aim routine trains both, but you should prioritize the style that fits your main game.',
+  },
+  {
+    q: 'Does mouse weight affect aiming performance?',
+    a: 'Yes. Lightweight mice (under 70g) reduce inertia, making it easier to start and stop movements quickly. This is ideal for fast flicks and reduces wrist fatigue during long sessions. However, some players prefer heavier mice for smoother tracking and stability. The industry standard has heavily shifted towards ultra-lightweight designs for competitive play.',
+  },
+  {
+    q: 'Can aim training help reduce spray transfer and recoil control?',
+    a: 'Directly — yes. Recoil control requires continuously correcting your crosshair downward against weapon rise, which is a tracking sub-skill. Click-accuracy training sharpens the hand-eye feedback loop so corrections become faster and more precise. Pair this trainer with dedicated recoil pattern practice for maximum spray control improvement.',
   },
 ] as const;
 
@@ -740,30 +728,6 @@ const GAMES = [
   'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us',
   'Valorant', 'Apex Legends',
 ] as const;
-
-// ─── useFullscreenLayout hook ─────────────────────────────────────────────────
-// Game area height কে dynamically fullscreen এ adjust করে
-function useFullscreenGameHeight(isFullscreen: boolean): number {
-  const [gameH, setGameH] = useState(420);
-
-  useEffect(() => {
-    if (!isFullscreen) { setGameH(420); return; }
-
-    const calc = () => {
-      // viewport থেকে header/settings/stats/controls এর approximate height বাদ দিয়ে game area height set করো
-      const vh = window.innerHeight;
-      // উপরের elements এর approximate height: settings~70, stats~90, progress~12, combo~30, shortcuts~30, controls~60, padding~20
-      const reserved = 320;
-      setGameH(Math.max(250, vh - reserved));
-    };
-
-    calc();
-    window.addEventListener('resize', calc);
-    return () => window.removeEventListener('resize', calc);
-  }, [isFullscreen]);
-
-  return gameH;
-}
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function AimTrainerPage() {
@@ -822,9 +786,6 @@ export default function AimTrainerPage() {
   const startTimeRef     = useRef(0);
   const pausedAtRef      = useRef(0);
   const exitFsOnEndRef   = useRef(false);
-
-  // ── Dynamic game area height ───────────────────────────────────────────────
-  const gameAreaHeight = useFullscreenGameHeight(isFullscreen);
 
   useEffect(() => { soundOnRef.current    = soundOn;    }, [soundOn]);
   useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
@@ -1207,8 +1168,20 @@ export default function AimTrainerPage() {
         }
 
         /* ════════════════════════════════════════════════════════════
-           FULLSCREEN — সব পুরো screen জুড়ে
+           MAIN CONTAINER (Normal & Fullscreen)
         ════════════════════════════════════════════════════════════ */
+        .aim-main-container {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 2rem 1.5rem;
+          width: 100%;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        /* FULLSCREEN ROOT */
         :fullscreen .aim-fs-root,
         :-webkit-full-screen .aim-fs-root,
         :-moz-full-screen .aim-fs-root {
@@ -1220,75 +1193,46 @@ export default function AimTrainerPage() {
           padding: 0 !important;
           margin: 0 !important;
           overflow: hidden !important;
-          background: var(--bg, #0a0a0f) !important;
-          box-sizing: border-box !important;
+          background: var(--bg-color, #0a0a0f) !important;
         }
-        :fullscreen .aim-fs-root > main,
-        :-webkit-full-screen .aim-fs-root > main,
-        :-moz-full-screen .aim-fs-root > main {
-          flex: 1 1 auto !important;
-          display: flex !important;
-          flex-direction: column !important;
-          max-width: none !important;
-          width: 100% !important;
+
+        /* FULLSCREEN MAIN CONTENT */
+        :fullscreen .aim-main-container,
+        :-webkit-full-screen .aim-main-container,
+        :-moz-full-screen .aim-main-container {
+          max-width: 100% !important;
           height: 100% !important;
-          max-height: 100vh !important;
-          padding: 0.5rem 1rem !important;
-          margin: 0 !important;
-          overflow: hidden !important;
-          box-sizing: border-box !important;
+          padding: 1rem 1rem 0.5rem !important;
+          flex: 1 1 auto !important;
         }
-        /* fullscreen এ header লুকাও */
+
+        /* FULLSCREEN: Hide unnecessary elements */
         :fullscreen .aim-fs-header,
         :-webkit-full-screen .aim-fs-header,
-        :-moz-full-screen .aim-fs-header {
-          display: none !important;
-        }
-        /* fullscreen এ game area বাকি সব জায়গা নেবে */
-        :fullscreen .aim-game-area,
-        :-webkit-full-screen .aim-game-area,
-        :-moz-full-screen .aim-game-area {
-          flex: 1 1 auto !important;
-          height: auto !important;
-          min-height: 200px !important;
-          max-height: none !important;
-          margin-bottom: 0.5rem !important;
-        }
-        /* fullscreen এ article, history, hr লুকাও */
         :fullscreen .aim-article-section,
         :-webkit-full-screen .aim-article-section,
-        :-moz-full-screen .aim-article-section,
         :fullscreen .aim-history-section,
         :-webkit-full-screen .aim-history-section,
-        :-moz-full-screen .aim-history-section,
         :fullscreen .aim-fs-hr,
         :-webkit-full-screen .aim-fs-hr,
-        :-moz-full-screen .aim-fs-hr {
-          display: none !important;
-        }
-        /* fullscreen এ settings, stats, controls compact */
-        :fullscreen .aim-settings-row,
-        :-webkit-full-screen .aim-settings-row,
-        :-moz-full-screen .aim-settings-row {
-          margin-bottom: 0.4rem !important;
-        }
-        :fullscreen .aim-stats-grid,
-        :-webkit-full-screen .aim-stats-grid,
-        :-moz-full-screen .aim-stats-grid {
-          margin-bottom: 0.3rem !important;
-        }
-        :fullscreen .aim-controls,
-        :-webkit-full-screen .aim-controls,
-        :-moz-full-screen .aim-controls {
-          margin-bottom: 0.3rem !important;
-        }
-        /* fullscreen এ results panel লুকাও — modal দিয়ে দেখাবে */
         :fullscreen .aim-results-panel,
-        :-webkit-full-screen .aim-results-panel,
-        :-moz-full-screen .aim-results-panel {
+        :-webkit-full-screen .aim-results-panel {
           display: none !important;
         }
 
+        /* FULLSCREEN: Compact UI */
+        :fullscreen .aim-settings-row,
+        :-webkit-full-screen .aim-settings-row {
+          margin-bottom: 0.5rem !important;
+        }
+        :fullscreen .aim-stats-grid,
+        :-webkit-full-screen .aim-stats-grid {
+          margin-bottom: 0.5rem !important;
+        }
+        
+        /* ════════════════════════════════════════════════════════════
+           BUTTON STYLES & MEDIA QUERIES
+        ════════════════════════════════════════════════════════════ */
         .aim-fullscreen-btn:hover  { background: rgba(255,255,255,0.1) !important; }
         .aim-fullscreen-btn:disabled { opacity: 0.4 !important; cursor: not-allowed !important; }
         .aim-difficulty-btn:focus-visible,
@@ -1297,7 +1241,6 @@ export default function AimTrainerPage() {
 
         @media (max-width: 640px) {
           .aim-stats-grid    { grid-template-columns: repeat(2,1fr) !important; gap: 0.6rem !important; }
-          .aim-game-area     { height: 280px !important; }
           .aim-controls      { flex-direction: column !important; align-items: stretch !important; }
           .aim-controls .btn { width: 100% !important; text-align: center !important; min-height: 44px; }
           .aim-settings-row  { flex-direction: column !important; gap: 0.75rem !important; }
@@ -1312,19 +1255,8 @@ export default function AimTrainerPage() {
 
       {/* containerRef = fullscreen target */}
       <div ref={containerRef} className="aim-fs-root">
-        <main
-          style={{
-            maxWidth: '900px',
-            margin: '0 auto',
-            padding: '2rem 1.5rem',
-            width: '100%',
-            boxSizing: 'border-box',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-          role="main"
-          aria-label="Aim Trainer"
-        >
+        <main className="aim-main-container" role="main" aria-label="Aim Trainer">
+          
           {/* ── Header ────────────────────────────────────────────────── */}
           <header className="aim-fs-header" style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
             <div className="section-label">Aim Tool</div>
@@ -1442,7 +1374,7 @@ export default function AimTrainerPage() {
           {/* ── Keyboard Hints ────────────────────────────────────────── */}
           <ShortcutHints phase={phase} />
 
-          {/* ── Game Area ─────────────────────────────────────────────── */}
+          {/* ── Game Area (Dynamic height via CSS Flexbox) ────────────── */}
           <div
             ref={areaRef}
             onPointerDown={missClick}
@@ -1455,8 +1387,9 @@ export default function AimTrainerPage() {
             style={{
               position: 'relative',
               width: '100%',
-              // fullscreen এ dynamic height, otherwise fixed 420px
-              height: isFullscreen ? `${gameAreaHeight}px` : '420px',
+              // In fullscreen CSS will override this with flex: 1 and height: 100%
+              height: isFullscreen ? '100%' : '420px',
+              flex: isFullscreen ? '1' : 'none',
               background: 'var(--bg-card)',
               border: `2px solid ${phase === 'running' ? diffCfg.color : phase === 'paused' ? 'var(--neon-orange)' : 'var(--border)'}`,
               borderRadius: '16px',
@@ -1514,7 +1447,7 @@ export default function AimTrainerPage() {
           </div>
 
           {/* ── Controls ──────────────────────────────────────────────── */}
-          <div className="aim-controls" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+          <div className="aim-controls" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: isFullscreen ? 'auto' : '0' }}>
             {phase !== 'running' && phase !== 'paused' && (
               <button className="btn btn-primary" onClick={beginCountdown} disabled={countdownNum !== null} aria-label={phase === 'done' ? 'Play again' : 'Start aim trainer'} style={{ opacity: countdownNum !== null ? 0.6 : 1, cursor: countdownNum !== null ? 'not-allowed' : 'pointer' }}>
                 {phase === 'done' ? '▶ Play Again' : '🎯 Start Game'}
@@ -1544,7 +1477,7 @@ export default function AimTrainerPage() {
 
           {/* ── Session History ───────────────────────────────────────── */}
           {history.length > 0 && (
-            <section className="aim-history-section" aria-label="Session history" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginBottom: '3rem' }}>
+            <section className="aim-history-section" aria-label="Session history" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginTop: '2rem' }}>
               <div style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
               <div role="list" aria-label="Previous game results">
                 {history.map((h, i) => (
@@ -1566,7 +1499,7 @@ export default function AimTrainerPage() {
           ══════════════════════════════════════════════════════════════ */}
           <hr className="aim-fs-hr" style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
 
-          <article className="aim-article-section aim-article-wrap" style={{ paddingTop: '3rem' }}>
+          <article className="aim-article-section aim-article-wrap" style={{ paddingTop: '1rem' }}>
             <section style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.85' }}>
 
               <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.25rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
@@ -1579,7 +1512,7 @@ export default function AimTrainerPage() {
                 Whether you play <strong>Counter-Strike 2</strong>, <strong>Valorant</strong>, <strong>Apex Legends</strong>, or even casual titles like <strong>Roblox</strong> or <strong>Fortnite</strong>, aim training transfers directly to in-game performance. This guide covers every aspect of aim training — from mouse hardware to daily routines — so you can go from your first session to measurable improvement within weeks.
               </p>
 
-              <div style={{ borderLeft: '4px solid var(--neon-green)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem' }}>
+              <div style={{ borderLeft: '4px solid var(--neon-green)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem', background: 'rgba(16, 185, 129, 0.05)' }}>
                 <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', marginTop: '0', marginBottom: '0.4rem' }}>🖱️ Use This as a New Mouse Sensor Check</h3>
                 <p style={{ margin: 0, color: '#9ca3af', fontSize: '0.92rem' }}>
                   Our Aim Trainer doubles as a <strong>new mouse check</strong>. By clicking small randomly spawning targets rapidly, you can immediately detect optical sensor spin-outs, confirm zero hardware acceleration, and dial in your DPI before any competitive match.
@@ -1601,24 +1534,13 @@ export default function AimTrainerPage() {
               </ul>
 
               <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-                Best DPI and Sensitivity for FPS Games
+                Tracking vs. Flicking: Understanding Aim Styles
               </h2>
-              <div style={{ background: 'rgba(0,0,0,0.35)', borderRadius: '10px', border: '1px solid var(--border)', padding: '1rem 1.25rem', marginBottom: '2rem', fontSize: '0.88rem', color: '#9ca3af' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', textAlign: 'center' }}>
-                  {[
-                    { role: 'Rifler / Entry',   dpi: '400–800',  sens: '1.5–2.5', edpi: '600–2000' },
-                    { role: 'AWPer / Sniper',   dpi: '400–800',  sens: '0.8–1.5', edpi: '320–1200' },
-                    { role: 'Casual / Shooter', dpi: '800–1600', sens: '1.0–2.0', edpi: '800–3200' },
-                  ].map(row => (
-                    <div key={row.role}>
-                      <div style={{ color: 'var(--neon-cyan)', fontWeight: '700', marginBottom: '0.3rem' }}>{row.role}</div>
-                      <div>DPI: <strong style={{ color: '#fff' }}>{row.dpi}</strong></div>
-                      <div>Sens: <strong style={{ color: '#fff' }}>{row.sens}</strong></div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>eDPI: {row.edpi}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <p style={{ marginBottom: '2rem', color: '#9ca3af' }}>
+                <strong style={{ color: '#fff' }}>Flicking</strong> is the ability to instantly snap your crosshair to a target that just appeared on your screen. This relies heavily on muscle memory and spatial awareness, making it crucial for tactical shooters like <em>Valorant</em> and <em>CS:GO</em> where time-to-kill is extremely low.
+                <br /><br />
+                <strong style={{ color: '#fff' }}>Tracking</strong>, on the other hand, is the ability to smoothly follow a moving target with your crosshair while continuously firing. Games with higher time-to-kill and heavy movement mechanics—like <em>Apex Legends</em> or <em>Overwatch</em>—require god-tier tracking skills. Our trainer helps you build the initial hand-eye coordination required for both styles by demanding rapid clicks on spawning targets.
+              </p>
 
               <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>Daily Aim Training Routine</h2>
               <ol style={{ marginBottom: '2rem', color: '#9ca3af', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
