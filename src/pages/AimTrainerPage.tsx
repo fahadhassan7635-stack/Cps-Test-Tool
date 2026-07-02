@@ -1,2011 +1,1891 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+/**
+ * AimTrainerPage.tsx - Production-ready with Fullscreen Click-to-Start
+ */
+
 import {
-  Rocket, Play, RefreshCcw, Activity, Zap, Shield, Timer, TrendingUp,
-  Home, Volume2, VolumeX, Gauge, Pause, Play as PlayIcon,
-  Maximize, Minimize, Trophy, Star, Cpu, BarChart2,
-  ChevronRight, Award, Layers, Repeat
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  memo,
+} from 'react';
 
-// ============================================================
-// TYPES
-// ============================================================
-interface Point { x: number; y: number; }
+// ─── Constants ────────────────────────────────────────────────────────────────
+const MAX_HISTORY    = 10;
+const CLICK_RATE_MS  = 30;
 
-interface Particle extends Point {
-  vx: number; vy: number; life: number; color: string; size: number;
+// ─── Difficulty Config ────────────────────────────────────────────────────────
+type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible';
+
+interface DifficultyConfig {
+  minSize: number;
+  maxSize: number;
+  spawnInterval: number;
+  targetLifetime: number;
+  maxTargets: number;
+  label: string;
+  color: string;
+  scoreMultiplier: number;
 }
 
-interface Obstacle extends Point {
-  radius: number; speed: number; rotation: number; rotationSpeed: number;
-  type: 'asteroid' | 'comet' | 'boss';
-  points: Point[];
-  hasNearMissed?: boolean;
-  isBoss?: boolean;
-  hp?: number;
-  maxHp?: number;
-  glowPhase?: number;
-}
-
-interface PowerUp extends Point {
-  type: 'shield' | 'slowmo' | 'doubleboost' | 'multiplier' | 'invincibility';
-  radius: number;
-  speed: number;
-  life: number;
-  collected?: boolean;
-  glowPhase: number;
-}
-
-interface FloatingText {
-  x: number; y: number; text: string; life: number;
-  color: string; vy: number; size: number;
-}
-
-interface Achievement {
-  id: string; title: string; description: string;
-  icon: string; unlocked: boolean; unlockedAt?: number;
-}
-
-interface HighScores {
-  bestDistance: number; bestTime: number;
-  highestCps: number; mostAvoided: number;
-}
-
-interface LifetimeStats {
-  gamesPlayed: number; totalDistance: number; totalTime: number;
-  totalAvoided: number; highestCps: number; highestDistance: number;
-  averageCpsSum: number; averageCpsCount: number;
-}
-
-interface ReplayFrame {
-  y: number; vel: number; obstacles: { x: number; y: number; radius: number; type: string; rotation: number }[];
-  powerups: { x: number; y: number; type: string }[];
-  time: number;
-}
-
-type GameStatus = 'start' | 'countdown' | 'playing' | 'paused' | 'gameover';
-type Difficulty = 'easy' | 'normal' | 'hard';
-type UiView = 'start' | 'countdown' | 'playing' | 'paused' | 'gameover';
-
-// ============================================================
-// ANALYTICS HELPER
-// ============================================================
-const GA = {
-  event: (name: string, params?: Record<string, unknown>) => {
-    try {
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', name, params ?? {});
-      }
-    } catch { /* silent */ }
+const DIFFICULTY_CONFIGS: Record<Difficulty, DifficultyConfig> = {
+  Easy: {
+    minSize: 65, maxSize: 90, spawnInterval: 1200,
+    targetLifetime: 3000, maxTargets: 3,
+    label: 'Easy', color: 'var(--neon-green, #10b981)', scoreMultiplier: 1,
   },
-  gameStart: (difficulty: string) => GA.event('game_start', { difficulty }),
-  gameOver: (distance: number, time: number, cps: number) =>
-    GA.event('game_over', { distance, survival_time: time, peak_cps: cps }),
-  retry: () => GA.event('retry'),
-  pause: () => GA.event('pause'),
-  resume: () => GA.event('resume'),
-  achievementUnlock: (id: string) => GA.event('achievement_unlock', { achievement_id: id }),
-  powerUpCollected: (type: string) => GA.event('power_up_collected', { type }),
-  bossSpawn: () => GA.event('boss_spawn'),
-  peakCps: (cps: number) => GA.event('peak_cps', { value: cps }),
-};
-
-// ============================================================
-// AUDIO MANAGER
-// ============================================================
-class AudioManager {
-  ctx: AudioContext | null = null;
-  muted = false;
-
-  init() {
-    if (!this.ctx && !this.muted && typeof window !== 'undefined') {
-      try {
-        const AC = window.AudioContext || (window as any).webkitAudioContext;
-        if (AC) this.ctx = new AC();
-      } catch { console.warn('Web Audio API not supported'); }
-    }
-  }
-
-  private safe(fn: () => void) {
-    if (this.muted || !this.ctx || this.ctx.state === 'suspended') return;
-    try { fn(); } catch (e) { console.error(e); }
-  }
-
-  playBoost() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(120, this.ctx!.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(40, this.ctx!.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.05, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.2);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 0.2);
-    });
-  }
-
-  playCollision() {
-    this.init();
-    this.safe(() => {
-      const noise = this.ctx!.createBufferSource();
-      const bufferSize = this.ctx!.sampleRate * 0.5;
-      const buffer = this.ctx!.createBuffer(1, bufferSize, this.ctx!.sampleRate);
-      const data = buffer.getChannelData(0);
-      for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-      noise.buffer = buffer;
-      const filter = this.ctx!.createBiquadFilter();
-      filter.type = 'lowpass';
-      filter.frequency.setValueAtTime(800, this.ctx!.currentTime);
-      filter.frequency.exponentialRampToValueAtTime(40, this.ctx!.currentTime + 0.6);
-      const gain = this.ctx!.createGain();
-      gain.gain.setValueAtTime(0.4, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.6);
-      noise.connect(filter); filter.connect(gain); gain.connect(this.ctx!.destination);
-      noise.start();
-    });
-  }
-
-  playGameOver() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(150, this.ctx!.currentTime);
-      osc.frequency.linearRampToValueAtTime(40, this.ctx!.currentTime + 1.2);
-      gain.gain.setValueAtTime(0.2, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 1.2);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 1.2);
-    });
-  }
-
-  playNearMiss() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, this.ctx!.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, this.ctx!.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.03, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.15);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 0.15);
-    });
-  }
-
-  playPowerUp() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, this.ctx!.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, this.ctx!.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.08, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.3);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 0.3);
-    });
-  }
-
-  playBossSpawn() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(80, this.ctx!.currentTime);
-      osc.frequency.linearRampToValueAtTime(40, this.ctx!.currentTime + 0.8);
-      gain.gain.setValueAtTime(0.15, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.8);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 0.8);
-    });
-  }
-
-  playAchievement() {
-    this.init();
-    this.safe(() => {
-      const notes = [523, 659, 784, 1047];
-      notes.forEach((freq, i) => {
-        const osc = this.ctx!.createOscillator();
-        const gain = this.ctx!.createGain();
-        const t = this.ctx!.currentTime + i * 0.1;
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, t);
-        gain.gain.setValueAtTime(0.06, t);
-        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
-        osc.connect(gain); gain.connect(this.ctx!.destination);
-        osc.start(t); osc.stop(t + 0.2);
-      });
-    });
-  }
-
-  playCountdown() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, this.ctx!.currentTime);
-      gain.gain.setValueAtTime(0.1, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.15);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 0.15);
-    });
-  }
-
-  playGo() {
-    this.init();
-    this.safe(() => {
-      const osc = this.ctx!.createOscillator();
-      const gain = this.ctx!.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, this.ctx!.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, this.ctx!.currentTime + 0.3);
-      gain.gain.setValueAtTime(0.15, this.ctx!.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx!.currentTime + 0.3);
-      osc.connect(gain); gain.connect(this.ctx!.destination);
-      osc.start(); osc.stop(this.ctx!.currentTime + 0.3);
-    });
-  }
-}
-
-const audio = new AudioManager();
-
-// ============================================================
-// CONSTANTS
-// ============================================================
-const GRAVITY = 0.35;
-const BOOST_STRENGTH = -0.75;
-const MAX_VELOCITY = 7;
-const INITIAL_SPEED = 5;
-const SPEED_INCREMENT = 0.4;
-const VOYAGER_X = 120;
-const CANVAS_WIDTH = 900;
-const CANVAS_HEIGHT = 500;
-
-const DIFFICULTY_CONFIG = {
-  easy:   { speedMult: 0.7,  spawnMult: 1.6, gravityMult: 0.8 },
-  normal: { speedMult: 1.0,  spawnMult: 1.0, gravityMult: 1.0 },
-  hard:   { speedMult: 1.35, spawnMult: 0.6, gravityMult: 1.15 },
-};
-
-const POWERUP_COLORS: Record<string, string> = {
-  shield:       '#22c55e',
-  slowmo:       '#3b82f6',
-  doubleboost:  '#f59e0b',
-  multiplier:   '#a855f7',
-  invincibility:'#ec4899',
-};
-
-const POWERUP_ICONS: Record<string, string> = {
-  shield: '🛡️', slowmo: '⏱️', doubleboost: '⚡', multiplier: '✖️', invincibility: '💫',
-};
-
-const ACHIEVEMENT_DEFS: Omit<Achievement, 'unlocked' | 'unlockedAt'>[] = [
-  { id: 'first_flight',   title: 'First Flight',    description: 'Complete your first mission',    icon: '🚀' },
-  { id: 'dist_500',       title: 'Explorer',         description: 'Travel 500 distance',            icon: '🌠' },
-  { id: 'dist_1000',      title: 'Deep Space',       description: 'Travel 1,000 distance',          icon: '🌌' },
-  { id: 'dist_5000',      title: 'Voyager Elite',    description: 'Travel 5,000 distance',          icon: '🏆' },
-  { id: 'cps_10',         title: 'Speed Fingers',    description: 'Reach 10 CPS',                   icon: '⚡' },
-  { id: 'cps_15',         title: 'Lightning Hands',  description: 'Reach 15 CPS',                   icon: '🌩️' },
-  { id: 'avoid_20',       title: 'Dodger',           description: 'Avoid 20 obstacles in one run',  icon: '🎯' },
-  { id: 'avoid_50',       title: 'Matrix',           description: 'Avoid 50 obstacles in one run',  icon: '🕶️' },
-  { id: 'survivor_60',    title: 'Survivor',         description: 'Survive for 60 seconds',         icon: '⏱️' },
-  { id: 'space_master',   title: 'Space Master',     description: 'Survive for 120 seconds',        icon: '👑' },
-  { id: 'near_miss_5',    title: 'Daredevil',        description: 'Get 5 near misses in one run',   icon: '😎' },
-  { id: 'boss_survived',  title: 'Boss Slayer',      description: 'Survive a boss asteroid',        icon: '💀' },
-];
-
-// ============================================================
-// LOCAL STORAGE HELPERS
-// ============================================================
-const LS = {
-  get: <T,>(key: string, fallback: T): T => {
-    try {
-      const v = localStorage.getItem(key);
-      return v ? JSON.parse(v) : fallback;
-    } catch { return fallback; }
+  Medium: {
+    minSize: 40, maxSize: 70, spawnInterval: 800,
+    targetLifetime: 2000, maxTargets: 5,
+    label: 'Medium', color: 'var(--neon-cyan, #00f5ff)', scoreMultiplier: 2,
   },
-  set: <T,>(key: string, val: T) => {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* quota */ }
+  Hard: {
+    minSize: 25, maxSize: 50, spawnInterval: 500,
+    targetLifetime: 1200, maxTargets: 7,
+    label: 'Hard', color: 'var(--neon-orange, #f97316)', scoreMultiplier: 3,
+  },
+  Impossible: {
+    minSize: 15, maxSize: 35, spawnInterval: 280,
+    targetLifetime: 700, maxTargets: 10,
+    label: 'Impossible', color: 'var(--neon-red, #ff2d55)', scoreMultiplier: 5,
   },
 };
 
-// ============================================================
-// DIRECT DOM UPDATE (avoids React re-render lag in game loop)
-// ============================================================
-const updateHUD = (id: string, value: string | number) => {
-  const el = document.getElementById(id);
-  if (el) el.innerText = value.toString();
-};
+// ─── Duration Options ─────────────────────────────────────────────────────────
+const DURATION_OPTIONS = [10, 30, 60, 120] as const;
+type Duration = typeof DURATION_OPTIONS[number];
+const DEFAULT_DURATION: Duration = 30;
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
-export default function VoyagerGame() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  const [uiView, setUiView] = useState<UiView>('start');
-  const [difficulty, setDifficulty] = useState<Difficulty>('normal');
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [showFps, setShowFps] = useState(false);
-  const [highScores, setHighScores] = useState<HighScores>(() =>
-    LS.get('voyager_highscores', { bestDistance: 0, bestTime: 0, highestCps: 0, mostAvoided: 0 })
-  );
-  const [lifetimeStats, setLifetimeStats] = useState<LifetimeStats>(() =>
-    LS.get('voyager_lifetime', {
-      gamesPlayed: 0, totalDistance: 0, totalTime: 0, totalAvoided: 0,
-      highestCps: 0, highestDistance: 0, averageCpsSum: 0, averageCpsCount: 0,
-    })
-  );
-  const [achievements, setAchievements] = useState<Achievement[]>(() => {
-    const saved = LS.get<Record<string, boolean>>('voyager_achievements', {});
-    return ACHIEVEMENT_DEFS.map(d => ({ ...d, unlocked: !!saved[d.id] }));
-  });
-  const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
-  const [activePowerUps, setActivePowerUps] = useState<{ type: string; remaining: number; total: number }[]>([]);
-  const [countdownNum, setCountdownNum] = useState<number | 'GO!' | null>(null);
-  const [showStats, setShowStats] = useState(false);
-  const [showAchievements, setShowAchievements] = useState(false);
-  const [combo, setCombo] = useState(0);
-  const [scoreMultiplier, setScoreMultiplier] = useState(1);
-  const fpsRef = useRef(0);
-  const lastFrameTimeRef = useRef(0);
+// ─── Grade System ─────────────────────────────────────────────────────────────
+type Grade = 'S+' | 'S' | 'A' | 'B' | 'C' | 'D';
 
-  // ============================================================
-  // GAME STATE REF (single source of truth for the game loop)
-  // ============================================================
-  const g = useRef({
-    status: 'start' as GameStatus,
-    y: CANVAS_HEIGHT / 2,
-    vel: 0,
-    speed: INITIAL_SPEED,
-    distance: 0,
-    avoided: 0,
-    time: 0,
-    cps: 0,
-    peakCps: 0,
-    isBoosting: false,
-    startTime: 0,
-    lastSpawn: 0,
-    lastSpeedUp: 0,
-    lastPowerUpSpawn: 0,
-    lastBossSpawn: 0,
-    clickTimes: [] as number[],
-    obstacles: [] as Obstacle[],
-    powerUps: [] as PowerUp[],
-    particles: [] as Particle[],
-    floatingTexts: [] as FloatingText[],
-    stars: [] as { x: number; y: number; z: number; size: number }[],
-    screenShake: 0,
-    difficulty: 'normal' as Difficulty,
-    combo: 0,
-    nearMissCount: 0,
-    scoreMultiplier: 1,
-    // Power up states
-    hasShield: false,
-    shieldEnd: 0,
-    hasSlowmo: false,
-    slowmoEnd: 0,
-    hasDoubleBoost: false,
-    doubleBoostEnd: 0,
-    hasMultiplier: false,
-    multiplierEnd: 0,
-    hasInvincibility: false,
-    invincibilityEnd: 0,
-    // Replay recording
-    replayFrames: [] as ReplayFrame[],
-    frameCount: 0,
-    // Ghost
-    ghostFrames: [] as ReplayFrame[],
-    // Boss
-    bossSpawned: false,
-    bossCleared: false,
-    // FPS
-    fps: 0,
-    fpsFrameCount: 0,
-    fpsLastTime: 0,
-  });
+function calcGrade(acc: number, avgReaction: number, hitsPerSec: number): Grade {
+  const accScore      = acc;
+  const reactionScore = avgReaction === 0 ? 100 : Math.max(0, 100 - (avgReaction - 150) / 5);
+  const hpsScore      = Math.min(100, hitsPerSec * 20);
+  const total = accScore * 0.4 + reactionScore * 0.3 + hpsScore * 0.3;
+  if (total >= 95) return 'S+';
+  if (total >= 85) return 'S';
+  if (total >= 72) return 'A';
+  if (total >= 58) return 'B';
+  if (total >= 42) return 'C';
+  return 'D';
+}
 
-  const actionsRef = useRef<{
-    start: () => void;
-    boostUp: () => void;
-    boostDown: () => void;
-    pause: () => void;
-    resume: () => void;
-  } | null>(null);
+// ─── Types ───────────────────────────────────────────────────────────────────
+interface Target {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  spawnTime: number;
+}
 
-  // ============================================================
-  // FULLSCREEN
-  // ============================================================
-  const toggleFullscreen = useCallback(async () => {
-    const el = containerRef.current;
-    if (!el) return;
-    try {
-      if (!document.fullscreenElement) {
-        await el.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        await document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    } catch { /* ignore */ }
-  }, []);
+interface SessionResult {
+  score: number;
+  misses: number;
+  acc: number;
+  missPct: number;
+  avgReaction: number;
+  hitsPerSec: number;
+  combo: number;
+  grade: Grade;
+  duration: number;
+  totalTime: number;
+  difficulty: Difficulty;
+}
 
+type Phase = 'idle' | 'running' | 'paused' | 'done';
+
+// ─── Sound Engine ─────────────────────────────────────────────────────────────
+function playHit(ctx: AudioContext) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(1200, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.08);
+  gain.gain.setValueAtTime(0.3,  ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+function playMiss(ctx: AudioContext) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(120, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.1);
+  gain.gain.setValueAtTime(0.2,  ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.12);
+}
+
+function playCombo(ctx: AudioContext, level: number) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  const freq = 800 + level * 200;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(freq * 1.5, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.25, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.2);
+}
+
+// NEW: countdown "beep" (3, 2, 1) sound
+function playCountdownBeep(ctx: AudioContext) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, ctx.currentTime);
+  gain.gain.setValueAtTime(0.28, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.15);
+}
+
+// NEW: countdown "GO!" sound
+function playCountdownGo(ctx: AudioContext) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1300, ctx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.32, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.3);
+}
+
+// ─── JSON-LD ──────────────────────────────────────────────────────────────────
+const JSON_LD_APP = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Aim Trainer — Free Online Aim Training & Mouse Accuracy Test',
+  description:
+    'Free online aim trainer. Improve mouse accuracy, flick speed, and reaction time for FPS games like CS2, Valorant, Fortnite, and more.',
+  applicationCategory: 'GameApplication',
+  operatingSystem: 'Any',
+  browserRequirements: 'Requires JavaScript and Web Audio API support.',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  featureList: [
+    'Mouse accuracy training',
+    'Reaction time measurement',
+    'Combo streak system',
+    'Performance grade',
+    'Multiple difficulty levels',
+    'Fullscreen mode',
+  ],
+});
+
+function JsonLd({ data }: { data: string }) {
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handler);
-    return () => document.removeEventListener('fullscreenchange', handler);
-  }, []);
-
-  // ============================================================
-  // SOUND TOGGLE
-  // ============================================================
-  const toggleSound = () => {
-    const next = !isMuted;
-    audio.muted = next;
-    setIsMuted(next);
-    if (!next) audio.init();
-  };
-
-  // ============================================================
-  // ACHIEVEMENTS CHECK
-  // ============================================================
-  const checkAchievements = useCallback((state: typeof g.current) => {
-    setAchievements(prev => {
-      const unlocked: Achievement[] = [];
-      const next = prev.map(a => {
-        if (a.unlocked) return a;
-        let shouldUnlock = false;
-        switch (a.id) {
-          case 'first_flight':    shouldUnlock = true; break;
-          case 'dist_500':        shouldUnlock = state.distance >= 500; break;
-          case 'dist_1000':       shouldUnlock = state.distance >= 1000; break;
-          case 'dist_5000':       shouldUnlock = state.distance >= 5000; break;
-          case 'cps_10':          shouldUnlock = state.peakCps >= 10; break;
-          case 'cps_15':          shouldUnlock = state.peakCps >= 15; break;
-          case 'avoid_20':        shouldUnlock = state.avoided >= 20; break;
-          case 'avoid_50':        shouldUnlock = state.avoided >= 50; break;
-          case 'survivor_60':     shouldUnlock = state.time >= 60; break;
-          case 'space_master':    shouldUnlock = state.time >= 120; break;
-          case 'near_miss_5':     shouldUnlock = state.nearMissCount >= 5; break;
-          case 'boss_survived':   shouldUnlock = state.bossCleared; break;
-        }
-        if (shouldUnlock) {
-          const updated = { ...a, unlocked: true, unlockedAt: Date.now() };
-          unlocked.push(updated);
-          audio.playAchievement();
-          GA.achievementUnlock(a.id);
-          return updated;
-        }
-        return a;
-      });
-      if (unlocked.length > 0) {
-        // Persist
-        const savedMap: Record<string, boolean> = {};
-        next.forEach(a => { if (a.unlocked) savedMap[a.id] = true; });
-        LS.set('voyager_achievements', savedMap);
-        setNewAchievements(u => [...u, ...unlocked]);
-        setTimeout(() => setNewAchievements(u => u.slice(unlocked.length)), 4000);
-      }
-      return next;
-    });
-  }, []);
-
-  // ============================================================
-  // HIGH SCORE UPDATE
-  // ============================================================
-  const updateHighScores = useCallback((state: typeof g.current) => {
-    setHighScores(prev => {
-      const next: HighScores = {
-        bestDistance: Math.max(prev.bestDistance, Math.floor(state.distance)),
-        bestTime: Math.max(prev.bestTime, state.time),
-        highestCps: Math.max(prev.highestCps, state.peakCps),
-        mostAvoided: Math.max(prev.mostAvoided, state.avoided),
-      };
-      LS.set('voyager_highscores', next);
-      return next;
-    });
-  }, []);
-
-  // ============================================================
-  // LIFETIME STATS UPDATE
-  // ============================================================
-  const updateLifetimeStats = useCallback((state: typeof g.current) => {
-    setLifetimeStats(prev => {
-      const next: LifetimeStats = {
-        gamesPlayed: prev.gamesPlayed + 1,
-        totalDistance: prev.totalDistance + Math.floor(state.distance),
-        totalTime: prev.totalTime + state.time,
-        totalAvoided: prev.totalAvoided + state.avoided,
-        highestCps: Math.max(prev.highestCps, state.peakCps),
-        highestDistance: Math.max(prev.highestDistance, Math.floor(state.distance)),
-        averageCpsSum: prev.averageCpsSum + state.peakCps,
-        averageCpsCount: prev.averageCpsCount + 1,
-      };
-      LS.set('voyager_lifetime', next);
-      return next;
-    });
-  }, []);
-
-  // ============================================================
-  // COUNTDOWN
-  // ============================================================
-  const startCountdown = useCallback((onDone: () => void) => {
-    setUiView('countdown');
-    g.current.status = 'countdown';
-    const steps: (number | 'GO!')[] = [3, 2, 1, 'GO!'];
-    let i = 0;
-    const tick = () => {
-      setCountdownNum(steps[i]);
-      if (typeof steps[i] === 'number') audio.playCountdown();
-      else audio.playGo();
-      i++;
-      if (i < steps.length) {
-        setTimeout(tick, i === steps.length - 1 ? 600 : 800);
-      } else {
-        setTimeout(() => {
-          setCountdownNum(null);
-          onDone();
-        }, 600);
-      }
-    };
-    tick();
-  }, []);
-
-  // ============================================================
-  // ACTIVE POWER UP HUD SYNC
-  // ============================================================
-  const syncActivePowerUps = useCallback(() => {
-    const now = Date.now();
-    const state = g.current;
-    const active: { type: string; remaining: number; total: number }[] = [];
-    if (state.hasShield)       active.push({ type: 'shield',       remaining: Math.max(0, state.shieldEnd - now),       total: 5000 });
-    if (state.hasSlowmo)       active.push({ type: 'slowmo',       remaining: Math.max(0, state.slowmoEnd - now),       total: 5000 });
-    if (state.hasDoubleBoost)  active.push({ type: 'doubleboost',  remaining: Math.max(0, state.doubleBoostEnd - now),  total: 5000 });
-    if (state.hasMultiplier)   active.push({ type: 'multiplier',   remaining: Math.max(0, state.multiplierEnd - now),   total: 8000 });
-    if (state.hasInvincibility)active.push({ type: 'invincibility',remaining: Math.max(0, state.invincibilityEnd - now),total: 4000 });
-    setActivePowerUps(active);
-    setCombo(state.combo);
-    setScoreMultiplier(state.scoreMultiplier);
-  }, []);
-
-  // ============================================================
-  // MAIN GAME EFFECT (canvas setup + game loop)
-  // ============================================================
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
-
-    let frameId: number;
-    let hudSyncInterval: ReturnType<typeof setInterval>;
-
-    // Init stars
-    g.current.stars = Array.from({ length: 180 }, () => ({
-      x: Math.random() * CANVAS_WIDTH,
-      y: Math.random() * CANVAS_HEIGHT,
-      z: Math.random() * 8 + 1,
-      size: Math.random() * 2 + 0.5,
-    }));
-
-    // ----------------------------------------------------------
-    // Obstacle factory
-    // ----------------------------------------------------------
-    const createObstacle = (speed: number, forceBoss = false): Obstacle => {
-      if (forceBoss) {
-        const size = 80 + Math.random() * 40;
-        const points: Point[] = [];
-        const seg = 14;
-        for (let i = 0; i < seg; i++) {
-          const angle = (i / seg) * Math.PI * 2;
-          const r = size * (0.75 + Math.random() * 0.35);
-          points.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
-        }
-        return {
-          x: CANVAS_WIDTH + size * 2,
-          y: CANVAS_HEIGHT / 2,
-          radius: size,
-          speed: speed * 0.7,
-          rotation: 0,
-          rotationSpeed: 0.012,
-          type: 'boss',
-          isBoss: true,
-          hp: 1,
-          maxHp: 1,
-          glowPhase: 0,
-          points,
-        };
-      }
-      const size = 20 + Math.random() * 45;
-      const type = Math.random() > 0.85 ? 'comet' : 'asteroid';
-      const points: Point[] = [];
-      const segments = 9 + Math.floor(Math.random() * 6);
-      for (let i = 0; i < segments; i++) {
-        const angle = (i / segments) * Math.PI * 2;
-        const r = size * (0.7 + Math.random() * 0.4);
-        points.push({ x: Math.cos(angle) * r, y: Math.sin(angle) * r });
-      }
-      return {
-        x: CANVAS_WIDTH + size * 2,
-        y: Math.random() * CANVAS_HEIGHT,
-        radius: size,
-        speed: speed + Math.random() * 2,
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.04,
-        type,
-        points,
-      };
-    };
-
-    // ----------------------------------------------------------
-    // Power-up factory
-    // ----------------------------------------------------------
-    const createPowerUp = (speed: number): PowerUp => {
-      const types: PowerUp['type'][] = ['shield', 'slowmo', 'doubleboost', 'multiplier', 'invincibility'];
-      return {
-        x: CANVAS_WIDTH + 30,
-        y: 60 + Math.random() * (CANVAS_HEIGHT - 120),
-        type: types[Math.floor(Math.random() * types.length)],
-        radius: 18,
-        speed: speed * 0.8,
-        life: 1,
-        glowPhase: 0,
-      };
-    };
-
-    // ----------------------------------------------------------
-    // Floating text helper
-    // ----------------------------------------------------------
-    const addFloat = (x: number, y: number, text: string, color: string, size = 18) => {
-      g.current.floatingTexts.push({ x, y, text, life: 1, color, vy: -2, size });
-    };
-
-    // ----------------------------------------------------------
-    // Game over handler
-    // ----------------------------------------------------------
-    const triggerGameOver = () => {
-      const state = g.current;
-      state.status = 'gameover';
-      state.isBoosting = false;
-      audio.playCollision();
-      audio.playGameOver();
-
-      // Explosion particles
-      for (let i = 0; i < 60; i++) {
-        state.particles.push({
-          x: VOYAGER_X, y: state.y,
-          vx: (Math.random() - 0.5) * 16,
-          vy: (Math.random() - 0.5) * 16,
-          life: 1,
-          color: Math.random() > 0.4 ? '#ff6b35' : '#ef4444',
-          size: Math.random() * 4 + 2,
-        });
-      }
-      state.screenShake = 25;
-
-      // Save best ghost run
-      LS.set('voyager_ghost', state.replayFrames.slice(-600));
-
-      // Analytics
-      GA.gameOver(Math.floor(state.distance), state.time, state.peakCps);
-      if (state.peakCps > 0) GA.peakCps(state.peakCps);
-
-      // Side effects via React
-      updateHighScores(state);
-      updateLifetimeStats(state);
-      checkAchievements(state);
-      setUiView('gameover');
-    };
-
-    // ----------------------------------------------------------
-    // Obstacle update with power-up awareness
-    // ----------------------------------------------------------
-    const updateObstacles = (state: typeof g.current, now: number) => {
-      const cfg = DIFFICULTY_CONFIG[state.difficulty];
-      const survivalSecs = Math.floor((now - state.startTime) / 1000);
-
-      // Boss spawn every 90s
-      const bossCooldown = 90000;
-      if (!state.bossSpawned && now - state.lastBossSpawn > bossCooldown && survivalSecs > 30) {
-        state.obstacles.push(createObstacle(state.speed * cfg.speedMult, true));
-        state.bossSpawned = true;
-        state.lastBossSpawn = now;
-        audio.playBossSpawn();
-        GA.bossSpawn();
-        addFloat(CANVAS_WIDTH / 2, 80, '⚠️ BOSS ASTEROID!', '#ef4444', 22);
-      }
-
-      const slowFactor = state.hasSlowmo ? 0.4 : 1;
-
-      state.obstacles = state.obstacles.filter(obs => {
-        if (obs.isBoss && obs.glowPhase !== undefined) obs.glowPhase! += 0.05;
-        obs.x -= obs.speed * slowFactor;
-        obs.rotation += obs.rotationSpeed * slowFactor;
-
-        const dx = obs.x - VOYAGER_X;
-        const dy = obs.y - state.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        const hitRadius = obs.radius + 18;
-
-        if (dist < hitRadius) {
-          if (state.hasShield || state.hasInvincibility) {
-            // Shield absorbs hit
-            state.hasShield = false;
-            state.hasInvincibility = false;
-            state.screenShake = 10;
-            for (let i = 0; i < 20; i++) {
-              state.particles.push({
-                x: VOYAGER_X, y: state.y,
-                vx: (Math.random() - 0.5) * 8,
-                vy: (Math.random() - 0.5) * 8,
-                life: 0.8, color: '#22c55e', size: Math.random() * 3 + 1,
-              });
-            }
-            addFloat(VOYAGER_X, state.y - 40, '🛡️ SHIELD!', '#22c55e', 16);
-            return false; // destroy obstacle
-          } else {
-            triggerGameOver();
-            return false;
-          }
-        }
-
-        // Near miss
-        if (!obs.hasNearMissed && dist < obs.radius + 55 && obs.x < VOYAGER_X + 25 && obs.x > VOYAGER_X - 25) {
-          audio.playNearMiss();
-          obs.hasNearMissed = true;
-          state.nearMissCount++;
-          state.combo++;
-          state.combo = Math.min(state.combo, 10);
-          const mult = 1 + state.combo * 0.1;
-          state.scoreMultiplier = mult;
-          addFloat(VOYAGER_X + 20, state.y - 35, `NEAR MISS! ×${mult.toFixed(1)}`, '#00f5ff', 15);
-        }
-
-        if (obs.x < -obs.radius * 2) {
-          state.avoided++;
-          if (obs.isBoss) {
-            state.bossSpawned = false;
-            state.bossCleared = true;
-            addFloat(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 60, '👑 BOSS CLEARED!', '#eab308', 24);
-          }
-          updateHUD('stat-avoided', state.avoided);
-          return false;
-        }
-        return true;
-      });
-    };
-
-    // ----------------------------------------------------------
-    // Power-up update
-    // ----------------------------------------------------------
-    const updatePowerUps = (state: typeof g.current, now: number) => {
-      const cfg = DIFFICULTY_CONFIG[state.difficulty];
-
-      // Spawn
-      if (now - state.lastPowerUpSpawn > 18000) {
-        state.powerUps.push(createPowerUp(state.speed * cfg.speedMult));
-        state.lastPowerUpSpawn = now;
-      }
-
-      const slowFactor = state.hasSlowmo ? 0.4 : 1;
-
-      state.powerUps = state.powerUps.filter(pu => {
-        pu.x -= pu.speed * slowFactor;
-        pu.glowPhase += 0.06;
-
-        if (pu.x < -60) return false;
-
-        const dx = pu.x - VOYAGER_X;
-        const dy = pu.y - state.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-
-        if (dist < pu.radius + 22 && !pu.collected) {
-          pu.collected = true;
-          audio.playPowerUp();
-          GA.powerUpCollected(pu.type);
-          const dur = 5000;
-
-          switch (pu.type) {
-            case 'shield':
-              state.hasShield = true;
-              state.shieldEnd = now + dur;
-              break;
-            case 'slowmo':
-              state.hasSlowmo = true;
-              state.slowmoEnd = now + dur;
-              break;
-            case 'doubleboost':
-              state.hasDoubleBoost = true;
-              state.doubleBoostEnd = now + dur;
-              break;
-            case 'multiplier':
-              state.hasMultiplier = true;
-              state.multiplierEnd = now + 8000;
-              state.scoreMultiplier = Math.min(state.scoreMultiplier * 2, 8);
-              break;
-            case 'invincibility':
-              state.hasInvincibility = true;
-              state.invincibilityEnd = now + 4000;
-              break;
-          }
-
-          for (let i = 0; i < 15; i++) {
-            state.particles.push({
-              x: pu.x, y: pu.y,
-              vx: (Math.random() - 0.5) * 8,
-              vy: (Math.random() - 0.5) * 8,
-              life: 0.9,
-              color: POWERUP_COLORS[pu.type],
-              size: Math.random() * 3 + 1,
-            });
-          }
-          addFloat(pu.x, pu.y - 30, `${POWERUP_ICONS[pu.type]} ${pu.type.toUpperCase()}!`, POWERUP_COLORS[pu.type], 16);
-          return false;
-        }
-        return true;
-      });
-
-      // Expire power-ups
-      if (state.hasShield && now > state.shieldEnd) state.hasShield = false;
-      if (state.hasSlowmo && now > state.slowmoEnd) state.hasSlowmo = false;
-      if (state.hasDoubleBoost && now > state.doubleBoostEnd) state.hasDoubleBoost = false;
-      if (state.hasMultiplier && now > state.multiplierEnd) {
-        state.hasMultiplier = false;
-        state.scoreMultiplier = 1 + state.combo * 0.1;
-      }
-      if (state.hasInvincibility && now > state.invincibilityEnd) state.hasInvincibility = false;
-    };
-
-    // ----------------------------------------------------------
-    // ACTIONS
-    // ----------------------------------------------------------
-    actionsRef.current = {
-      start: () => {
-        const now = Date.now();
-        const cfg = DIFFICULTY_CONFIG[difficulty];
-        const ghostFrames = LS.get<ReplayFrame[]>('voyager_ghost', []);
-
-        Object.assign(g.current, {
-          status: 'countdown',
-          y: CANVAS_HEIGHT / 2, vel: 0,
-          speed: INITIAL_SPEED * cfg.speedMult,
-          distance: 0, avoided: 0, time: 0, cps: 0, peakCps: 0,
-          isBoosting: false, startTime: 0,
-          lastSpawn: now, lastSpeedUp: now,
-          lastPowerUpSpawn: now, lastBossSpawn: 0,
-          clickTimes: [], obstacles: [], powerUps: [],
-          particles: [], floatingTexts: [],
-          screenShake: 0,
-          difficulty,
-          combo: 0, nearMissCount: 0, scoreMultiplier: 1,
-          hasShield: false, hasSlowmo: false, hasDoubleBoost: false,
-          hasMultiplier: false, hasInvincibility: false,
-          replayFrames: [], frameCount: 0,
-          ghostFrames, bossSpawned: false, bossCleared: false,
-          fpsFrameCount: 0, fpsLastTime: now,
-        });
-        setActivePowerUps([]);
-        setCombo(0);
-        setScoreMultiplier(1);
-
-        startCountdown(() => {
-          const startNow = Date.now();
-          g.current.status = 'playing';
-          g.current.startTime = startNow;
-          g.current.lastSpawn = startNow;
-          g.current.lastSpeedUp = startNow;
-          setUiView('playing');
-          GA.gameStart(difficulty);
-          if (!audio.muted) audio.init();
-        });
-      },
-
-      boostUp: () => {
-        if (g.current.status !== 'playing') return;
-        g.current.isBoosting = true;
-        audio.playBoost();
-        g.current.clickTimes.push(Date.now());
-      },
-
-      boostDown: () => { g.current.isBoosting = false; },
-
-      pause: () => {
-        if (g.current.status !== 'playing') return;
-        g.current.status = 'paused';
-        g.current.isBoosting = false;
-        setUiView('paused');
-        GA.pause();
-      },
-
-      resume: () => {
-        if (g.current.status !== 'paused') return;
-        g.current.status = 'playing';
-        // Adjust timers to account for pause duration
-        const now = Date.now();
-        setUiView('playing');
-        GA.resume();
-      },
-    };
-
-    // ----------------------------------------------------------
-    // UPDATE (physics + logic)
-    // ----------------------------------------------------------
-    const update = () => {
-      const state = g.current;
-      if (state.status !== 'playing') return;
-      const now = Date.now();
-      const cfg = DIFFICULTY_CONFIG[state.difficulty];
-
-      // FPS calc
-      state.fpsFrameCount++;
-      if (now - state.fpsLastTime >= 1000) {
-        state.fps = state.fpsFrameCount;
-        state.fpsFrameCount = 0;
-        state.fpsLastTime = now;
-        fpsRef.current = state.fps;
-        updateHUD('stat-fps', `${state.fps}`);
-      }
-
-      // CPS
-      const oneSecAgo = now - 1000;
-      state.clickTimes = state.clickTimes.filter(t => t > oneSecAgo);
-      if (state.cps !== state.clickTimes.length) {
-        state.cps = state.clickTimes.length;
-        if (state.cps > state.peakCps) {
-          state.peakCps = state.cps;
-          updateHUD('stat-cps', state.cps);
-        } else {
-          updateHUD('stat-cps', state.cps);
-        }
-      }
-
-      if (state.screenShake > 0) state.screenShake--;
-
-      // Gravity (difficulty-adjusted)
-      const grav = GRAVITY * cfg.gravityMult;
-
-      // Boost
-      const boostStr = state.hasDoubleBoost ? BOOST_STRENGTH * 1.6 : BOOST_STRENGTH;
-      if (state.isBoosting) {
-        state.vel += boostStr;
-        const count = state.hasDoubleBoost ? 3 : 1;
-        for (let n = 0; n < count; n++) {
-          if (state.particles.length < 120) {
-            state.particles.push({
-              x: VOYAGER_X - 15,
-              y: state.y + (Math.random() - 0.5) * 8,
-              vx: -3 - Math.random() * 5,
-              vy: (Math.random() - 0.5) * 2.5,
-              life: 0.8,
-              color: state.hasDoubleBoost ? 'rgba(245,158,11,0.8)' : 'rgba(0,245,255,0.7)',
-              size: Math.random() * 3 + 1,
-            });
-          }
-        }
-      }
-
-      state.vel += grav;
-      state.vel = Math.min(Math.max(state.vel, -MAX_VELOCITY), MAX_VELOCITY);
-      state.y += state.vel;
-
-      if (state.y < 0 || state.y > CANVAS_HEIGHT) {
-        triggerGameOver();
-        return;
-      }
-
-      // Distance (with multiplier)
-      const distInc = (state.speed * cfg.speedMult / 10) * state.scoreMultiplier;
-      state.distance += distInc;
-      updateHUD('stat-distance', Math.floor(state.distance).toLocaleString());
-
-      // Survival time
-      const survivalSecs = Math.floor((now - state.startTime) / 1000);
-      if (survivalSecs !== state.time) {
-        state.time = survivalSecs;
-        updateHUD('stat-time', `${survivalSecs}s`);
-      }
-
-      // Speed ramp
-      if (now - state.lastSpeedUp > 15000) {
-        state.speed += SPEED_INCREMENT;
-        state.lastSpeedUp = now;
-        updateHUD('stat-speed', `${(state.speed * cfg.speedMult).toFixed(1)}u`);
-      }
-
-      // Obstacle spawn
-      const spawnBase = Math.max(1800 - survivalSecs * 60, 500);
-      const spawnInterval = spawnBase * cfg.spawnMult;
-      if (now - state.lastSpawn > spawnInterval) {
-        state.obstacles.push(createObstacle(state.speed * cfg.speedMult));
-        state.lastSpawn = now;
-      }
-
-      updateObstacles(state, now);
-      updatePowerUps(state, now);
-
-      // Floating texts
-      state.floatingTexts = state.floatingTexts.filter(ft => {
-        ft.y += ft.vy;
-        ft.life -= 0.018;
-        return ft.life > 0;
-      });
-
-      // Particles
-      state.particles = state.particles.filter(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.025;
-        return p.life > 0;
-      });
-
-      // Combo decay
-      // (combo only resets on death, not time-based for now)
-
-      // Record replay frame every 2nd frame
-      state.frameCount++;
-      if (state.frameCount % 2 === 0 && state.replayFrames.length < 1800) {
-        state.replayFrames.push({
-          y: state.y,
-          vel: state.vel,
-          time: now,
-          obstacles: state.obstacles.map(o => ({ x: o.x, y: o.y, radius: o.radius, type: o.type, rotation: o.rotation })),
-          powerups: state.powerUps.map(p => ({ x: p.x, y: p.y, type: p.type })),
-        });
-      }
-    };
-
-    // ----------------------------------------------------------
-    // DRAW
-    // ----------------------------------------------------------
-    const draw = (timestamp: number) => {
-      ctx.save();
-      const state = g.current;
-
-      // Screen shake
-      if (state.screenShake > 0) {
-        ctx.translate(
-          (Math.random() - 0.5) * state.screenShake,
-          (Math.random() - 0.5) * state.screenShake
-        );
-      }
-
-      ctx.clearRect(-50, -50, CANVAS_WIDTH + 100, CANVAS_HEIGHT + 100);
-
-      // --- Stars (parallax) ---
-      const activeSpeed = state.status === 'playing' ? state.speed * DIFFICULTY_CONFIG[state.difficulty].speedMult : 1;
-      const slowFactor = state.hasSlowmo ? 0.4 : 1;
-      state.stars.forEach(star => {
-        if (state.status === 'playing') {
-          star.x -= (1 / star.z) * activeSpeed * slowFactor;
-          if (star.x < 0) star.x = CANVAS_WIDTH;
-        }
-        ctx.fillStyle = `rgba(255,255,255,${0.1 + (1 / star.z) * 0.9})`;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size / star.z, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // Update logic
-      update();
-
-      // --- Particles ---
-      state.particles.forEach(p => {
-        ctx.globalAlpha = p.life;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      ctx.globalAlpha = 1;
-
-      // --- Ghost ship (best run) ---
-      if (state.status === 'playing' && state.ghostFrames.length > 0) {
-        const gIdx = Math.min(state.frameCount, state.ghostFrames.length - 1);
-        const gf = state.ghostFrames[gIdx];
-        if (gf) {
-          ctx.save();
-          ctx.globalAlpha = 0.25;
-          ctx.translate(VOYAGER_X + 8, gf.y);
-          ctx.fillStyle = '#00f5ff';
-          ctx.beginPath();
-          ctx.ellipse(0, 0, 20, 10, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.globalAlpha = 1;
-          ctx.restore();
-        }
-      }
-
-      // --- Entities ---
-      if (state.status !== 'start' && state.status !== 'countdown') {
-        // Shield bubble
-        if (state.hasShield || state.hasInvincibility) {
-          ctx.save();
-          ctx.translate(VOYAGER_X, state.y);
-          const shieldGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, 45);
-          shieldGrad.addColorStop(0, 'rgba(34,197,94,0)');
-          shieldGrad.addColorStop(0.7, state.hasInvincibility ? 'rgba(236,72,153,0.15)' : 'rgba(34,197,94,0.12)');
-          shieldGrad.addColorStop(1, state.hasInvincibility ? 'rgba(236,72,153,0.4)' : 'rgba(34,197,94,0.35)');
-          ctx.fillStyle = shieldGrad;
-          ctx.beginPath();
-          ctx.arc(0, 0, 45, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.strokeStyle = state.hasInvincibility ? '#ec4899' : '#22c55e';
-          ctx.lineWidth = 2;
-          ctx.globalAlpha = 0.6 + Math.sin(Date.now() * 0.008) * 0.3;
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-          ctx.restore();
-        }
-
-        // Voyager ship
-        ctx.save();
-        ctx.translate(VOYAGER_X, state.y);
-        ctx.rotate(state.vel * 0.06);
-
-        ctx.strokeStyle = '#f1f5f9';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(-18, 0, 22, -Math.PI / 2.5, Math.PI / 2.5);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(-18, 0);
-        ctx.lineTo(2, 0);
-        ctx.stroke();
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(-10, -10, 28, 20);
-
-        ctx.fillStyle = state.hasDoubleBoost ? '#f59e0b' : '#ff6b35';
-        ctx.fillRect(0, -8, 18, 16);
-
-        ctx.strokeStyle = '#64748b';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(18, 6);
-        ctx.lineTo(50, 16);
-        ctx.stroke();
-
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(45, 12, 12, 10);
-
-        ctx.beginPath();
-        ctx.moveTo(10, -10);
-        ctx.lineTo(20, -45);
-        ctx.stroke();
-
-        ctx.restore();
-
-        // Power-up orbs
-        state.powerUps.forEach(pu => {
-          ctx.save();
-          ctx.translate(pu.x, pu.y);
-          const glow = ctx.createRadialGradient(0, 0, 2, 0, 0, pu.radius * 1.5);
-          glow.addColorStop(0, POWERUP_COLORS[pu.type] + 'ff');
-          glow.addColorStop(0.5, POWERUP_COLORS[pu.type] + '88');
-          glow.addColorStop(1, 'transparent');
-          ctx.fillStyle = glow;
-          ctx.beginPath();
-          ctx.arc(0, 0, pu.radius * 1.5, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#fff';
-          ctx.font = `${pu.radius}px serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(POWERUP_ICONS[pu.type], 0, 0);
-
-          // Pulse ring
-          const pulse = Math.sin(pu.glowPhase) * 0.3 + 0.7;
-          ctx.strokeStyle = POWERUP_COLORS[pu.type];
-          ctx.lineWidth = 2;
-          ctx.globalAlpha = pulse;
-          ctx.beginPath();
-          ctx.arc(0, 0, pu.radius + 6, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.globalAlpha = 1;
-          ctx.restore();
-        });
-
-        // Obstacles
-        state.obstacles.forEach(obs => {
-          ctx.save();
-          ctx.translate(obs.x, obs.y);
-          ctx.rotate(obs.rotation);
-
-          if (obs.type === 'boss') {
-            // Boss glow
-            const bossGrad = ctx.createRadialGradient(0, 0, obs.radius * 0.3, 0, 0, obs.radius * 1.4);
-            const pulse = Math.sin(obs.glowPhase ?? 0) * 0.4 + 0.6;
-            bossGrad.addColorStop(0, `rgba(239,68,68,${pulse})`);
-            bossGrad.addColorStop(0.5, `rgba(220,38,38,0.3)`);
-            bossGrad.addColorStop(1, 'transparent');
-            ctx.fillStyle = bossGrad;
-            ctx.beginPath();
-            ctx.arc(0, 0, obs.radius * 1.4, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.beginPath();
-            ctx.moveTo(obs.points[0].x, obs.points[0].y);
-            obs.points.forEach(p => ctx.lineTo(p.x, p.y));
-            ctx.closePath();
-            const bg = ctx.createRadialGradient(-obs.radius / 4, -obs.radius / 4, 0, 0, 0, obs.radius);
-            bg.addColorStop(0, '#7f1d1d');
-            bg.addColorStop(1, '#1c0202');
-            ctx.fillStyle = bg;
-            ctx.fill();
-            ctx.strokeStyle = `rgba(239,68,68,${pulse})`;
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            // "BOSS" label
-            ctx.rotate(-obs.rotation);
-            ctx.fillStyle = '#ef4444';
-            ctx.font = 'bold 14px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('BOSS', 0, 0);
-
-          } else if (obs.type === 'asteroid') {
-            ctx.beginPath();
-            ctx.moveTo(obs.points[0].x, obs.points[0].y);
-            obs.points.forEach(p => ctx.lineTo(p.x, p.y));
-            ctx.closePath();
-            const grad = ctx.createRadialGradient(-obs.radius / 4, -obs.radius / 4, 0, 0, 0, obs.radius);
-            grad.addColorStop(0, '#64748b');
-            grad.addColorStop(1, '#080d14');
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.strokeStyle = '#475569';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath();
-            ctx.arc(obs.radius / 3, -obs.radius / 5, obs.radius / 4, 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            const cometGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, obs.radius);
-            cometGrad.addColorStop(0, '#fff');
-            cometGrad.addColorStop(0.2, '#00f5ff');
-            cometGrad.addColorStop(1, 'transparent');
-            ctx.fillStyle = cometGrad;
-            ctx.beginPath();
-            ctx.arc(0, 0, obs.radius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.rotate(-obs.rotation);
-            const tailGrad = ctx.createLinearGradient(0, 0, obs.radius * 5, 0);
-            tailGrad.addColorStop(0, 'rgba(0,245,255,0.3)');
-            tailGrad.addColorStop(1, 'transparent');
-            ctx.fillStyle = tailGrad;
-            ctx.beginPath();
-            ctx.moveTo(0, -obs.radius / 1.5);
-            ctx.lineTo(obs.radius * 5, -obs.radius * 1.5);
-            ctx.lineTo(obs.radius * 5, obs.radius * 1.5);
-            ctx.lineTo(0, obs.radius / 1.5);
-            ctx.closePath();
-            ctx.fill();
-          }
-          ctx.restore();
-        });
-
-        // Floating texts
-        state.floatingTexts.forEach(ft => {
-          ctx.globalAlpha = ft.life;
-          ctx.fillStyle = ft.color;
-          ctx.font = `bold ${ft.size}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(ft.text, ft.x, ft.y);
-        });
-        ctx.globalAlpha = 1;
-      }
-
-      // --- Progress Bar (boss timer) ---
-      if (state.status === 'playing') {
-        const survivalSecs = (Date.now() - state.startTime) / 1000;
-        const nextBossIn = 90 - (survivalSecs % 90);
-        const progress = 1 - nextBossIn / 90;
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.fillRect(10, CANVAS_HEIGHT - 14, CANVAS_WIDTH - 20, 6);
-        ctx.fillStyle = progress > 0.85 ? '#ef4444' : '#00f5ff';
-        ctx.fillRect(10, CANVAS_HEIGHT - 14, (CANVAS_WIDTH - 20) * progress, 6);
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.font = '9px sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(`Boss in ${Math.ceil(nextBossIn)}s`, 12, CANVAS_HEIGHT - 16);
-      }
-
-      ctx.restore();
-      frameId = requestAnimationFrame(draw);
-    };
-
-    // ----------------------------------------------------------
-    // KEY HANDLERS
-    // ----------------------------------------------------------
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const s = g.current.status;
-
-      if (e.code === 'Space' || e.key === ' ') {
-        e.preventDefault();
-        if (e.repeat) return;
-        if (s === 'playing') {
-          actionsRef.current?.boostUp();
-        } else if (s === 'start' || s === 'gameover') {
-          actionsRef.current?.start();
-        } else if (s === 'paused') {
-          actionsRef.current?.resume();
-        }
-      }
-
-      if ((e.code === 'Escape' || e.key === 'Escape') && s === 'playing') {
-        actionsRef.current?.pause();
-      }
-      if ((e.code === 'KeyP' || e.key === 'p' || e.key === 'P') && s === 'playing') {
-        actionsRef.current?.pause();
-      }
-      if ((e.code === 'KeyP' || e.key === 'p' || e.key === 'P') && s === 'paused') {
-        actionsRef.current?.resume();
-      }
-    };
-
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space' || e.key === ' ') {
-        actionsRef.current?.boostDown();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    // HUD sync interval (for active power-ups display)
-    hudSyncInterval = setInterval(() => {
-      if (g.current.status === 'playing') syncActivePowerUps();
-    }, 200);
-
-    frameId = requestAnimationFrame(draw);
-
+    const script = document.createElement('script');
+    script.type        = 'application/ld+json';
+    script.textContent = data;
+    document.head.appendChild(script);
     return () => {
-      cancelAnimationFrame(frameId);
-      clearInterval(hudSyncInterval);
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      if (document.head.contains(script)) document.head.removeChild(script);
     };
-  }, [difficulty, startCountdown, syncActivePowerUps, checkAchievements, updateHighScores, updateLifetimeStats]);
-
-  // ============================================================
-  // RENDER
-  // ============================================================
-  return (
-    <>
-      {/* ---- SEO Meta (injected into head via useEffect) ---- */}
-      <SeoHead />
-
-      <div style={{
-        maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem',
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        backgroundColor: '#030712', minHeight: '100vh',
-        color: '#f3f4f6', fontFamily: 'sans-serif',
-      }}>
-
-        {/* === GAME CONTAINER === */}
-        <div
-          ref={containerRef}
-          style={{
-            position: 'relative', width: '100%', maxWidth: '900px',
-            aspectRatio: '16/9',
-            background: 'rgba(8,13,20,0.95)',
-            border: '1px solid rgba(0,245,255,0.2)',
-            borderRadius: '20px', overflow: 'hidden',
-            boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(0,245,255,0.05)',
-            userSelect: 'none', marginBottom: '4rem',
-          }}
-        >
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            aria-label="Voyager Space Game Canvas — click or press Space to boost"
-            style={{ width: '100%', height: '100%', display: 'block', cursor: 'pointer', touchAction: 'none' }}
-            onMouseDown={() => {
-              if (g.current.status === 'playing') actionsRef.current?.boostUp();
-              else if (g.current.status === 'start' || g.current.status === 'gameover') actionsRef.current?.start();
-              else if (g.current.status === 'paused') actionsRef.current?.resume();
-            }}
-            onMouseUp={() => actionsRef.current?.boostDown()}
-            onMouseLeave={() => actionsRef.current?.boostDown()}
-            onTouchStart={(e) => { e.preventDefault(); if (g.current.status === 'playing') actionsRef.current?.boostUp(); else actionsRef.current?.start(); }}
-            onTouchEnd={(e) => { e.preventDefault(); actionsRef.current?.boostDown(); }}
-          />
-
-          {/* ---- HUD (playing) ---- */}
-          {uiView === 'playing' && (
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1rem 1.25rem', display: 'flex', justifyContent: 'space-between', pointerEvents: 'none' }}>
-              {/* Left stats */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', pointerEvents: 'auto' }}>
-                <StatBox id="stat-distance" icon={<TrendingUp size={14} color="#22c55e" />} label="Distance" />
-                <StatBox id="stat-avoided"  icon={<Shield size={14} color="#ff6b35" />} label="Avoided" />
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
-                  <IconBtn onClick={toggleSound} aria-label={isMuted ? 'Unmute' : 'Mute'}>
-                    {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} color="#00f5ff" />}
-                  </IconBtn>
-                  <IconBtn onClick={() => actionsRef.current?.pause()} aria-label="Pause game">
-                    <Pause size={14} color="#fff" />
-                  </IconBtn>
-                  <IconBtn onClick={toggleFullscreen} aria-label="Toggle fullscreen">
-                    {isFullscreen ? <Minimize size={14} color="#fff" /> : <Maximize size={14} color="#fff" />}
-                  </IconBtn>
-                  {showFps && <IconBtn onClick={() => setShowFps(f => !f)} aria-label="Toggle FPS"><Cpu size={14} color="#a855f7" /></IconBtn>}
-                  {!showFps && <IconBtn onClick={() => setShowFps(f => !f)} aria-label="Show FPS"><Cpu size={14} color="#64748b" /></IconBtn>}
-                </div>
-              </div>
-
-              {/* Right stats */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', alignItems: 'flex-end' }}>
-                <StatBox id="stat-cps"   icon={<Zap size={14} color="#eab308" />}    label="CPS" />
-                <StatBox id="stat-speed" icon={<Activity size={14} color="#00f5ff" />} label="Speed" initialValue={`${INITIAL_SPEED.toFixed(1)}u`} />
-                <StatBox id="stat-time"  icon={<Timer size={14} color="#a855f7" />}   label="Time" initialValue="0s" />
-                {showFps && <StatBox id="stat-fps" icon={<Cpu size={14} color="#a855f7" />} label="FPS" initialValue="--" />}
-              </div>
-
-              {/* Active power-ups row */}
-              {activePowerUps.length > 0 && (
-                <div style={{ position: 'absolute', bottom: '2rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '0.5rem', pointerEvents: 'none' }}>
-                  {activePowerUps.map((pu, i) => (
-                    <PowerUpHudItem key={i} pu={pu} />
-                  ))}
-                </div>
-              )}
-
-              {/* Combo */}
-              {combo > 1 && (
-                <div style={{ position: 'absolute', top: '50%', right: '1rem', transform: 'translateY(-50%)', textAlign: 'center', pointerEvents: 'none' }}>
-                  <div style={{ fontSize: '0.6rem', color: '#eab308', fontWeight: '800', letterSpacing: '0.1em' }}>COMBO</div>
-                  <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#eab308', lineHeight: 1 }}>×{scoreMultiplier.toFixed(1)}</div>
-                </div>
-              )}
-
-              {/* Mobile boost button */}
-              <button
-                onTouchStart={(e) => { e.preventDefault(); actionsRef.current?.boostUp(); }}
-                onTouchEnd={(e)   => { e.preventDefault(); actionsRef.current?.boostDown(); }}
-                onMouseDown={() => actionsRef.current?.boostUp()}
-                onMouseUp={() => actionsRef.current?.boostDown()}
-                aria-label="Boost thruster"
-                style={{
-                  position: 'absolute', bottom: '1.5rem', right: '1.5rem',
-                  width: '64px', height: '64px',
-                  background: 'rgba(0,245,255,0.15)',
-                  border: '2px solid rgba(0,245,255,0.4)',
-                  borderRadius: '50%', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', cursor: 'pointer',
-                  backdropFilter: 'blur(8px)', pointerEvents: 'auto',
-                  touchAction: 'none',
-                }}
-              >
-                <Rocket size={24} color="#00f5ff" />
-              </button>
-            </div>
-          )}
-
-          {/* ---- COUNTDOWN ---- */}
-          {uiView === 'countdown' && countdownNum !== null && (
-            <div style={{
-              position: 'absolute', inset: 0, display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              background: 'rgba(3,7,18,0.5)', flexDirection: 'column',
-              pointerEvents: 'none',
-            }}>
-              <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#00f5ff', letterSpacing: '0.2em', marginBottom: '1rem', textTransform: 'uppercase' }}>
-                Mission Ready
-              </div>
-              <div
-                key={String(countdownNum)}
-                style={{
-                  fontSize: countdownNum === 'GO!' ? '4rem' : '7rem',
-                  fontWeight: '900',
-                  color: countdownNum === 'GO!' ? '#22c55e' : '#fff',
-                  textShadow: countdownNum === 'GO!'
-                    ? '0 0 40px rgba(34,197,94,0.8)'
-                    : '0 0 40px rgba(255,255,255,0.4)',
-                  animation: 'countdownPop 0.4s ease-out',
-                  lineHeight: 1,
-                }}
-              >
-                {countdownNum}
-              </div>
-            </div>
-          )}
-
-          {/* ---- START MENU ---- */}
-          {uiView === 'start' && (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,13,20,0.88)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-              <div style={{ maxWidth: '480px', width: '100%', textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '24px', padding: '2rem' }}>
-
-                <div style={{ width: '72px', height: '72px', background: 'rgba(0,245,255,0.1)', borderRadius: '18px', border: '1px solid rgba(0,245,255,0.3)', margin: '0 auto 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transform: 'rotate(15deg)' }}>
-                  <Rocket size={36} color="#00f5ff" style={{ transform: 'rotate(-45deg)' }} />
-                </div>
-
-                <h1 style={{ fontSize: '2.2rem', fontWeight: '900', color: '#fff', marginBottom: '0.25rem', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                  Guide The <span style={{ color: '#00f5ff' }}>Voyager</span>
-                </h1>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                  Navigate through the asteroid field. Hold SPACE or tap to boost.
-                </p>
-
-                {/* High Scores */}
-                {highScores.bestDistance > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
-                    <HiScoreChip label="Best Dist" value={highScores.bestDistance.toLocaleString()} color="#00f5ff" />
-                    <HiScoreChip label="Best Time" value={`${highScores.bestTime}s`} color="#a855f7" />
-                    <HiScoreChip label="Peak CPS" value={highScores.highestCps} color="#eab308" />
-                    <HiScoreChip label="Most Avoided" value={highScores.mostAvoided} color="#ff6b35" />
-                  </div>
-                )}
-
-                {/* Difficulty */}
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Difficulty</div>
-                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-                    {(['easy', 'normal', 'hard'] as Difficulty[]).map(d => (
-                      <button
-                        key={d}
-                        aria-label={`Set difficulty to ${d}`}
-                        onClick={() => setDifficulty(d)}
-                        style={{
-                          flex: 1, padding: '0.5rem 0.25rem',
-                          background: difficulty === d ? DIFF_COLORS[d] + '22' : 'transparent',
-                          border: `1px solid ${difficulty === d ? DIFF_COLORS[d] : 'rgba(255,255,255,0.1)'}`,
-                          borderRadius: '10px', color: difficulty === d ? DIFF_COLORS[d] : '#64748b',
-                          fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer',
-                          textTransform: 'capitalize', transition: 'all 0.2s',
-                        }}
-                      >
-                        {d === 'easy' ? '🟢' : d === 'normal' ? '🟡' : '🔴'} {d}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <button
-                  aria-label="Start mission"
-                  onClick={(e) => { e.currentTarget.blur(); actionsRef.current?.start(); }}
-                  style={{ width: '100%', padding: '1.1rem', background: 'linear-gradient(135deg,#00f5ff,#22c55e)', color: '#000', fontSize: '1rem', fontWeight: '900', borderRadius: '14px', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(0,245,255,0.3)', marginBottom: '0.75rem' }}
-                >
-                  <Play fill="currentColor" size={18} /> START MISSION
-                </button>
-
-                {/* Bottom row */}
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <button aria-label="View lifetime statistics" onClick={() => setShowStats(true)} style={outlineBtn}>
-                    <BarChart2 size={14} /> Stats
-                  </button>
-                  <button aria-label="View achievements" onClick={() => setShowAchievements(true)} style={outlineBtn}>
-                    <Trophy size={14} /> Achievements
-                  </button>
-                  <button aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleSound} style={outlineBtn}>
-                    {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} color="#00f5ff" />}
-                  </button>
-                  <button aria-label="Toggle fullscreen" onClick={toggleFullscreen} style={outlineBtn}>
-                    {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ---- PAUSE OVERLAY ---- */}
-          {uiView === 'paused' && (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(3,7,18,0.8)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ textAlign: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '2rem', minWidth: '260px' }}>
-                <Pause size={36} color="#00f5ff" style={{ marginBottom: '0.75rem' }} />
-                <h2 style={{ fontSize: '2rem', fontWeight: '900', color: '#fff', margin: '0 0 0.5rem' }}>Paused</h2>
-                <p style={{ color: '#64748b', fontSize: '0.8rem', marginBottom: '1.5rem' }}>Press P or ESC to resume</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <button
-                    aria-label="Resume game"
-                    onClick={() => actionsRef.current?.resume()}
-                    style={{ ...solidBtn, background: 'linear-gradient(135deg,#00f5ff,#22c55e)', color: '#000' }}
-                  >
-                    <PlayIcon fill="currentColor" size={16} /> RESUME
-                  </button>
-                  <button
-                    aria-label="Restart mission"
-                    onClick={() => actionsRef.current?.start()}
-                    style={{ ...solidBtn, background: 'rgba(255,255,255,0.08)' }}
-                  >
-                    <RefreshCcw size={16} /> RESTART
-                  </button>
-                  <Link
-                    to="/games"
-                    style={{ ...solidBtn, textDecoration: 'none', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' } as React.CSSProperties}
-                  >
-                    <Home size={16} /> QUIT
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ---- GAME OVER ---- */}
-          {uiView === 'gameover' && (
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,13,20,0.93)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-              <div style={{ maxWidth: '400px', width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '1.5rem', textAlign: 'center' }}>
-                <div style={{ color: '#ff4d4d', fontWeight: '900', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '0.2rem' }}>Signal Lost</div>
-                <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', marginBottom: '1rem', letterSpacing: '-0.02em' }}>MISSION FAILED</h2>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '1rem' }}>
-                  <GameOverStat label="Distance"   value={Math.floor(g.current.distance).toLocaleString()} highlight="#00f5ff" isNew={Math.floor(g.current.distance) >= highScores.bestDistance && Math.floor(g.current.distance) > 0} />
-                  <GameOverStat label="Avoided"    value={g.current.avoided}   highlight="#ff6b35" isNew={g.current.avoided >= highScores.mostAvoided && g.current.avoided > 0} />
-                  <GameOverStat label="Peak CPS"   value={g.current.peakCps}   highlight="#eab308" isNew={g.current.peakCps >= highScores.highestCps && g.current.peakCps > 0} />
-                  <GameOverStat label="Time"       value={`${g.current.time}s`} highlight="#a855f7" isNew={g.current.time >= highScores.bestTime && g.current.time > 0} />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                  <button
-                    aria-label="Retry mission"
-                    onClick={(e) => { e.currentTarget.blur(); GA.retry(); actionsRef.current?.start(); }}
-                    style={{ ...solidBtn, background: '#fff', color: '#000' }}
-                  >
-                    <RefreshCcw size={16} /> RETRY MISSION
-                  </button>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button aria-label="View achievements" onClick={() => setShowAchievements(true)} style={{ ...solidBtn, flex: 1, background: 'rgba(255,255,255,0.06)', fontSize: '0.8rem' }}>
-                      <Trophy size={14} /> Achievements
-                    </button>
-                    <button aria-label="View stats" onClick={() => setShowStats(true)} style={{ ...solidBtn, flex: 1, background: 'rgba(255,255,255,0.06)', fontSize: '0.8rem' }}>
-                      <BarChart2 size={14} /> Stats
-                    </button>
-                  </div>
-                  <Link
-                    to="/games"
-                    style={{ ...solidBtn, textDecoration: 'none', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem' } as React.CSSProperties}
-                  >
-                    <Home size={16} /> ALL GAMES
-                  </Link>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ---- NEW ACHIEVEMENT TOASTS ---- */}
-          <div style={{ position: 'absolute', top: '1rem', left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', gap: '0.5rem', pointerEvents: 'none', zIndex: 50 }}>
-            {newAchievements.map((a, i) => (
-              <div key={a.id + i} style={{ background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.4)', borderRadius: '12px', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', backdropFilter: 'blur(8px)', animation: 'slideDown 0.4s ease-out' }}>
-                <span style={{ fontSize: '1.2rem' }}>{a.icon}</span>
-                <div>
-                  <div style={{ fontSize: '0.65rem', color: '#eab308', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Achievement Unlocked!</div>
-                  <div style={{ fontSize: '0.85rem', color: '#fff', fontWeight: '700' }}>{a.title}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ---- STATS MODAL ---- */}
-        {showStats && (
-          <Modal title="Lifetime Statistics" icon={<BarChart2 size={20} color="#00f5ff" />} onClose={() => setShowStats(false)}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-              <StatModal label="Games Played"     value={lifetimeStats.gamesPlayed} />
-              <StatModal label="Total Distance"   value={lifetimeStats.totalDistance.toLocaleString()} />
-              <StatModal label="Total Time"       value={`${lifetimeStats.totalTime}s`} />
-              <StatModal label="Total Avoided"    value={lifetimeStats.totalAvoided} />
-              <StatModal label="Highest CPS"      value={lifetimeStats.highestCps} />
-              <StatModal label="Highest Distance" value={lifetimeStats.highestDistance.toLocaleString()} />
-              <StatModal label="Avg Peak CPS"     value={lifetimeStats.averageCpsCount > 0 ? (lifetimeStats.averageCpsSum / lifetimeStats.averageCpsCount).toFixed(1) : '0'} />
-            </div>
-          </Modal>
-        )}
-
-        {/* ---- ACHIEVEMENTS MODAL ---- */}
-        {showAchievements && (
-          <Modal title="Achievements" icon={<Trophy size={20} color="#eab308" />} onClose={() => setShowAchievements(false)}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', maxHeight: '60vh', overflowY: 'auto' }}>
-              {achievements.map(a => (
-                <div key={a.id} style={{ background: a.unlocked ? 'rgba(234,179,8,0.08)' : 'rgba(255,255,255,0.02)', border: `1px solid ${a.unlocked ? 'rgba(234,179,8,0.3)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '12px', padding: '0.75rem', opacity: a.unlocked ? 1 : 0.45 }}>
-                  <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{a.icon}</div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: '800', color: a.unlocked ? '#eab308' : '#94a3b8' }}>{a.title}</div>
-                  <div style={{ fontSize: '0.68rem', color: '#64748b' }}>{a.description}</div>
-                  {a.unlocked && <div style={{ fontSize: '0.6rem', color: '#22c55e', marginTop: '0.25rem', fontWeight: '700' }}>✓ Unlocked</div>}
-                </div>
-              ))}
-            </div>
-          </Modal>
-        )}
-
-        {/* ---- SEO ARTICLE ---- */}
-        <article style={{
-          width: '100%', maxWidth: '850px',
-          background: 'rgba(17,24,39,0.7)',
-          border: '1px solid rgba(0,245,255,0.1)',
-          borderRadius: '16px', padding: '2rem',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-          lineHeight: '1.7', color: '#d1d5db',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-            <Gauge size={24} color="#00f5ff" />
-            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#fff', margin: 0 }}>
-              Spacebar CPS Test: Boost Your Clicking Speed with Voyager Game
-            </h2>
-          </div>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Are you ready to calculate your exact clicking speed? Welcome to the ultimate <strong>Spacebar CPS Test</strong> (Clicks Per Second) packed inside an immersive interstellar arcade trainer! While traditional click speed tests feature blank, boring screens, our <strong>Voyager Asteroid Navigator</strong> turns intensive clicking practice into an addictive cosmic adventure.
-          </p>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-            What is a CPS Test and Why Does it Matter?
-          </h3>
-          <p style={{ marginBottom: '1.25rem' }}>
-            <strong>CPS</strong> stands for <em>Clicks Per Second</em>. It is a core metric used by competitive pro-gamers (especially in Minecraft, FPS, and clicker-heavy strategy titles) to measure raw reflex velocity and finger stamina. Improving your CPS score helps lower reaction time thresholds and gives you an upper hand over opponents during micro-intensive modern gaming matches.
-          </p>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-            How to Test and Improve Your Clicks Per Second Score Here
-          </h3>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Unlike standard speed-clicking scripts, the Voyager Game challenges you to balance brute mechanical force with surgical precision:
-          </p>
-          <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.25rem', color: '#9ca3af' }}>
-            <li style={{ marginBottom: '0.5rem' }}><strong>Real-time Tracking:</strong> Monitor your live interactive CPS directly inside the upper HUD panel while you actively avoid lethal, incoming procedural asteroids.</li>
-            <li style={{ marginBottom: '0.5rem' }}><strong>Stamina Training:</strong> As the ship drops constantly due to mock cosmic gravity, your rhythmic click patterns regulate the engine propulsion required to pass narrow gaps.</li>
-            <li style={{ marginBottom: '0.5rem' }}><strong>Peak Score Analytics:</strong> The post-game analysis screen accurately displays your maximum Peak CPS alongside survival time and distance cleared.</li>
-          </ul>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-            Pro Tips to Rank Higher on the Speed Clicker Leaderboards
-          </h3>
-          <p style={{ marginBottom: '1.25rem' }}>
-            To achieve double-digit clicks per second (10+ CPS), players generally utilize specific physical execution models. Try experimenting with the <strong>Jitter Clicking</strong> method by vibrating your forearm muscles gently, or use the dual-finger <strong>Butterfly Clicking</strong> technique on your mouse/spacebar layout to maximize input signals safely without causing strain.
-          </p>
-          <div style={{ background: 'rgba(0,245,255,0.03)', borderLeft: '4px solid #00f5ff', padding: '1rem', margin: '1.5rem 0', borderRadius: '0 12px 12px 0' }}>
-            <span style={{ display: 'block', fontWeight: '800', color: '#fff', marginBottom: '0.25rem' }}>💡 Did You Know?</span>
-            The current average score for global computer users sits between 4 to 6.5 CPS. Professional esports veterans frequently breach sustained ranges of 12 to 15 clicks per second under extreme pressure!
-          </div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
-            Take the Challenge Now
-          </h3>
-          <p style={{ margin: 0 }}>
-            Launch the simulation above, tap your Spacebar or click vigorously on the viewframe to fire your thrusters, and see if you possess the elite micro-skills needed to guide the Voyager ship through deep space. Benchmark your index finger today!
-          </p>
-        </article>
-
-      </div>
-
-      {/* ---- Global Keyframe Styles ---- */}
-      <style>{`
-        @keyframes countdownPop {
-          0%   { transform: scale(1.6); opacity: 0; }
-          60%  { transform: scale(0.95); opacity: 1; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
-    </>
-  );
+  }, [data]);
+  return null;
 }
 
-// ============================================================
-// SEO HEAD COMPONENT
-// ============================================================
-function SeoHead() {
+function SeoMeta() {
   useEffect(() => {
-    // Title
-    document.title = 'Voyager Space Game — Spacebar CPS Test & Asteroid Navigator';
+    const CANONICAL = 'https://yoursite.com/aim-trainer';
+    const TITLE     = 'Aim Trainer – Free Online Aim Training & Mouse Accuracy Test';
+    const DESC      =
+      'Train your aim for free. Improve mouse accuracy, reaction time, and flick speed with our browser-based aim trainer. Track combos and performance grades. No download needed.';
+    const OG_IMAGE  = 'https://yoursite.com/og-aim-trainer.png';
 
-    const setMeta = (name: string, content: string, prop = false) => {
-      const sel = prop ? `meta[property="${name}"]` : `meta[name="${name}"]`;
-      let el = document.querySelector(sel) as HTMLMetaElement | null;
+    const setMeta = (sel: string, attr: string, val: string): (() => void) => {
+      let el = document.querySelector<HTMLMetaElement>(sel);
+      let created = false;
       if (!el) {
         el = document.createElement('meta');
-        if (prop) el.setAttribute('property', name); else el.setAttribute('name', name);
+        const [a, v] = attr.split('=');
+        el.setAttribute(a.trim(), v?.replace(/"/g, '') ?? attr);
         document.head.appendChild(el);
+        created = true;
       }
-      el.content = content;
+      const prev = el.getAttribute('content') ?? '';
+      el.setAttribute('content', val);
+      return () => {
+        if (created) {
+          if (document.head.contains(el!)) document.head.removeChild(el!);
+        } else {
+          el!.setAttribute('content', prev);
+        }
+      };
     };
 
-    const setLink = (rel: string, href: string) => {
-      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
-      if (!el) { el = document.createElement('link'); el.rel = rel; document.head.appendChild(el); }
-      el.href = href;
+    const setLink = (rel: string, href: string): (() => void) => {
+      let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+      let created = false;
+      if (!el) {
+        el = document.createElement('link');
+        el.setAttribute('rel', rel);
+        document.head.appendChild(el);
+        created = true;
+      }
+      const prev = el.getAttribute('href') ?? '';
+      el.setAttribute('href', href);
+      return () => {
+        if (created) {
+          if (document.head.contains(el!)) document.head.removeChild(el!);
+        } else {
+          el!.setAttribute('href', prev);
+        }
+      };
     };
 
-    setMeta('description', 'Play Voyager — the ultimate browser spacebar CPS test game. Navigate asteroid fields, collect power-ups, dodge boss asteroids and benchmark your clicks per second in real time.');
-    setMeta('robots', 'index, follow');
-    setMeta('theme-color', '#00f5ff');
-    setMeta('viewport', 'width=device-width, initial-scale=1');
+    const prevTitle = document.title;
+    document.title = TITLE;
 
-    // OG
-    setMeta('og:title', 'Voyager Space Game — Spacebar CPS Test', true);
-    setMeta('og:description', 'Navigate through procedural asteroid fields and test your clicking speed in real-time. Browser-based, no install needed.', true);
-    setMeta('og:type', 'website', true);
-    setMeta('og:url', 'https://yourdomain.com/games/voyager', true);
-    setMeta('og:image', 'https://yourdomain.com/og-voyager.png', true);
-    setMeta('og:site_name', 'Voyager Game', true);
+    const cleanups = [
+      setMeta('meta[name="description"]',         'name="description"',          DESC),
+      setMeta('meta[name="robots"]',              'name="robots"',               'index, follow'),
+      setMeta('meta[name="theme-color"]',         'name="theme-color"',          '#0a0a0f'),
+      setMeta('meta[property="og:type"]',         'property="og:type"',          'website'),
+      setMeta('meta[property="og:title"]',        'property="og:title"',         TITLE),
+      setMeta('meta[property="og:description"]',  'property="og:description"',   DESC),
+      setMeta('meta[property="og:image"]',        'property="og:image"',         OG_IMAGE),
+      setMeta('meta[property="og:url"]',          'property="og:url"',           CANONICAL),
+      setMeta('meta[property="og:site_name"]',    'property="og:site_name"',     'Aim Trainer'),
+      setMeta('meta[name="twitter:card"]',        'name="twitter:card"',         'summary_large_image'),
+      setMeta('meta[name="twitter:title"]',       'name="twitter:title"',        TITLE),
+      setMeta('meta[name="twitter:description"]', 'name="twitter:description"',  DESC),
+      setMeta('meta[name="twitter:image"]',       'name="twitter:image"',        OG_IMAGE),
+      setLink('canonical',                        CANONICAL),
+    ];
 
-    // Twitter Card
-    setMeta('twitter:card', 'summary_large_image');
-    setMeta('twitter:title', 'Voyager Space Game — CPS Test');
-    setMeta('twitter:description', 'Test your spacebar CPS in this immersive asteroid navigator game. Free to play in your browser!');
-    setMeta('twitter:image', 'https://yourdomain.com/og-voyager.png');
-
-    // Canonical
-    setLink('canonical', 'https://yourdomain.com/games/voyager');
-
-    // JSON-LD
-    const existing = document.getElementById('voyager-jsonld');
-    if (!existing) {
-      const script = document.createElement('script');
-      script.id = 'voyager-jsonld';
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify([
-        {
-          '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: 'Voyager Space Game',
-          description: 'Browser-based CPS test asteroid navigator game with power-ups, boss fights and real-time click speed tracking.',
-          url: 'https://yourdomain.com/games/voyager',
-          applicationCategory: 'GameApplication',
-          operatingSystem: 'Any',
-          browserRequirements: 'Requires a modern web browser with HTML5 Canvas support.',
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-          author: { '@type': 'Organization', name: 'Your Studio' },
-        },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://yourdomain.com/' },
-            { '@type': 'ListItem', position: 2, name: 'Games', item: 'https://yourdomain.com/games' },
-            { '@type': 'ListItem', position: 3, name: 'Voyager', item: 'https://yourdomain.com/games/voyager' },
-          ],
-        },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: [
-            {
-              '@type': 'Question',
-              name: 'What is a CPS test?',
-              acceptedAnswer: { '@type': 'Answer', text: 'A CPS (Clicks Per Second) test measures how many times you can click a button within one second. It is used by gamers to benchmark their reaction speed and clicking stamina.' },
-            },
-            {
-              '@type': 'Question',
-              name: 'How do I play Voyager?',
-              acceptedAnswer: { '@type': 'Answer', text: 'Press the SPACEBAR or click/tap the game canvas to boost your spaceship upward. Avoid asteroids and collect power-ups to survive as long as possible.' },
-            },
-            {
-              '@type': 'Question',
-              name: 'Is Voyager free to play?',
-              acceptedAnswer: { '@type': 'Answer', text: 'Yes, Voyager is completely free to play directly in your browser with no download or registration required.' },
-            },
-          ],
-        },
-      ]);
-      document.head.appendChild(script);
-    }
+    return () => {
+      document.title = prevTitle;
+      cleanups.forEach(fn => fn());
+    };
   }, []);
   return null;
 }
 
-// ============================================================
-// HELPER STYLE OBJECTS
-// ============================================================
-const DIFF_COLORS: Record<Difficulty, string> = {
-  easy: '#22c55e', normal: '#eab308', hard: '#ef4444',
-};
+// ─── Cross-Browser Fullscreen ─────────────────────────────────────────────────
+interface FsDocument extends Document {
+  webkitFullscreenElement?: Element | null;
+  webkitExitFullscreen?: () => Promise<void> | void;
+  mozFullScreenElement?: Element | null;
+  mozCancelFullScreen?: () => Promise<void> | void;
+  msFullscreenElement?: Element | null;
+  msExitFullscreen?: () => Promise<void> | void;
+  webkitFullscreenEnabled?: boolean;
+  mozFullScreenEnabled?: boolean;
+  msFullscreenEnabled?: boolean;
+}
+interface FsElement extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void> | void;
+  mozRequestFullScreen?: () => Promise<void> | void;
+  msRequestFullscreen?: () => Promise<void> | void;
+}
 
-const outlineBtn: React.CSSProperties = {
-  flex: 1, padding: '0.5rem 0.25rem',
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: '10px', color: '#94a3b8',
-  fontWeight: '700', fontSize: '0.72rem',
-  cursor: 'pointer', display: 'flex',
-  alignItems: 'center', justifyContent: 'center', gap: '4px',
-};
-
-const solidBtn: React.CSSProperties = {
-  width: '100%', padding: '0.8rem',
-  background: 'rgba(255,255,255,0.08)',
-  color: '#fff', fontSize: '0.9rem',
-  fontWeight: '800', borderRadius: '12px',
-  border: 'none', cursor: 'pointer',
-  display: 'flex', alignItems: 'center',
-  justifyContent: 'center', gap: '8px',
-};
-
-// ============================================================
-// SUB-COMPONENTS
-// ============================================================
-const StatBox = ({ icon, label, id, initialValue }: {
-  icon: React.ReactNode; label: string; id: string; initialValue?: string | number;
-}) => (
-  <div style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '0.35rem 0.7rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-    <div style={{ width: '24px', height: '24px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {icon}
-    </div>
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <span style={{ fontSize: '0.55rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b', fontWeight: '800' }}>{label}</span>
-      <span id={id} style={{ fontSize: '0.9rem', fontFamily: 'monospace', fontWeight: '700', color: '#fff', lineHeight: 1 }}>{initialValue ?? 0}</span>
-    </div>
-  </div>
-);
-
-const GameOverStat = ({ label, value, highlight = '#fff', isNew }: {
-  label: string; value: string | number; highlight?: string; isNew?: boolean;
-}) => (
-  <div style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${isNew ? highlight + '44' : 'rgba(255,255,255,0.05)'}`, borderRadius: '12px', padding: '0.7rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', position: 'relative' }}>
-    {isNew && <div style={{ position: 'absolute', top: '-6px', right: '6px', fontSize: '0.55rem', background: highlight, color: '#000', fontWeight: '900', padding: '1px 5px', borderRadius: '4px' }}>NEW BEST</div>}
-    <div style={{ fontSize: '0.6rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
-    <div style={{ fontSize: '1.15rem', fontWeight: '800', fontFamily: 'monospace', color: highlight }}>{value}</div>
-  </div>
-);
-
-const HiScoreChip = ({ label, value, color }: { label: string; value: string | number; color: string }) => (
-  <div style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${color}22`, borderRadius: '10px', padding: '0.4rem 0.6rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-    <span style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: '700' }}>{label}</span>
-    <span style={{ fontSize: '0.85rem', fontFamily: 'monospace', fontWeight: '800', color }}>{value}</span>
-  </div>
-);
-
-const IconBtn = ({ children, onClick, 'aria-label': ariaLabel }: {
-  children: React.ReactNode; onClick?: () => void; 'aria-label'?: string;
-}) => (
-  <button
-    onClick={onClick}
-    aria-label={ariaLabel}
-    style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.35rem', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}
-  >
-    {children}
-  </button>
-);
-
-const PowerUpHudItem = ({ pu }: { pu: { type: string; remaining: number; total: number } }) => {
-  const pct = pu.remaining / pu.total;
+function getFullscreenElement(): Element | null {
+  const d = document as FsDocument;
   return (
-    <div style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: `1px solid ${POWERUP_COLORS[pu.type]}44`, borderRadius: '10px', padding: '0.35rem 0.6rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', minWidth: '54px' }}>
-      <span style={{ fontSize: '1rem' }}>{POWERUP_ICONS[pu.type]}</span>
-      <div style={{ width: '100%', height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
-        <div style={{ width: `${pct * 100}%`, height: '100%', background: POWERUP_COLORS[pu.type], transition: 'width 0.2s linear' }} />
-      </div>
+    document.fullscreenElement ||
+    d.webkitFullscreenElement ||
+    d.mozFullScreenElement ||
+    d.msFullscreenElement ||
+    null
+  );
+}
+
+function isFullscreenSupported(): boolean {
+  const d = document as FsDocument;
+  return !!(
+    document.fullscreenEnabled ||
+    d.webkitFullscreenEnabled ||
+    d.mozFullScreenEnabled ||
+    d.msFullscreenEnabled
+  );
+}
+
+async function requestFs(el: HTMLElement): Promise<void> {
+  const e = el as FsElement;
+  try {
+    if (e.requestFullscreen)            await e.requestFullscreen();
+    else if (e.webkitRequestFullscreen) await e.webkitRequestFullscreen();
+    else if (e.mozRequestFullScreen)    await e.mozRequestFullScreen();
+    else if (e.msRequestFullscreen)     await e.msRequestFullscreen();
+  } catch { /* ignore */ }
+}
+
+async function exitFs(): Promise<void> {
+  const d = document as FsDocument;
+  try {
+    if (document.exitFullscreen)        await document.exitFullscreen();
+    else if (d.webkitExitFullscreen)    await d.webkitExitFullscreen();
+    else if (d.mozCancelFullScreen)     await d.mozCancelFullScreen();
+    else if (d.msExitFullscreen)        await d.msExitFullscreen();
+  } catch { /* ignore */ }
+}
+
+const FS_CHANGE_EVENTS = [
+  'fullscreenchange',
+  'webkitfullscreenchange',
+  'mozfullscreenchange',
+  'MSFullscreenChange',
+];
+
+// ─── Grade Badge ──────────────────────────────────────────────────────────────
+const GradeBadge = memo(function GradeBadge({ grade }: { grade: Grade }) {
+  const colors: Record<Grade, { bg: string; text: string; glow: string }> = {
+    'S+': { bg: 'rgba(255,215,0,0.15)',   text: '#FFD700', glow: '0 0 20px rgba(255,215,0,0.5)'   },
+    'S':  { bg: 'rgba(0,245,255,0.15)',   text: '#00F5FF', glow: '0 0 20px rgba(0,245,255,0.4)'   },
+    'A':  { bg: 'rgba(0,255,136,0.15)',   text: '#00FF88', glow: '0 0 20px rgba(0,255,136,0.4)'   },
+    'B':  { bg: 'rgba(107,127,255,0.15)', text: '#6B7FFF', glow: '0 0 20px rgba(107,127,255,0.4)' },
+    'C':  { bg: 'rgba(255,107,0,0.15)',   text: '#FF6B00', glow: '0 0 20px rgba(255,107,0,0.4)'   },
+    'D':  { bg: 'rgba(255,45,85,0.15)',   text: '#FF2D55', glow: '0 0 20px rgba(255,45,85,0.4)'   },
+  };
+  const c = colors[grade] ?? colors['D'];
+  return (
+    <div
+      style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: '80px', height: '80px', borderRadius: '50%',
+        background: c.bg, border: `3px solid ${c.text}`,
+        boxShadow: c.glow, color: c.text,
+        fontSize: '2rem', fontWeight: '900',
+        animation: 'gradeReveal 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards',
+      }}
+      aria-label={`Performance grade: ${grade}`}
+    >
+      {grade}
     </div>
   );
-};
+});
 
-const Modal = ({ title, icon, onClose, children }: {
-  title: string; icon: React.ReactNode; onClose: () => void; children: React.ReactNode;
-}) => (
-  <div
-    style={{ position: 'fixed', inset: 0, background: 'rgba(3,7,18,0.85)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: '1rem' }}
-    onClick={onClose}
-  >
-    <div
-      style={{ background: 'rgba(17,24,39,0.98)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '1.5rem', maxWidth: '500px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}
-      onClick={e => e.stopPropagation()}
-    >
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {icon}
-          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: '#fff' }}>{title}</h2>
+// ─── Results Modal ────────────────────────────────────────────────────────────
+const ResultsModal = memo(function ResultsModal({
+  result,
+  onPlayAgain,
+  onChangeDifficulty,
+  onClose,
+}: {
+  result: SessionResult | null;
+  onPlayAgain: () => void;
+  onChangeDifficulty: () => void;
+  onClose: () => void;
+}) {
+  const dialogRef   = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    try { closeBtnRef.current?.focus(); } catch { /* ignore */ }
+
+    const handler = (e: KeyboardEvent) => {
+      try {
+        if (e.key === 'Escape') { e.preventDefault(); onClose(); return; }
+        if (e.key !== 'Tab') return;
+        const root = dialogRef.current;
+        if (!root) return;
+        const focusables = root.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusables.length === 0) return;
+        const first = focusables[0];
+        const last  = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      } catch { /* never crash */ }
+    };
+
+    document.addEventListener('keydown', handler);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  if (!result) return null;
+
+  const safeClose            = () => { try { onClose();            } catch { /* noop */ } };
+  const safePlayAgain        = () => { try { onPlayAgain();        } catch { /* noop */ } };
+  const safeChangeDifficulty = () => { try { onChangeDifficulty(); } catch { /* noop */ } };
+
+  const topStats = [
+    { value: `${result.acc ?? 0}%`,      label: 'Accuracy' },
+    { value: result.score ?? 0,          label: 'Hits'     },
+    { value: `${result.duration ?? 0}s`, label: 'Duration' },
+  ];
+
+  const extStats = [
+    { value: result.score ?? 0,                                                  label: 'Correct',   color: 'var(--neon-green, #10b981)' },
+    { value: result.misses ?? 0,                                                 label: 'Incorrect', color: 'var(--neon-red, #ff2d55)'   },
+    { value: (result.avgReaction ?? 0) > 0 ? `${result.avgReaction}ms` : 'N/A', label: 'Reaction',  color: 'var(--neon-orange, #f97316)' },
+    { value: `×${result.combo ?? 0}`,                                            label: 'Combo',     color: 'var(--text-secondary, #94a3b8)' },
+  ];
+
+  const gradeColors: Record<Grade, string> = {
+    'S+': '#FFD700', 'S': 'var(--neon-cyan,#00f5ff)', 'A': 'var(--neon-orange,#f97316)',
+    'B': '#a855f7',  'C': 'var(--neon-green,#10b981)', 'D': 'var(--text-secondary,#94a3b8)',
+  };
+  const finalRatingColor = gradeColors[result.grade] ?? 'var(--neon-cyan,#00f5ff)';
+
+  return (
+    <>
+      <div
+        onClick={safeClose}
+        aria-hidden="true"
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)', zIndex: 999,
+          animation: 'fadeIn 0.3s ease-out forwards',
+        }}
+      />
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="aim-results-title"
+        style={{
+          position: 'fixed', top: '50%', left: '50%',
+          transform: 'translate(-50%,-50%)',
+          width: '90%', maxWidth: '380px',
+          background: 'linear-gradient(135deg,rgba(0,245,255,0.08),rgba(0,255,136,0.08))',
+          border: '2px solid rgba(0,245,255,0.3)', borderRadius: '20px',
+          padding: '1.5rem 0.75rem 0.75rem', textAlign: 'center',
+          zIndex: 1000,
+          animation: 'modalPopIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+          maxHeight: '90vh', overflowY: 'auto',
+          boxShadow: '0 0 60px rgba(0,245,255,0.2),0 0 120px rgba(0,255,136,0.1)',
+        }}
+      >
+        <button
+          ref={closeBtnRef} onClick={safeClose} aria-label="Close results"
+          style={{
+            position: 'absolute', top: '0.5rem', right: '0.5rem',
+            background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)',
+            color: 'var(--neon-cyan)', width: '32px', height: '32px',
+            borderRadius: '50%', cursor: 'pointer', fontSize: '0.9rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >✕</button>
+
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.1rem' }}>
+          {result.difficulty ?? ''} · Your Result
         </div>
-        <button aria-label="Close modal" onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.3rem 0.6rem', color: '#94a3b8', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
-      </div>
-      {children}
-    </div>
-  </div>
-);
+        <div
+          id="aim-results-title"
+          style={{
+            fontSize: 'clamp(1.9rem,5.5vw,3rem)', fontWeight: '900',
+            color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums', marginBottom: '0.05rem',
+          }}
+        >
+          {result.score ?? 0}{' '}
+          <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>HITS</span>
+        </div>
+        <div
+          style={{
+            display: 'inline-flex', alignItems: 'center',
+            padding: '0.3rem 0.85rem', borderRadius: '50px',
+            background: `${finalRatingColor}20`, border: `2px solid ${finalRatingColor}50`,
+            color: finalRatingColor, fontSize: '0.88rem', fontWeight: '700', marginBottom: '0.45rem',
+          }}
+        >
+          Grade {result.grade ?? '-'}
+        </div>
 
-const StatModal = ({ label, value }: { label: string; value: string | number }) => (
-  <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '0.75rem', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-    <div style={{ fontSize: '0.62rem', color: '#64748b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
-    <div style={{ fontSize: '1.1rem', fontFamily: 'monospace', fontWeight: '800', color: '#00f5ff' }}>{value}</div>
-  </div>
-);
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.2rem', marginBottom: '0.35rem' }}>
+          {topStats.map(s => (
+            <div key={s.label} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '0.3rem', border: '1px solid rgba(0,245,255,0.2)' }}>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--neon-cyan)' }}>{s.value}</div>
+              <div style={{ fontSize: '0.45rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.04rem' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.2rem', marginBottom: '0.45rem' }}>
+          {extStats.map(s => (
+            <div key={s.label} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '0.3rem', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: '800', color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: '0.42rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" onClick={safeChangeDifficulty} style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>🔄 Reset</button>
+          <button className="btn btn-primary"   onClick={safePlayAgain}        style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>Try Again</button>
+        </div>
+      </div>
+      <style>{`
+        @keyframes fadeIn     { from{opacity:0} to{opacity:1} }
+        @keyframes modalPopIn { from{opacity:0;transform:translate(-50%,-50%) scale(0.5)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+      `}</style>
+    </>
+  );
+});
+
+// ─── Inline Results Panel ─────────────────────────────────────────────────────
+const ResultsPanel = memo(function ResultsPanel({
+  result,
+  onPlayAgain,
+  onReset,
+}: {
+  result: SessionResult | null;
+  onPlayAgain: () => void;
+  onReset: () => void;
+}) {
+  if (!result) return null;
+
+  const stats = [
+    { label: 'Hits',         value: result.score ?? 0,                                                  color: 'var(--neon-green)'  },
+    { label: 'Misses',       value: result.misses ?? 0,                                                 color: 'var(--neon-red)'    },
+    { label: 'Accuracy',     value: `${result.acc ?? 0}%`,                                              color: 'var(--neon-cyan)'   },
+    { label: 'Avg Reaction', value: (result.avgReaction ?? 0) > 0 ? `${result.avgReaction}ms` : 'N/A', color: 'var(--neon-orange)' },
+    { label: 'Targets/sec',  value: (result.hitsPerSec ?? 0).toFixed(2),                               color: 'var(--neon-cyan)'   },
+    { label: 'Best Combo',   value: `×${result.combo ?? 0}`,                                            color: '#FFD700'             },
+    { label: 'Miss %',       value: `${result.missPct ?? 0}%`,                                          color: 'var(--neon-red)'    },
+  ];
+
+  return (
+    <section
+      aria-label="Game results"
+      style={{
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: '20px', padding: '2rem', marginBottom: '2rem',
+        animation: 'fadeSlideIn 0.4s ease forwards',
+      }}
+    >
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+        <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '2px', marginBottom: '0.5rem' }}>
+          Session Complete — {result.difficulty ?? ''} · {result.duration ?? 0}s
+        </div>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', margin: '0 0 1rem 0' }}>
+          🏁 Time&apos;s Up!
+        </h2>
+        <GradeBadge grade={result.grade ?? 'D'} />
+      </div>
+
+      <div
+        className="aim-results-grid"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}
+        role="list" aria-label="Performance statistics"
+      >
+        {stats.map(s => (
+          <div
+            key={s.label} role="listitem"
+            style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.9rem', textAlign: 'center' }}
+          >
+            <div style={{ fontSize: '1.6rem', fontWeight: '900', color: s.color, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
+            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.2rem' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <button className="btn btn-primary"   onClick={() => { try { onPlayAgain(); } catch { /* noop */ } }} aria-label="Play again">▶ Play Again</button>
+        <button className="btn btn-secondary" onClick={() => { try { onReset();     } catch { /* noop */ } }} aria-label="Reset">🔄 Reset</button>
+      </div>
+    </section>
+  );
+});
+
+// ─── Individual Target ────────────────────────────────────────────────────────
+const TargetEl = memo(function TargetEl({
+  target, isHit, onHit,
+}: {
+  target: Target; isHit: boolean; onHit: (id: number, e: React.PointerEvent) => void;
+}) {
+  return (
+    <div
+      onPointerDown={e => onHit(target.id, e)}
+      role="button" tabIndex={-1} aria-label="Target — click to hit"
+      style={{
+        position: 'absolute', left: target.x, top: target.y,
+        width: target.size, height: target.size, borderRadius: '50%',
+        transform: 'translate(-50%,-50%)', cursor: 'crosshair', touchAction: 'none',
+        background: isHit
+          ? 'radial-gradient(circle,rgba(255,255,255,0.95) 18%,rgba(255,200,0,0.9) 38%,transparent 38%,transparent 58%,rgba(255,200,0,0.9) 58%)'
+          : 'radial-gradient(circle,rgba(255,255,255,0.9) 18%,rgba(255,45,85,0.95) 38%,transparent 38%,transparent 58%,rgba(255,45,85,0.85) 58%)',
+        border: `3px solid ${isHit ? 'rgba(255,220,0,0.9)' : 'rgba(255,255,255,0.85)'}`,
+        boxShadow: isHit
+          ? '0 0 25px rgba(255,220,0,0.8),0 0 50px rgba(255,220,0,0.4)'
+          : '0 0 20px rgba(255,45,85,0.55)',
+        animation: isHit
+          ? 'target-hit 0.12s ease-out forwards'
+          : 'target-pop 0.18s cubic-bezier(0.34,1.56,0.64,1) forwards',
+        willChange: 'transform, opacity',
+        userSelect: 'none', WebkitUserSelect: 'none',
+      }}
+    />
+  );
+});
+
+// ─── Combo Banner ─────────────────────────────────────────────────────────────
+const ComboBanner = memo(function ComboBanner({ combo, milestone }: { combo: number; milestone: boolean }) {
+  if (combo < 2) return null;
+  const isFire = combo >= 20;
+  const isGold = combo >= 10;
+  const color  = isFire ? '#FF6B00' : isGold ? '#FFD700' : 'var(--neon-cyan)';
+  const label  = isFire ? '🔥 ON FIRE!' : isGold ? '⭐ COMBO!' : '✨ Streak';
+  return (
+    <div
+      aria-live="polite" aria-atomic="true" aria-label={`Combo streak: ${combo}`}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: '6px',
+        padding: '4px 12px', borderRadius: '20px',
+        background: 'rgba(0,0,0,0.55)', border: `1.5px solid ${color}`,
+        color, fontWeight: '900', fontSize: '0.85rem',
+        animation: milestone ? 'comboMilestone 0.4s cubic-bezier(0.34,1.56,0.64,1)' : 'none',
+        boxShadow: milestone ? `0 0 20px ${color}55` : 'none',
+        transition: 'color 0.2s,border-color 0.2s',
+      }}
+    >
+      <span>{label}</span>
+      <span style={{ fontSize: '1rem' }}>×{combo}</span>
+    </div>
+  );
+});
+
+// ─── Shortcut Hints ───────────────────────────────────────────────────────────
+const ShortcutHints = memo(function ShortcutHints({ phase }: { phase: Phase }) {
+  const hints =
+    phase === 'idle'    ? [{ key: 'Space', action: 'Start' },  { key: 'R', action: 'Reset' }] :
+    phase === 'running' ? [{ key: 'Esc',   action: 'Pause' },  { key: 'R', action: 'Reset' }] :
+    phase === 'paused'  ? [{ key: 'Esc',   action: 'Resume' }, { key: 'R', action: 'Reset' }] :
+                          [{ key: 'Space', action: 'Play Again' }, { key: 'Esc', action: 'Close popup' }, { key: 'R', action: 'Reset' }];
+  return (
+    <div aria-label="Keyboard shortcuts" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+      {hints.map(h => (
+        <div key={h.key + h.action} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+          <kbd style={{ padding: '2px 7px', borderRadius: '5px', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.06)', fontFamily: 'monospace', fontSize: '0.75rem', color: '#fff', boxShadow: '0 1px 0 rgba(255,255,255,0.1)' }}>{h.key}</kbd>
+          <span>{h.action}</span>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+// ─── FAQ & Games Data ─────────────────────────────────────────────────────────
+const ALL_FAQS = [
+  { q: 'What is an Aim Trainer and how does it help?', a: 'An Aim Trainer is a browser-based or standalone tool designed to isolate your mechanical mouse skills. By rapidly clicking randomly spawned targets, you build the critical hand-eye neural pathways needed for tracking, flicking, and reaction speed in competitive FPS games.' },
+  { q: 'How to improve reaction time in FPS games?', a: "Train your brain's cognitive processing with daily aim sessions. Pair practice with a high-refresh monitor (144Hz+) and a low-latency mouse to physically reduce input lag. Focus on reading target spawn positions rather than reacting after they appear. Consistent sleep, hydration, and warm-up routines also measurably improve reaction time." },
+  { q: 'Does aim training help in Minecraft, Roblox, or League of Legends?', a: 'Yes. In Minecraft, tracking a strafing player while landing hits separates PvP masters from average players. In League of Legends, precise clicking prevents misclicks during team fights. In Roblox and Fortnite, fast accurate crosshair placement speeds up mechanical execution significantly.' },
+  { q: 'What is the difference between arm aiming and wrist aiming?', a: 'Arm aiming (low DPI, large mouse movements) is better for large flicks and long-term wrist health. Wrist aiming (higher DPI, small movements) suits micro-adjustments. Most pro players use low DPI (400–800) and arm-aim for consistency.' },
+  { q: 'What does polling rate mean for a gaming mouse?', a: 'Polling rate (Hz) is how often your mouse reports its position to the PC per second. A 1000Hz mouse reports every 1ms; a 125Hz mouse every 8ms. Higher polling rates (1000Hz+) result in smoother, more responsive cursor movement — critical in fast-paced FPS games.' },
+  { q: 'How long should I aim train per day?', a: 'Research and pro player routines suggest 15–30 minutes of focused aim training before gaming sessions is optimal. Beyond 45 minutes, diminishing returns and mental fatigue can reduce accuracy gains. Quality and focus matter more than raw time.' },
+  { q: 'What is eDPI and why does it matter more than raw DPI?', a: 'eDPI (effective DPI) = hardware DPI × in-game sensitivity multiplier. Two players with completely different hardware setups have identical crosshair movement if their eDPI matches. This makes eDPI the universal comparison metric across games and hardware.' },
+  { q: 'What is the best mouse grip for aim training?', a: 'There are three main grips: Palm (stable, good for tracking), Claw (balanced, good for quick flicks), and Fingertip (highest micro-precision). Choose the one that feels most natural to you. Changing your grip requires rebuilding muscle memory.' },
+  { q: 'Tracking vs. Flicking: Which is more important?', a: 'Flicking is crucial for games like Valorant and CS2 where time-to-kill is instant. Tracking dominates in games like Apex Legends, Overwatch, and Fortnite. A well-rounded aim routine trains both.' },
+  { q: 'Does mouse weight affect aiming performance?', a: 'Yes. Lightweight mice (under 70g) reduce inertia, making it easier to start and stop movements quickly. This is ideal for fast flicks and reduces wrist fatigue during long sessions.' },
+  { q: 'Can aim training help reduce spray transfer and recoil control?', a: 'Directly — yes. Recoil control requires continuously correcting your crosshair downward against weapon rise, which is a tracking sub-skill. Click-accuracy training sharpens the hand-eye feedback loop so corrections become faster.' },
+  { q: 'Does playing osu! help with FPS aim?', a: 'While osu! improves raw hand-eye coordination and clicking speed, it operates on a 2D plane. True 3D aim requires translation of 3D space to a 2D mousepad. Standard aim trainers are much better for transferring skills directly to FPS games.' },
+  { q: 'What is angle snapping?', a: 'Angle snapping is a mouse sensor feature that artificially straightens your mouse movements. While it makes drawing horizontal lines easier, it destroys micro-adjustments in gaming. Always ensure angle snapping is turned OFF.' },
+  { q: 'Glass skates vs PTFE mouse feet?', a: 'PTFE (Teflon) is the standard, offering a good balance of glide and stopping power. Glass skates provide extreme speed and zero initial friction, which is amazing for tracking but makes it harder to stop your mouse accurately for flicks.' },
+  { q: 'Hard pad vs cloth pad?', a: 'Hard pads offer low friction for fast tracking, but wear out mouse skates quickly. Cloth pads offer much better stopping power and control, which is why 95% of tactical FPS pros (CS2, Valorant) use high-quality cloth pads.' },
+  { q: 'How long does muscle memory take to build?', a: 'Initial neurological adaptation happens within 3-4 days of consistent practice. Solidifying that into automatic muscle memory takes about 3 to 6 weeks of daily deliberate aim training.' },
+  { q: 'How do I stop panicking in gunfights?', a: 'Panic comes from a lack of confidence in your mechanics. By grinding an aim trainer daily, aiming becomes an unconscious background process, allowing your brain to focus calmly on positioning and game sense instead.' },
+  { q: 'Is 1000Hz polling rate enough?', a: 'Yes. 1000Hz (1ms delay) is the industry standard and perfect for 99% of players. While 4000Hz and 8000Hz mice exist, the benefit is only noticeable on 240Hz+ monitors and strains your CPU.' },
+  { q: 'What is aim assist and does this help controller players?', a: 'Aim assist is a software feature that slows down or magnetically pulls a crosshair toward enemies to compensate for the inaccuracy of analog sticks. This tool is specifically for mouse and keyboard players to train raw, unassisted mechanical aim.' },
+  { q: 'Can I use this aim trainer on a trackpad?', a: 'You can, but it is highly discouraged for gaming improvement. Trackpads do not translate well to the 1:1 raw input mechanics needed for FPS games. Always use a dedicated gaming mouse.' },
+  { q: 'How does fatigue affect reaction time?', a: 'Physical and mental fatigue drastically increase reaction time (by up to 50-100ms) and lower accuracy. If you notice your Aim Trainer scores dropping significantly after an hour, it is time to take a break.' },
+  { q: 'Do pros use aim trainers?', a: 'Absolutely. Almost every professional player in Valorant, Overwatch, and Apex Legends uses dedicated aim training software as a daily warm-up to ensure their mechanics are peaked before tournament matches.' },
+  { q: 'What is target switching?', a: 'Target switching is the ability to kill one enemy and immediately snap onto a secondary target seamlessly. Our trainer simulates this when multiple targets are on screen, forcing you to plan your next click before the first one finishes.' },
+  { q: 'Why is my aim inconsistent?', a: 'Inconsistency usually stems from changing your posture, grip, chair height, or playing while tired. Find a comfortable, repeatable setup, stick to one sensitivity, and use our Aim Trainer to track your baseline performance daily.' },
+] as const;
+
+const GAMES = [
+  'Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V',
+  'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2',
+  'PUBG: Battlegrounds', 'Genshin Impact', 'Among Us',
+  'Valorant', 'Apex Legends',
+] as const;
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Main Component ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+export default function AimTrainerPage() {
+  // ── Config State ───────────────────────────────────────────────────────────
+  const [difficulty,   setDifficulty]   = useState<Difficulty>('Medium');
+  const [gameDuration, setGameDuration] = useState<Duration>(DEFAULT_DURATION);
+
+  // ── Runtime State ──────────────────────────────────────────────────────────
+  const [phase,     setPhase]     = useState<Phase>('idle');
+  const [targets,   setTargets]   = useState<Target[]>([]);
+  const [score,     setScore]     = useState(0);
+  const [misses,    setMisses]    = useState(0);
+  const [timeLeft,  setTimeLeft]  = useState<number>(DEFAULT_DURATION);
+  const [hitIds,    setHitIds]    = useState<Set<number>>(new Set());
+  const [combo,     setCombo]     = useState(0);
+  const [milestone, setMilestone] = useState(false);
+  const [soundOn,   setSoundOn]   = useState(true);
+
+  // ── Fullscreen State ───────────────────────────────────────────────────────
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fsSupported]  = useState<boolean>(() =>
+    typeof document !== 'undefined' ? isFullscreenSupported() : false,
+  );
+  const [exitFsOnEnd, setExitFsOnEnd] = useState(false);
+
+  // ── Results State ──────────────────────────────────────────────────────────
+  const [result,    setResult]    = useState<SessionResult | null>(null);
+  const [history,   setHistory]   = useState<SessionResult[]>([]);
+  const [showModal, setShowModal] = useState(false);
+
+  // ── Countdown State ────────────────────────────────────────────────────────
+  const [countdownNum, setCountdownNum] = useState<number | null>(null);
+  const countdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Refs ───────────────────────────────────────────────────────────────────
+  const fullscreenTargetRef = useRef<HTMLDivElement>(null);
+  const areaRef             = useRef<HTMLDivElement>(null);
+  const timerRef            = useRef<ReturnType<typeof setInterval> | null>(null);
+  const spawnRef            = useRef<ReturnType<typeof setInterval> | null>(null);
+  const targetTimeouts      = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const targetId            = useRef(0);
+  const totalClicks         = useRef(0);
+  const hitClicks           = useRef(0);
+  const phaseRef            = useRef<Phase>('idle');
+  const lastClickTime       = useRef(0);
+  const audioCtxRef         = useRef<AudioContext | null>(null);
+  const soundOnRef          = useRef(soundOn);
+  const difficultyRef       = useRef<Difficulty>('Medium');
+  const gameDurationRef     = useRef<number>(DEFAULT_DURATION);
+  const comboRef            = useRef(0);
+  const maxComboRef         = useRef(0);
+  const reactionTimes       = useRef<number[]>([]);
+  const startTimeRef        = useRef(0);
+  const pausedAtRef         = useRef(0);
+  const exitFsOnEndRef      = useRef(false);
+  const isFullscreenRef     = useRef(false);
+
+  useEffect(() => { soundOnRef.current     = soundOn;      }, [soundOn]);
+  useEffect(() => { difficultyRef.current  = difficulty;   }, [difficulty]);
+  useEffect(() => { exitFsOnEndRef.current = exitFsOnEnd;  }, [exitFsOnEnd]);
+  useEffect(() => { isFullscreenRef.current = isFullscreen; }, [isFullscreen]);
+  useEffect(() => {
+    gameDurationRef.current = gameDuration;
+    if (phaseRef.current === 'idle') setTimeLeft(gameDuration);
+  }, [gameDuration]);
+
+  // ── Audio ──────────────────────────────────────────────────────────────────
+  const getAudioCtx = useCallback((): AudioContext => {
+    if (!audioCtxRef.current) {
+      audioCtxRef.current = new (
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+      )();
+    }
+    return audioCtxRef.current;
+  }, []);
+
+  const emitSound = useCallback((type: 'hit' | 'miss' | 'combo' | 'countdown' | 'go', comboLevel = 1) => {
+    if (!soundOnRef.current) return;
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') void ctx.resume();
+      if (type === 'hit')            playHit(ctx);
+      else if (type === 'miss')      playMiss(ctx);
+      else if (type === 'countdown') playCountdownBeep(ctx);
+      else if (type === 'go')        playCountdownGo(ctx);
+      else                           playCombo(ctx, comboLevel);
+    } catch { /* ignore */ }
+  }, [getAudioCtx]);
+
+  // ── Fullscreen ─────────────────────────────────────────────────────────────
+  const toggleFullscreen = useCallback(() => {
+    if (!fsSupported) return;
+    const el = fullscreenTargetRef.current;
+    if (!el) return;
+    // Make sure the audio context exists / resumes on this user gesture too,
+    // so the countdown beeps are guaranteed to work right after entering fullscreen.
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') void ctx.resume();
+    } catch { /* ignore */ }
+    if (getFullscreenElement()) void exitFs();
+    else                        void requestFs(el);
+  }, [fsSupported, getAudioCtx]);
+
+  useEffect(() => {
+    const handler = () => {
+      const isFull = !!getFullscreenElement();
+      setIsFullscreen(isFull);
+      isFullscreenRef.current = isFull;
+    };
+    FS_CHANGE_EVENTS.forEach(evt => document.addEventListener(evt, handler));
+    handler();
+    return () => { FS_CHANGE_EVENTS.forEach(evt => document.removeEventListener(evt, handler)); };
+  }, []);
+
+  // ── Touch scroll prevention ────────────────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'running') return;
+    const prevent = (e: TouchEvent) => { e.preventDefault(); };
+    const area = areaRef.current;
+    area?.addEventListener('touchmove',  prevent, { passive: false });
+    area?.addEventListener('touchstart', prevent, { passive: false });
+    return () => {
+      area?.removeEventListener('touchmove',  prevent);
+      area?.removeEventListener('touchstart', prevent);
+    };
+  }, [phase]);
+
+  // ── Unmount cleanup ────────────────────────────────────────────────────────
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (spawnRef.current) clearInterval(spawnRef.current);
+    if (countdownTimeoutRef.current) clearTimeout(countdownTimeoutRef.current);
+    targetTimeouts.current.forEach(t => clearTimeout(t));
+    audioCtxRef.current?.close().catch(() => {});
+  }, []);
+
+  // ── Remove Target ──────────────────────────────────────────────────────────
+  const removeTarget = useCallback((id: number) => {
+    setTargets(prev => prev.filter(t => t.id !== id));
+    setHitIds(prev => { const s = new Set(prev); s.delete(id); return s; });
+    targetTimeouts.current.delete(id);
+  }, []);
+
+  // ── Spawn Target ───────────────────────────────────────────────────────────
+  const spawnTarget = useCallback(() => {
+    if (!areaRef.current || phaseRef.current !== 'running') return;
+    const rect = areaRef.current.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    const cfg  = DIFFICULTY_CONFIGS[difficultyRef.current];
+    const size = cfg.minSize + Math.random() * (cfg.maxSize - cfg.minSize);
+    const x    = Math.max(size / 2, Math.min(rect.width  - size / 2, size / 2 + Math.random() * (rect.width  - size)));
+    const y    = Math.max(size / 2, Math.min(rect.height - size / 2, size / 2 + Math.random() * (rect.height - size)));
+    const id   = ++targetId.current;
+    setTargets(prev => {
+      if (prev.length >= cfg.maxTargets) return prev;
+      return [...prev, { id, x, y, size, spawnTime: performance.now() }];
+    });
+    const t = setTimeout(() => removeTarget(id), cfg.targetLifetime);
+    targetTimeouts.current.set(id, t);
+  }, [removeTarget]);
+
+  // ── End Game ───────────────────────────────────────────────────────────────
+  const endGame = useCallback(() => {
+    if (phaseRef.current !== 'running' && phaseRef.current !== 'paused') return;
+    phaseRef.current = 'done';
+    if (timerRef.current) { clearInterval(timerRef.current);  timerRef.current = null; }
+    if (spawnRef.current) { clearInterval(spawnRef.current);  spawnRef.current = null; }
+    targetTimeouts.current.forEach(t => clearTimeout(t));
+    targetTimeouts.current.clear();
+    setTargets([]);
+    setPhase('done');
+
+    const configuredDuration = gameDurationRef.current;
+    const totalTime   = Math.min(configuredDuration, Math.max(0.01, (performance.now() - startTimeRef.current) / 1000));
+    const totalAtt    = totalClicks.current;
+    const acc         = totalAtt > 0 ? Math.round((hitClicks.current / totalAtt) * 100) : 0;
+    const missCount   = Math.max(0, totalAtt - hitClicks.current);
+    const missPct     = totalAtt > 0 ? Math.round((missCount / totalAtt) * 100) : 0;
+    const avgReaction = reactionTimes.current.length > 0
+      ? Math.round(reactionTimes.current.reduce((a, b) => a + b, 0) / reactionTimes.current.length) : 0;
+    const hitsPerSec  = totalTime > 0 ? hitClicks.current / totalTime : 0;
+    const grade       = calcGrade(acc, avgReaction, hitsPerSec);
+
+    const r: SessionResult = {
+      score: hitClicks.current, misses: missCount, acc, missPct,
+      avgReaction, hitsPerSec, combo: maxComboRef.current,
+      grade, duration: configuredDuration, totalTime, difficulty: difficultyRef.current,
+    };
+    setResult(r);
+    setHistory(prev => [r, ...prev.slice(0, MAX_HISTORY - 1)]);
+    setShowModal(true);
+
+    if (exitFsOnEndRef.current && getFullscreenElement()) void exitFs();
+  }, []);
+
+  // ── Start Game ─────────────────────────────────────────────────────────────
+  const startGame = useCallback(() => {
+    if (phaseRef.current === 'running') return;
+    phaseRef.current = 'running';
+    const dur = gameDurationRef.current;
+    setPhase('running'); setScore(0); setMisses(0); setTimeLeft(dur);
+    setTargets([]); setHitIds(new Set()); setCombo(0); setMilestone(false);
+    setResult(null); setShowModal(false);
+    totalClicks.current = 0; hitClicks.current = 0; targetId.current = 0;
+    lastClickTime.current = 0; comboRef.current = 0; maxComboRef.current = 0;
+    reactionTimes.current = [];
+    startTimeRef.current  = performance.now();
+    targetTimeouts.current.forEach(t => clearTimeout(t));
+    targetTimeouts.current.clear();
+    spawnTarget();
+    spawnRef.current = setInterval(spawnTarget, DIFFICULTY_CONFIGS[difficultyRef.current].spawnInterval);
+    const start = performance.now();
+    timerRef.current = setInterval(() => {
+      const elapsed = (performance.now() - start) / 1000;
+      const left    = Math.max(0, dur - elapsed);
+      setTimeLeft(left);
+      if (left <= 0) endGame();
+    }, 50);
+  }, [spawnTarget, endGame]);
+
+  // ── Countdown (now with 3‑2‑1 beeps + GO! sound) ──────────────────────────
+  const beginCountdown = useCallback(() => {
+    try {
+      if (phaseRef.current === 'running' || phaseRef.current === 'paused') return;
+      if (countdownTimeoutRef.current) return;
+      setShowModal(false);
+
+      // Make sure audio is ready to play immediately (this call happens
+      // synchronously inside a user gesture, satisfying autoplay policies).
+      try {
+        const ctx = getAudioCtx();
+        if (ctx.state === 'suspended') void ctx.resume();
+      } catch { /* ignore */ }
+
+      let step = 3;
+      setCountdownNum(step);
+      emitSound('countdown');
+
+      const tick = () => {
+        try {
+          step -= 1;
+          if (step >= 1) {
+            setCountdownNum(step);
+            emitSound('countdown');
+            countdownTimeoutRef.current = setTimeout(tick, 700);
+          } else {
+            setCountdownNum(0);
+            emitSound('go');
+            countdownTimeoutRef.current = setTimeout(() => {
+              countdownTimeoutRef.current = null;
+              setCountdownNum(null);
+              startGame();
+            }, 500);
+          }
+        } catch {
+          countdownTimeoutRef.current = null;
+          setCountdownNum(null);
+          startGame();
+        }
+      };
+      countdownTimeoutRef.current = setTimeout(tick, 700);
+    } catch {
+      countdownTimeoutRef.current = null;
+      setCountdownNum(null);
+      startGame();
+    }
+  }, [startGame, emitSound, getAudioCtx]);
+
+  // ── Pause / Resume ─────────────────────────────────────────────────────────
+  const togglePause = useCallback(() => {
+    if (phaseRef.current === 'running') {
+      phaseRef.current = 'paused'; setPhase('paused');
+      if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+      if (spawnRef.current) { clearInterval(spawnRef.current); spawnRef.current = null; }
+      setTimeLeft(prev => { pausedAtRef.current = prev; return prev; });
+    } else if (phaseRef.current === 'paused') {
+      phaseRef.current = 'running'; setPhase('running');
+      spawnRef.current = setInterval(spawnTarget, DIFFICULTY_CONFIGS[difficultyRef.current].spawnInterval);
+      const resumeLeft = pausedAtRef.current;
+      const start      = performance.now();
+      timerRef.current = setInterval(() => {
+        const elapsed = (performance.now() - start) / 1000;
+        const left    = Math.max(0, resumeLeft - elapsed);
+        setTimeLeft(left);
+        if (left <= 0) endGame();
+      }, 50);
+    }
+  }, [spawnTarget, endGame]);
+
+  // ── Reset ──────────────────────────────────────────────────────────────────
+  const resetGame = useCallback(() => {
+    phaseRef.current = 'idle';
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
+    if (spawnRef.current) { clearInterval(spawnRef.current); spawnRef.current = null; }
+    if (countdownTimeoutRef.current) { clearTimeout(countdownTimeoutRef.current); countdownTimeoutRef.current = null; }
+    setCountdownNum(null);
+    targetTimeouts.current.forEach(t => clearTimeout(t));
+    targetTimeouts.current.clear();
+    setPhase('idle'); setScore(0); setMisses(0); setTimeLeft(gameDurationRef.current);
+    setTargets([]); setHitIds(new Set()); setCombo(0); setMilestone(false);
+    setResult(null); setShowModal(false);
+    totalClicks.current = 0; hitClicks.current = 0; lastClickTime.current = 0;
+    comboRef.current = 0; maxComboRef.current = 0;
+    reactionTimes.current = [];
+  }, []);
+
+  const changeDuration = useCallback((d: Duration) => {
+    if (phaseRef.current === 'running' || phaseRef.current === 'paused') return;
+    setGameDuration(d); gameDurationRef.current = d; setTimeLeft(d);
+  }, []);
+
+  const changeDifficulty = useCallback((d: Difficulty) => {
+    if (phaseRef.current === 'running' || phaseRef.current === 'paused') return;
+    setDifficulty(d); difficultyRef.current = d;
+  }, []);
+
+  const closeModal              = useCallback(() => setShowModal(false), []);
+  const openDifficultyFromModal = useCallback(() => { setShowModal(false); resetGame(); }, [resetGame]);
+
+  // ── Hit Target ─────────────────────────────────────────────────────────────
+  const hitTarget = useCallback((id: number, e: React.PointerEvent) => {
+    e.stopPropagation();
+    if (phaseRef.current !== 'running') return;
+    const now = performance.now();
+    if (now - lastClickTime.current < CLICK_RATE_MS) return;
+    lastClickTime.current = now;
+
+    setTargets(prev => {
+      const t = prev.find(x => x.id === id);
+      if (t) reactionTimes.current = [...reactionTimes.current, Math.round(now - t.spawnTime)];
+      return prev;
+    });
+
+    const timeout = targetTimeouts.current.get(id);
+    if (timeout) { clearTimeout(timeout); targetTimeouts.current.delete(id); }
+    setHitIds(prev => new Set(prev).add(id));
+    setTimeout(() => removeTarget(id), 120);
+    setScore(prev => prev + 1);
+    hitClicks.current++; totalClicks.current++;
+
+    const newCombo = comboRef.current + 1;
+    comboRef.current = newCombo;
+    if (newCombo > maxComboRef.current) maxComboRef.current = newCombo;
+    setCombo(newCombo);
+
+    const isMilestone = newCombo === 10 || newCombo === 20 || newCombo % 25 === 0;
+    if (isMilestone) {
+      setMilestone(true); emitSound('combo', newCombo);
+      setTimeout(() => setMilestone(false), 500);
+    } else {
+      emitSound('hit');
+    }
+    spawnTarget();
+  }, [spawnTarget, removeTarget, emitSound]);
+
+  // ── Miss Click ─────────────────────────────────────────────────────────────
+  const missClick = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    if (phaseRef.current !== 'running') return;
+    const now = performance.now();
+    if (now - lastClickTime.current < CLICK_RATE_MS) return;
+    lastClickTime.current = now;
+    setMisses(prev => prev + 1);
+    totalClicks.current++;
+    comboRef.current = 0; setCombo(0); emitSound('miss');
+  }, [emitSound]);
+
+  // ── Fullscreen area click handler ──────────────────────────────────────────
+  // Fullscreen e game area er baire (stats/progress/anywhere) click korle jeno
+  // game start hoy — full-screen wrapper er je kono jaygay click e kaj kore.
+  const handleFullscreenBgClick = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    // Shudhu fullscreen e kaj korbe
+    if (!isFullscreenRef.current) return;
+
+    if (phaseRef.current === 'idle' && !countdownTimeoutRef.current) {
+      e.stopPropagation();
+      beginCountdown();
+      return;
+    }
+    if (phaseRef.current === 'done') {
+      e.stopPropagation();
+      setShowModal(false);
+      beginCountdown();
+      return;
+    }
+  }, [beginCountdown]);
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────────
+  const isTypingTarget = useCallback((target: EventTarget | null): boolean => {
+    const el = target as HTMLElement | null;
+    if (!el) return false;
+    const tag = el.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+    if (el.isContentEditable) return true;
+    return false;
+  }, []);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (isTypingTarget(e.target)) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (countdownTimeoutRef.current) return;
+        if (phaseRef.current === 'idle') beginCountdown();
+        else if (phaseRef.current === 'done') { setShowModal(false); beginCountdown(); }
+      }
+      if (e.code === 'KeyR')   { e.preventDefault(); resetGame(); }
+      if (e.code === 'Escape') {
+        e.preventDefault();
+        if (showModal) setShowModal(false);
+        else if (phaseRef.current === 'running' || phaseRef.current === 'paused') togglePause();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [startGame, beginCountdown, resetGame, togglePause, isTypingTarget, showModal]);
+
+  // ── Derived values ─────────────────────────────────────────────────────────
+  const acc = useMemo(
+    () => totalClicks.current > 0 ? Math.round((hitClicks.current / totalClicks.current) * 100) : 100,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [score, misses],
+  );
+  const progress = useMemo(
+    () => gameDuration > 0 ? ((gameDuration - timeLeft) / gameDuration) * 100 : 0,
+    [gameDuration, timeLeft],
+  );
+  const diffCfg = DIFFICULTY_CONFIGS[difficulty];
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  return (
+    <>
+      <SeoMeta />
+      <JsonLd data={JSON_LD_APP} />
+
+      <style>{`
+        @keyframes target-pop {
+          0%   { transform: translate(-50%,-50%) scale(0.35); opacity: 0; }
+          60%  { transform: translate(-50%,-50%) scale(1.1);  opacity: 1; }
+          100% { transform: translate(-50%,-50%) scale(1);    opacity: 1; }
+        }
+        @keyframes target-hit {
+          0%   { transform: translate(-50%,-50%) scale(1);   opacity: 1; }
+          100% { transform: translate(-50%,-50%) scale(1.4); opacity: 0; }
+        }
+        @keyframes comboMilestone {
+          0%   { transform: scale(1);    }
+          40%  { transform: scale(1.25); }
+          70%  { transform: scale(0.95); }
+          100% { transform: scale(1);    }
+        }
+        @keyframes gradeReveal {
+          0%   { transform: scale(0) rotate(-30deg); opacity: 0; }
+          70%  { transform: scale(1.2) rotate(5deg); opacity: 1; }
+          100% { transform: scale(1)   rotate(0deg); opacity: 1; }
+        }
+        @keyframes countdownPop {
+          0%   { transform: scale(0.3); opacity: 0; }
+          55%  { transform: scale(1.25); opacity: 1; }
+          100% { transform: scale(1);    opacity: 1; }
+        }
+        @keyframes fadeSlideIn {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes pulseRing {
+          0%   { transform: scale(0.95); opacity: 0.8; }
+          50%  { transform: scale(1.05); opacity: 1;   }
+          100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        /* ── Main container ────────────────────────────────────── */
+        .aim-main-container {
+          max-width: 900px;
+          margin: 0 auto;
+          padding: 2rem 1.5rem;
+          width: 100%;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        /* ── Targeted Fullscreen Styles ─────────────────────────────
+           IMPORTANT: the element that receives requestFullscreen()
+           (fullscreenTargetRef, class="fullscreen-target") *is itself*
+           the element that becomes :fullscreen — it is NOT a descendant
+           of the fullscreen element. So the selector must target the
+           element directly (".fullscreen-target:fullscreen"), not
+           ":fullscreen .fullscreen-target" (descendant combinator),
+           otherwise the rule never matches and you only get a
+           "half" / unstyled fullscreen. */
+        .fullscreen-target:fullscreen,
+        .fullscreen-target:-webkit-full-screen,
+        .fullscreen-target:-moz-full-screen {
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: stretch !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          max-width: none !important;
+          max-height: none !important;
+          padding: 0.75rem 1rem !important;
+          margin: 0 !important;
+          background: var(--bg-color, #0a0a0f) !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+          cursor: crosshair !important;
+          justify-content: flex-start !important;
+        }
+
+        :fullscreen .aim-game-area,
+        :-webkit-full-screen .aim-game-area,
+        :-moz-full-screen .aim-game-area {
+          flex: 1 1 auto !important;
+          height: 100% !important;
+          min-height: 0 !important;
+          margin-bottom: 0 !important;
+          border-radius: 12px !important;
+        }
+
+        :fullscreen .aim-stats-grid,
+        :-webkit-full-screen .aim-stats-grid {
+          margin-bottom: 0.4rem !important;
+        }
+
+        /* Fullscreen idle / done overlay — pura screen cover kore */
+        :fullscreen .fs-click-overlay,
+        :-webkit-full-screen .fs-click-overlay,
+        :-moz-full-screen .fs-click-overlay {
+          display: flex !important;
+        }
+
+        .fs-click-overlay {
+          display: none;
+          position: absolute;
+          inset: 0;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          background: rgba(0,0,0,0.72);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          z-index: 18;
+          cursor: crosshair;
+          user-select: none;
+          -webkit-user-select: none;
+        }
+
+        /* ── Buttons ───────────────────────────────────────────── */
+        .aim-fullscreen-btn:hover  { background: rgba(255,255,255,0.1) !important; }
+        .aim-fullscreen-btn:disabled { opacity: 0.4 !important; cursor: not-allowed !important; }
+        .aim-difficulty-btn:focus-visible,
+        .aim-duration-btn:focus-visible,
+        .aim-sound-btn:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
+
+        /* ── Responsive ────────────────────────────────────────── */
+        @media (max-width: 640px) {
+          .aim-stats-grid    { grid-template-columns: repeat(3,1fr) !important; gap: 0.5rem !important; }
+          .aim-controls      { flex-direction: column !important; align-items: stretch !important; }
+          .aim-controls .btn { width: 100% !important; text-align: center !important; min-height: 44px; }
+          .aim-settings-row  { flex-direction: column !important; gap: 0.75rem !important; }
+          .aim-games-grid    { grid-template-columns: repeat(2,1fr) !important; }
+          .aim-article-wrap  { padding: 1.25rem !important; }
+          .aim-results-grid  { grid-template-columns: repeat(2,1fr) !important; }
+          .aim-difficulty-btn,.aim-duration-btn,.aim-sound-btn,.aim-fullscreen-btn { min-height: 40px; }
+        }
+        @media (max-width: 380px) {
+          .aim-stats-grid { gap: 0.35rem !important; }
+        }
+        *:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
+      `}</style>
+
+      <main
+        ref={fullscreenTargetRef}
+        className="aim-main-container fullscreen-target"
+        role="main"
+        aria-label="Aim Trainer"
+        onPointerDown={handleFullscreenBgClick}
+      >
+
+        {/* ── Header ────────────────────────────────────────────── */}
+        <header style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+          <div className="section-label">Aim Tool</div>
+          <h1 className="tool-title">Aim Trainer</h1>
+          <p className="tool-subtitle">
+            Click targets as fast and accurately as possible — track your accuracy, combos, and grade
+          </p>
+        </header>
+
+        {/* ── Settings Row ──────────────────────────────────────── */}
+        <div
+          className="aim-settings-row"
+          style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}
+        >
+          {/* Difficulty */}
+          <fieldset style={{ border: 'none', padding: 0, margin: 0 }} aria-label="Select difficulty">
+            <legend style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', letterSpacing: '1px' }}>Difficulty</legend>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {(Object.keys(DIFFICULTY_CONFIGS) as Difficulty[]).map(d => (
+                <button
+                  key={d} className="aim-difficulty-btn"
+                  onClick={() => changeDifficulty(d)}
+                  disabled={phase === 'running' || phase === 'paused'}
+                  aria-pressed={difficulty === d} aria-label={`Difficulty: ${d}`}
+                  style={{
+                    padding: '0.35rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700',
+                    border: `1.5px solid ${difficulty === d ? DIFFICULTY_CONFIGS[d].color : 'var(--border)'}`,
+                    background: difficulty === d ? `${DIFFICULTY_CONFIGS[d].color}22` : 'var(--bg-card)',
+                    color: difficulty === d ? DIFFICULTY_CONFIGS[d].color : 'var(--text-muted)',
+                    cursor: phase === 'running' || phase === 'paused' ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.15s',
+                    opacity: phase === 'running' || phase === 'paused' ? 0.5 : 1,
+                  }}
+                >{d}</button>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Duration */}
+          <fieldset style={{ border: 'none', padding: 0, margin: 0 }} aria-label="Select game duration">
+            <legend style={{ fontSize: '0.7rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', letterSpacing: '1px' }}>Duration</legend>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {DURATION_OPTIONS.map(d => (
+                <button
+                  key={d} className="aim-duration-btn"
+                  onClick={() => changeDuration(d)}
+                  disabled={phase === 'running' || phase === 'paused'}
+                  aria-pressed={gameDuration === d} aria-label={`${d} seconds`}
+                  style={{
+                    padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700',
+                    border: `1.5px solid ${gameDuration === d ? 'var(--neon-cyan)' : 'var(--border)'}`,
+                    background: gameDuration === d ? 'rgba(0,245,255,0.12)' : 'var(--bg-card)',
+                    color: gameDuration === d ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                    cursor: phase === 'running' || phase === 'paused' ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.15s',
+                    opacity: phase === 'running' || phase === 'paused' ? 0.5 : 1,
+                  }}
+                >{d}s</button>
+              ))}
+            </div>
+          </fieldset>
+
+          {/* Sound + Fullscreen Controls */}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+            <button
+              className="aim-sound-btn"
+              onClick={() => setSoundOn(v => !v)}
+              aria-pressed={soundOn}
+              aria-label={soundOn ? 'Sound on — click to mute' : 'Sound off — click to unmute'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                padding: '0.4rem 0.8rem', borderRadius: '8px',
+                border: soundOn ? '1px solid var(--neon-cyan)' : '1px solid var(--border)',
+                background: soundOn ? 'rgba(0,245,255,0.1)' : 'var(--bg-card)',
+                color: soundOn ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              <span aria-hidden="true">{soundOn ? '🔊' : '🔇'}</span>
+              <span>{soundOn ? 'ON' : 'OFF'}</span>
+            </button>
+
+            <button
+              className="aim-sound-btn"
+              onClick={() => setExitFsOnEnd(v => !v)}
+              aria-pressed={exitFsOnEnd}
+              aria-label="Toggle auto-exit fullscreen when game ends"
+              title="Automatically exit fullscreen when the game ends"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                padding: '0.4rem 0.8rem', borderRadius: '8px',
+                border: exitFsOnEnd ? '1px solid var(--neon-orange)' : '1px solid var(--border)',
+                background: exitFsOnEnd ? 'rgba(255,107,0,0.1)' : 'var(--bg-card)',
+                color: exitFsOnEnd ? 'var(--neon-orange)' : 'var(--text-muted)',
+                fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.15s',
+              }}
+            >
+              Auto-exit FS: {exitFsOnEnd ? 'ON' : 'OFF'}
+            </button>
+
+            <button
+              className="aim-fullscreen-btn"
+              onClick={toggleFullscreen}
+              disabled={!fsSupported}
+              aria-pressed={isFullscreen}
+              aria-label={
+                !fsSupported ? 'Fullscreen not supported' :
+                isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+              }
+              title={
+                !fsSupported ? 'Fullscreen not supported in this browser' :
+                isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+              }
+              style={{
+                padding: '0.4rem 0.65rem', borderRadius: '8px',
+                border: `1px solid ${isFullscreen ? 'var(--neon-cyan)' : 'var(--border)'}`,
+                background: isFullscreen ? 'rgba(0,245,255,0.1)' : 'var(--bg-card)',
+                color: isFullscreen ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                fontSize: '1rem', cursor: fsSupported ? 'pointer' : 'not-allowed',
+                transition: 'background 0.15s', display: 'flex', alignItems: 'center', gap: '4px',
+              }}
+            >
+              <span aria-hidden="true">⛶</span>
+              <span style={{ fontSize: '0.75rem' }}>
+                {!fsSupported ? 'Unsupported' : isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* ════════════════════════════════════════════════════════
+            TARGETED FULLSCREEN WRAPPER
+            — fullscreen e ei div-i pura screen cover korbe.
+            — Ei wrapper e je kono jaygay click korle (idle/done obosthay)
+              game start hoy, karon onPointerDown eikhane bubble kore.
+        ════════════════════════════════════════════════════════ */}
+        <div style={{ position: 'relative' }}>
+          {/* Stats Cards */}
+          <div
+            className="aim-stats-grid"
+            role="status" aria-live="polite" aria-atomic="true"
+            aria-label={`Hits: ${score}, Misses: ${misses}, Accuracy: ${acc}%, Time left: ${timeLeft.toFixed(1)} seconds, Combo: ${combo}`}
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}
+          >
+            {[
+              { value: score,               label: 'Hits',     color: 'var(--neon-green)'  },
+              { value: misses,              label: 'Misses',   color: 'var(--neon-red)'    },
+              { value: `${acc}%`,           label: 'Accuracy', color: 'var(--neon-cyan)'   },
+              { value: timeLeft.toFixed(1), label: 'Seconds',  color: 'var(--neon-orange)' },
+              { value: `×${combo}`,         label: 'Combo',    color: '#FFD700'             },
+            ].map(s => (
+              <div key={s.label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', textAlign: 'center' }}>
+                <div style={{ fontSize: 'clamp(1.1rem,3.5vw,2rem)', fontWeight: '900', color: s.color, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.15rem' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Progress Bar */}
+          <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuemin={0} aria-valuemax={100}
+            aria-valuenow={Math.round(progress)}
+            aria-label="Game progress"
+            style={{ marginBottom: '0.6rem' }}
+          >
+            <div className="progress-fill" style={{ width: `${progress}%` }} />
+          </div>
+
+          {/* Combo Banner */}
+          <div style={{ display: 'flex', justifyContent: 'center', minHeight: '28px', marginBottom: '0.4rem' }}>
+            {phase === 'running' && <ComboBanner combo={combo} milestone={milestone} />}
+          </div>
+
+          {/* Keyboard Hints */}
+          <ShortcutHints phase={phase} />
+
+          {/* ── Game Area ─────────────────────────────────────────── */}
+          <div
+            ref={areaRef}
+            onPointerDown={missClick}
+            className="aim-game-area"
+            role={phase === 'running' ? 'region' : undefined}
+            aria-label={
+              phase === 'running' ? 'Aim training area — click the targets' :
+              phase === 'paused'  ? 'Game paused' : undefined
+            }
+            style={{
+              position: 'relative',
+              width: '100%',
+              height: '420px',
+              background: 'var(--bg-card)',
+              border: `2px solid ${
+                phase === 'running' ? diffCfg.color :
+                phase === 'paused'  ? 'var(--neon-orange)' : 'var(--border)'
+              }`,
+              borderRadius: '16px',
+              overflow: 'hidden',
+              cursor: phase === 'running' ? 'crosshair' : 'default',
+              marginBottom: '1.25rem',
+              touchAction: phase === 'running' ? 'none' : 'auto',
+              boxShadow: phase === 'running' ? `0 0 30px ${diffCfg.color}22` : 'none',
+              transition: 'border-color 0.3s,box-shadow 0.3s',
+              userSelect: 'none', WebkitUserSelect: 'none',
+            }}
+          >
+            {/* ── Countdown overlay ──────────────────────────────── */}
+            {countdownNum !== null && (
+              <div
+                aria-live="assertive" aria-atomic="true"
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                  background: 'rgba(0,0,0,0.82)', zIndex: 20,
+                }}
+              >
+                <span
+                  key={countdownNum}
+                  style={{
+                    fontSize: countdownNum === 0 ? 'clamp(2.5rem,9vw,4.5rem)' : 'clamp(4rem,14vw,7rem)',
+                    fontWeight: '900',
+                    color: countdownNum === 0 ? 'var(--neon-green)' : diffCfg.color,
+                    textShadow: `0 0 30px ${countdownNum === 0 ? 'rgba(0,255,136,0.6)' : 'rgba(0,245,255,0.5)'}`,
+                    animation: 'countdownPop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
+                  {countdownNum === 0 ? 'GO!' : countdownNum}
+                </span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  {difficulty} · {gameDuration}s
+                </span>
+              </div>
+            )}
+
+            {/* ── Idle state (normal mode) ───────────────────────── */}
+            {phase === 'idle' && countdownNum === null && (
+              <div
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                }}
+              >
+                <span style={{ fontSize: '4rem' }} aria-hidden="true">🎯</span>
+                <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--neon-green)' }}>
+                  Click Start to Play
+                </span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
+                  {difficulty} · {gameDuration}s — Click targets as fast as you can!
+                </span>
+              </div>
+            )}
+
+            {/* ── FULLSCREEN IDLE OVERLAY — anywhere click to start ── */}
+            {phase === 'idle' && countdownNum === null && (
+              <div
+                className="fs-click-overlay"
+                onPointerDown={(e) => {
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  e.stopPropagation();
+                  beginCountdown();
+                }}
+                role="button"
+                aria-label="Click anywhere to start the game"
+                tabIndex={-1}
+              >
+                <div style={{
+                  textAlign: 'center', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: '0.75rem',
+                  animation: 'pulseRing 2s ease-in-out infinite',
+                }}>
+                  <span style={{ fontSize: 'clamp(3rem,8vw,6rem)' }} aria-hidden="true">🎯</span>
+                  <span style={{
+                    fontSize: 'clamp(1.5rem,4vw,2.5rem)', fontWeight: '900',
+                    color: 'var(--neon-green)',
+                    textShadow: '0 0 30px rgba(0,255,136,0.6)',
+                  }}>
+                    Click Anywhere to Start!
+                  </span>
+                  <span style={{
+                    color: 'var(--text-secondary)', fontSize: 'clamp(0.85rem,2vw,1.1rem)',
+                    background: 'rgba(0,0,0,0.5)', padding: '0.4rem 1.2rem',
+                    borderRadius: '50px', border: '1px solid rgba(255,255,255,0.1)',
+                  }}>
+                    {difficulty} · {gameDuration}s
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* ── FULLSCREEN DONE OVERLAY — anywhere click to retry ── */}
+            {phase === 'done' && !showModal && countdownNum === null && (
+              <div
+                className="fs-click-overlay"
+                onPointerDown={(e) => {
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  e.stopPropagation();
+                  setShowModal(false);
+                  beginCountdown();
+                }}
+                role="button"
+                aria-label="Click anywhere to play again"
+                tabIndex={-1}
+              >
+                <div style={{
+                  textAlign: 'center', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: '0.75rem',
+                }}>
+                  <span style={{ fontSize: 'clamp(2.5rem,7vw,5rem)' }} aria-hidden="true">🏁</span>
+                  <span style={{
+                    fontSize: 'clamp(1.4rem,3.5vw,2.2rem)', fontWeight: '900',
+                    color: 'var(--neon-cyan)',
+                    textShadow: '0 0 20px rgba(0,245,255,0.5)',
+                  }}>
+                    Time&apos;s Up! · {score} Hits
+                  </span>
+                  <span style={{
+                    color: 'var(--neon-green)', fontSize: 'clamp(1rem,2.5vw,1.4rem)',
+                    fontWeight: '800',
+                  }}>
+                    Click Anywhere to Play Again
+                  </span>
+                  {result && (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+                      style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}
+                    >
+                      View Full Results
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Paused overlay ─────────────────────────────────── */}
+            {phase === 'paused' && (
+              <div
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                  background: 'rgba(0,0,0,0.75)', zIndex: 10,
+                }}
+              >
+                <span style={{ fontSize: '3rem' }} aria-hidden="true">⏸</span>
+                <span style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--neon-orange)' }}>Paused</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Press Esc or click Resume to continue
+                </span>
+              </div>
+            )}
+
+            {/* ── Normal Done overlay (non-fullscreen) ───────────── */}
+            {phase === 'done' && !showModal && countdownNum === null && (
+              <div
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                  background: 'rgba(0,0,0,0.7)', zIndex: 10,
+                }}
+                className="non-fs-done-overlay"
+              >
+                <span style={{ fontSize: '3rem' }} aria-hidden="true">🏁</span>
+                <span style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--neon-cyan)' }}>Time&apos;s Up!</span>
+                <span style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--neon-green)' }}>{score} Hits</span>
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  {acc}% Accuracy · ×{Math.max(combo, maxComboRef.current)} Max Combo
+                </span>
+                {result && (
+                  <button className="btn btn-secondary" onClick={() => setShowModal(true)} style={{ marginTop: '0.5rem' }}>
+                    View Full Results
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* ── Targets ────────────────────────────────────────── */}
+            {targets.map(t => (
+              <TargetEl key={t.id} target={t} isHit={hitIds.has(t.id)} onHit={hitTarget} />
+            ))}
+          </div>
+          {/* ── End Game Area ──────────────────────────────────────── */}
+        </div>
+        {/* ── End Fullscreen Wrapper ──────────────────────────────── */}
+
+        {/* ── Controls ──────────────────────────────────────────── */}
+        <div
+          className="aim-controls"
+          style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}
+        >
+          {phase !== 'running' && phase !== 'paused' && (
+            <button
+              className="btn btn-primary"
+              onClick={beginCountdown}
+              disabled={countdownNum !== null}
+              aria-label={phase === 'done' ? 'Play again' : 'Start aim trainer'}
+              style={{ opacity: countdownNum !== null ? 0.6 : 1, cursor: countdownNum !== null ? 'not-allowed' : 'pointer' }}
+            >
+              {phase === 'done' ? '▶ Play Again' : '🎯 Start Game'}
+            </button>
+          )}
+          {phase === 'running' && (
+            <button className="btn btn-secondary" onClick={togglePause} aria-label="Pause game">⏸ Pause</button>
+          )}
+          {phase === 'paused' && (
+            <button className="btn btn-primary" onClick={togglePause} aria-label="Resume game">▶ Resume</button>
+          )}
+          {phase !== 'idle' && (
+            <button className="btn btn-secondary" onClick={resetGame} aria-label="Reset game">🔄 Reset</button>
+          )}
+        </div>
+
+        {/* ── Modal or Panel ────────────────────────────────────── */}
+        {showModal && result ? (
+          <ResultsModal
+            result={result}
+            onPlayAgain={beginCountdown}
+            onChangeDifficulty={openDifficultyFromModal}
+            onClose={closeModal}
+          />
+        ) : (
+          phase === 'done' && result && (
+            <div style={{ marginTop: '1.5rem' }}>
+              <ResultsPanel result={result} onPlayAgain={beginCountdown} onReset={resetGame} />
+            </div>
+          )
+        )}
+
+        {/* ── Session History ───────────────────────────────────── */}
+        {history.length > 0 && (
+          <section
+            aria-label="Session history"
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              borderRadius: '16px', overflow: 'hidden', marginTop: '2rem',
+            }}
+          >
+            <div style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>
+              📊 Session History
+            </div>
+            <div role="list" aria-label="Previous game results">
+              {history.map((h, i) => (
+                <div
+                  key={i} role="listitem"
+                  style={{
+                    display: 'grid', gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 2rem',
+                    gap: '0.5rem', alignItems: 'center', padding: '0.65rem 1.25rem',
+                    fontSize: '0.8rem',
+                    borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}
+                >
+                  <span style={{ color: 'var(--text-muted)' }}>#{history.length - i}</span>
+                  <span style={{ color: 'var(--neon-green)', fontWeight: '700' }}>{h.score} hits</span>
+                  <span style={{ color: 'var(--neon-cyan)' }}>{h.acc}% acc</span>
+                  <span style={{ color: 'var(--neon-orange)' }}>{h.avgReaction > 0 ? `${h.avgReaction}ms` : '—'}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>{h.difficulty} · {h.duration}s</span>
+                  <span style={{ color: '#FFD700', fontWeight: '900', fontSize: '0.85rem' }}>{h.grade}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ══════════════════════════════════════════════════════════
+            SEO ARTICLE
+        ══════════════════════════════════════════════════════════ */}
+        <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
+
+        <article className="aim-article-wrap" style={{ paddingTop: '1rem' }}>
+          <section style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.85' }}>
+
+            <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.25rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
+              1. The Ultimate Guide to Aim Training & Mouse Accuracy
+            </h2>
+            <p style={{ marginBottom: '1.5rem', fontSize: '1rem', color: '#d1d5db' }}>
+              An <strong>Aim Trainer</strong> is a specialized browser tool designed to help gamers systematically test and improve their mouse reaction time, clicking accuracy, and spatial tracking. In competitive eSports, raw clicks-per-second statistics mean very little without precision behind them.
+            </p>
+
+            <div style={{ borderLeft: '4px solid var(--neon-green)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem', background: 'rgba(16,185,129,0.05)' }}>
+              <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', marginTop: '0', marginBottom: '0.4rem' }}>🖱️ Use This as a New Mouse Sensor Check</h3>
+              <p style={{ margin: 0, color: '#9ca3af', fontSize: '0.92rem' }}>
+                Our Aim Trainer doubles as a <strong>new mouse check</strong>. By clicking small randomly spawning targets rapidly, you can immediately detect optical sensor spin-outs, confirm zero hardware acceleration, and dial in your DPI before any competitive match.
+              </p>
+            </div>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>2. How to Increase Aim Accuracy Consistently</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Accuracy is the product of three combined factors: <em>muscle memory</em>, <em>visual processing speed</em>, and <em>hardware reliability</em>. Improving all three simultaneously accelerates your progress far faster than focusing on any one area.</p>
+
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>3. Finding Your Perfect Mouse Sensitivity (eDPI)</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Your effective DPI (eDPI) dictates how far you must move your hand to look around in-game. A lower sensitivity generally promotes stability and smoother tracking, while a higher sensitivity allows for rapid 180-degree turns.</p>
+
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>4. Tracking vs. Flicking: Understanding Aim Styles</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Flicking is the ability to instantly snap your crosshair to a target, critical for games like CS2 and Valorant. Tracking is the ability to smoothly follow a moving target, essential for Apex Legends and Overwatch.</p>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>5. The Best Mouse Grip Styles for Gaming</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Palm grip offers high stability and tracking power. Claw grip provides a balanced mix of stability and micro-flicking. Fingertip grip offers pure vertical dexterity and micro-adjustments but lacks stability.</p>
+
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>6. Hardware vs. Skill: Does a Better Mouse Make You Better?</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>A top-tier mouse won't magically give you pro aim, but a bad mouse will actively hold you back. An optical sensor that skips or spins out makes it impossible to build consistent muscle memory.</p>
+
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>7. How Posture and Seating Affects Your Aim</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Aim starts at your core. If your chair height changes daily, the angle of your arm on the desk changes, destroying your muscle memory. Keep your elbow roughly parallel with your desk surface.</p>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>8. The Ultimate Warm-up Routine for Valorant and CS2</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Before hopping into ranked, play 5 minutes of our Aim Trainer on "Medium" to wake up your hand-eye coordination. Follow this up with 5 minutes on "Hard" to push your reaction times.</p>
+
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>9. The Importance of Crosshair Placement</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>The best flick in the world is slower than not having to flick at all. Crosshair placement means keeping your reticle exactly where an enemy's head will appear.</p>
+
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>10. How to Overcome Aiming Plateaus</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>If your scores stop improving, you've hit a plateau. To break it, artificially increase the difficulty. Play on our "Impossible" mode to intentionally fail. This forces your brain out of autopilot.</p>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>11. Does Monitor Refresh Rate (144Hz/240Hz) Impact Aim?</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Yes. Upgrading from 60Hz to 144Hz reduces system latency and provides twice as many visual frames per second, directly increasing your tracking scores and reaction time.</p>
+
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>12. Lightweight Mice vs. Heavy Mice</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>The eSports industry has heavily shifted toward ultra-lightweight mice (under 65 grams). Less weight means less inertia, allowing your hand to start and stop the mouse much faster.</p>
+
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>13. Disabling Mouse Acceleration for Raw Input</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>"Enhance pointer precision" in Windows adds artificial mouse acceleration. Always disable this to ensure raw, 1:1 muscle memory building.</p>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>14. How to Build Solid Muscle Memory</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Muscle memory thrives on repetition and sleep. Train in short, intense 15-minute bursts daily rather than a single 3-hour session once a week.</p>
+
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>15. Aim Training for Fortnite and Movement Shooters</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>In high-mobility games, targets move vertically and horizontally at extreme speeds. Our 2D aim trainer simulates this dynamic target acquisition.</p>
+
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>16. Dealing with Ranked Anxiety and Aim Shakes</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>"Aim shakes" happen when adrenaline floods your system during a clutch moment. The only cure is supreme confidence in your mechanics built through daily practice.</p>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>17. Measuring Your Progress in Aim Training</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Pay attention to your "Avg Reaction" and "Accuracy %" statistics at the end of each session. Always prioritize landing the shot smoothly over moving erratically fast.</p>
+
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>18. Common Mistakes Beginners Make When Aiming</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>The biggest mistake is tensing the arm and gripping the mouse too tightly. Focus on a relaxed shoulder, a loose grip, and smooth, gliding motions across your mousepad.</p>
+
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>19. The Role of Mousepads in Accuracy</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>A good cloth mousepad provides friction — often called "stopping power." When you flick your mouse, you want it to stop precisely where your hand stops.</p>
+
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>20. Applying 2D Training to 3D Environments</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Browser-based aim trainers operate in a 2D space, which perfectly mirrors the flat sensor of your mouse. By mastering 2D cursor control here, you directly train the physical hand movements required in 3D games.</p>
+
+            {/* Games Grid */}
+            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem', marginTop: '2rem' }}>Why Aim Matters in These Top Games</h3>
+            <div
+              className="aim-games-grid"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: '0.75rem', marginBottom: '3rem' }}
+            >
+              {GAMES.map(game => (
+                <div key={game} style={{ padding: '0.65rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
+                  <span style={{ color: 'var(--neon-green)' }} aria-hidden="true">🎯</span>{game}
+                </div>
+              ))}
+            </div>
+
+            {/* FAQ Section */}
+            <div itemScope itemType="https://schema.org/FAQPage" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+              <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '0', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
+                Aim Training Frequently Asked Questions
+              </h2>
+
+              {ALL_FAQS.map(({ q, a }, i) => (
+                <div key={i} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
+                  <h3 itemProp="name" style={{ color: 'var(--neon-cyan)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem', marginTop: 0 }}>{q}</h3>
+                  <div itemScope itemProp="acceptedAnswer" itemType="https://schema.org/Answer">
+                    <p itemProp="text" style={{ color: '#9ca3af', margin: 0, lineHeight: '1.75' }}>{a}</p>
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ border: '1px solid rgba(255,107,0,0.2)', padding: '1.25rem 1.5rem', borderRadius: '12px', marginTop: '1rem' }}>
+                <h4 style={{ color: 'var(--neon-orange)', fontSize: '1rem', fontWeight: '700', margin: '0 0 0.4rem 0' }}>💡 Pro Tip: Warm Up Before Every Ranked Session</h4>
+                <p style={{ color: '#9ca3af', margin: 0, fontSize: '0.875rem', lineHeight: '1.7' }}>
+                  Use this Aim Trainer for 5–10 minutes before launching competitive matches. Start on Easy to wake up your muscle memory, finish on Hard to sharpen your reflexes, and watch your ranked performance soar.
+                </p>
+              </div>
+            </div>
+
+          </section>
+        </article>
+
+      </main>
+    </>
+  );
+}
