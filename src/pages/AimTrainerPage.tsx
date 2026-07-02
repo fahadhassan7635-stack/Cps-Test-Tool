@@ -142,6 +142,35 @@ function playCombo(ctx: AudioContext, level: number) {
   osc.stop(ctx.currentTime + 0.2);
 }
 
+// NEW: countdown "beep" (3, 2, 1) sound
+function playCountdownBeep(ctx: AudioContext) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(600, ctx.currentTime);
+  gain.gain.setValueAtTime(0.28, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.15);
+}
+
+// NEW: countdown "GO!" sound
+function playCountdownGo(ctx: AudioContext) {
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(1300, ctx.currentTime + 0.3);
+  gain.gain.setValueAtTime(0.32, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.3);
+}
+
 // ─── JSON-LD ──────────────────────────────────────────────────────────────────
 const JSON_LD_APP = JSON.stringify({
   '@context': 'https://schema.org',
@@ -766,14 +795,16 @@ export default function AimTrainerPage() {
     return audioCtxRef.current;
   }, []);
 
-  const emitSound = useCallback((type: 'hit' | 'miss' | 'combo', comboLevel = 1) => {
+  const emitSound = useCallback((type: 'hit' | 'miss' | 'combo' | 'countdown' | 'go', comboLevel = 1) => {
     if (!soundOnRef.current) return;
     try {
       const ctx = getAudioCtx();
       if (ctx.state === 'suspended') void ctx.resume();
-      if (type === 'hit')       playHit(ctx);
-      else if (type === 'miss') playMiss(ctx);
-      else                      playCombo(ctx, comboLevel);
+      if (type === 'hit')            playHit(ctx);
+      else if (type === 'miss')      playMiss(ctx);
+      else if (type === 'countdown') playCountdownBeep(ctx);
+      else if (type === 'go')        playCountdownGo(ctx);
+      else                           playCombo(ctx, comboLevel);
     } catch { /* ignore */ }
   }, [getAudioCtx]);
 
@@ -782,9 +813,15 @@ export default function AimTrainerPage() {
     if (!fsSupported) return;
     const el = fullscreenTargetRef.current;
     if (!el) return;
+    // Make sure the audio context exists / resumes on this user gesture too,
+    // so the countdown beeps are guaranteed to work right after entering fullscreen.
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') void ctx.resume();
+    } catch { /* ignore */ }
     if (getFullscreenElement()) void exitFs();
     else                        void requestFs(el);
-  }, [fsSupported]);
+  }, [fsSupported, getAudioCtx]);
 
   useEffect(() => {
     const handler = () => {
@@ -903,22 +940,34 @@ export default function AimTrainerPage() {
     }, 50);
   }, [spawnTarget, endGame]);
 
-  // ── Countdown ──────────────────────────────────────────────────────────────
+  // ── Countdown (now with 3‑2‑1 beeps + GO! sound) ──────────────────────────
   const beginCountdown = useCallback(() => {
     try {
       if (phaseRef.current === 'running' || phaseRef.current === 'paused') return;
       if (countdownTimeoutRef.current) return;
       setShowModal(false);
+
+      // Make sure audio is ready to play immediately (this call happens
+      // synchronously inside a user gesture, satisfying autoplay policies).
+      try {
+        const ctx = getAudioCtx();
+        if (ctx.state === 'suspended') void ctx.resume();
+      } catch { /* ignore */ }
+
       let step = 3;
       setCountdownNum(step);
+      emitSound('countdown');
+
       const tick = () => {
         try {
           step -= 1;
           if (step >= 1) {
             setCountdownNum(step);
+            emitSound('countdown');
             countdownTimeoutRef.current = setTimeout(tick, 700);
           } else {
             setCountdownNum(0);
+            emitSound('go');
             countdownTimeoutRef.current = setTimeout(() => {
               countdownTimeoutRef.current = null;
               setCountdownNum(null);
@@ -937,7 +986,7 @@ export default function AimTrainerPage() {
       setCountdownNum(null);
       startGame();
     }
-  }, [startGame]);
+  }, [startGame, emitSound, getAudioCtx]);
 
   // ── Pause / Resume ─────────────────────────────────────────────────────────
   const togglePause = useCallback(() => {
@@ -1039,7 +1088,8 @@ export default function AimTrainerPage() {
   }, [emitSound]);
 
   // ── Fullscreen area click handler ──────────────────────────────────────────
-  // Fullscreen e game area er baire click korle game start hobe
+  // Fullscreen e game area er baire (stats/progress/anywhere) click korle jeno
+  // game start hoy — full-screen wrapper er je kono jaygay click e kaj kore.
   const handleFullscreenBgClick = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     // Shudhu fullscreen e kaj korbe
@@ -1154,10 +1204,18 @@ export default function AimTrainerPage() {
           min-height: 100vh;
         }
 
-        /* ── Targeted Fullscreen Styles ────────────────────────── */
-        :fullscreen .fullscreen-target,
-        :-webkit-full-screen .fullscreen-target,
-        :-moz-full-screen .fullscreen-target {
+        /* ── Targeted Fullscreen Styles ─────────────────────────────
+           IMPORTANT: the element that receives requestFullscreen()
+           (fullscreenTargetRef, class="fullscreen-target") *is itself*
+           the element that becomes :fullscreen — it is NOT a descendant
+           of the fullscreen element. So the selector must target the
+           element directly (".fullscreen-target:fullscreen"), not
+           ":fullscreen .fullscreen-target" (descendant combinator),
+           otherwise the rule never matches and you only get a
+           "half" / unstyled fullscreen. */
+        .fullscreen-target:fullscreen,
+        .fullscreen-target:-webkit-full-screen,
+        .fullscreen-target:-moz-full-screen {
           display: flex !important;
           flex-direction: column !important;
           width: 100vw !important;
@@ -1169,6 +1227,7 @@ export default function AimTrainerPage() {
           box-sizing: border-box !important;
           overflow: hidden !important;
           cursor: crosshair !important;
+          justify-content: center !important;
         }
 
         :fullscreen .aim-game-area,
@@ -1188,7 +1247,8 @@ export default function AimTrainerPage() {
 
         /* Fullscreen idle / done overlay — pura screen cover kore */
         :fullscreen .fs-click-overlay,
-        :-webkit-full-screen .fs-click-overlay {
+        :-webkit-full-screen .fs-click-overlay,
+        :-moz-full-screen .fs-click-overlay {
           display: flex !important;
         }
 
@@ -1367,7 +1427,9 @@ export default function AimTrainerPage() {
 
         {/* ════════════════════════════════════════════════════════
             TARGETED FULLSCREEN WRAPPER
-            — fullscreen e ei div-i pura screen cover korbe
+            — fullscreen e ei div-i pura screen cover korbe.
+            — Ei wrapper e je kono jaygay click korle (idle/done obosthay)
+              game start hoy, karon onPointerDown eikhane bubble kore.
         ════════════════════════════════════════════════════════ */}
         <div
           ref={fullscreenTargetRef}
