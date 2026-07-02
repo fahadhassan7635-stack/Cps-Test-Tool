@@ -1,5 +1,5 @@
 /**
- * AimTrainerPage.tsx - Production-ready with Graph Removed, Targeted Fullscreen & Massive SEO
+ * AimTrainerPage.tsx - Production-ready with Fullscreen Click-to-Start
  */
 
 import {
@@ -393,9 +393,9 @@ const ResultsModal = memo(function ResultsModal({
 
   if (!result) return null;
 
-  const safeClose           = () => { try { onClose();            } catch { /* noop */ } };
-  const safePlayAgain       = () => { try { onPlayAgain();        } catch { /* noop */ } };
-  const safeChangeDifficulty= () => { try { onChangeDifficulty(); } catch { /* noop */ } };
+  const safeClose            = () => { try { onClose();            } catch { /* noop */ } };
+  const safePlayAgain        = () => { try { onPlayAgain();        } catch { /* noop */ } };
+  const safeChangeDifficulty = () => { try { onChangeDifficulty(); } catch { /* noop */ } };
 
   const topStats = [
     { value: `${result.acc ?? 0}%`,      label: 'Accuracy' },
@@ -418,22 +418,69 @@ const ResultsModal = memo(function ResultsModal({
 
   return (
     <>
-      <div onClick={safeClose} aria-hidden="true" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards' }} />
+      <div
+        onClick={safeClose}
+        aria-hidden="true"
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)', zIndex: 999,
+          animation: 'fadeIn 0.3s ease-out forwards',
+        }}
+      />
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="aim-results-title"
-        style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: '90%', maxWidth: '380px', background: 'linear-gradient(135deg,rgba(0,245,255,0.08),rgba(0,255,136,0.08))', border: '2px solid rgba(0,245,255,0.3)', borderRadius: '20px', padding: '1.5rem 0.75rem 0.75rem', textAlign: 'center', zIndex: 1000, animation: 'modalPopIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 0 60px rgba(0,245,255,0.2),0 0 120px rgba(0,255,136,0.1)' }}
+        style={{
+          position: 'fixed', top: '50%', left: '50%',
+          transform: 'translate(-50%,-50%)',
+          width: '90%', maxWidth: '380px',
+          background: 'linear-gradient(135deg,rgba(0,245,255,0.08),rgba(0,255,136,0.08))',
+          border: '2px solid rgba(0,245,255,0.3)', borderRadius: '20px',
+          padding: '1.5rem 0.75rem 0.75rem', textAlign: 'center',
+          zIndex: 1000,
+          animation: 'modalPopIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards',
+          maxHeight: '90vh', overflowY: 'auto',
+          boxShadow: '0 0 60px rgba(0,245,255,0.2),0 0 120px rgba(0,255,136,0.1)',
+        }}
       >
-        <button ref={closeBtnRef} onClick={safeClose} aria-label="Close results" style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)', color: 'var(--neon-cyan)', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '0.9rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.1rem' }}>{result.difficulty ?? ''} · Your Result</div>
-        <div id="aim-results-title" style={{ fontSize: 'clamp(1.9rem,5.5vw,3rem)', fontWeight: '900', color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums', marginBottom: '0.05rem' }}>
-          {result.score ?? 0}{' '}<span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>HITS</span>
+        <button
+          ref={closeBtnRef} onClick={safeClose} aria-label="Close results"
+          style={{
+            position: 'absolute', top: '0.5rem', right: '0.5rem',
+            background: 'rgba(0,245,255,0.1)', border: '1px solid rgba(0,245,255,0.3)',
+            color: 'var(--neon-cyan)', width: '32px', height: '32px',
+            borderRadius: '50%', cursor: 'pointer', fontSize: '0.9rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >✕</button>
+
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.1rem' }}>
+          {result.difficulty ?? ''} · Your Result
         </div>
-        <div style={{ display: 'inline-flex', alignItems: 'center', padding: '0.3rem 0.85rem', borderRadius: '50px', background: `${finalRatingColor}20`, border: `2px solid ${finalRatingColor}50`, color: finalRatingColor, fontSize: '0.88rem', fontWeight: '700', marginBottom: '0.45rem' }}>
+        <div
+          id="aim-results-title"
+          style={{
+            fontSize: 'clamp(1.9rem,5.5vw,3rem)', fontWeight: '900',
+            color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums', marginBottom: '0.05rem',
+          }}
+        >
+          {result.score ?? 0}{' '}
+          <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>HITS</span>
+        </div>
+        <div
+          style={{
+            display: 'inline-flex', alignItems: 'center',
+            padding: '0.3rem 0.85rem', borderRadius: '50px',
+            background: `${finalRatingColor}20`, border: `2px solid ${finalRatingColor}50`,
+            color: finalRatingColor, fontSize: '0.88rem', fontWeight: '700', marginBottom: '0.45rem',
+          }}
+        >
           Grade {result.grade ?? '-'}
         </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '0.2rem', marginBottom: '0.35rem' }}>
           {topStats.map(s => (
             <div key={s.label} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '12px', padding: '0.3rem', border: '1px solid rgba(0,245,255,0.2)' }}>
@@ -442,6 +489,7 @@ const ResultsModal = memo(function ResultsModal({
             </div>
           ))}
         </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.2rem', marginBottom: '0.45rem' }}>
           {extStats.map(s => (
             <div key={s.label} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '0.3rem', border: '1px solid rgba(255,255,255,0.08)' }}>
@@ -450,14 +498,15 @@ const ResultsModal = memo(function ResultsModal({
             </div>
           ))}
         </div>
+
         <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={safeChangeDifficulty} style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>🔄 Reset</button>
           <button className="btn btn-primary"   onClick={safePlayAgain}        style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}>Try Again</button>
         </div>
       </div>
       <style>{`
-        @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
-        @keyframes modalPopIn{ from{opacity:0;transform:translate(-50%,-50%) scale(0.5)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+        @keyframes fadeIn     { from{opacity:0} to{opacity:1} }
+        @keyframes modalPopIn { from{opacity:0;transform:translate(-50%,-50%) scale(0.5)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
       `}</style>
     </>
   );
@@ -486,22 +535,40 @@ const ResultsPanel = memo(function ResultsPanel({
   ];
 
   return (
-    <section aria-label="Game results" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '20px', padding: '2rem', marginBottom: '2rem', animation: 'fadeSlideIn 0.4s ease forwards' }}>
+    <section
+      aria-label="Game results"
+      style={{
+        background: 'var(--bg-card)', border: '1px solid var(--border)',
+        borderRadius: '20px', padding: '2rem', marginBottom: '2rem',
+        animation: 'fadeSlideIn 0.4s ease forwards',
+      }}
+    >
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '2px', marginBottom: '0.5rem' }}>
           Session Complete — {result.difficulty ?? ''} · {result.duration ?? 0}s
         </div>
-        <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', margin: '0 0 1rem 0' }}>🏁 Time&apos;s Up!</h2>
+        <h2 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#fff', margin: '0 0 1rem 0' }}>
+          🏁 Time&apos;s Up!
+        </h2>
         <GradeBadge grade={result.grade ?? 'D'} />
       </div>
-      <div className="aim-results-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: '0.75rem', marginBottom: '1.5rem' }} role="list" aria-label="Performance statistics">
+
+      <div
+        className="aim-results-grid"
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}
+        role="list" aria-label="Performance statistics"
+      >
         {stats.map(s => (
-          <div key={s.label} role="listitem" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.9rem', textAlign: 'center' }}>
+          <div
+            key={s.label} role="listitem"
+            style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.9rem', textAlign: 'center' }}
+          >
             <div style={{ fontSize: '1.6rem', fontWeight: '900', color: s.color, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginTop: '0.2rem' }}>{s.label}</div>
           </div>
         ))}
       </div>
+
       <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
         <button className="btn btn-primary"   onClick={() => { try { onPlayAgain(); } catch { /* noop */ } }} aria-label="Play again">▶ Play Again</button>
         <button className="btn btn-secondary" onClick={() => { try { onReset();     } catch { /* noop */ } }} aria-label="Reset">🔄 Reset</button>
@@ -528,9 +595,14 @@ const TargetEl = memo(function TargetEl({
           ? 'radial-gradient(circle,rgba(255,255,255,0.95) 18%,rgba(255,200,0,0.9) 38%,transparent 38%,transparent 58%,rgba(255,200,0,0.9) 58%)'
           : 'radial-gradient(circle,rgba(255,255,255,0.9) 18%,rgba(255,45,85,0.95) 38%,transparent 38%,transparent 58%,rgba(255,45,85,0.85) 58%)',
         border: `3px solid ${isHit ? 'rgba(255,220,0,0.9)' : 'rgba(255,255,255,0.85)'}`,
-        boxShadow: isHit ? '0 0 25px rgba(255,220,0,0.8),0 0 50px rgba(255,220,0,0.4)' : '0 0 20px rgba(255,45,85,0.55)',
-        animation: isHit ? 'target-hit 0.12s ease-out forwards' : 'target-pop 0.18s cubic-bezier(0.34,1.56,0.64,1) forwards',
-        willChange: 'transform, opacity', userSelect: 'none', WebkitUserSelect: 'none',
+        boxShadow: isHit
+          ? '0 0 25px rgba(255,220,0,0.8),0 0 50px rgba(255,220,0,0.4)'
+          : '0 0 20px rgba(255,45,85,0.55)',
+        animation: isHit
+          ? 'target-hit 0.12s ease-out forwards'
+          : 'target-pop 0.18s cubic-bezier(0.34,1.56,0.64,1) forwards',
+        willChange: 'transform, opacity',
+        userSelect: 'none', WebkitUserSelect: 'none',
       }}
     />
   );
@@ -544,7 +616,18 @@ const ComboBanner = memo(function ComboBanner({ combo, milestone }: { combo: num
   const color  = isFire ? '#FF6B00' : isGold ? '#FFD700' : 'var(--neon-cyan)';
   const label  = isFire ? '🔥 ON FIRE!' : isGold ? '⭐ COMBO!' : '✨ Streak';
   return (
-    <div aria-live="polite" aria-atomic="true" aria-label={`Combo streak: ${combo}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', background: 'rgba(0,0,0,0.55)', border: `1.5px solid ${color}`, color, fontWeight: '900', fontSize: '0.85rem', animation: milestone ? 'comboMilestone 0.4s cubic-bezier(0.34,1.56,0.64,1)' : 'none', boxShadow: milestone ? `0 0 20px ${color}55` : 'none', transition: 'color 0.2s,border-color 0.2s' }}>
+    <div
+      aria-live="polite" aria-atomic="true" aria-label={`Combo streak: ${combo}`}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: '6px',
+        padding: '4px 12px', borderRadius: '20px',
+        background: 'rgba(0,0,0,0.55)', border: `1.5px solid ${color}`,
+        color, fontWeight: '900', fontSize: '0.85rem',
+        animation: milestone ? 'comboMilestone 0.4s cubic-bezier(0.34,1.56,0.64,1)' : 'none',
+        boxShadow: milestone ? `0 0 20px ${color}55` : 'none',
+        transition: 'color 0.2s,border-color 0.2s',
+      }}
+    >
       <span>{label}</span>
       <span style={{ fontSize: '1rem' }}>×{combo}</span>
     </div>
@@ -595,7 +678,7 @@ const ALL_FAQS = [
   { q: 'How does fatigue affect reaction time?', a: 'Physical and mental fatigue drastically increase reaction time (by up to 50-100ms) and lower accuracy. If you notice your Aim Trainer scores dropping significantly after an hour, it is time to take a break.' },
   { q: 'Do pros use aim trainers?', a: 'Absolutely. Almost every professional player in Valorant, Overwatch, and Apex Legends uses dedicated aim training software as a daily warm-up to ensure their mechanics are peaked before tournament matches.' },
   { q: 'What is target switching?', a: 'Target switching is the ability to kill one enemy and immediately snap onto a secondary target seamlessly. Our trainer simulates this when multiple targets are on screen, forcing you to plan your next click before the first one finishes.' },
-  { q: 'Why is my aim inconsistent?', a: 'Inconsistency usually stems from changing your posture, grip, chair height, or playing while tired. Find a comfortable, repeatable setup, stick to one sensitivity, and use our Aim Trainer to track your baseline performance daily.' }
+  { q: 'Why is my aim inconsistent?', a: 'Inconsistency usually stems from changing your posture, grip, chair height, or playing while tired. Find a comfortable, repeatable setup, stick to one sensitivity, and use our Aim Trainer to track your baseline performance daily.' },
 ] as const;
 
 const GAMES = [
@@ -605,22 +688,24 @@ const GAMES = [
   'Valorant', 'Apex Legends',
 ] as const;
 
+// ═══════════════════════════════════════════════════════════════════════════════
 // ─── Main Component ───────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function AimTrainerPage() {
   // ── Config State ───────────────────────────────────────────────────────────
   const [difficulty,   setDifficulty]   = useState<Difficulty>('Medium');
   const [gameDuration, setGameDuration] = useState<Duration>(DEFAULT_DURATION);
 
   // ── Runtime State ──────────────────────────────────────────────────────────
-  const [phase,      setPhase]      = useState<Phase>('idle');
-  const [targets,    setTargets]    = useState<Target[]>([]);
-  const [score,      setScore]      = useState(0);
-  const [misses,     setMisses]     = useState(0);
-  const [timeLeft,   setTimeLeft]   = useState<number>(DEFAULT_DURATION);
-  const [hitIds,     setHitIds]     = useState<Set<number>>(new Set());
-  const [combo,      setCombo]      = useState(0);
-  const [milestone,  setMilestone]  = useState(false);
-  const [soundOn,    setSoundOn]    = useState(true);
+  const [phase,     setPhase]     = useState<Phase>('idle');
+  const [targets,   setTargets]   = useState<Target[]>([]);
+  const [score,     setScore]     = useState(0);
+  const [misses,    setMisses]    = useState(0);
+  const [timeLeft,  setTimeLeft]  = useState<number>(DEFAULT_DURATION);
+  const [hitIds,    setHitIds]    = useState<Set<number>>(new Set());
+  const [combo,     setCombo]     = useState(0);
+  const [milestone, setMilestone] = useState(false);
+  const [soundOn,   setSoundOn]   = useState(true);
 
   // ── Fullscreen State ───────────────────────────────────────────────────────
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -630,9 +715,9 @@ export default function AimTrainerPage() {
   const [exitFsOnEnd, setExitFsOnEnd] = useState(false);
 
   // ── Results State ──────────────────────────────────────────────────────────
-  const [result,     setResult]     = useState<SessionResult | null>(null);
-  const [history,    setHistory]    = useState<SessionResult[]>([]);
-  const [showModal,  setShowModal]  = useState(false);
+  const [result,    setResult]    = useState<SessionResult | null>(null);
+  const [history,   setHistory]   = useState<SessionResult[]>([]);
+  const [showModal, setShowModal] = useState(false);
 
   // ── Countdown State ────────────────────────────────────────────────────────
   const [countdownNum, setCountdownNum] = useState<number | null>(null);
@@ -640,29 +725,31 @@ export default function AimTrainerPage() {
 
   // ── Refs ───────────────────────────────────────────────────────────────────
   const fullscreenTargetRef = useRef<HTMLDivElement>(null);
-  const areaRef          = useRef<HTMLDivElement>(null);
-  const timerRef         = useRef<ReturnType<typeof setInterval>  | null>(null);
-  const spawnRef         = useRef<ReturnType<typeof setInterval>  | null>(null);
-  const targetTimeouts   = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
-  const targetId         = useRef(0);
-  const totalClicks      = useRef(0);
-  const hitClicks        = useRef(0);
-  const phaseRef         = useRef<Phase>('idle');
-  const lastClickTime    = useRef(0);
-  const audioCtxRef      = useRef<AudioContext | null>(null);
-  const soundOnRef       = useRef(soundOn);
-  const difficultyRef    = useRef<Difficulty>('Medium');
-  const gameDurationRef  = useRef<number>(DEFAULT_DURATION);
-  const comboRef         = useRef(0);
-  const maxComboRef      = useRef(0);
-  const reactionTimes    = useRef<number[]>([]);
-  const startTimeRef     = useRef(0);
-  const pausedAtRef      = useRef(0);
-  const exitFsOnEndRef   = useRef(false);
+  const areaRef             = useRef<HTMLDivElement>(null);
+  const timerRef            = useRef<ReturnType<typeof setInterval> | null>(null);
+  const spawnRef            = useRef<ReturnType<typeof setInterval> | null>(null);
+  const targetTimeouts      = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
+  const targetId            = useRef(0);
+  const totalClicks         = useRef(0);
+  const hitClicks           = useRef(0);
+  const phaseRef            = useRef<Phase>('idle');
+  const lastClickTime       = useRef(0);
+  const audioCtxRef         = useRef<AudioContext | null>(null);
+  const soundOnRef          = useRef(soundOn);
+  const difficultyRef       = useRef<Difficulty>('Medium');
+  const gameDurationRef     = useRef<number>(DEFAULT_DURATION);
+  const comboRef            = useRef(0);
+  const maxComboRef         = useRef(0);
+  const reactionTimes       = useRef<number[]>([]);
+  const startTimeRef        = useRef(0);
+  const pausedAtRef         = useRef(0);
+  const exitFsOnEndRef      = useRef(false);
+  const isFullscreenRef     = useRef(false);
 
-  useEffect(() => { soundOnRef.current    = soundOn;    }, [soundOn]);
-  useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
-  useEffect(() => { exitFsOnEndRef.current = exitFsOnEnd; }, [exitFsOnEnd]);
+  useEffect(() => { soundOnRef.current     = soundOn;      }, [soundOn]);
+  useEffect(() => { difficultyRef.current  = difficulty;   }, [difficulty]);
+  useEffect(() => { exitFsOnEndRef.current = exitFsOnEnd;  }, [exitFsOnEnd]);
+  useEffect(() => { isFullscreenRef.current = isFullscreen; }, [isFullscreen]);
   useEffect(() => {
     gameDurationRef.current = gameDuration;
     if (phaseRef.current === 'idle') setTimeLeft(gameDuration);
@@ -672,7 +759,8 @@ export default function AimTrainerPage() {
   const getAudioCtx = useCallback((): AudioContext => {
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (
-        window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       )();
     }
     return audioCtxRef.current;
@@ -683,13 +771,13 @@ export default function AimTrainerPage() {
     try {
       const ctx = getAudioCtx();
       if (ctx.state === 'suspended') void ctx.resume();
-      if (type === 'hit')        playHit(ctx);
-      else if (type === 'miss')  playMiss(ctx);
-      else                       playCombo(ctx, comboLevel);
+      if (type === 'hit')       playHit(ctx);
+      else if (type === 'miss') playMiss(ctx);
+      else                      playCombo(ctx, comboLevel);
     } catch { /* ignore */ }
   }, [getAudioCtx]);
 
-  // ── Fullscreen Targeted ────────────────────────────────────────────────────
+  // ── Fullscreen ─────────────────────────────────────────────────────────────
   const toggleFullscreen = useCallback(() => {
     if (!fsSupported) return;
     const el = fullscreenTargetRef.current;
@@ -699,7 +787,11 @@ export default function AimTrainerPage() {
   }, [fsSupported]);
 
   useEffect(() => {
-    const handler = () => setIsFullscreen(!!getFullscreenElement());
+    const handler = () => {
+      const isFull = !!getFullscreenElement();
+      setIsFullscreen(isFull);
+      isFullscreenRef.current = isFull;
+    };
     FS_CHANGE_EVENTS.forEach(evt => document.addEventListener(evt, handler));
     handler();
     return () => { FS_CHANGE_EVENTS.forEach(evt => document.removeEventListener(evt, handler)); };
@@ -730,10 +822,9 @@ export default function AimTrainerPage() {
   // ── Remove Target ──────────────────────────────────────────────────────────
   const removeTarget = useCallback((id: number) => {
     setTargets(prev => prev.filter(t => t.id !== id));
-    setHitIds(prev  => { const s = new Set(prev); s.delete(id); return s; });
+    setHitIds(prev => { const s = new Set(prev); s.delete(id); return s; });
     targetTimeouts.current.delete(id);
   }, []);
-
 
   // ── Spawn Target ───────────────────────────────────────────────────────────
   const spawnTarget = useCallback(() => {
@@ -765,17 +856,21 @@ export default function AimTrainerPage() {
     setPhase('done');
 
     const configuredDuration = gameDurationRef.current;
-    const totalTime = Math.min(configuredDuration, Math.max(0.01, (performance.now() - startTimeRef.current) / 1000));
-    const totalAttempts = totalClicks.current;
-    const acc       = totalAttempts > 0 ? Math.round((hitClicks.current / totalAttempts) * 100) : 0;
-    const missCount = Math.max(0, totalAttempts - hitClicks.current);
-    const missPct   = totalAttempts > 0 ? Math.round((missCount / totalAttempts) * 100) : 0;
+    const totalTime   = Math.min(configuredDuration, Math.max(0.01, (performance.now() - startTimeRef.current) / 1000));
+    const totalAtt    = totalClicks.current;
+    const acc         = totalAtt > 0 ? Math.round((hitClicks.current / totalAtt) * 100) : 0;
+    const missCount   = Math.max(0, totalAtt - hitClicks.current);
+    const missPct     = totalAtt > 0 ? Math.round((missCount / totalAtt) * 100) : 0;
     const avgReaction = reactionTimes.current.length > 0
       ? Math.round(reactionTimes.current.reduce((a, b) => a + b, 0) / reactionTimes.current.length) : 0;
-    const hitsPerSec = totalTime > 0 ? hitClicks.current / totalTime : 0;
-    const grade      = calcGrade(acc, avgReaction, hitsPerSec);
+    const hitsPerSec  = totalTime > 0 ? hitClicks.current / totalTime : 0;
+    const grade       = calcGrade(acc, avgReaction, hitsPerSec);
 
-    const r: SessionResult = { score: hitClicks.current, misses: missCount, acc, missPct, avgReaction, hitsPerSec, combo: maxComboRef.current, grade, duration: configuredDuration, totalTime, difficulty: difficultyRef.current };
+    const r: SessionResult = {
+      score: hitClicks.current, misses: missCount, acc, missPct,
+      avgReaction, hitsPerSec, combo: maxComboRef.current,
+      grade, duration: configuredDuration, totalTime, difficulty: difficultyRef.current,
+    };
     setResult(r);
     setHistory(prev => [r, ...prev.slice(0, MAX_HISTORY - 1)]);
     setShowModal(true);
@@ -788,9 +883,9 @@ export default function AimTrainerPage() {
     if (phaseRef.current === 'running') return;
     phaseRef.current = 'running';
     const dur = gameDurationRef.current;
-    setPhase('running'); setScore(0); setMisses(0); setTimeLeft(dur); setTargets([]);
-    setHitIds(new Set()); setCombo(0); setMilestone(false); setResult(null);
-    setShowModal(false);
+    setPhase('running'); setScore(0); setMisses(0); setTimeLeft(dur);
+    setTargets([]); setHitIds(new Set()); setCombo(0); setMilestone(false);
+    setResult(null); setShowModal(false);
     totalClicks.current = 0; hitClicks.current = 0; targetId.current = 0;
     lastClickTime.current = 0; comboRef.current = 0; maxComboRef.current = 0;
     reactionTimes.current = [];
@@ -882,7 +977,7 @@ export default function AimTrainerPage() {
     reactionTimes.current = [];
   }, []);
 
-  const changeDuration   = useCallback((d: Duration) => {
+  const changeDuration = useCallback((d: Duration) => {
     if (phaseRef.current === 'running' || phaseRef.current === 'paused') return;
     setGameDuration(d); gameDurationRef.current = d; setTimeLeft(d);
   }, []);
@@ -942,6 +1037,26 @@ export default function AimTrainerPage() {
     totalClicks.current++;
     comboRef.current = 0; setCombo(0); emitSound('miss');
   }, [emitSound]);
+
+  // ── Fullscreen area click handler ──────────────────────────────────────────
+  // Fullscreen e game area er baire click korle game start hobe
+  const handleFullscreenBgClick = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    // Shudhu fullscreen e kaj korbe
+    if (!isFullscreenRef.current) return;
+
+    if (phaseRef.current === 'idle' && !countdownTimeoutRef.current) {
+      e.stopPropagation();
+      beginCountdown();
+      return;
+    }
+    if (phaseRef.current === 'done') {
+      e.stopPropagation();
+      setShowModal(false);
+      beginCountdown();
+      return;
+    }
+  }, [beginCountdown]);
 
   // ── Keyboard shortcuts ─────────────────────────────────────────────────────
   const isTypingTarget = useCallback((target: EventTarget | null): boolean => {
@@ -1021,10 +1136,13 @@ export default function AimTrainerPage() {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0);    }
         }
+        @keyframes pulseRing {
+          0%   { transform: scale(0.95); opacity: 0.8; }
+          50%  { transform: scale(1.05); opacity: 1;   }
+          100% { transform: scale(0.95); opacity: 0.8; }
+        }
 
-        /* ════════════════════════════════════════════════════════════
-           MAIN CONTAINER
-        ════════════════════════════════════════════════════════════ */
+        /* ── Main container ────────────────────────────────────── */
         .aim-main-container {
           max-width: 900px;
           margin: 0 auto;
@@ -1036,9 +1154,7 @@ export default function AimTrainerPage() {
           min-height: 100vh;
         }
 
-        /* ════════════════════════════════════════════════════════════
-           TARGETED FULLSCREEN STYLES
-        ════════════════════════════════════════════════════════════ */
+        /* ── Targeted Fullscreen Styles ────────────────────────── */
         :fullscreen .fullscreen-target,
         :-webkit-full-screen .fullscreen-target,
         :-moz-full-screen .fullscreen-target {
@@ -1047,11 +1163,12 @@ export default function AimTrainerPage() {
           width: 100vw !important;
           height: 100vh !important;
           max-width: none !important;
-          padding: 1rem !important;
+          padding: 0.75rem 1rem !important;
           margin: 0 !important;
           background: var(--bg-color, #0a0a0f) !important;
           box-sizing: border-box !important;
           overflow: hidden !important;
+          cursor: crosshair !important;
         }
 
         :fullscreen .aim-game-area,
@@ -1059,26 +1176,49 @@ export default function AimTrainerPage() {
         :-moz-full-screen .aim-game-area {
           flex: 1 1 auto !important;
           height: 100% !important;
+          min-height: 0 !important;
           margin-bottom: 0 !important;
+          border-radius: 12px !important;
         }
 
-        /* FULLSCREEN: Compact Stats UI */
         :fullscreen .aim-stats-grid,
         :-webkit-full-screen .aim-stats-grid {
-          margin-bottom: 0.5rem !important;
+          margin-bottom: 0.4rem !important;
         }
-        
-        /* ════════════════════════════════════════════════════════════
-           BUTTON STYLES & MEDIA QUERIES
-        ════════════════════════════════════════════════════════════ */
+
+        /* Fullscreen idle / done overlay — pura screen cover kore */
+        :fullscreen .fs-click-overlay,
+        :-webkit-full-screen .fs-click-overlay {
+          display: flex !important;
+        }
+
+        .fs-click-overlay {
+          display: none;
+          position: absolute;
+          inset: 0;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 1rem;
+          background: rgba(0,0,0,0.72);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          z-index: 18;
+          cursor: crosshair;
+          user-select: none;
+          -webkit-user-select: none;
+        }
+
+        /* ── Buttons ───────────────────────────────────────────── */
         .aim-fullscreen-btn:hover  { background: rgba(255,255,255,0.1) !important; }
         .aim-fullscreen-btn:disabled { opacity: 0.4 !important; cursor: not-allowed !important; }
         .aim-difficulty-btn:focus-visible,
         .aim-duration-btn:focus-visible,
         .aim-sound-btn:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
 
+        /* ── Responsive ────────────────────────────────────────── */
         @media (max-width: 640px) {
-          .aim-stats-grid    { grid-template-columns: repeat(2,1fr) !important; gap: 0.6rem !important; }
+          .aim-stats-grid    { grid-template-columns: repeat(3,1fr) !important; gap: 0.5rem !important; }
           .aim-controls      { flex-direction: column !important; align-items: stretch !important; }
           .aim-controls .btn { width: 100% !important; text-align: center !important; min-height: 44px; }
           .aim-settings-row  { flex-direction: column !important; gap: 0.75rem !important; }
@@ -1087,14 +1227,16 @@ export default function AimTrainerPage() {
           .aim-results-grid  { grid-template-columns: repeat(2,1fr) !important; }
           .aim-difficulty-btn,.aim-duration-btn,.aim-sound-btn,.aim-fullscreen-btn { min-height: 40px; }
         }
-        @media (max-width: 380px) { .aim-stats-grid { gap: 0.4rem !important; } }
+        @media (max-width: 380px) {
+          .aim-stats-grid { gap: 0.35rem !important; }
+        }
         *:focus-visible { outline: 2px solid var(--neon-cyan); outline-offset: 2px; }
       `}</style>
 
       <main className="aim-main-container" role="main" aria-label="Aim Trainer">
-        
-        {/* ── Header ────────────────────────────────────────────────── */}
-        <header className="aim-fs-header" style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
+
+        {/* ── Header ────────────────────────────────────────────── */}
+        <header style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
           <div className="section-label">Aim Tool</div>
           <h1 className="tool-title">Aim Trainer</h1>
           <p className="tool-subtitle">
@@ -1102,7 +1244,7 @@ export default function AimTrainerPage() {
           </p>
         </header>
 
-        {/* ── Settings Row ──────────────────────────────────────────── */}
+        {/* ── Settings Row ──────────────────────────────────────── */}
         <div
           className="aim-settings-row"
           style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}
@@ -1117,7 +1259,15 @@ export default function AimTrainerPage() {
                   onClick={() => changeDifficulty(d)}
                   disabled={phase === 'running' || phase === 'paused'}
                   aria-pressed={difficulty === d} aria-label={`Difficulty: ${d}`}
-                  style={{ padding: '0.35rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', border: `1.5px solid ${difficulty === d ? DIFFICULTY_CONFIGS[d].color : 'var(--border)'}`, background: difficulty === d ? `${DIFFICULTY_CONFIGS[d].color}22` : 'var(--bg-card)', color: difficulty === d ? DIFFICULTY_CONFIGS[d].color : 'var(--text-muted)', cursor: phase === 'running' || phase === 'paused' ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: phase === 'running' || phase === 'paused' ? 0.5 : 1 }}
+                  style={{
+                    padding: '0.35rem 0.8rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700',
+                    border: `1.5px solid ${difficulty === d ? DIFFICULTY_CONFIGS[d].color : 'var(--border)'}`,
+                    background: difficulty === d ? `${DIFFICULTY_CONFIGS[d].color}22` : 'var(--bg-card)',
+                    color: difficulty === d ? DIFFICULTY_CONFIGS[d].color : 'var(--text-muted)',
+                    cursor: phase === 'running' || phase === 'paused' ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.15s',
+                    opacity: phase === 'running' || phase === 'paused' ? 0.5 : 1,
+                  }}
                 >{d}</button>
               ))}
             </div>
@@ -1133,19 +1283,35 @@ export default function AimTrainerPage() {
                   onClick={() => changeDuration(d)}
                   disabled={phase === 'running' || phase === 'paused'}
                   aria-pressed={gameDuration === d} aria-label={`${d} seconds`}
-                  style={{ padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', border: `1.5px solid ${gameDuration === d ? 'var(--neon-cyan)' : 'var(--border)'}`, background: gameDuration === d ? 'rgba(0,245,255,0.12)' : 'var(--bg-card)', color: gameDuration === d ? 'var(--neon-cyan)' : 'var(--text-muted)', cursor: phase === 'running' || phase === 'paused' ? 'not-allowed' : 'pointer', transition: 'all 0.15s', opacity: phase === 'running' || phase === 'paused' ? 0.5 : 1 }}
+                  style={{
+                    padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700',
+                    border: `1.5px solid ${gameDuration === d ? 'var(--neon-cyan)' : 'var(--border)'}`,
+                    background: gameDuration === d ? 'rgba(0,245,255,0.12)' : 'var(--bg-card)',
+                    color: gameDuration === d ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                    cursor: phase === 'running' || phase === 'paused' ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.15s',
+                    opacity: phase === 'running' || phase === 'paused' ? 0.5 : 1,
+                  }}
                 >{d}s</button>
               ))}
             </div>
           </fieldset>
 
-          {/* Sound + Fullscreen Control */}
+          {/* Sound + Fullscreen Controls */}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <button
               className="aim-sound-btn"
               onClick={() => setSoundOn(v => !v)}
-              aria-pressed={soundOn} aria-label={soundOn ? 'Sound on — click to mute' : 'Sound off — click to unmute'}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.8rem', borderRadius: '8px', border: soundOn ? '1px solid var(--neon-cyan)' : '1px solid var(--border)', background: soundOn ? 'rgba(0,245,255,0.1)' : 'var(--bg-card)', color: soundOn ? 'var(--neon-cyan)' : 'var(--text-muted)', fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s' }}
+              aria-pressed={soundOn}
+              aria-label={soundOn ? 'Sound on — click to mute' : 'Sound off — click to unmute'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                padding: '0.4rem 0.8rem', borderRadius: '8px',
+                border: soundOn ? '1px solid var(--neon-cyan)' : '1px solid var(--border)',
+                background: soundOn ? 'rgba(0,245,255,0.1)' : 'var(--bg-card)',
+                color: soundOn ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer', transition: 'all 0.15s',
+              }}
             >
               <span aria-hidden="true">{soundOn ? '🔊' : '🔇'}</span>
               <span>{soundOn ? 'ON' : 'OFF'}</span>
@@ -1154,9 +1320,17 @@ export default function AimTrainerPage() {
             <button
               className="aim-sound-btn"
               onClick={() => setExitFsOnEnd(v => !v)}
-              aria-pressed={exitFsOnEnd} aria-label="Toggle exit fullscreen automatically when game ends"
-              title="Exit fullscreen automatically when the game ends"
-              style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.8rem', borderRadius: '8px', border: exitFsOnEnd ? '1px solid var(--neon-orange)' : '1px solid var(--border)', background: exitFsOnEnd ? 'rgba(255,107,0,0.1)' : 'var(--bg-card)', color: exitFsOnEnd ? 'var(--neon-orange)' : 'var(--text-muted)', fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.15s' }}
+              aria-pressed={exitFsOnEnd}
+              aria-label="Toggle auto-exit fullscreen when game ends"
+              title="Automatically exit fullscreen when the game ends"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.3rem',
+                padding: '0.4rem 0.8rem', borderRadius: '8px',
+                border: exitFsOnEnd ? '1px solid var(--neon-orange)' : '1px solid var(--border)',
+                background: exitFsOnEnd ? 'rgba(255,107,0,0.1)' : 'var(--bg-card)',
+                color: exitFsOnEnd ? 'var(--neon-orange)' : 'var(--text-muted)',
+                fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer', transition: 'all 0.15s',
+              }}
             >
               Auto-exit FS: {exitFsOnEnd ? 'ON' : 'OFF'}
             </button>
@@ -1166,19 +1340,41 @@ export default function AimTrainerPage() {
               onClick={toggleFullscreen}
               disabled={!fsSupported}
               aria-pressed={isFullscreen}
-              aria-label={!fsSupported ? 'Fullscreen not supported in this browser' : isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              title={!fsSupported ? 'Fullscreen not supported in this browser' : isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-              style={{ padding: '0.4rem 0.65rem', borderRadius: '8px', border: `1px solid ${isFullscreen ? 'var(--neon-cyan)' : 'var(--border)'}`, background: isFullscreen ? 'rgba(0,245,255,0.1)' : 'var(--bg-card)', color: isFullscreen ? 'var(--neon-cyan)' : 'var(--text-muted)', fontSize: '1rem', cursor: fsSupported ? 'pointer' : 'not-allowed', transition: 'background 0.15s', display: 'flex', alignItems: 'center', gap: '4px' }}
+              aria-label={
+                !fsSupported ? 'Fullscreen not supported' :
+                isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+              }
+              title={
+                !fsSupported ? 'Fullscreen not supported in this browser' :
+                isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'
+              }
+              style={{
+                padding: '0.4rem 0.65rem', borderRadius: '8px',
+                border: `1px solid ${isFullscreen ? 'var(--neon-cyan)' : 'var(--border)'}`,
+                background: isFullscreen ? 'rgba(0,245,255,0.1)' : 'var(--bg-card)',
+                color: isFullscreen ? 'var(--neon-cyan)' : 'var(--text-muted)',
+                fontSize: '1rem', cursor: fsSupported ? 'pointer' : 'not-allowed',
+                transition: 'background 0.15s', display: 'flex', alignItems: 'center', gap: '4px',
+              }}
             >
               <span aria-hidden="true">⛶</span>
-              <span style={{ fontSize: '0.75rem' }}>{!fsSupported ? 'Unsupported' : isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}</span>
+              <span style={{ fontSize: '0.75rem' }}>
+                {!fsSupported ? 'Unsupported' : isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              </span>
             </button>
           </div>
         </div>
 
-        {/* ── Targeted Fullscreen Wrapper (Stats + Game) ────────────── */}
-        <div ref={fullscreenTargetRef} className="fullscreen-target">
-          
+        {/* ════════════════════════════════════════════════════════
+            TARGETED FULLSCREEN WRAPPER
+            — fullscreen e ei div-i pura screen cover korbe
+        ════════════════════════════════════════════════════════ */}
+        <div
+          ref={fullscreenTargetRef}
+          className="fullscreen-target"
+          onPointerDown={handleFullscreenBgClick}
+          style={{ position: 'relative' }}
+        >
           {/* Stats Cards */}
           <div
             className="aim-stats-grid"
@@ -1201,19 +1397,26 @@ export default function AimTrainerPage() {
           </div>
 
           {/* Progress Bar */}
-          <div className="progress-bar" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress)} aria-label="Game progress" style={{ marginBottom: '0.75rem' }}>
+          <div
+            className="progress-bar"
+            role="progressbar"
+            aria-valuemin={0} aria-valuemax={100}
+            aria-valuenow={Math.round(progress)}
+            aria-label="Game progress"
+            style={{ marginBottom: '0.6rem' }}
+          >
             <div className="progress-fill" style={{ width: `${progress}%` }} />
           </div>
 
           {/* Combo Banner */}
-          <div style={{ display: 'flex', justifyContent: 'center', minHeight: '28px', marginBottom: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', minHeight: '28px', marginBottom: '0.4rem' }}>
             {phase === 'running' && <ComboBanner combo={combo} milestone={milestone} />}
           </div>
 
           {/* Keyboard Hints */}
           <ShortcutHints phase={phase} />
 
-          {/* Game Area */}
+          {/* ── Game Area ─────────────────────────────────────────── */}
           <div
             ref={areaRef}
             onPointerDown={missClick}
@@ -1228,7 +1431,10 @@ export default function AimTrainerPage() {
               width: '100%',
               height: '420px',
               background: 'var(--bg-card)',
-              border: `2px solid ${phase === 'running' ? diffCfg.color : phase === 'paused' ? 'var(--neon-orange)' : 'var(--border)'}`,
+              border: `2px solid ${
+                phase === 'running' ? diffCfg.color :
+                phase === 'paused'  ? 'var(--neon-orange)' : 'var(--border)'
+              }`,
               borderRadius: '16px',
               overflow: 'hidden',
               cursor: phase === 'running' ? 'crosshair' : 'default',
@@ -1236,59 +1442,201 @@ export default function AimTrainerPage() {
               touchAction: phase === 'running' ? 'none' : 'auto',
               boxShadow: phase === 'running' ? `0 0 30px ${diffCfg.color}22` : 'none',
               transition: 'border-color 0.3s,box-shadow 0.3s',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
+              userSelect: 'none', WebkitUserSelect: 'none',
             }}
           >
-            {/* Countdown overlay */}
+            {/* ── Countdown overlay ──────────────────────────────── */}
             {countdownNum !== null && (
-              <div aria-live="assertive" aria-atomic="true" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.78)', zIndex: 20 }}>
-                <span key={countdownNum} style={{ fontSize: countdownNum === 0 ? 'clamp(2.5rem,9vw,4.5rem)' : 'clamp(4rem,14vw,7rem)', fontWeight: '900', color: countdownNum === 0 ? 'var(--neon-green)' : diffCfg.color, textShadow: `0 0 30px ${countdownNum === 0 ? 'rgba(0,255,136,0.6)' : 'rgba(0,245,255,0.5)'}`, animation: 'countdownPop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards', fontVariantNumeric: 'tabular-nums' }}>
+              <div
+                aria-live="assertive" aria-atomic="true"
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                  background: 'rgba(0,0,0,0.82)', zIndex: 20,
+                }}
+              >
+                <span
+                  key={countdownNum}
+                  style={{
+                    fontSize: countdownNum === 0 ? 'clamp(2.5rem,9vw,4.5rem)' : 'clamp(4rem,14vw,7rem)',
+                    fontWeight: '900',
+                    color: countdownNum === 0 ? 'var(--neon-green)' : diffCfg.color,
+                    textShadow: `0 0 30px ${countdownNum === 0 ? 'rgba(0,255,136,0.6)' : 'rgba(0,245,255,0.5)'}`,
+                    animation: 'countdownPop 0.6s cubic-bezier(0.34,1.56,0.64,1) forwards',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}
+                >
                   {countdownNum === 0 ? 'GO!' : countdownNum}
                 </span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{difficulty} · {gameDuration}s</span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  {difficulty} · {gameDuration}s
+                </span>
               </div>
             )}
 
+            {/* ── Idle state (normal mode) ───────────────────────── */}
             {phase === 'idle' && countdownNum === null && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem' }}>
+              <div
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                }}
+              >
                 <span style={{ fontSize: '4rem' }} aria-hidden="true">🎯</span>
-                <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--neon-green)' }}>Click Start to Play</span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{difficulty} · {gameDuration}s — Click targets as fast as you can!</span>
+                <span style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--neon-green)' }}>
+                  Click Start to Play
+                </span>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', textAlign: 'center', padding: '0 1rem' }}>
+                  {difficulty} · {gameDuration}s — Click targets as fast as you can!
+                </span>
               </div>
             )}
 
+            {/* ── FULLSCREEN IDLE OVERLAY — anywhere click to start ── */}
+            {phase === 'idle' && countdownNum === null && (
+              <div
+                className="fs-click-overlay"
+                onPointerDown={(e) => {
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  e.stopPropagation();
+                  beginCountdown();
+                }}
+                role="button"
+                aria-label="Click anywhere to start the game"
+                tabIndex={-1}
+              >
+                <div style={{
+                  textAlign: 'center', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: '0.75rem',
+                  animation: 'pulseRing 2s ease-in-out infinite',
+                }}>
+                  <span style={{ fontSize: 'clamp(3rem,8vw,6rem)' }} aria-hidden="true">🎯</span>
+                  <span style={{
+                    fontSize: 'clamp(1.5rem,4vw,2.5rem)', fontWeight: '900',
+                    color: 'var(--neon-green)',
+                    textShadow: '0 0 30px rgba(0,255,136,0.6)',
+                  }}>
+                    Click Anywhere to Start!
+                  </span>
+                  <span style={{
+                    color: 'var(--text-secondary)', fontSize: 'clamp(0.85rem,2vw,1.1rem)',
+                    background: 'rgba(0,0,0,0.5)', padding: '0.4rem 1.2rem',
+                    borderRadius: '50px', border: '1px solid rgba(255,255,255,0.1)',
+                  }}>
+                    {difficulty} · {gameDuration}s
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* ── FULLSCREEN DONE OVERLAY — anywhere click to retry ── */}
+            {phase === 'done' && !showModal && countdownNum === null && (
+              <div
+                className="fs-click-overlay"
+                onPointerDown={(e) => {
+                  if (e.pointerType === 'mouse' && e.button !== 0) return;
+                  e.stopPropagation();
+                  setShowModal(false);
+                  beginCountdown();
+                }}
+                role="button"
+                aria-label="Click anywhere to play again"
+                tabIndex={-1}
+              >
+                <div style={{
+                  textAlign: 'center', display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: '0.75rem',
+                }}>
+                  <span style={{ fontSize: 'clamp(2.5rem,7vw,5rem)' }} aria-hidden="true">🏁</span>
+                  <span style={{
+                    fontSize: 'clamp(1.4rem,3.5vw,2.2rem)', fontWeight: '900',
+                    color: 'var(--neon-cyan)',
+                    textShadow: '0 0 20px rgba(0,245,255,0.5)',
+                  }}>
+                    Time&apos;s Up! · {score} Hits
+                  </span>
+                  <span style={{
+                    color: 'var(--neon-green)', fontSize: 'clamp(1rem,2.5vw,1.4rem)',
+                    fontWeight: '800',
+                  }}>
+                    Click Anywhere to Play Again
+                  </span>
+                  {result && (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={(e) => { e.stopPropagation(); setShowModal(true); }}
+                      style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}
+                    >
+                      View Full Results
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── Paused overlay ─────────────────────────────────── */}
             {phase === 'paused' && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', background: 'rgba(0,0,0,0.75)', zIndex: 10 }}>
+              <div
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                  background: 'rgba(0,0,0,0.75)', zIndex: 10,
+                }}
+              >
                 <span style={{ fontSize: '3rem' }} aria-hidden="true">⏸</span>
                 <span style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--neon-orange)' }}>Paused</span>
-                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Press Esc or click Resume to continue</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  Press Esc or click Resume to continue
+                </span>
               </div>
             )}
 
+            {/* ── Normal Done overlay (non-fullscreen) ───────────── */}
             {phase === 'done' && !showModal && countdownNum === null && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', background: 'rgba(0,0,0,0.7)', zIndex: 10 }}>
+              <div
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+                  background: 'rgba(0,0,0,0.7)', zIndex: 10,
+                }}
+                className="non-fs-done-overlay"
+              >
                 <span style={{ fontSize: '3rem' }} aria-hidden="true">🏁</span>
                 <span style={{ fontSize: '1.8rem', fontWeight: '900', color: 'var(--neon-cyan)' }}>Time&apos;s Up!</span>
                 <span style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--neon-green)' }}>{score} Hits</span>
-                <span style={{ color: 'var(--text-secondary)' }}>{acc}% Accuracy · ×{Math.max(combo, maxComboRef.current)} Max Combo</span>
+                <span style={{ color: 'var(--text-secondary)' }}>
+                  {acc}% Accuracy · ×{Math.max(combo, maxComboRef.current)} Max Combo
+                </span>
                 {result && (
-                  <button className="btn btn-secondary" onClick={() => setShowModal(true)} style={{ marginTop: '0.5rem' }}>View Full Results</button>
+                  <button className="btn btn-secondary" onClick={() => setShowModal(true)} style={{ marginTop: '0.5rem' }}>
+                    View Full Results
+                  </button>
                 )}
               </div>
             )}
 
+            {/* ── Targets ────────────────────────────────────────── */}
             {targets.map(t => (
               <TargetEl key={t.id} target={t} isHit={hitIds.has(t.id)} onHit={hitTarget} />
             ))}
           </div>
+          {/* ── End Game Area ──────────────────────────────────────── */}
         </div>
-        {/* ── End Targeted Fullscreen Wrapper ─────────────────────────── */}
+        {/* ── End Fullscreen Wrapper ──────────────────────────────── */}
 
-        {/* ── Controls ──────────────────────────────────────────────── */}
-        <div className="aim-controls" style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+        {/* ── Controls ──────────────────────────────────────────── */}
+        <div
+          className="aim-controls"
+          style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '0.5rem' }}
+        >
           {phase !== 'running' && phase !== 'paused' && (
-            <button className="btn btn-primary" onClick={beginCountdown} disabled={countdownNum !== null} aria-label={phase === 'done' ? 'Play again' : 'Start aim trainer'} style={{ opacity: countdownNum !== null ? 0.6 : 1, cursor: countdownNum !== null ? 'not-allowed' : 'pointer' }}>
+            <button
+              className="btn btn-primary"
+              onClick={beginCountdown}
+              disabled={countdownNum !== null}
+              aria-label={phase === 'done' ? 'Play again' : 'Start aim trainer'}
+              style={{ opacity: countdownNum !== null ? 0.6 : 1, cursor: countdownNum !== null ? 'not-allowed' : 'pointer' }}
+            >
               {phase === 'done' ? '▶ Play Again' : '🎯 Start Game'}
             </button>
           )}
@@ -1303,24 +1651,45 @@ export default function AimTrainerPage() {
           )}
         </div>
 
-        {/* ── Modal or Panel ────────────────────────────────────────── */}
+        {/* ── Modal or Panel ────────────────────────────────────── */}
         {showModal && result ? (
-          <ResultsModal result={result} onPlayAgain={beginCountdown} onChangeDifficulty={openDifficultyFromModal} onClose={closeModal} />
+          <ResultsModal
+            result={result}
+            onPlayAgain={beginCountdown}
+            onChangeDifficulty={openDifficultyFromModal}
+            onClose={closeModal}
+          />
         ) : (
           phase === 'done' && result && (
-            <div className="aim-results-panel" style={{ marginTop: '1.5rem' }}>
+            <div style={{ marginTop: '1.5rem' }}>
               <ResultsPanel result={result} onPlayAgain={beginCountdown} onReset={resetGame} />
             </div>
           )
         )}
 
-        {/* ── Session History ───────────────────────────────────────── */}
+        {/* ── Session History ───────────────────────────────────── */}
         {history.length > 0 && (
-          <section className="aim-history-section" aria-label="Session history" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', overflow: 'hidden', marginTop: '2rem' }}>
-            <div style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>📊 Session History</div>
+          <section
+            aria-label="Session history"
+            style={{
+              background: 'var(--bg-card)', border: '1px solid var(--border)',
+              borderRadius: '16px', overflow: 'hidden', marginTop: '2rem',
+            }}
+          >
+            <div style={{ padding: '0.9rem 1.25rem', borderBottom: '1px solid var(--border)', fontWeight: '700', fontSize: '0.9rem', color: 'var(--neon-cyan)' }}>
+              📊 Session History
+            </div>
             <div role="list" aria-label="Previous game results">
               {history.map((h, i) => (
-                <div key={i} role="listitem" style={{ display: 'grid', gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 2rem', gap: '0.5rem', alignItems: 'center', padding: '0.65rem 1.25rem', fontSize: '0.8rem', borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <div
+                  key={i} role="listitem"
+                  style={{
+                    display: 'grid', gridTemplateColumns: '2rem 1fr 1fr 1fr 1fr 2rem',
+                    gap: '0.5rem', alignItems: 'center', padding: '0.65rem 1.25rem',
+                    fontSize: '0.8rem',
+                    borderBottom: i < history.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}
+                >
                   <span style={{ color: 'var(--text-muted)' }}>#{history.length - i}</span>
                   <span style={{ color: 'var(--neon-green)', fontWeight: '700' }}>{h.score} hits</span>
                   <span style={{ color: 'var(--neon-cyan)' }}>{h.acc}% acc</span>
@@ -1333,164 +1702,91 @@ export default function AimTrainerPage() {
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════════════════════
-            SEO ARTICLE WITH 20+ H2 SECTIONS
-        ══════════════════════════════════════════════════════════════ */}
-        <hr className="aim-fs-hr" style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
+        {/* ══════════════════════════════════════════════════════════
+            SEO ARTICLE
+        ══════════════════════════════════════════════════════════ */}
+        <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
 
-        <article className="aim-article-section aim-article-wrap" style={{ paddingTop: '1rem' }}>
+        <article className="aim-article-wrap" style={{ paddingTop: '1rem' }}>
           <section style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.85' }}>
 
             <h2 style={{ fontWeight: '800', fontSize: '2rem', marginBottom: '1.25rem', color: 'var(--neon-cyan)', marginTop: '0', letterSpacing: '-0.5px' }}>
               1. The Ultimate Guide to Aim Training & Mouse Accuracy
             </h2>
             <p style={{ marginBottom: '1.5rem', fontSize: '1rem', color: '#d1d5db' }}>
-              An <strong>Aim Trainer</strong> is a specialized browser tool designed to help gamers systematically test and improve their mouse reaction time, clicking accuracy, and spatial tracking. In competitive eSports, raw clicks-per-second statistics mean very little without precision behind them. Our 2D Aim Trainer isolates your mechanical mouse control, building stable neural pathways between your eyes and your hands.
+              An <strong>Aim Trainer</strong> is a specialized browser tool designed to help gamers systematically test and improve their mouse reaction time, clicking accuracy, and spatial tracking. In competitive eSports, raw clicks-per-second statistics mean very little without precision behind them.
             </p>
 
-            <div style={{ borderLeft: '4px solid var(--neon-green)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem', background: 'rgba(16, 185, 129, 0.05)' }}>
+            <div style={{ borderLeft: '4px solid var(--neon-green)', borderRadius: '0 12px 12px 0', padding: '1.5rem', marginBottom: '2.5rem', background: 'rgba(16,185,129,0.05)' }}>
               <h3 style={{ color: '#fff', fontSize: '1.2rem', fontWeight: '700', marginTop: '0', marginBottom: '0.4rem' }}>🖱️ Use This as a New Mouse Sensor Check</h3>
               <p style={{ margin: 0, color: '#9ca3af', fontSize: '0.92rem' }}>
                 Our Aim Trainer doubles as a <strong>new mouse check</strong>. By clicking small randomly spawning targets rapidly, you can immediately detect optical sensor spin-outs, confirm zero hardware acceleration, and dial in your DPI before any competitive match.
               </p>
             </div>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              2. How to Increase Aim Accuracy Consistently
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Accuracy is the product of three combined factors: <em>muscle memory</em>, <em>visual processing speed</em>, and <em>hardware reliability</em>. Improving all three simultaneously accelerates your progress far faster than focusing on any one area.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>2. How to Increase Aim Accuracy Consistently</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Accuracy is the product of three combined factors: <em>muscle memory</em>, <em>visual processing speed</em>, and <em>hardware reliability</em>. Improving all three simultaneously accelerates your progress far faster than focusing on any one area.</p>
 
-            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              3. Finding Your Perfect Mouse Sensitivity (eDPI)
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Your effective DPI (eDPI) dictates how far you must move your hand to look around in-game. A lower sensitivity generally promotes stability and smoother tracking, while a higher sensitivity allows for rapid 180-degree turns. We recommend finding a middle ground where you can comfortably do a 180-turn from the center to the edge of your mousepad.
-            </p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>3. Finding Your Perfect Mouse Sensitivity (eDPI)</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Your effective DPI (eDPI) dictates how far you must move your hand to look around in-game. A lower sensitivity generally promotes stability and smoother tracking, while a higher sensitivity allows for rapid 180-degree turns.</p>
 
-            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              4. Tracking vs. Flicking: Understanding Aim Styles
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Flicking is the ability to instantly snap your crosshair to a target, critical for games like CS2 and Valorant. Tracking is the ability to smoothly follow a moving target, essential for Apex Legends and Overwatch. Our trainer helps build the initial hand-eye coordination for both.
-            </p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>4. Tracking vs. Flicking: Understanding Aim Styles</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Flicking is the ability to instantly snap your crosshair to a target, critical for games like CS2 and Valorant. Tracking is the ability to smoothly follow a moving target, essential for Apex Legends and Overwatch.</p>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              5. The Best Mouse Grip Styles for Gaming
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Palm grip offers high stability and tracking power. Claw grip provides a balanced mix of stability and micro-flicking. Fingertip grip offers pure vertical dexterity and micro-adjustments but lacks stability. Choose the one that prevents hand fatigue.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>5. The Best Mouse Grip Styles for Gaming</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Palm grip offers high stability and tracking power. Claw grip provides a balanced mix of stability and micro-flicking. Fingertip grip offers pure vertical dexterity and micro-adjustments but lacks stability.</p>
 
-            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              6. Hardware vs. Skill: Does a Better Mouse Make You Better?
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              A top-tier mouse won't magically give you pro aim, but a bad mouse will actively hold you back. An optical sensor that skips or spins out makes it impossible to build consistent muscle memory. Invest in a flawless sensor first, then focus entirely on practice.
-            </p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>6. Hardware vs. Skill: Does a Better Mouse Make You Better?</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>A top-tier mouse won't magically give you pro aim, but a bad mouse will actively hold you back. An optical sensor that skips or spins out makes it impossible to build consistent muscle memory.</p>
 
-            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              7. How Posture and Seating Affects Your Aim
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Aim starts at your core. If your chair height changes daily, the angle of your arm on the desk changes, destroying your muscle memory. Keep your elbow roughly parallel with your desk surface and plant your forearm consistently to ensure repeatability.
-            </p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>7. How Posture and Seating Affects Your Aim</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Aim starts at your core. If your chair height changes daily, the angle of your arm on the desk changes, destroying your muscle memory. Keep your elbow roughly parallel with your desk surface.</p>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              8. The Ultimate Warm-up Routine for Valorant and CS2
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Before hopping into ranked, play 5 minutes of our Aim Trainer on "Medium" to wake up your hand-eye coordination. Follow this up with 5 minutes on "Hard" to push your reaction times. Finish by shooting bots in-game to apply the raw mechanical skill to actual character models.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>8. The Ultimate Warm-up Routine for Valorant and CS2</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Before hopping into ranked, play 5 minutes of our Aim Trainer on "Medium" to wake up your hand-eye coordination. Follow this up with 5 minutes on "Hard" to push your reaction times.</p>
 
-            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              9. The Importance of Crosshair Placement
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              The best flick in the world is slower than not having to flick at all. Crosshair placement means keeping your reticle exactly where an enemy's head will appear. Aim training helps you win the fights where perfect crosshair placement wasn't enough.
-            </p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>9. The Importance of Crosshair Placement</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>The best flick in the world is slower than not having to flick at all. Crosshair placement means keeping your reticle exactly where an enemy's head will appear.</p>
 
-            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              10. How to Overcome Aiming Plateaus
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              If your scores stop improving, you've hit a plateau. To break it, artificially increase the difficulty. Play on our "Impossible" mode to intentionally fail. This forces your brain out of autopilot and builds new neural connections. When you return to "Medium," it will feel incredibly slow.
-            </p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>10. How to Overcome Aiming Plateaus</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>If your scores stop improving, you've hit a plateau. To break it, artificially increase the difficulty. Play on our "Impossible" mode to intentionally fail. This forces your brain out of autopilot.</p>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              11. Does Monitor Refresh Rate (144Hz/240Hz) Impact Aim?
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Yes. Upgrading from 60Hz to 144Hz reduces system latency and provides twice as many visual frames per second. This allows your eyes to track fast-moving targets smoothly, directly increasing your tracking scores and reaction time.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>11. Does Monitor Refresh Rate (144Hz/240Hz) Impact Aim?</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Yes. Upgrading from 60Hz to 144Hz reduces system latency and provides twice as many visual frames per second, directly increasing your tracking scores and reaction time.</p>
 
-            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              12. Lightweight Mice vs. Heavy Mice
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              The eSports industry has heavily shifted toward ultra-lightweight mice (under 65 grams). Less weight means less inertia, allowing your hand to start and stop the mouse much faster, reducing wrist fatigue and improving micro-correction speed.
-            </p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>12. Lightweight Mice vs. Heavy Mice</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>The eSports industry has heavily shifted toward ultra-lightweight mice (under 65 grams). Less weight means less inertia, allowing your hand to start and stop the mouse much faster.</p>
 
-            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              13. Disabling Mouse Acceleration for Raw Input
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              "Enhance pointer precision" in Windows adds artificial mouse acceleration, meaning the distance your cursor moves depends on how *fast* you move the mouse, rather than just how *far*. Always disable this to ensure raw, 1:1 muscle memory building.
-            </p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>13. Disabling Mouse Acceleration for Raw Input</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>"Enhance pointer precision" in Windows adds artificial mouse acceleration. Always disable this to ensure raw, 1:1 muscle memory building.</p>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              14. How to Build Solid Muscle Memory
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Muscle memory thrives on repetition and sleep. Train in short, intense 15-minute bursts daily rather than a single 3-hour session once a week. Your brain solidifies these hand-eye coordination improvements overnight while you rest.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>14. How to Build Solid Muscle Memory</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Muscle memory thrives on repetition and sleep. Train in short, intense 15-minute bursts daily rather than a single 3-hour session once a week.</p>
 
-            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              15. Aim Training for Fortnite and Movement Shooters
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              In high-mobility games, targets move vertically and horizontally at extreme speeds. Our 2D aim trainer simulates this dynamic target acquisition. The faster you can click the small, randomly appearing targets on the screen, the faster you can edit and shoot.
-            </p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>15. Aim Training for Fortnite and Movement Shooters</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>In high-mobility games, targets move vertically and horizontally at extreme speeds. Our 2D aim trainer simulates this dynamic target acquisition.</p>
 
-            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              16. Dealing with Ranked Anxiety and Aim Shakes
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              "Aim shakes" happen when adrenaline floods your system during a clutch moment. The only cure is supreme confidence in your mechanics. By grinding your aim daily, aiming becomes subconscious, allowing you to stay relaxed under pressure.
-            </p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>16. Dealing with Ranked Anxiety and Aim Shakes</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>"Aim shakes" happen when adrenaline floods your system during a clutch moment. The only cure is supreme confidence in your mechanics built through daily practice.</p>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              17. Measuring Your Progress in Aim Training
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Pay attention to your "Avg Reaction" and "Accuracy %" statistics at the end of each session. A high score means nothing if your accuracy drops below 85%. Always prioritize landing the shot smoothly over moving erratically fast.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>17. Measuring Your Progress in Aim Training</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Pay attention to your "Avg Reaction" and "Accuracy %" statistics at the end of each session. Always prioritize landing the shot smoothly over moving erratically fast.</p>
 
-            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              18. Common Mistakes Beginners Make When Aiming
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              The biggest mistake is tensing the arm and gripping the mouse too tightly. Tension limits your range of motion and creates jittery aim. Focus on a relaxed shoulder, a loose grip, and smooth, gliding motions across your mousepad.
-            </p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>18. Common Mistakes Beginners Make When Aiming</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>The biggest mistake is tensing the arm and gripping the mouse too tightly. Focus on a relaxed shoulder, a loose grip, and smooth, gliding motions across your mousepad.</p>
 
-            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              19. The Role of Mousepads in Accuracy
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              A good cloth mousepad provides friction—often called "stopping power." When you flick your mouse, you want it to stop precisely where your hand stops. Playing on a bare desk causes the mouse to slide past your intended target.
-            </p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>19. The Role of Mousepads in Accuracy</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>A good cloth mousepad provides friction — often called "stopping power." When you flick your mouse, you want it to stop precisely where your hand stops.</p>
 
-            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>
-              20. Applying 2D Training to 3D Environments
-            </h2>
-            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>
-              Browser-based aim trainers operate in a 2D space, which perfectly mirrors the flat sensor of your mouse moving on a flat desk. By mastering 2D cursor control here, you are directly training the physical hand movements required to control your 3D crosshair.
-            </p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.6rem', fontWeight: '700', marginBottom: '0.75rem' }}>20. Applying 2D Training to 3D Environments</h2>
+            <p style={{ marginBottom: '1rem', color: '#9ca3af' }}>Browser-based aim trainers operate in a 2D space, which perfectly mirrors the flat sensor of your mouse. By mastering 2D cursor control here, you directly train the physical hand movements required in 3D games.</p>
 
             {/* Games Grid */}
             <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: '700', marginBottom: '1rem', marginTop: '2rem' }}>Why Aim Matters in These Top Games</h3>
-            <div className="aim-games-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: '0.75rem', marginBottom: '3rem' }}>
+            <div
+              className="aim-games-grid"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: '0.75rem', marginBottom: '3rem' }}
+            >
               {GAMES.map(game => (
                 <div key={game} style={{ padding: '0.65rem 0.9rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', color: '#e5e7eb', fontWeight: '600', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '7px' }}>
                   <span style={{ color: 'var(--neon-green)' }} aria-hidden="true">🎯</span>{game}
@@ -1498,12 +1794,12 @@ export default function AimTrainerPage() {
               ))}
             </div>
 
-            {/* Massive FAQ Section (20+ Items) */}
+            {/* FAQ Section */}
             <div itemScope itemType="https://schema.org/FAQPage" style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               <h2 style={{ fontWeight: '800', fontSize: '1.8rem', marginBottom: '0', color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '0.75rem' }}>
                 Aim Training Frequently Asked Questions
               </h2>
-              
+
               {ALL_FAQS.map(({ q, a }, i) => (
                 <div key={i} itemScope itemProp="mainEntity" itemType="https://schema.org/Question">
                   <h3 itemProp="name" style={{ color: 'var(--neon-cyan)', fontSize: '1.1rem', fontWeight: '700', marginBottom: '0.5rem', marginTop: 0 }}>{q}</h3>
