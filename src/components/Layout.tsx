@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 
 // Fixed the image path here
-const mouseIcon = '/logo.png';
+const mouseIcon = '/cps-pfp.png';
 
 interface ToolItem {
   to: string;
@@ -73,16 +73,22 @@ export default function Layout() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           
-          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
             <div style={{
-              width: '44px', height: '44px', borderRadius: '10px',
+              width: '44px', height: '44px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', background: 'rgba(255,255,255,0.05)',
+              background: 'transparent',
             }}>
-              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} />
             </div>
-            <span style={{ fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              CPS<span style={{ color: 'var(--neon-cyan)' }}>Test</span> Tools
+            <span style={{
+              fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em',
+              textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
+            }}>
+              CPS<span style={{
+                color: 'var(--neon-cyan)',
+                textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)'
+              }}>Test</span> Tools
             </span>
           </Link>
         </div>
@@ -168,7 +174,6 @@ export default function Layout() {
       )}
 
       {/* BODY SECTION */}
-      {/* Container with flex-start keeps sidebar from stretching vertically */}
       <div style={{ display: 'flex', flex: 1, position: 'relative', width: '100%', alignItems: 'flex-start' }}>
         
         {/* SIDEBAR PANEL */}
@@ -179,8 +184,8 @@ export default function Layout() {
           background: 'transparent',
           backdropFilter: 'none',
           borderRight: '1px solid var(--border)',
-          height: 'calc(100vh - 64px)', // Take up exact screen height minus navbar
-          position: 'sticky', // STICKY NOW WORKS PERFECTLY
+          height: 'calc(100vh - 64px)', 
+          position: 'sticky', 
           top: '64px',
           display: 'flex',
           flexDirection: 'column',
@@ -274,6 +279,7 @@ export default function Layout() {
                     marginBottom: isPinned ? '5px' : '0',
                     fontSize: '0.85rem', fontWeight: isCurrentActive ? '600' : '500',
                     color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
+                    textShadow: isCurrentActive ? '0 0 8px rgba(0,245,255,0.6)' : 'none',
                     transition: 'all 0.3s ease', transform: 'translateX(0)'
                   }}
                   onMouseEnter={(e) => {
@@ -282,6 +288,7 @@ export default function Layout() {
                       e.currentTarget.style.color = '#00f5ff'; 
                       e.currentTarget.style.transform = 'translateX(6px)'; 
                       e.currentTarget.style.border = '1px solid rgba(0, 245, 255, 0.1)';
+                      e.currentTarget.style.textShadow = '0 0 8px rgba(0,245,255,0.6)';
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -290,10 +297,16 @@ export default function Layout() {
                       e.currentTarget.style.color = 'var(--text-secondary)';
                       e.currentTarget.style.transform = 'translateX(0)';
                       e.currentTarget.style.border = '1px solid transparent';
+                      e.currentTarget.style.textShadow = 'none';
                     }
                   }}
                 >
-                  <span style={{ fontSize: '1.1rem' }}>{tool.icon}</span>
+                  <span style={{
+                    fontSize: '1.1rem',
+                    filter: isCurrentActive
+                      ? 'drop-shadow(0 0 6px rgba(0,245,255,0.9)) drop-shadow(0 0 14px rgba(0,245,255,0.5))'
+                      : 'drop-shadow(0 0 4px rgba(0,245,255,0.35))'
+                  }}>{tool.icon}</span>
                   <span style={{ 
                     display: (sidebarOpen || isPinned) ? 'block' : 'none', 
                     textTransform: 'uppercase', fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
@@ -308,8 +321,6 @@ export default function Layout() {
         </aside>
 
         {/* MAIN DYNAMIC CONTENT */}
-        {/* FIX: Moved overflowX: hidden directly to the main container. 
-            This prevents horizontal scroll bugs on mobile but keeps the Sidebar sticky! */}
         <main className="main-content" style={{ 
           flex: 1, 
           position: 'relative', 
@@ -332,11 +343,19 @@ export default function Layout() {
         <div className="footer-grid" style={{ maxWidth: '1200px', margin: '0 auto', display: 'grid', gap: '2rem', marginBottom: '3rem' }}>
           
           <div style={{ paddingRight: '2rem' }}>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none', marginBottom: '1rem' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', background: 'rgba(255,255,255,0.05)' }}>
-                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', marginBottom: '1rem' }}>
+              <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
+                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(0,245,255,0.7)) drop-shadow(0 0 12px rgba(0,245,255,0.4))' }} />
               </div>
-              <span style={{ fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)' }}>CPS<span style={{ color: 'var(--neon-cyan, #00f5ff)' }}>Test</span> Tools</span>
+              <span style={{
+                fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)',
+                textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
+              }}>
+                CPS<span style={{
+                  color: 'var(--neon-cyan, #00f5ff)',
+                  textShadow: '0 0 8px var(--neon-cyan, #00f5ff), 0 0 20px var(--neon-cyan, #00f5ff)'
+                }}>Test</span> Tools
+              </span>
             </Link>
             <p style={{ color: '#8892b0', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>The ultimate free platform for gamers and typists to test, train, and compete. No signup required.</p>
             <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -395,7 +414,6 @@ export default function Layout() {
 
       {/* STYLES */}
       <style>{`
-        /* FIX: Removed overflow-x hidden from body so Sticky Sidebar stays active */
         html, body {
           margin: 0;
           padding: 0;
