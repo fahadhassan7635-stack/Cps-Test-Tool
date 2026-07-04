@@ -1913,6 +1913,114 @@ export default function SniperModePage() {
                   in this trainer closely approximates enemy strafing patterns in FPS titles, making it a
                   high-fidelity training stimulus. Pair it with in-game practice for the fastest improvement.
                 </AccordionItem>
+
+                <AccordionItem id="faq-mobile" question="Can I use this aim trainer on my phone or tablet?"
+                  isOpen={openFaqId === 'faq-mobile'} onToggle={() => toggleFaq('faq-mobile')}>
+                  Yes. The arena responds to touch as well as mouse input — tap the target for a hit and tap
+                  anywhere else on the arena for a miss. Touch scrolling is disabled inside the play area so
+                  your finger won&apos;t accidentally scroll the page mid-session.
+                </AccordionItem>
+
+                <AccordionItem id="faq-browser" question="Which browsers and devices are supported?"
+                  isOpen={openFaqId === 'faq-browser'} onToggle={() => toggleFaq('faq-browser')}>
+                  Any modern browser with JavaScript enabled works — Chrome, Firefox, Edge, and Safari on both
+                  desktop and mobile. Sound uses the standard Web Audio API, so no plugins or extensions are
+                  required. Older browsers without Web Audio support will still let you play; they&apos;ll
+                  simply run silently.
+                </AccordionItem>
+
+                <AccordionItem id="faq-keyboard" question="Are there any keyboard shortcuts?"
+                  isOpen={openFaqId === 'faq-keyboard'} onToggle={() => toggleFaq('faq-keyboard')}>
+                  Press <kbd style={kbdStyle}>ESC</kbd> at any point during a match to pause, and press it
+                  again to resume. There is currently no keyboard-only way to start a match or hit the
+                  target, since the trainer is built specifically around mouse and touch precision.
+                </AccordionItem>
+
+                <AccordionItem id="faq-scoring" question="How exactly is my score calculated?"
+                  isOpen={openFaqId === 'faq-scoring'} onToggle={() => toggleFaq('faq-scoring')}>
+                  Each hit starts at a base value — 100 points for a normal hit, 150 for a critical hit — then
+                  gets multiplied by your current combo multiplier (×1 to ×5) and by the selected difficulty&apos;s
+                  score multiplier (×1 on Easy up to ×3 on Impossible). The result is rounded to the nearest
+                  whole point and added to your total; misses never subtract points.
+                </AccordionItem>
+
+                <AccordionItem id="faq-which-difficulty" question="Which difficulty should I start with?"
+                  isOpen={openFaqId === 'faq-which-difficulty'} onToggle={() => toggleFaq('faq-which-difficulty')}>
+                  Start on Easy or Medium until your accuracy consistently sits above 85–90%, then move up.
+                  Jumping straight to Hard or Impossible before your tracking is solid tends to build sloppy
+                  habits — like overshooting or slapping the mouse — rather than clean, controlled aim.
+                </AccordionItem>
+
+                <AccordionItem id="faq-sensitivity" question="What mouse sensitivity should I use for training?"
+                  isOpen={openFaqId === 'faq-sensitivity'} onToggle={() => toggleFaq('faq-sensitivity')}>
+                  Use whatever sensitivity you play your main game at. Aim training only builds useful muscle
+                  memory when it mirrors your real setup — practicing at a different sensitivity than the one
+                  you queue up with largely wastes the repetition.
+                </AccordionItem>
+
+                <AccordionItem id="faq-refresh-rate" question="Does my monitor's refresh rate affect training quality?"
+                  isOpen={openFaqId === 'faq-refresh-rate'} onToggle={() => toggleFaq('faq-refresh-rate')}>
+                  Yes. A higher refresh rate (120Hz, 144Hz, 240Hz) shows more intermediate frames of the
+                  target&apos;s movement, which makes tracking feel smoother and lets you react a few
+                  milliseconds sooner. A 60Hz display still works fine for building fundamentals, just with
+                  slightly choppier visual feedback.
+                </AccordionItem>
+
+                <AccordionItem id="faq-warmup" question="Should I use this as a warm-up before ranked matches?"
+                  isOpen={openFaqId === 'faq-warmup'} onToggle={() => toggleFaq('faq-warmup')}>
+                  A short 5–10 minute session on Medium or Hard difficulty is a solid pre-game warm-up — long
+                  enough to activate tracking muscle memory without causing fatigue. Save Impossible-difficulty
+                  grinding for dedicated practice sessions rather than right before you queue.
+                </AccordionItem>
+
+                <AccordionItem id="faq-streak-vs-combo" question="What's the difference between streak and combo?"
+                  isOpen={openFaqId === 'faq-streak-vs-combo'} onToggle={() => toggleFaq('faq-streak-vs-combo')}>
+                  They track the same underlying run of consecutive hits, but combo drives your score
+                  multiplier and resets to zero on a miss, while streak is simply a running counter of hits in
+                  a row for your own reference — both reset together when you miss.
+                </AccordionItem>
+
+                <AccordionItem id="faq-data-privacy" question="Is my score data private, and where is it stored?"
+                  isOpen={openFaqId === 'faq-data-privacy'} onToggle={() => toggleFaq('faq-data-privacy')}>
+                  All records — best score, best streak, best combo, and games played — are saved locally in
+                  your browser&apos;s storage. Nothing is sent to a server, no account is required, and no one
+                  else can see your stats. Clearing your browser data will also clear your saved records.
+                </AccordionItem>
+
+                <AccordionItem id="faq-reset-records" question="How do I reset my all-time records?"
+                  isOpen={openFaqId === 'faq-reset-records'} onToggle={() => toggleFaq('faq-reset-records')}>
+                  Since records are stored in your browser, clearing this site&apos;s local storage (through
+                  your browser&apos;s privacy or site-data settings) wipes them back to zero. There is no
+                  in-game reset button, since records are meant to represent your genuine lifetime best.
+                </AccordionItem>
+
+                <AccordionItem id="faq-audio" question="Why can't I hear any sound when I start playing?"
+                  isOpen={openFaqId === 'faq-audio'} onToggle={() => toggleFaq('faq-audio')}>
+                  Browsers block audio from starting automatically until you interact with the page. The very
+                  first click or tap you make (such as pressing Start) unlocks sound for the rest of the
+                  session. Also double-check the speaker icon in the controls row hasn&apos;t been muted.
+                </AccordionItem>
+
+                <AccordionItem id="faq-progressive-speed" question="Why does the target get faster the longer I play?"
+                  isOpen={openFaqId === 'faq-progressive-speed'} onToggle={() => toggleFaq('faq-progressive-speed')}>
+                  Every difficulty includes a progressive speed ramp: the target gradually accelerates the
+                  longer a single match runs, up to a capped maximum multiplier. This rewards players who can
+                  sustain tracking accuracy under mounting pressure, rather than just reacting well early on.
+                </AccordionItem>
+
+                <AccordionItem id="faq-impossible-tips" question="Any tips specifically for Impossible difficulty?"
+                  isOpen={openFaqId === 'faq-impossible-tips'} onToggle={() => toggleFaq('faq-impossible-tips')}>
+                  The target occasionally makes small random direction nudges on Impossible, so avoid
+                  predicting its path too far ahead — stay reactive instead. Because the hitbox is tiny,
+                  prioritise steady, controlled cursor movement over fast, jerky corrections.
+                </AccordionItem>
+
+                <AccordionItem id="faq-repeat-sessions" question="How many rounds should I play per session?"
+                  isOpen={openFaqId === 'faq-repeat-sessions'} onToggle={() => toggleFaq('faq-repeat-sessions')}>
+                  Five to ten short rounds with brief breaks between them tends to beat one long unbroken
+                  grind — fatigue quietly erodes precision even when it doesn&apos;t feel like it. Watch your
+                  accuracy stat: if it starts trending down round over round, that&apos;s your cue to stop.
+                </AccordionItem>
               </div>
             </section>
 
