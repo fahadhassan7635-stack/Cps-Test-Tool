@@ -22,6 +22,17 @@
  *      hit · crit · miss · combo-unlock · countdown-beep · go-fanfare · game-over
  *  - Mute toggle button persisted to localStorage
  *  - AudioContext lazily created on first user gesture (browser autoplay policy)
+ *
+ * v4 fixes & additions:
+ *  - FIX: combo-unlock sound tier mapping was inverted (small combos played the
+ *    most excited sound, big combos played the dullest). Now mapped explicitly
+ *    by multiplier value instead of relying on array order.
+ *  - FIX: pausing no longer distorts the progressive difficulty ramp. Elapsed
+ *    time used for speed-multiplier calculation now excludes time spent paused.
+ *  - NEW: selectable match duration – 1s / 2s / 5s / 10s / 30s / custom / unlimited.
+ *    Unlimited mode counts time up instead of down and ends only when the
+ *    player presses "Finish", at which point the score is saved to records
+ *    exactly like a normal timed match.
  */
 
 import React, {
@@ -38,6 +49,10 @@ import React, {
 ═══════════════════════════════════════════════════════════════ */
 type Phase = 'idle' | 'countdown' | 'running' | 'paused' | 'done';
 type Difficulty = 'easy' | 'medium' | 'hard' | 'impossible';
+
+/** Duration selector option. Numeric presets are seconds; 'custom' reads
+ *  from customDurationInput; 'unlimited' disables the countdown entirely. */
+type DurationOption = '1' | '2' | '5' | '10' | '30' | 'custom' | 'unlimited';
 
 interface TargetPhysics {
   x: number;   // centre x
@@ -79,7 +94,9 @@ interface StoredRecords {
 /* ═══════════════════════════════════════════════════════════════
    CONSTANTS & CONFIG
 ═══════════════════════════════════════════════════════════════ */
-const GAME_DURATION      = 30;       // seconds
+const DEFAULT_GAME_DURATION = 30;    // seconds – fallback / initial preset
+const MIN_CUSTOM_DURATION   = 1;     // seconds – lower bound for custom input
+const MAX_CUSTOM_DURATION   = 600;   // seconds – upper bound for custom input (10 min)
 const AREA_HEIGHT        = 380;      // px – arena height
 const TIMER_INTERVAL_MS  = 100;      // ms between timer ticks
 const COUNTDOWN_FROM     = 3;        // countdown start number
@@ -103,6 +120,16 @@ const COMBO_THRESHOLDS: ReadonlyArray<{ hits: number; mult: number; label: strin
   { hits: 10, mult: 3, label: '×3 COMBO' },
   { hits:  5, mult: 2, label: '×2 COMBO' },
 ];
+
+/** Maps a combo multiplier to its arpeggio "excitement" tier (1 = calmest, 3 = biggest).
+ *  Kept as an explicit lookup rather than deriving from COMBO_THRESHOLDS array order,
+ *  since that array is sorted descending by hit count and index-based derivation
+ *  silently inverts the mapping. */
+const COMBO_SOUND_TIER: Readonly<Record<number, number>> = {
+  2: 1,
+  3: 2,
+  5: 3,
+};
 
 interface DifficultyDef {
   label: string;
@@ -144,6 +171,18 @@ const DIFFICULTY_CONFIG: Readonly<Record<Difficulty, DifficultyDef>> = {
 
 const DIFFICULTY_ORDER: Difficulty[] = ['easy', 'medium', 'hard', 'impossible'];
 
+/** Duration presets shown as buttons, in order. 'custom' and 'unlimited' are
+ *  handled specially (see DurationSelector). */
+const DURATION_PRESETS: DurationOption[] = ['1', '2', '5', '10', '30', 'custom', 'unlimited'];
+
+function durationLabel(opt: DurationOption): string {
+  switch (opt) {
+    case 'custom':    return 'Custom';
+    case 'unlimited': return 'Unlimited';
+    default:          return `${opt}s`;
+  }
+}
+
 const SUPPORTED_GAMES = [
   'Minecraft', 'Roblox', 'Fortnite', 'Grand Theft Auto V',
   'Call of Duty: Warzone', 'League of Legends', 'Counter-Strike 2',
@@ -153,7 +192,7 @@ const SUPPORTED_GAMES = [
 const DEFAULT_GAME_STATE: Readonly<GameState> = {
   score: 0, hits: 0, misses: 0, criticalHits: 0,
   combo: 0, bestCombo: 0, streak: 0, bestStreak: 0,
-  timeLeft: GAME_DURATION,
+  timeLeft: DEFAULT_GAME_DURATION,
 };
 
 const DEFAULT_RECORDS: Readonly<StoredRecords> = {
@@ -362,6 +401,15 @@ function calcAvgAccuracy(r: StoredRecords): number {
   return Math.round((r.totalHits / total) * 100);
 }
 
+/** Resolve a DurationOption + custom input into an actual seconds value,
+ *  or null for unlimited (no countdown target). */
+function resolveDurationSeconds(opt: DurationOption, customValue: number): number | null {
+  if (opt === 'unlimited') return null;
+  if (opt === 'custom') return clamp(safeNum(customValue, DEFAULT_GAME_DURATION), MIN_CUSTOM_DURATION, MAX_CUSTOM_DURATION);
+  const n = parseInt(opt, 10);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_GAME_DURATION;
+}
+
 /* ── localStorage helpers ── */
 function loadRecords(): StoredRecords {
   if (typeof window === 'undefined') return { ...DEFAULT_RECORDS };
@@ -460,15 +508,15 @@ const StatCard = memo(function StatCard({ value, label, color, live }: StatCardP
       aria-atomic={live ? 'true' : undefined}
       style={{
         background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: '12px', padding: '1rem', textAlign: 'center',
+        borderRadius: '10px', padding: '0.55rem 0.4rem', textAlign: 'center',
       }}
     >
-      <div style={{ fontSize: '1.75rem', fontWeight: 900, color }} aria-hidden="true">
+      <div style={{ fontSize: '1.15rem', fontWeight: 900, color }} aria-hidden="true">
         {value}
       </div>
       <div style={{
-        fontSize: '0.7rem', color: 'var(--text-muted)',
-        textTransform: 'uppercase', marginTop: '0.2rem', letterSpacing: '0.05em',
+        fontSize: '0.58rem', color: 'var(--text-muted)',
+        textTransform: 'uppercase', marginTop: '0.1rem', letterSpacing: '0.04em',
       }}>
         {label}
       </div>
@@ -491,19 +539,54 @@ const DifficultyButton = memo(function DifficultyButton({
       aria-pressed={selected}
       aria-label={`Select ${cfg.label} difficulty`}
       style={{
-        flex: 1, padding: '0.6rem 0.4rem', borderRadius: '10px',
-        border: selected ? `2px solid ${cfg.color}` : '2px solid var(--border)',
+        flex: 1, padding: '0.4rem 0.3rem', borderRadius: '8px',
+        border: selected ? `2px solid ${cfg.color}` : '1px solid var(--border)',
         background: selected ? `${cfg.color}1f` : 'var(--bg-card)',
         color: selected ? cfg.color : 'var(--text-muted)',
-        fontWeight: 700, fontSize: '0.78rem',
+        fontWeight: 700, fontSize: '0.68rem',
         cursor: disabled ? 'not-allowed' : 'pointer',
         transition: 'border-color 0.15s, background 0.15s, color 0.15s',
         opacity: disabled ? 0.45 : 1,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
       }}
     >
-      <span style={{ fontSize: '1.05rem' }} aria-hidden="true">{cfg.emoji}</span>
+      <span style={{ fontSize: '0.85rem' }} aria-hidden="true">{cfg.emoji}</span>
       {cfg.label}
+    </button>
+  );
+});
+
+interface DurationButtonProps {
+  opt: DurationOption; selected: boolean;
+  onSelect: (o: DurationOption) => void; disabled: boolean;
+}
+const DurationButton = memo(function DurationButton({
+  opt, selected, onSelect, disabled,
+}: DurationButtonProps) {
+  const accent = 'var(--neon-cyan)';
+  return (
+    <button
+      onClick={() => !disabled && onSelect(opt)}
+      disabled={disabled}
+      aria-pressed={selected}
+      aria-label={
+        opt === 'custom'    ? 'Select custom duration' :
+        opt === 'unlimited' ? 'Select unlimited duration' :
+        `Select ${opt} second duration`
+      }
+      style={{
+        flex: 1, padding: '0.35rem 0.3rem', borderRadius: '8px',
+        border: selected ? `2px solid ${accent}` : '1px solid var(--border)',
+        background: selected ? `${accent}1f` : 'var(--bg-card)',
+        color: selected ? accent : 'var(--text-muted)',
+        fontWeight: 700, fontSize: '0.68rem',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'border-color 0.15s, background 0.15s, color 0.15s',
+        opacity: disabled ? 0.45 : 1,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {durationLabel(opt)}
     </button>
   );
 });
@@ -563,6 +646,80 @@ const FaqItem = memo(function FaqItem({
         {question}
       </h3>
       <div style={{ color: '#9ca3af' }}>{children}</div>
+    </div>
+  );
+});
+
+/** Small inline chevron – rotates 180° when its accordion panel is open.
+ *  Drawn as raw SVG rather than pulled from an icon library so this file
+ *  has no new external dependency. */
+const ChevronIcon = memo(function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="16" height="16" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true"
+      style={{
+        flexShrink: 0,
+        transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+        transition: 'transform 0.2s ease',
+      }}
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+});
+
+interface AccordionItemProps {
+  id: string; question: string; children: React.ReactNode;
+  isOpen: boolean; onToggle: () => void;
+}
+/** Collapsible FAQ row: header button + chevron, animated panel beneath.
+ *  Only one item is open at a time (controlled by the parent's openFaqId). */
+const AccordionItem = memo(function AccordionItem({
+  id, question, children, isOpen, onToggle,
+}: AccordionItemProps) {
+  return (
+    <div
+      style={{
+        background: 'var(--bg-card)',
+        border: isOpen ? '1px solid var(--neon-cyan)' : '1px solid var(--border)',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        transition: 'border-color 0.2s ease',
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        aria-controls={`${id}-panel`}
+        id={`${id}-button`}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '1rem', padding: '1rem 1.25rem', background: 'transparent', border: 'none',
+          cursor: 'pointer', textAlign: 'left', color: '#fff', fontWeight: 700, fontSize: '1rem',
+        }}
+      >
+        <span>{question}</span>
+        <span style={{ color: isOpen ? 'var(--neon-cyan)' : 'var(--text-muted)' }}>
+          <ChevronIcon open={isOpen} />
+        </span>
+      </button>
+      <div
+        id={`${id}-panel`}
+        role="region"
+        aria-labelledby={`${id}-button`}
+        style={{
+          maxHeight: isOpen ? '700px' : '0px',
+          transition: 'max-height 0.25s ease',
+          overflow: 'hidden',
+        }}
+      >
+        <div style={{ padding: '0 1.25rem 1.15rem', color: '#9ca3af', fontSize: '0.9rem', lineHeight: 1.7 }}>
+          {children}
+        </div>
+      </div>
     </div>
   );
 });
@@ -685,11 +842,14 @@ export default function SniperModePage() {
   const [phase,       setPhase]       = useState<Phase>('idle');
   const [gameState,   setGameState]   = useState<GameState>({ ...DEFAULT_GAME_STATE });
   const [difficulty,  setDifficulty]  = useState<Difficulty>('medium');
+  const [durationOpt, setDurationOpt] = useState<DurationOption>('30');
+  const [customDurationInput, setCustomDurationInput] = useState<string>('60');
   const [countdown,   setCountdown]   = useState<number | 'GO!'>(COUNTDOWN_FROM);
   const [feedbacks,   setFeedbacks]   = useState<HitFeedback[]>([]);
   const [records,     setRecords]     = useState<StoredRecords>({ ...DEFAULT_RECORDS });
   const [comboLabel,  setComboLabel]  = useState('');
   const [muted,       setMuted]       = useState(false);
+  const [openFaqId,   setOpenFaqId]   = useState<string | null>(null);
 
   const areaRef          = useRef<HTMLDivElement>(null);
   const targetElRef      = useRef<HTMLButtonElement>(null);
@@ -704,8 +864,17 @@ export default function SniperModePage() {
   const phaseRef         = useRef<Phase>('idle');
   const difficultyRef    = useRef<Difficulty>('medium');
 
+  /** Effective match length in seconds, or null for unlimited. Resolved once
+   *  per launch from durationOpt + customDurationInput so a mid-match edit
+   *  to the custom field can't destabilise an active game. */
+  const durationSecondsRef = useRef<number | null>(DEFAULT_GAME_DURATION);
+  const isUnlimitedRef     = useRef(false);
+
   const startTimestampRef = useRef<number>(0);
   const lastRafRef        = useRef<number>(0);
+  /** Timestamp when the game was paused – used to shift startTimestampRef on
+   *  resume so the progressive-difficulty ramp ignores paused time. */
+  const pauseStartRef     = useRef<number>(0);
 
   const hitGuardRef      = useRef(false);
   const gameInitRef      = useRef(false);
@@ -729,7 +898,11 @@ export default function SniperModePage() {
     return total > 0 ? Math.round((gameState.hits / total) * 100) : 100;
   }, [gameState.hits, gameState.misses]);
 
-  const progressPct = ((GAME_DURATION - gameState.timeLeft) / GAME_DURATION) * 100;
+  const isUnlimited = durationOpt === 'unlimited';
+  const effectiveDurationPreview = resolveDurationSeconds(durationOpt, parseFloat(customDurationInput));
+  const progressPct = isUnlimited || !effectiveDurationPreview
+    ? 0
+    : ((effectiveDurationPreview - gameState.timeLeft) / effectiveDurationPreview) * 100;
   const isPlaying   = phase === 'running';
   const canSetDiff  = phase === 'idle' || phase === 'done';
   const diffCfg     = DIFFICULTY_CONFIG[difficulty];
@@ -753,7 +926,7 @@ export default function SniperModePage() {
       bestCombo:    safeNum(gs.bestCombo),
       streak:       safeNum(gs.streak),
       bestStreak:   safeNum(gs.bestStreak),
-      timeLeft:     safeNum(gs.timeLeft, GAME_DURATION),
+      timeLeft:     safeNum(gs.timeLeft, DEFAULT_GAME_DURATION),
     };
     gameStateRef.current = safe;
     setGameState({ ...safe });
@@ -764,6 +937,21 @@ export default function SniperModePage() {
     difficultyRef.current = d;
     setDifficulty(d);
   }, [canSetDiff]);
+
+  const selectDuration = useCallback((o: DurationOption) => {
+    if (!canSetDiff) return;
+    setDurationOpt(o);
+  }, [canSetDiff]);
+
+  const toggleFaq = useCallback((id: string) => {
+    setOpenFaqId(prev => (prev === id ? null : id));
+  }, []);
+
+  const handleCustomDurationChange = useCallback((raw: string) => {
+    // Allow free typing (including empty string mid-edit); clamp only on use
+    if (!/^\d{0,4}$/.test(raw)) return;
+    setCustomDurationInput(raw);
+  }, []);
 
   /* ─────────────────────────────────────────────────────────────
      MUTE TOGGLE
@@ -799,6 +987,7 @@ export default function SniperModePage() {
     if (countdownTORef.current)    { clearTimeout(countdownTORef.current);     countdownTORef.current = null; }
     if (comboLabelTORef.current)   { clearTimeout(comboLabelTORef.current);    comboLabelTORef.current = null; }
     lastRafRef.current = 0;
+    pauseStartRef.current = 0;
     hitGuardRef.current = false;
     gameInitRef.current = false;
   }, []);
@@ -811,6 +1000,32 @@ export default function SniperModePage() {
     if (!el) return;
     el.style.transform = `translate3d(${t.x - t.size}px,${t.y - t.size}px,0)`;
   }, []);
+
+  /* ─────────────────────────────────────────────────────────────
+     END GAME – shared by "time's up" and manual Finish (unlimited mode)
+  ───────────────────────────────────────────────────────────── */
+  const endGame = useCallback((finalState: GameState) => {
+    if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
+    cancelAnimationFrame(animRafRef.current);
+    animRafRef.current = 0;
+
+    const rec = loadRecords();
+    const newRec: StoredRecords = {
+      bestScore:   Math.max(rec.bestScore, finalState.score),
+      bestStreak:  Math.max(rec.bestStreak, finalState.bestStreak),
+      bestCombo:   Math.max(rec.bestCombo, finalState.bestCombo),
+      gamesPlayed: rec.gamesPlayed + 1,
+      totalHits:   rec.totalHits + finalState.hits,
+      totalMisses: rec.totalMisses + finalState.misses,
+    };
+    saveRecords(newRec);
+    setRecords(newRec);
+
+    targetRef.current = null;
+    if (targetElRef.current) targetElRef.current.style.display = 'none';
+    soundGameOver();
+    commitPhase('done');
+  }, [commitPhase]);
 
   /* ─────────────────────────────────────────────────────────────
      ANIMATION LOOP
@@ -828,6 +1043,8 @@ export default function SniperModePage() {
     lastRafRef.current = timestamp;
     const dtFactor = dt / (1000 / FRAME_REF_HZ);
 
+    // elapsed excludes any time spent paused, since pause() -> resume()
+    // shifts startTimestampRef forward by the paused duration.
     const elapsed   = timestamp - startTimestampRef.current;
     const speedMult = clamp(1 + elapsed * PROGRESSIVE_ACCEL, 1, MAX_SPEED_MULT);
 
@@ -851,36 +1068,24 @@ export default function SniperModePage() {
     timerIntervalRef.current = setInterval(() => {
       if (phaseRef.current !== 'running') return;
 
-      const gs   = gameStateRef.current;
+      const gs = gameStateRef.current;
+
+      if (isUnlimitedRef.current) {
+        // Count UP with no auto-end; player ends the match manually.
+        const next = parseFloat((gs.timeLeft + TIMER_INTERVAL_MS / 1000).toFixed(1));
+        commitGameState({ ...gs, timeLeft: next });
+        return;
+      }
+
       const next = parseFloat((Math.max(0, gs.timeLeft - TIMER_INTERVAL_MS / 1000)).toFixed(1));
       const updated: GameState = { ...gs, timeLeft: next };
       commitGameState(updated);
 
       if (next <= 0) {
-        clearInterval(timerIntervalRef.current!);
-        timerIntervalRef.current = null;
-        cancelAnimationFrame(animRafRef.current);
-        animRafRef.current = 0;
-
-        const rec  = loadRecords();
-        const newRec: StoredRecords = {
-          bestScore:   Math.max(rec.bestScore, updated.score),
-          bestStreak:  Math.max(rec.bestStreak, updated.bestStreak),
-          bestCombo:   Math.max(rec.bestCombo, updated.bestCombo),
-          gamesPlayed: rec.gamesPlayed + 1,
-          totalHits:   rec.totalHits  + updated.hits,
-          totalMisses: rec.totalMisses + updated.misses,
-        };
-        saveRecords(newRec);
-        setRecords(newRec);
-
-        targetRef.current = null;
-        if (targetElRef.current) targetElRef.current.style.display = 'none';
-        soundGameOver();
-        commitPhase('done');
+        endGame(updated);
       }
     }, TIMER_INTERVAL_MS);
-  }, [commitGameState, commitPhase]);
+  }, [commitGameState, endGame]);
 
   /* ─────────────────────────────────────────────────────────────
      LAUNCH GAME
@@ -892,10 +1097,18 @@ export default function SniperModePage() {
     const area = areaRef.current;
     if (!area) { gameInitRef.current = false; return; }
 
+    // Resolve duration once at launch time so it can't drift mid-match.
+    const resolved = resolveDurationSeconds(durationOpt, parseFloat(customDurationInput));
+    durationSecondsRef.current = resolved;
+    isUnlimitedRef.current = resolved === null;
+
     const { width: areaWidth } = area.getBoundingClientRect();
     const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
 
-    const gs: GameState = { ...DEFAULT_GAME_STATE };
+    const gs: GameState = {
+      ...DEFAULT_GAME_STATE,
+      timeLeft: isUnlimitedRef.current ? 0 : (resolved as number),
+    };
     commitGameState(gs);
     setFeedbacks([]);
     setComboLabel('');
@@ -920,7 +1133,7 @@ export default function SniperModePage() {
 
     startTimer();
     commitPhase('running');
-  }, [commitGameState, commitPhase, animate, startTimer, applyTargetTransform]);
+  }, [commitGameState, commitPhase, animate, startTimer, applyTargetTransform, durationOpt, customDurationInput]);
 
   /* ─────────────────────────────────────────────────────────────
      COUNTDOWN SEQUENCE
@@ -967,11 +1180,18 @@ export default function SniperModePage() {
     animRafRef.current = 0;
     if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
     lastRafRef.current = 0;
+    pauseStartRef.current = performance.now();
     commitPhase('paused');
   }, [commitPhase]);
 
   const resume = useCallback(() => {
     if (phaseRef.current !== 'paused') return;
+    // Shift the ramp's reference point forward by however long we were
+    // paused, so the progressive speed multiplier ignores paused time.
+    if (pauseStartRef.current) {
+      startTimestampRef.current += performance.now() - pauseStartRef.current;
+      pauseStartRef.current = 0;
+    }
     commitPhase('running');
     animRafRef.current = requestAnimationFrame(animate);
     startTimer();
@@ -987,6 +1207,15 @@ export default function SniperModePage() {
     setComboLabel('');
     commitPhase('idle');
   }, [stopAll, commitGameState, commitPhase]);
+
+  /** Manually end an unlimited-duration match, saving the score like a normal finish. */
+  const handleFinish = useCallback(() => {
+    if (phaseRef.current !== 'running' && phaseRef.current !== 'paused') return;
+    cancelAnimationFrame(animRafRef.current);
+    animRafRef.current = 0;
+    if (timerIntervalRef.current) { clearInterval(timerIntervalRef.current); timerIntervalRef.current = null; }
+    endGame(gameStateRef.current);
+  }, [endGame]);
 
   /* ─────────────────────────────────────────────────────────────
      ESC KEY
@@ -1047,11 +1276,14 @@ export default function SniperModePage() {
 
     // Sound: crit or normal hit, then combo unlock if threshold crossed
     if (isCrit) soundCrit(); else soundHit();
-    // Fire combo sound when a new threshold is first reached (exact boundary)
+    // Fire combo sound when a new threshold is first reached (exact boundary).
+    // Tier is looked up explicitly by multiplier value (see COMBO_SOUND_TIER)
+    // rather than derived from array index, which is inverted since
+    // COMBO_THRESHOLDS is sorted descending by hit count.
     const prevComboInfo = getComboInfo(gs.combo);
     const nextComboInfo = getComboInfo(newCombo);
     if (nextComboInfo.mult > prevComboInfo.mult) {
-      const tier = COMBO_THRESHOLDS.findIndex(t => t.mult === nextComboInfo.mult) + 1;
+      const tier = COMBO_SOUND_TIER[nextComboInfo.mult] ?? 1;
       setTimeout(() => soundCombo(tier), 60); // slight delay so it layers after hit
     }
 
@@ -1157,6 +1389,10 @@ export default function SniperModePage() {
           70%  { box-shadow: 0 0 0 9px rgba(255,45,85,0),    0 0 14px rgba(255,45,85,0.8); }
           100% { box-shadow: 0 0 0 0   rgba(255,45,85,0),    0 0 14px rgba(255,45,85,0.8); }
         }
+        @keyframes indeterminateSlide {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(250%); }
+        }
 
         /* Premium SVG crosshair cursor during play */
         .arena-playing {
@@ -1172,7 +1408,7 @@ export default function SniperModePage() {
         <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="section-label">Aim Tool</div>
           <h1 className="tool-title">
-            Sniper Aim Trainer – Free Online Tracking Aim Test
+            Aim Trainer
           </h1>
           <p className="tool-subtitle">Track and hit the small moving target — precision matters!</p>
         </header>
@@ -1180,14 +1416,14 @@ export default function SniperModePage() {
         <section aria-label="Game arena">
 
           {/* Difficulty selector */}
-          <div style={{ marginBottom: '1rem' }}>
+          <div style={{ marginBottom: '0.75rem' }}>
             <div style={{
-              fontSize: '0.7rem', color: 'var(--text-muted)',
-              textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.5rem',
+              fontSize: '0.62rem', color: 'var(--text-muted)',
+              textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem',
             }}>
               Difficulty
             </div>
-            <div role="group" aria-label="Select difficulty" style={{ display: 'flex', gap: '0.5rem' }}>
+            <div role="group" aria-label="Select difficulty" style={{ display: 'flex', gap: '0.35rem' }}>
               {DIFFICULTY_ORDER.map(d => (
                 <DifficultyButton
                   key={d} diff={d}
@@ -1199,21 +1435,86 @@ export default function SniperModePage() {
             </div>
           </div>
 
+          {/* Duration selector */}
+          <div style={{ marginBottom: '0.75rem' }}>
+            <div style={{
+              fontSize: '0.62rem', color: 'var(--text-muted)',
+              textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.35rem',
+            }}>
+              Duration
+            </div>
+            <div
+              role="group" aria-label="Select match duration"
+              style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap' }}
+            >
+              {DURATION_PRESETS.map(opt => (
+                <DurationButton
+                  key={opt} opt={opt}
+                  selected={durationOpt === opt}
+                  onSelect={selectDuration}
+                  disabled={!canSetDiff}
+                />
+              ))}
+            </div>
+            {durationOpt === 'custom' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.6rem' }}>
+                <label htmlFor="custom-duration-input" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Seconds:
+                </label>
+                <input
+                  id="custom-duration-input"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={customDurationInput}
+                  disabled={!canSetDiff}
+                  onChange={e => handleCustomDurationChange(e.target.value)}
+                  onBlur={() => {
+                    const clamped = clamp(
+                      safeNum(parseFloat(customDurationInput), DEFAULT_GAME_DURATION),
+                      MIN_CUSTOM_DURATION, MAX_CUSTOM_DURATION,
+                    );
+                    setCustomDurationInput(String(clamped));
+                  }}
+                  aria-label="Custom duration in seconds"
+                  style={{
+                    width: '5.5rem', padding: '0.4rem 0.6rem', borderRadius: '8px',
+                    border: '1px solid var(--border)', background: 'var(--bg-card)',
+                    color: 'var(--neon-cyan)', fontWeight: 700, fontSize: '0.9rem',
+                  }}
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  ({MIN_CUSTOM_DURATION}–{MAX_CUSTOM_DURATION}s)
+                </span>
+              </div>
+            )}
+            {durationOpt === 'unlimited' && (
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem', marginBottom: 0 }}>
+                Time counts up with no limit. Press <strong>Finish</strong> during play to end the match and save your score.
+              </p>
+            )}
+          </div>
+
           {/* Primary stat row – score and timer are aria-live for screen readers */}
           <div
             role="group" aria-label="Game statistics"
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '0.75rem' }}
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.5rem' }}
           >
             <StatCard value={gameState.score}                label="Score"    color="var(--neon-cyan)"   live={isPlaying} />
             <StatCard value={`${accuracy}%`}                label="Accuracy" color="var(--neon-green)"  />
             <StatCard value={gameState.misses}              label="Misses"   color="var(--neon-red)"    />
-            <StatCard value={gameState.timeLeft.toFixed(1)} label="Time"     color="var(--neon-orange)" live={isPlaying} />
+            <StatCard
+              value={gameState.timeLeft.toFixed(1)}
+              label={isUnlimited ? 'Elapsed' : 'Time'}
+              color="var(--neon-orange)"
+              live={isPlaying}
+            />
           </div>
 
           {/* Secondary stat row */}
           <div
             role="group" aria-label="Combo and streak statistics"
-            style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1rem' }}
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}
           >
             <StatCard value={gameState.combo}      label="Combo"       color="var(--neon-orange)" />
             <StatCard value={gameState.bestCombo}  label="Best Combo"  color="#a855f7"            />
@@ -1221,16 +1522,31 @@ export default function SniperModePage() {
             <StatCard value={gameState.bestStreak} label="Best Streak" color="var(--neon-green)"  />
           </div>
 
-          {/* Progress bar */}
+          {/* Progress bar – indeterminate sweep for unlimited mode */}
           <div
             className="progress-bar"
             role="progressbar"
-            aria-valuenow={Math.round(progressPct)}
-            aria-valuemin={0} aria-valuemax={100}
-            aria-label="Time elapsed"
-            style={{ marginBottom: '1rem' }}
+            aria-valuenow={isUnlimited ? undefined : Math.round(progressPct)}
+            aria-valuemin={isUnlimited ? undefined : 0}
+            aria-valuemax={isUnlimited ? undefined : 100}
+            aria-label={isUnlimited ? 'Time elapsed (unlimited match)' : 'Time elapsed'}
+            style={{ marginBottom: '1rem', position: 'relative', overflow: 'hidden' }}
           >
-            <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+            {isUnlimited ? (
+              isPlaying && (
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute', top: 0, bottom: 0, width: '30%',
+                    background: 'var(--neon-orange)',
+                    animation: 'indeterminateSlide 1.1s linear infinite',
+                    borderRadius: 'inherit',
+                  }}
+                />
+              )
+            ) : (
+              <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+            )}
           </div>
 
           {/* ── Arena ── */}
@@ -1357,6 +1673,11 @@ export default function SniperModePage() {
                 ⏸ Pause
               </button>
             )}
+            {isUnlimited && (phase === 'running' || phase === 'paused') && (
+              <button className="btn btn-primary" onClick={handleFinish} aria-label="Finish match and save score">
+                🏁 Finish
+              </button>
+            )}
             {(phase === 'running' || phase === 'paused' || phase === 'done') && (
               <button className="btn btn-secondary" onClick={handleReset} aria-label="Reset game">
                 🔄 Reset
@@ -1385,7 +1706,7 @@ export default function SniperModePage() {
 
           {/* All-time records panel – now includes avg accuracy */}
           {records.gamesPlayed > 0 && (phase === 'idle' || phase === 'done') && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem', marginBottom: '2.5rem' }}>
               <StatCard value={records.bestScore}  label="Best Score"  color="var(--neon-cyan)"  />
               <StatCard value={records.bestStreak} label="Best Streak" color="var(--neon-green)" />
               <StatCard value={records.bestCombo}  label="Best Combo"  color="#a855f7"           />
@@ -1401,8 +1722,7 @@ export default function SniperModePage() {
         <article
           aria-label="Sniper aim trainer guide and tips"
           style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: '16px', padding: '2.5rem', marginTop: '3rem',
+            padding: '0', marginTop: '3rem',
           }}
         >
           <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: 1.8 }}>
@@ -1422,7 +1742,8 @@ export default function SniperModePage() {
                 FPS games. Whether you want to boost your <strong>mouse accuracy</strong>, build consistent{' '}
                 <strong>aim practice</strong> habits, or dominate sniper duels in competitive shooters, this tool
                 provides targeted, measurable training — with four difficulty modes, a progressive speed system,
-                a combo multiplier, critical hits, and persistent records that track your improvement over time.
+                a combo multiplier, critical hits, selectable match lengths from 1 second to unlimited, and
+                persistent records that track your improvement over time.
               </p>
             </header>
 
@@ -1540,44 +1861,166 @@ export default function SniperModePage() {
                 Frequently Asked Questions
               </h2>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                <FaqItem question="Is this sniper aim trainer free to use?">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <AccordionItem id="faq-free" question="Is this sniper aim trainer free to use?"
+                  isOpen={openFaqId === 'faq-free'} onToggle={() => toggleFaq('faq-free')}>
                   Yes. This is a completely free, browser-based <strong>online aim trainer</strong>. No
                   downloads, accounts, or subscriptions are required. Open the page and start training
                   immediately on any device with a mouse or touchscreen.
-                </FaqItem>
+                </AccordionItem>
 
-                <FaqItem question="What do the difficulty modes change?">
+                <AccordionItem id="faq-difficulty" question="What do the difficulty modes change?"
+                  isOpen={openFaqId === 'faq-difficulty'} onToggle={() => toggleFaq('faq-difficulty')}>
                   Each difficulty adjusts four variables simultaneously: target radius, movement speed,
                   movement unpredictability, and score multiplier. Easy gives you a large, slow target at ×1
                   score. Impossible gives you a tiny, erratic, fast target at ×3 score — designed to push
                   elite players to their absolute limit.
-                </FaqItem>
+                </AccordionItem>
 
-                <FaqItem question="How does the combo system work?">
+                <AccordionItem id="faq-duration" question="What duration options are available?"
+                  isOpen={openFaqId === 'faq-duration'} onToggle={() => toggleFaq('faq-duration')}>
+                  You can play 1, 2, 5, 10, or 30-second sprints, enter a custom length up to 10 minutes, or
+                  select Unlimited to play with no timer at all. In Unlimited mode, time counts up instead of
+                  down and the match ends only when you press Finish — your score is saved to your all-time
+                  records exactly like a timed match.
+                </AccordionItem>
+
+                <AccordionItem id="faq-combo" question="How does the combo system work?"
+                  isOpen={openFaqId === 'faq-combo'} onToggle={() => toggleFaq('faq-combo')}>
                   Landing 5 consecutive hits without missing activates a ×2 combo multiplier. 10 hits unlocks
                   ×3. 20 hits unlocks ×5. A miss resets your combo to zero. Combine Impossible difficulty
                   with a long combo for maximum score output.
-                </FaqItem>
+                </AccordionItem>
 
-                <FaqItem question="What is a critical hit?">
+                <AccordionItem id="faq-crit" question="What is a critical hit?"
+                  isOpen={openFaqId === 'faq-crit'} onToggle={() => toggleFaq('faq-crit')}>
                   Clicking within the central 38% of the target&apos;s radius registers as a Critical Hit,
                   worth 150 base points instead of 100 — before combo and difficulty multipliers are applied.
                   Aim precisely for the centre of the dot to maximise your score.
-                </FaqItem>
+                </AccordionItem>
 
-                <FaqItem question="How long should I train each day?">
+                <AccordionItem id="faq-daily" question="How long should I train each day?"
+                  isOpen={openFaqId === 'faq-daily'} onToggle={() => toggleFaq('faq-daily')}>
                   Focused sessions of 15–30 minutes produce better results than long, fatigued marathons. Aim
                   for three to five short sessions per week, track your accuracy score each time, and look for
                   a consistent upward trend over two to four weeks.
-                </FaqItem>
+                </AccordionItem>
 
-                <FaqItem question="Does aim training transfer to real games?">
+                <AccordionItem id="faq-transfer" question="Does aim training transfer to real games?"
+                  isOpen={openFaqId === 'faq-transfer'} onToggle={() => toggleFaq('faq-transfer')}>
                   Studies on perceptual-motor learning confirm that deliberate, repetitive practice on isolated
                   skills — like cursor tracking — transfers to related real-world tasks. The bouncing movement
                   in this trainer closely approximates enemy strafing patterns in FPS titles, making it a
                   high-fidelity training stimulus. Pair it with in-game practice for the fastest improvement.
-                </FaqItem>
+                </AccordionItem>
+
+                <AccordionItem id="faq-mobile" question="Can I use this aim trainer on my phone or tablet?"
+                  isOpen={openFaqId === 'faq-mobile'} onToggle={() => toggleFaq('faq-mobile')}>
+                  Yes. The arena responds to touch as well as mouse input — tap the target for a hit and tap
+                  anywhere else on the arena for a miss. Touch scrolling is disabled inside the play area so
+                  your finger won&apos;t accidentally scroll the page mid-session.
+                </AccordionItem>
+
+                <AccordionItem id="faq-browser" question="Which browsers and devices are supported?"
+                  isOpen={openFaqId === 'faq-browser'} onToggle={() => toggleFaq('faq-browser')}>
+                  Any modern browser with JavaScript enabled works — Chrome, Firefox, Edge, and Safari on both
+                  desktop and mobile. Sound uses the standard Web Audio API, so no plugins or extensions are
+                  required. Older browsers without Web Audio support will still let you play; they&apos;ll
+                  simply run silently.
+                </AccordionItem>
+
+                <AccordionItem id="faq-keyboard" question="Are there any keyboard shortcuts?"
+                  isOpen={openFaqId === 'faq-keyboard'} onToggle={() => toggleFaq('faq-keyboard')}>
+                  Press <kbd style={kbdStyle}>ESC</kbd> at any point during a match to pause, and press it
+                  again to resume. There is currently no keyboard-only way to start a match or hit the
+                  target, since the trainer is built specifically around mouse and touch precision.
+                </AccordionItem>
+
+                <AccordionItem id="faq-scoring" question="How exactly is my score calculated?"
+                  isOpen={openFaqId === 'faq-scoring'} onToggle={() => toggleFaq('faq-scoring')}>
+                  Each hit starts at a base value — 100 points for a normal hit, 150 for a critical hit — then
+                  gets multiplied by your current combo multiplier (×1 to ×5) and by the selected difficulty&apos;s
+                  score multiplier (×1 on Easy up to ×3 on Impossible). The result is rounded to the nearest
+                  whole point and added to your total; misses never subtract points.
+                </AccordionItem>
+
+                <AccordionItem id="faq-which-difficulty" question="Which difficulty should I start with?"
+                  isOpen={openFaqId === 'faq-which-difficulty'} onToggle={() => toggleFaq('faq-which-difficulty')}>
+                  Start on Easy or Medium until your accuracy consistently sits above 85–90%, then move up.
+                  Jumping straight to Hard or Impossible before your tracking is solid tends to build sloppy
+                  habits — like overshooting or slapping the mouse — rather than clean, controlled aim.
+                </AccordionItem>
+
+                <AccordionItem id="faq-sensitivity" question="What mouse sensitivity should I use for training?"
+                  isOpen={openFaqId === 'faq-sensitivity'} onToggle={() => toggleFaq('faq-sensitivity')}>
+                  Use whatever sensitivity you play your main game at. Aim training only builds useful muscle
+                  memory when it mirrors your real setup — practicing at a different sensitivity than the one
+                  you queue up with largely wastes the repetition.
+                </AccordionItem>
+
+                <AccordionItem id="faq-refresh-rate" question="Does my monitor's refresh rate affect training quality?"
+                  isOpen={openFaqId === 'faq-refresh-rate'} onToggle={() => toggleFaq('faq-refresh-rate')}>
+                  Yes. A higher refresh rate (120Hz, 144Hz, 240Hz) shows more intermediate frames of the
+                  target&apos;s movement, which makes tracking feel smoother and lets you react a few
+                  milliseconds sooner. A 60Hz display still works fine for building fundamentals, just with
+                  slightly choppier visual feedback.
+                </AccordionItem>
+
+                <AccordionItem id="faq-warmup" question="Should I use this as a warm-up before ranked matches?"
+                  isOpen={openFaqId === 'faq-warmup'} onToggle={() => toggleFaq('faq-warmup')}>
+                  A short 5–10 minute session on Medium or Hard difficulty is a solid pre-game warm-up — long
+                  enough to activate tracking muscle memory without causing fatigue. Save Impossible-difficulty
+                  grinding for dedicated practice sessions rather than right before you queue.
+                </AccordionItem>
+
+                <AccordionItem id="faq-streak-vs-combo" question="What's the difference between streak and combo?"
+                  isOpen={openFaqId === 'faq-streak-vs-combo'} onToggle={() => toggleFaq('faq-streak-vs-combo')}>
+                  They track the same underlying run of consecutive hits, but combo drives your score
+                  multiplier and resets to zero on a miss, while streak is simply a running counter of hits in
+                  a row for your own reference — both reset together when you miss.
+                </AccordionItem>
+
+                <AccordionItem id="faq-data-privacy" question="Is my score data private, and where is it stored?"
+                  isOpen={openFaqId === 'faq-data-privacy'} onToggle={() => toggleFaq('faq-data-privacy')}>
+                  All records — best score, best streak, best combo, and games played — are saved locally in
+                  your browser&apos;s storage. Nothing is sent to a server, no account is required, and no one
+                  else can see your stats. Clearing your browser data will also clear your saved records.
+                </AccordionItem>
+
+                <AccordionItem id="faq-reset-records" question="How do I reset my all-time records?"
+                  isOpen={openFaqId === 'faq-reset-records'} onToggle={() => toggleFaq('faq-reset-records')}>
+                  Since records are stored in your browser, clearing this site&apos;s local storage (through
+                  your browser&apos;s privacy or site-data settings) wipes them back to zero. There is no
+                  in-game reset button, since records are meant to represent your genuine lifetime best.
+                </AccordionItem>
+
+                <AccordionItem id="faq-audio" question="Why can't I hear any sound when I start playing?"
+                  isOpen={openFaqId === 'faq-audio'} onToggle={() => toggleFaq('faq-audio')}>
+                  Browsers block audio from starting automatically until you interact with the page. The very
+                  first click or tap you make (such as pressing Start) unlocks sound for the rest of the
+                  session. Also double-check the speaker icon in the controls row hasn&apos;t been muted.
+                </AccordionItem>
+
+                <AccordionItem id="faq-progressive-speed" question="Why does the target get faster the longer I play?"
+                  isOpen={openFaqId === 'faq-progressive-speed'} onToggle={() => toggleFaq('faq-progressive-speed')}>
+                  Every difficulty includes a progressive speed ramp: the target gradually accelerates the
+                  longer a single match runs, up to a capped maximum multiplier. This rewards players who can
+                  sustain tracking accuracy under mounting pressure, rather than just reacting well early on.
+                </AccordionItem>
+
+                <AccordionItem id="faq-impossible-tips" question="Any tips specifically for Impossible difficulty?"
+                  isOpen={openFaqId === 'faq-impossible-tips'} onToggle={() => toggleFaq('faq-impossible-tips')}>
+                  The target occasionally makes small random direction nudges on Impossible, so avoid
+                  predicting its path too far ahead — stay reactive instead. Because the hitbox is tiny,
+                  prioritise steady, controlled cursor movement over fast, jerky corrections.
+                </AccordionItem>
+
+                <AccordionItem id="faq-repeat-sessions" question="How many rounds should I play per session?"
+                  isOpen={openFaqId === 'faq-repeat-sessions'} onToggle={() => toggleFaq('faq-repeat-sessions')}>
+                  Five to ten short rounds with brief breaks between them tends to beat one long unbroken
+                  grind — fatigue quietly erodes precision even when it doesn&apos;t feel like it. Watch your
+                  accuracy stat: if it starts trending down round over round, that&apos;s your cue to stop.
+                </AccordionItem>
               </div>
             </section>
 
