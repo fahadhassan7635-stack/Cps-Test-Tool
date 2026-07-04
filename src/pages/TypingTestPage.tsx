@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
 
 // ─── Word Lists ───────────────────────────────────────────────────────────────
 const WORD_LISTS = {
@@ -253,6 +253,81 @@ const JSON_LD_DATA = {
           name: 'What typing accuracy should I aim for?',
           acceptedAnswer: { '@type': 'Answer', text: 'Professional typists typically maintain 97 to 99 percent accuracy. For most purposes, 95 percent or above is excellent. Prioritizing accuracy over raw speed ultimately leads to higher net WPM because fewer errors require correction.' },
         },
+        {
+          '@type': 'Question',
+          name: 'What is the difference between typing speed and typing accuracy?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Typing speed measures words produced per minute, while accuracy measures the percentage of correct characters. A high WPM with low accuracy is misleading, since errors must eventually be corrected, slowing down real-world output.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'How does age affect typing speed?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Typing speed generally rises through childhood and adolescence, peaks in the late teens through thirties, and gradually declines afterward due to natural changes in nerve conduction and tendon flexibility. Consistent practice slows this decline.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What is the average typing speed for programmers?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Most professional developers type between 50 and 80 WPM in plain English, though actual coding speed is usually lower due to syntax, indentation, and frequent pauses for logical thinking.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Can I use a typing speed test on a mobile device?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Yes, typing tests work on phones and tablets using the on-screen keyboard, though speeds on touchscreens are naturally lower than on physical keyboards due to smaller key targets and lack of tactile feedback.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What is key rollover and does it affect typing tests?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Key rollover refers to how many simultaneous key presses a keyboard can register correctly. Keyboards with poor rollover may drop inputs during fast typing, artificially lowering measured WPM.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'How often should I retake a typing speed test?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Testing two to three times per week provides enough data to track meaningful progress without becoming repetitive. Treat weekly averages as your true benchmark since single sessions can vary due to fatigue.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Does keyboard layout affect typing speed?',
+          acceptedAnswer: { '@type': 'Answer', text: 'QWERTY remains the global standard most typing tests are built around. Alternative layouts like Dvorak or Colemak claim ergonomic advantages, but switching requires retraining muscle memory.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Does background noise or music affect typing performance?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Instrumental or ambient music tends to have minimal impact on typing speed, while lyrical music or conversational noise can reduce concentration and increase error rates.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'How can typists avoid repetitive strain injuries?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Maintain neutral wrist posture, take short breaks every 20 to 30 minutes, and avoid resting wrists on a hard surface. Ergonomic keyboards can reduce strain for people who type for many hours daily.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Are typing tests useful for job applications?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Many administrative, data entry, and transcription roles require a minimum WPM score as part of hiring. A documented typing test result demonstrates verifiable proficiency and can strengthen an application.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What is the difference between QWERTY and Dvorak layouts?',
+          acceptedAnswer: { '@type': 'Answer', text: 'QWERTY was originally designed to reduce mechanical typewriter jams, while Dvorak was designed decades later to minimize finger travel by placing frequently used letters on the home row.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Does typing speed matter for programming productivity?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Typing speed plays a smaller role in programming productivity than problem-solving ability, since most coding time is spent thinking, reading, and debugging rather than typing.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What is the best posture for typing quickly?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Sit with feet flat on the floor, back straight, elbows near ninety degrees, and wrists hovering just above the keyboard rather than resting on it. Good posture reduces fatigue and supports sustained speed.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'Can playing video games improve typing speed?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Games requiring rapid, precise keyboard input can improve finger dexterity and reaction time, indirectly supporting typing speed, though dedicated typing practice remains far more effective.' },
+        },
+        {
+          '@type': 'Question',
+          name: 'What is the historical origin of WPM as a metric?',
+          acceptedAnswer: { '@type': 'Answer', text: 'Words per minute became standardized in the late nineteenth century alongside the rise of typewriters and stenography, when businesses needed an objective way to compare clerical candidates.' },
+        },
       ],
     },
   ],
@@ -292,6 +367,66 @@ const FAQ_ITEMS = [
     q: 'What typing accuracy should I target?',
     a: 'Professional typists typically maintain 97 to 99 percent accuracy. For most purposes, 95 percent or above is excellent. Prioritizing accuracy over raw speed ultimately leads to higher net WPM because fewer errors require correction and backspacing.',
   },
+  {
+    q: 'What is the difference between typing speed and typing accuracy?',
+    a: 'Typing speed measures how many words you produce per minute, while accuracy measures what percentage of those characters were correct. A high WPM score with low accuracy is misleading, since every error must eventually be corrected, slowing down real-world output.',
+  },
+  {
+    q: 'How does age affect typing speed?',
+    a: 'Typing speed generally rises through childhood and adolescence as fine motor coordination develops, peaks in the late teens through thirties, and gradually declines afterward due to natural changes in nerve conduction and tendon flexibility. Consistent practice slows this decline significantly.',
+  },
+  {
+    q: 'What is the average typing speed for programmers?',
+    a: 'Most professional developers type between 50 and 80 WPM in plain English, though actual coding speed is usually lower due to syntax, indentation, and frequent pauses for logical thinking. Typing speed matters less in programming than in transcription-heavy roles.',
+  },
+  {
+    q: 'Can I use this test on a mobile device?',
+    a: 'Yes, the test works on phones and tablets using the on-screen keyboard, though typing speeds on touchscreens are naturally lower than on physical keyboards due to smaller key targets and the lack of tactile feedback.',
+  },
+  {
+    q: 'What is key rollover and does it affect typing tests?',
+    a: 'Key rollover refers to how many simultaneous key presses a keyboard can register correctly. Keyboards with poor rollover may drop inputs during fast typing, artificially lowering your measured WPM even when your actual finger speed is unaffected.',
+  },
+  {
+    q: 'How often should I retake the typing test?',
+    a: 'Testing two to three times per week provides enough data to track meaningful progress without becoming repetitive. Daily testing is fine for warmups, but treat weekly averages as your true benchmark since single sessions can vary due to fatigue or distraction.',
+  },
+  {
+    q: 'Does keyboard layout affect typing speed?',
+    a: 'The QWERTY layout remains the global standard and is what most typing tests and touch-typing curricula are built around. Alternative layouts like Dvorak or Colemak claim ergonomic advantages, but switching requires retraining muscle memory and rarely produces dramatic speed gains for most users.',
+  },
+  {
+    q: 'Does background noise or music affect typing performance?',
+    a: 'Instrumental or ambient music tends to have minimal impact on typing speed for most people, while lyrical music or conversational noise can reduce concentration and increase error rates by competing for the same cognitive resources used in language processing.',
+  },
+  {
+    q: 'How can typists avoid repetitive strain injuries?',
+    a: 'Maintain neutral wrist posture, take short breaks every 20 to 30 minutes, and avoid resting your wrists on a hard surface while typing. Ergonomic keyboards and split designs can reduce strain for people who type for many hours daily.',
+  },
+  {
+    q: 'Are typing tests useful for job applications?',
+    a: 'Many administrative, data entry, and transcription roles require a minimum WPM score as part of the hiring process. A documented typing test result demonstrates verifiable proficiency and can strengthen an application even when not explicitly requested.',
+  },
+  {
+    q: 'What is the difference between QWERTY and Dvorak layouts?',
+    a: 'QWERTY was originally designed to reduce mechanical typewriter jams by separating common letter pairs, while Dvorak was designed decades later to minimize finger travel by placing the most frequently used letters on the home row. Both can achieve high speeds with sufficient practice.',
+  },
+  {
+    q: 'Does typing speed matter for programming productivity?',
+    a: 'Typing speed plays a smaller role in programming productivity than problem-solving ability, since most coding time is spent thinking, reading, and debugging rather than typing. However, faster typing does reduce friction when translating clear ideas into code.',
+  },
+  {
+    q: 'What is the best posture for typing quickly?',
+    a: 'Sit with feet flat on the floor, back straight against the chair, elbows bent near ninety degrees, and wrists hovering just above the keyboard rather than resting on it. Good posture reduces fatigue, which directly supports sustained typing speed over long sessions.',
+  },
+  {
+    q: 'Can playing video games improve typing speed?',
+    a: 'Games that require rapid, precise keyboard input can improve finger dexterity and reaction time, indirectly supporting typing speed. However, dedicated typing practice remains far more effective since it directly trains the specific letter sequences and rhythms used in real text.',
+  },
+  {
+    q: 'What is the historical origin of WPM as a metric?',
+    a: 'Words per minute became a standardized metric in the late nineteenth century alongside the rise of typewriters and stenography, when businesses needed an objective way to compare clerical candidates. The five-character word convention was adopted to keep the measurement consistent regardless of the text used.',
+  },
 ];
 
 // ─── Rating Scale ─────────────────────────────────────────────────────────────
@@ -302,6 +437,100 @@ const RATING_SCALE = [
   { range: '80-119', label: 'Speed Typist', color: 'var(--neon-orange, #f97316)' },
   { range: '120+',   label: 'Blazing Fast', color: 'var(--neon-red, #ff2d55)' },
 ];
+
+// ─── FAQ Accordion (chevron-style, matches CPS test design) ──────────────────
+const FaqSection = memo(() => {
+  const [open, setOpen] = useState<number | null>(null);
+
+  return (
+    <div
+      style={{
+        marginTop: '2.5rem',
+        background: 'rgba(0,0,0,0.2)',
+        borderRadius: '12px',
+        padding: '1.5rem',
+        border: '1px solid var(--border)',
+      }}
+    >
+      <h2
+        style={{
+          color: 'var(--neon-purple, #a855f7)',
+          fontSize: '1.25rem',
+          fontWeight: '700',
+          marginBottom: '1.25rem',
+          marginTop: '0',
+        }}
+      >
+        Frequently Asked Questions
+      </h2>
+
+      <div role="list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {FAQ_ITEMS.map((item, i) => {
+          const isOpen = open === i;
+          return (
+            <div
+              key={i}
+              role="listitem"
+              style={{
+                border: '1px solid',
+                borderColor: isOpen ? 'rgba(168,85,247,0.4)' : 'var(--border)',
+                borderRadius: '10px',
+                overflow: 'hidden',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              <button
+                aria-expanded={isOpen}
+                aria-controls={`typing-faq-answer-${i}`}
+                id={`typing-faq-question-${i}`}
+                onClick={() => setOpen(isOpen ? null : i)}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  background: isOpen ? 'rgba(168,85,247,0.06)' : 'transparent',
+                  border: 'none',
+                  padding: '14px 18px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '12px',
+                  color: 'var(--text-primary)',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                }}
+              >
+                <span>{item.q}</span>
+                {isOpen ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--neon-purple, #a855f7)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <polyline points="18 15 12 9 6 15"></polyline>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                )}
+              </button>
+              {isOpen && (
+                <div
+                  id={`typing-faq-answer-${i}`}
+                  role="region"
+                  aria-labelledby={`typing-faq-question-${i}`}
+                  style={{ padding: '0 18px 16px' }}
+                >
+                  <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.7' }}>
+                    {item.a}
+                  </p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+FaqSection.displayName = 'FaqSection';
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function TypingTestPage() {
@@ -1305,14 +1534,8 @@ export default function TypingTestPage() {
         )}
 
         {/* ══════════════════ SEO CONTENT SECTION ══════════════════════════ */}
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '16px',
-          padding: '2rem',
-          marginTop: '2rem',
-        }}>
-          <article style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
+        <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
+        <article style={{ color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.75' }}>
 
             {/* What Is a Typing Speed Test */}
             <section>
@@ -1337,7 +1560,7 @@ export default function TypingTestPage() {
               <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '0.75rem', color: 'var(--neon-cyan)', marginTop: '2rem' }}>
                 How WPM Is Calculated
               </h2>
-              <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
                 The Standard Formula
               </h3>
               <p style={{ marginBottom: '1rem' }}>
@@ -1350,7 +1573,7 @@ export default function TypingTestPage() {
                 Net WPM = (Correct Characters divided by 5) divided by Time Elapsed in Minutes<br />
                 Accuracy = (Correct Characters divided by Total Typed Characters) multiplied by 100
               </p>
-              <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
                 Gross WPM vs. Net WPM
               </h3>
               <p style={{ marginBottom: '1.5rem' }}>
@@ -1399,7 +1622,7 @@ export default function TypingTestPage() {
               <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '0.75rem', color: 'var(--neon-cyan)', marginTop: '2rem' }}>
                 Tips to Improve Your Typing Speed
               </h2>
-              <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
                 1. Accuracy Before Speed
               </h3>
               <p style={{ marginBottom: '1rem' }}>
@@ -1407,7 +1630,7 @@ export default function TypingTestPage() {
                 speed must later be unlearned. Start deliberately slow, aiming for{' '}
                 <strong>98 percent accuracy</strong>, then allow speed to develop naturally through repetition.
               </p>
-              <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
                 2. Use All Ten Fingers
               </h3>
               <p style={{ marginBottom: '1rem' }}>
@@ -1415,7 +1638,7 @@ export default function TypingTestPage() {
                 all ten fingers to handle their assigned keyboard zones distributes the load evenly, unlocking
                 dramatic speed improvements over time.
               </p>
-              <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
                 3. Practice with Varied Content
               </h3>
               <p style={{ marginBottom: '1rem' }}>
@@ -1423,7 +1646,7 @@ export default function TypingTestPage() {
                 modes including quotes, technology, programming, science, numbers, and symbols to develop
                 fluency across the full character range your work demands.
               </p>
-              <h3 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: '1.1rem', fontWeight: '600', marginBottom: '0.5rem', marginTop: '1.25rem' }}>
                 4. Consistent Short Sessions Beat Marathon Practice
               </h3>
               <p style={{ marginBottom: '1.5rem' }}>
@@ -1510,60 +1733,9 @@ export default function TypingTestPage() {
             </section>
 
             {/* FAQ */}
-            <div style={{
-              marginTop: '2.5rem',
-              background: 'rgba(0,0,0,0.2)',
-              borderRadius: '12px',
-              padding: '1.5rem',
-              border: '1px solid var(--border)',
-            }}>
-              <h2 style={{
-                color: 'var(--neon-purple, #a855f7)',
-                fontSize: '1.25rem',
-                fontWeight: '700',
-                marginBottom: '1.25rem',
-                marginTop: '0',
-              }}>
-                Frequently Asked Questions
-              </h2>
+            <FaqSection />
 
-              {FAQ_ITEMS.map((item, idx) => (
-                <details
-                  key={idx}
-                  style={{
-                    marginBottom: '0.85rem',
-                    borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    paddingBottom: '0.85rem',
-                  }}
-                >
-                  <summary style={{
-                    cursor: 'pointer',
-                    color: '#fff',
-                    fontSize: '0.95rem',
-                    fontWeight: '600',
-                    listStyle: 'none',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    userSelect: 'none',
-                  }}>
-                    <span>{item.q}</span>
-                    <span style={{
-                      color: 'var(--neon-purple, #a855f7)',
-                      fontSize: '1.1rem',
-                      marginLeft: '0.5rem',
-                      flexShrink: 0,
-                    }}>+</span>
-                  </summary>
-                  <p style={{ margin: '0.6rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.88rem' }}>
-                    {item.a}
-                  </p>
-                </details>
-              ))}
-            </div>
-
-          </article>
-        </div>
+        </article>
         {/* ══════════════════ END SEO CONTENT ══════════════════════════════ */}
 
       </div>
