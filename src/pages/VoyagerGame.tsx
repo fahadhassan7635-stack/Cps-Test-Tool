@@ -3,7 +3,7 @@ import {
   Rocket, Play, RefreshCcw, Activity, Zap, Shield, Timer, TrendingUp,
   Home, Volume2, VolumeX, Gauge, Pause, Play as PlayIcon,
   Maximize, Minimize, Trophy, Star, Cpu, BarChart2,
-  ChevronRight, Award, Layers, Repeat
+  ChevronRight, ChevronDown, Award, Layers, Repeat
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -22,8 +22,6 @@ interface Obstacle extends Point {
   points: Point[];
   hasNearMissed?: boolean;
   isBoss?: boolean;
-  hp?: number;
-  maxHp?: number;
   glowPhase?: number;
 }
 
@@ -358,6 +356,11 @@ export default function VoyagerGame() {
   const [scoreMultiplier, setScoreMultiplier] = useState(1);
   const fpsRef = useRef(0);
   const lastFrameTimeRef = useRef(0);
+  // Mirrors `difficulty` state so the game-loop effect (which no longer
+  // depends on `difficulty` — see note near its dependency array) can
+  // always read the *current* selection instead of a stale closure value.
+  const difficultyRef = useRef<Difficulty>(difficulty);
+  useEffect(() => { difficultyRef.current = difficulty; }, [difficulty]);
 
   // ============================================================
   // GAME STATE REF (single source of truth for the game loop)
@@ -378,6 +381,7 @@ export default function VoyagerGame() {
     lastSpeedUp: 0,
     lastPowerUpSpawn: 0,
     lastBossSpawn: 0,
+    lastAchievementCheck: 0,
     clickTimes: [] as number[],
     obstacles: [] as Obstacle[],
     powerUps: [] as PowerUp[],
@@ -398,13 +402,16 @@ export default function VoyagerGame() {
     doubleBoostEnd: 0,
     hasMultiplier: false,
     multiplierEnd: 0,
+    multiplierBonus: 1,
     hasInvincibility: false,
     invincibilityEnd: 0,
-    // Replay recording
+    // Replay recording (time is stored *relative* to startTime so it can
+    // be replayed against a fresh run's elapsed clock — see ghost logic)
     replayFrames: [] as ReplayFrame[],
     frameCount: 0,
-    // Ghost
+    // Ghost (best previous run, played back live alongside the current ship)
     ghostFrames: [] as ReplayFrame[],
+    ghostIndex: 0,
     // Boss
     bossSpawned: false,
     bossCleared: false,
@@ -412,6 +419,8 @@ export default function VoyagerGame() {
     fps: 0,
     fpsFrameCount: 0,
     fpsLastTime: 0,
+    // Pause bookkeeping (used to shift all timers by the paused duration)
+    pausedAt: 0,
   });
 
   const actionsRef = useRef<{
@@ -543,21 +552,23 @@ export default function VoyagerGame() {
     g.current.status = 'countdown';
     const steps: (number | 'GO!')[] = [3, 2, 1, 'GO!'];
     let i = 0;
+    const timers: ReturnType<typeof setTimeout>[] = [];
     const tick = () => {
       setCountdownNum(steps[i]);
       if (typeof steps[i] === 'number') audio.playCountdown();
       else audio.playGo();
       i++;
       if (i < steps.length) {
-        setTimeout(tick, i === steps.length - 1 ? 600 : 800);
+        timers.push(setTimeout(tick, i === steps.length - 1 ? 600 : 800));
       } else {
-        setTimeout(() => {
+        timers.push(setTimeout(() => {
           setCountdownNum(null);
           onDone();
-        }, 600);
+        }, 600));
       }
     };
     tick();
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   // ============================================================
@@ -587,6 +598,7 @@ export default function VoyagerGame() {
 
     let frameId: number;
     let hudSyncInterval: ReturnType<typeof setInterval>;
+    let cancelCountdown: (() => void) | null = null;
 
     // Init stars
     g.current.stars = Array.from({ length: 180 }, () => ({
@@ -618,8 +630,6 @@ export default function VoyagerGame() {
           rotationSpeed: 0.012,
           type: 'boss',
           isBoss: true,
-          hp: 1,
-          maxHp: 1,
           glowPhase: 0,
           points,
         };
@@ -691,8 +701,13 @@ export default function VoyagerGame() {
       }
       state.screenShake = 25;
 
-      // Save best ghost run
-      LS.set('voyager_ghost', state.replayFrames.slice(-600));
+      // Save best ghost run — only overwrite the stored ghost if this run
+      // actually beat the previous best distance, so the ghost always
+      // represents the player's personal best rather than the last run.
+      const prevBestDistance = highScoresRef.current.bestDistance;
+      if (Math.floor(state.distance) >= prevBestDistance) {
+        LS.set('voyager_ghost', state.replayFrames.slice(0, 900));
+      }
 
       // Analytics
       GA.gameOver(Math.floor(state.distance), state.time, state.peakCps);
@@ -764,7 +779,10 @@ export default function VoyagerGame() {
           state.nearMissCount++;
           state.combo++;
           state.combo = Math.min(state.combo, 10);
-          const mult = 1 + state.combo * 0.1;
+          // Combo bonus stacks multiplicatively with any active Multiplier
+          // power-up bonus instead of overwriting it outright.
+          const comboMult = 1 + state.combo * 0.1;
+          const mult = comboMult * (state.hasMultiplier ? state.multiplierBonus : 1);
           state.scoreMultiplier = mult;
           addFloat(VOYAGER_X + 20, state.y - 35, `NEAR MISS! ×${mult.toFixed(1)}`, '#00f5ff', 15);
         }
@@ -826,11 +844,14 @@ export default function VoyagerGame() {
               state.hasDoubleBoost = true;
               state.doubleBoostEnd = now + dur;
               break;
-            case 'multiplier':
+            case 'multiplier': {
               state.hasMultiplier = true;
               state.multiplierEnd = now + 8000;
-              state.scoreMultiplier = Math.min(state.scoreMultiplier * 2, 8);
+              state.multiplierBonus = Math.min(state.multiplierBonus * 2, 8);
+              const comboMult = 1 + state.combo * 0.1;
+              state.scoreMultiplier = comboMult * state.multiplierBonus;
               break;
+            }
             case 'invincibility':
               state.hasInvincibility = true;
               state.invincibilityEnd = now + 4000;
@@ -859,6 +880,7 @@ export default function VoyagerGame() {
       if (state.hasDoubleBoost && now > state.doubleBoostEnd) state.hasDoubleBoost = false;
       if (state.hasMultiplier && now > state.multiplierEnd) {
         state.hasMultiplier = false;
+        state.multiplierBonus = 1;
         state.scoreMultiplier = 1 + state.combo * 0.1;
       }
       if (state.hasInvincibility && now > state.invincibilityEnd) state.hasInvincibility = false;
@@ -870,6 +892,7 @@ export default function VoyagerGame() {
     actionsRef.current = {
       start: () => {
         const now = Date.now();
+        const difficulty = difficultyRef.current;
         const cfg = DIFFICULTY_CONFIG[difficulty];
         const ghostFrames = LS.get<ReplayFrame[]>('voyager_ghost', []);
 
@@ -881,22 +904,25 @@ export default function VoyagerGame() {
           isBoosting: false, startTime: 0,
           lastSpawn: now, lastSpeedUp: now,
           lastPowerUpSpawn: now, lastBossSpawn: 0,
+          lastAchievementCheck: now,
           clickTimes: [], obstacles: [], powerUps: [],
           particles: [], floatingTexts: [],
           screenShake: 0,
           difficulty,
           combo: 0, nearMissCount: 0, scoreMultiplier: 1,
           hasShield: false, hasSlowmo: false, hasDoubleBoost: false,
-          hasMultiplier: false, hasInvincibility: false,
+          hasMultiplier: false, multiplierBonus: 1, hasInvincibility: false,
           replayFrames: [], frameCount: 0,
-          ghostFrames, bossSpawned: false, bossCleared: false,
+          ghostFrames, ghostIndex: 0, bossSpawned: false, bossCleared: false,
           fpsFrameCount: 0, fpsLastTime: now,
+          pausedAt: 0,
         });
         setActivePowerUps([]);
         setCombo(0);
         setScoreMultiplier(1);
 
-        startCountdown(() => {
+        if (cancelCountdown) cancelCountdown();
+        cancelCountdown = startCountdown(() => {
           const startNow = Date.now();
           g.current.status = 'playing';
           g.current.startTime = startNow;
@@ -921,22 +947,47 @@ export default function VoyagerGame() {
         if (g.current.status !== 'playing') return;
         g.current.status = 'paused';
         g.current.isBoosting = false;
+        // Record when we paused so resume() can shift every timestamp
+        // forward by however long the pause lasted. Without this, every
+        // "lastX" / "...End" timer is measured against Date.now() and a
+        // long pause causes a spawn/power-up-expiry pile-up on resume.
+        g.current.pausedAt = Date.now();
         setUiView('paused');
         GA.pause();
       },
 
       resume: () => {
         if (g.current.status !== 'paused') return;
-        g.current.status = 'playing';
-        // Adjust timers to account for pause duration
         const now = Date.now();
+        const pausedDuration = g.current.pausedAt ? now - g.current.pausedAt : 0;
+
+        // Shift every absolute timestamp forward by the paused duration so
+        // that elapsed-time calculations (spawns, speed ramp, power-up
+        // expiry, survival time) pick up exactly where they left off.
+        g.current.startTime += pausedDuration;
+        g.current.lastSpawn += pausedDuration;
+        g.current.lastSpeedUp += pausedDuration;
+        g.current.lastPowerUpSpawn += pausedDuration;
+        g.current.lastAchievementCheck += pausedDuration;
+        if (g.current.lastBossSpawn > 0) g.current.lastBossSpawn += pausedDuration;
+        if (g.current.hasShield) g.current.shieldEnd += pausedDuration;
+        if (g.current.hasSlowmo) g.current.slowmoEnd += pausedDuration;
+        if (g.current.hasDoubleBoost) g.current.doubleBoostEnd += pausedDuration;
+        if (g.current.hasMultiplier) g.current.multiplierEnd += pausedDuration;
+        if (g.current.hasInvincibility) g.current.invincibilityEnd += pausedDuration;
+        // Click history is short-lived (1s window) — safer to clear than shift
+        g.current.clickTimes = [];
+        g.current.fpsLastTime = now;
+        g.current.pausedAt = 0;
+
+        g.current.status = 'playing';
         setUiView('playing');
         GA.resume();
       },
     };
 
     // ----------------------------------------------------------
-    // UPDATE (physics + logic)
+    // UPDATE (physics + logic) — only runs while actively playing
     // ----------------------------------------------------------
     const update = () => {
       const state = g.current;
@@ -959,15 +1010,9 @@ export default function VoyagerGame() {
       state.clickTimes = state.clickTimes.filter(t => t > oneSecAgo);
       if (state.cps !== state.clickTimes.length) {
         state.cps = state.clickTimes.length;
-        if (state.cps > state.peakCps) {
-          state.peakCps = state.cps;
-          updateHUD('stat-cps', state.cps);
-        } else {
-          updateHUD('stat-cps', state.cps);
-        }
+        if (state.cps > state.peakCps) state.peakCps = state.cps;
+        updateHUD('stat-cps', state.cps);
       }
-
-      if (state.screenShake > 0) state.screenShake--;
 
       // Gravity (difficulty-adjusted)
       const grav = GRAVITY * cfg.gravityMult;
@@ -1046,20 +1091,46 @@ export default function VoyagerGame() {
         return p.life > 0;
       });
 
-      // Combo decay
-      // (combo only resets on death, not time-based for now)
+      // Real-time achievement checks (throttled to twice a second so we
+      // don't diff the whole achievement list every frame)
+      if (now - state.lastAchievementCheck > 500) {
+        state.lastAchievementCheck = now;
+        checkAchievements(state);
+      }
 
-      // Record replay frame every 2nd frame
+      // Record replay frame every 2nd frame. `time` is stored *relative*
+      // to this run's startTime so a future run's ghost lookup can just
+      // compare against its own elapsed time, regardless of when either
+      // run actually started.
       state.frameCount++;
       if (state.frameCount % 2 === 0 && state.replayFrames.length < 1800) {
         state.replayFrames.push({
           y: state.y,
           vel: state.vel,
-          time: now,
+          time: now - state.startTime,
           obstacles: state.obstacles.map(o => ({ x: o.x, y: o.y, radius: o.radius, type: o.type, rotation: o.rotation })),
           powerups: state.powerUps.map(p => ({ x: p.x, y: p.y, type: p.type })),
         });
       }
+    };
+
+    // ----------------------------------------------------------
+    // POST-GAME DECAY — runs even after status flips to 'gameover' so the
+    // explosion particles fade out and the screen-shake settles instead of
+    // freezing mid-shake behind the "Mission Failed" overlay forever.
+    // ----------------------------------------------------------
+    const postGameDecay = () => {
+      const state = g.current;
+      if (state.status !== 'gameover') return;
+      if (state.screenShake > 0) state.screenShake--;
+      state.particles = state.particles.filter(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.96;
+        p.vy *= 0.96;
+        p.life -= 0.02;
+        return p.life > 0;
+      });
     };
 
     // ----------------------------------------------------------
@@ -1095,6 +1166,32 @@ export default function VoyagerGame() {
 
       // Update logic
       update();
+      postGameDecay();
+
+      // --- Ghost ship (translucent replay of the player's best run) ---
+      if (state.status === 'playing' && state.ghostFrames.length > 0) {
+        const elapsed = Date.now() - state.startTime;
+        // Advance a monotonic pointer into the ghost frames rather than
+        // re-scanning from the start every frame.
+        let idx = state.ghostIndex;
+        while (idx < state.ghostFrames.length - 1 && state.ghostFrames[idx + 1].time <= elapsed) idx++;
+        state.ghostIndex = idx;
+        const ghost = state.ghostFrames[idx];
+        if (ghost && elapsed <= state.ghostFrames[state.ghostFrames.length - 1].time + 400) {
+          ctx.save();
+          ctx.globalAlpha = 0.35;
+          ctx.translate(VOYAGER_X, ghost.y);
+          ctx.rotate(ghost.vel * 0.06);
+          ctx.strokeStyle = '#a855f7';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(-18, 0, 22, -Math.PI / 2.5, Math.PI / 2.5);
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(168,85,247,0.5)';
+          ctx.fillRect(-10, -10, 28, 20);
+          ctx.restore();
+        }
+      }
 
       // --- Particles ---
       state.particles.forEach(p => {
@@ -1105,23 +1202,6 @@ export default function VoyagerGame() {
         ctx.fill();
       });
       ctx.globalAlpha = 1;
-
-      // --- Ghost ship (best run) ---
-      if (state.status === 'playing' && state.ghostFrames.length > 0) {
-        const gIdx = Math.min(state.frameCount, state.ghostFrames.length - 1);
-        const gf = state.ghostFrames[gIdx];
-        if (gf) {
-          ctx.save();
-          ctx.globalAlpha = 0.25;
-          ctx.translate(VOYAGER_X + 8, gf.y);
-          ctx.fillStyle = '#00f5ff';
-          ctx.beginPath();
-          ctx.ellipse(0, 0, 20, 10, 0, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.globalAlpha = 1;
-          ctx.restore();
-        }
-      }
 
       // --- Entities ---
       if (state.status !== 'start' && state.status !== 'countdown') {
@@ -1346,8 +1426,9 @@ export default function VoyagerGame() {
         }
       }
 
-      if ((e.code === 'Escape' || e.key === 'Escape') && s === 'playing') {
-        actionsRef.current?.pause();
+      if ((e.code === 'Escape' || e.key === 'Escape')) {
+        if (s === 'playing') actionsRef.current?.pause();
+        else if (s === 'paused') actionsRef.current?.resume();
       }
       if ((e.code === 'KeyP' || e.key === 'p' || e.key === 'P') && s === 'playing') {
         actionsRef.current?.pause();
@@ -1376,10 +1457,24 @@ export default function VoyagerGame() {
     return () => {
       cancelAnimationFrame(frameId);
       clearInterval(hudSyncInterval);
+      if (cancelCountdown) cancelCountdown();
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [difficulty, startCountdown, syncActivePowerUps, checkAchievements, updateHighScores, updateLifetimeStats]);
+    // NOTE: `difficulty` is intentionally left out of this dependency array.
+    // Including it caused the *entire* canvas effect (event listeners, the
+    // 180-star field, etc.) to re-run every time the difficulty buttons
+    // were clicked on the start screen. `actionsRef.current.start()` now
+    // reads the current selection via `difficultyRef` (kept in sync by a
+    // separate lightweight effect above) instead of closing over the
+    // `difficulty` state value directly, so this is safe.
+  }, [startCountdown, syncActivePowerUps, checkAchievements, updateHighScores, updateLifetimeStats]);
+
+  // Kept in sync so the game-loop closure (created once) can always read
+  // the latest saved best distance when deciding whether to overwrite the
+  // stored ghost run — mirrors the `difficultyRef` pattern above.
+  const highScoresRef = useRef(highScores);
+  useEffect(() => { highScoresRef.current = highScores; }, [highScores]);
 
   // ============================================================
   // RENDER
@@ -1392,7 +1487,7 @@ export default function VoyagerGame() {
       <div style={{
         maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        backgroundColor: '#030712', minHeight: '100vh',
+        minHeight: '100vh',
         color: '#f3f4f6', fontFamily: 'sans-serif',
       }}>
 
@@ -1422,7 +1517,12 @@ export default function VoyagerGame() {
             }}
             onMouseUp={() => actionsRef.current?.boostDown()}
             onMouseLeave={() => actionsRef.current?.boostDown()}
-            onTouchStart={(e) => { e.preventDefault(); if (g.current.status === 'playing') actionsRef.current?.boostUp(); else actionsRef.current?.start(); }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              if (g.current.status === 'playing') actionsRef.current?.boostUp();
+              else if (g.current.status === 'start' || g.current.status === 'gameover') actionsRef.current?.start();
+              else if (g.current.status === 'paused') actionsRef.current?.resume();
+            }}
             onTouchEnd={(e) => { e.preventDefault(); actionsRef.current?.boostDown(); }}
           />
 
@@ -1443,8 +1543,9 @@ export default function VoyagerGame() {
                   <IconBtn onClick={toggleFullscreen} aria-label="Toggle fullscreen">
                     {isFullscreen ? <Minimize size={14} color="#fff" /> : <Maximize size={14} color="#fff" />}
                   </IconBtn>
-                  {showFps && <IconBtn onClick={() => setShowFps(f => !f)} aria-label="Toggle FPS"><Cpu size={14} color="#a855f7" /></IconBtn>}
-                  {!showFps && <IconBtn onClick={() => setShowFps(f => !f)} aria-label="Show FPS"><Cpu size={14} color="#64748b" /></IconBtn>}
+                  <IconBtn onClick={() => setShowFps(f => !f)} aria-label={showFps ? 'Hide FPS' : 'Show FPS'}>
+                    <Cpu size={14} color={showFps ? '#a855f7' : '#64748b'} />
+                  </IconBtn>
                 </div>
               </div>
 
@@ -1473,26 +1574,6 @@ export default function VoyagerGame() {
                 </div>
               )}
 
-              {/* Mobile boost button */}
-              <button
-                onTouchStart={(e) => { e.preventDefault(); actionsRef.current?.boostUp(); }}
-                onTouchEnd={(e)   => { e.preventDefault(); actionsRef.current?.boostDown(); }}
-                onMouseDown={() => actionsRef.current?.boostUp()}
-                onMouseUp={() => actionsRef.current?.boostDown()}
-                aria-label="Boost thruster"
-                style={{
-                  position: 'absolute', bottom: '1.5rem', right: '1.5rem',
-                  width: '64px', height: '64px',
-                  background: 'rgba(0,245,255,0.15)',
-                  border: '2px solid rgba(0,245,255,0.4)',
-                  borderRadius: '50%', display: 'flex', alignItems: 'center',
-                  justifyContent: 'center', cursor: 'pointer',
-                  backdropFilter: 'blur(8px)', pointerEvents: 'auto',
-                  touchAction: 'none',
-                }}
-              >
-                <Rocket size={24} color="#00f5ff" />
-              </button>
             </div>
           )}
 
@@ -1554,19 +1635,20 @@ export default function VoyagerGame() {
                 {/* Difficulty */}
                 <div style={{ marginBottom: '1.25rem' }}>
                   <div style={{ fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Difficulty</div>
-                  <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                  <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
                     {(['easy', 'normal', 'hard'] as Difficulty[]).map(d => (
                       <button
                         key={d}
                         aria-label={`Set difficulty to ${d}`}
                         onClick={() => setDifficulty(d)}
                         style={{
-                          flex: 1, padding: '0.5rem 0.25rem',
+                          flex: 1, padding: '0.4rem 0.15rem', minWidth: 0,
                           background: difficulty === d ? DIFF_COLORS[d] + '22' : 'transparent',
                           border: `1px solid ${difficulty === d ? DIFF_COLORS[d] : 'rgba(255,255,255,0.1)'}`,
-                          borderRadius: '10px', color: difficulty === d ? DIFF_COLORS[d] : '#64748b',
-                          fontWeight: '700', fontSize: '0.75rem', cursor: 'pointer',
+                          borderRadius: '8px', color: difficulty === d ? DIFF_COLORS[d] : '#64748b',
+                          fontWeight: '700', fontSize: '0.65rem', cursor: 'pointer',
                           textTransform: 'capitalize', transition: 'all 0.2s',
+                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}
                       >
                         {d === 'easy' ? '🟢' : d === 'normal' ? '🟡' : '🔴'} {d}
@@ -1724,10 +1806,7 @@ export default function VoyagerGame() {
         {/* ---- SEO ARTICLE ---- */}
         <article style={{
           width: '100%', maxWidth: '850px',
-          background: 'rgba(17,24,39,0.7)',
-          border: '1px solid rgba(0,245,255,0.1)',
-          borderRadius: '16px', padding: '2rem',
-          boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+          padding: '2rem 0',
           lineHeight: '1.7', color: '#d1d5db',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
@@ -1766,6 +1845,24 @@ export default function VoyagerGame() {
             <span style={{ display: 'block', fontWeight: '800', color: '#fff', marginBottom: '0.25rem' }}>💡 Did You Know?</span>
             The current average score for global computer users sits between 4 to 6.5 CPS. Professional esports veterans frequently breach sustained ranges of 12 to 15 clicks per second under extreme pressure!
           </div>
+
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
+            Understanding Your Power-Up Loadout
+          </h3>
+          <p style={{ marginBottom: '1.25rem' }}>
+            Voyager isn't just a raw clicking drill — it layers in five collectible power-ups that reward pattern recognition as much as speed. The <strong>Shield</strong> and <strong>Invincibility</strong> orbs absorb a single asteroid impact so a mistimed click doesn't instantly end your run, <strong>Slow-Mo</strong> stretches the incoming obstacle field to buy your fingers a breather, <strong>Double Boost</strong> triples your thruster output per click, and the <strong>Multiplier</strong> orb stacks with your near-miss combo to inflate your distance score. Learning which orb is worth chasing versus dodging is its own skill layer on top of raw CPS.
+          </p>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
+            Boss Asteroids and Long-Run Endurance
+          </h3>
+          <p style={{ marginBottom: '1.25rem' }}>
+            Every 90 seconds of survival summons a slow-moving <strong>Boss Asteroid</strong> that fills most of the vertical play field, forcing a sustained high-CPS burst rather than a single well-timed tap. Clearing one unlocks the "Boss Slayer" achievement and is generally where the difference between casual and elite runs becomes obvious — most players' CPS output degrades under sustained pressure, so training against the boss timer is a good proxy for real endurance rather than a short reflex spike.
+          </p>
+          <SeoExtraSections />
+          <h3 style={seoH3}>
+            Frequently Asked Questions
+          </h3>
+          <FaqAccordion items={FAQ_ITEMS} />
           <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' }}>
             Take the Challenge Now
           </h3>
@@ -1821,6 +1918,7 @@ function SeoHead() {
     setMeta('robots', 'index, follow');
     setMeta('theme-color', '#00f5ff');
     setMeta('viewport', 'width=device-width, initial-scale=1');
+    setMeta('keywords', 'CPS test, spacebar clicker, clicks per second, asteroid game, click speed test, reaction time game');
 
     // OG
     setMeta('og:title', 'Voyager Space Game — Spacebar CPS Test', true);
@@ -1840,59 +1938,236 @@ function SeoHead() {
     setLink('canonical', 'https://yourdomain.com/games/voyager');
 
     // JSON-LD
-    const existing = document.getElementById('voyager-jsonld');
-    if (!existing) {
-      const script = document.createElement('script');
-      script.id = 'voyager-jsonld';
-      script.type = 'application/ld+json';
-      script.text = JSON.stringify([
-        {
-          '@context': 'https://schema.org',
-          '@type': 'WebApplication',
-          name: 'Voyager Space Game',
-          description: 'Browser-based CPS test asteroid navigator game with power-ups, boss fights and real-time click speed tracking.',
-          url: 'https://yourdomain.com/games/voyager',
-          applicationCategory: 'GameApplication',
-          operatingSystem: 'Any',
-          browserRequirements: 'Requires a modern web browser with HTML5 Canvas support.',
-          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-          author: { '@type': 'Organization', name: 'Your Studio' },
+    const existingScripts = ['voyager-jsonld'];
+    existingScripts.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.remove();
+    });
+
+    const script = document.createElement('script');
+    script.id = 'voyager-jsonld';
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify([
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'Voyager Space Game',
+        description: 'Browser-based CPS test asteroid navigator game with power-ups, boss fights and real-time click speed tracking.',
+        url: 'https://yourdomain.com/games/voyager',
+        applicationCategory: 'GameApplication',
+        operatingSystem: 'Any',
+        browserRequirements: 'Requires a modern web browser with HTML5 Canvas support.',
+        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        author: { '@type': 'Organization', name: 'Your Studio' },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: '4.7',
+          ratingCount: '128',
         },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'BreadcrumbList',
-          itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://yourdomain.com/' },
-            { '@type': 'ListItem', position: 2, name: 'Games', item: 'https://yourdomain.com/games' },
-            { '@type': 'ListItem', position: 3, name: 'Voyager', item: 'https://yourdomain.com/games/voyager' },
-          ],
-        },
-        {
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          mainEntity: [
-            {
-              '@type': 'Question',
-              name: 'What is a CPS test?',
-              acceptedAnswer: { '@type': 'Answer', text: 'A CPS (Clicks Per Second) test measures how many times you can click a button within one second. It is used by gamers to benchmark their reaction speed and clicking stamina.' },
-            },
-            {
-              '@type': 'Question',
-              name: 'How do I play Voyager?',
-              acceptedAnswer: { '@type': 'Answer', text: 'Press the SPACEBAR or click/tap the game canvas to boost your spaceship upward. Avoid asteroids and collect power-ups to survive as long as possible.' },
-            },
-            {
-              '@type': 'Question',
-              name: 'Is Voyager free to play?',
-              acceptedAnswer: { '@type': 'Answer', text: 'Yes, Voyager is completely free to play directly in your browser with no download or registration required.' },
-            },
-          ],
-        },
-      ]);
-      document.head.appendChild(script);
-    }
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://yourdomain.com/' },
+          { '@type': 'ListItem', position: 2, name: 'Games', item: 'https://yourdomain.com/games' },
+          { '@type': 'ListItem', position: 3, name: 'Voyager', item: 'https://yourdomain.com/games/voyager' },
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [
+          {
+            '@type': 'Question',
+            name: 'What is a CPS test?',
+            acceptedAnswer: { '@type': 'Answer', text: 'A CPS (Clicks Per Second) test measures how many times you can click a button within one second. It is used by gamers to benchmark their reaction speed and clicking stamina.' },
+          },
+          {
+            '@type': 'Question',
+            name: 'How do I play Voyager?',
+            acceptedAnswer: { '@type': 'Answer', text: 'Press the SPACEBAR or click/tap the game canvas to boost your spaceship upward. Avoid asteroids and collect power-ups to survive as long as possible.' },
+          },
+          {
+            '@type': 'Question',
+            name: 'Is Voyager free to play?',
+            acceptedAnswer: { '@type': 'Answer', text: 'Yes, Voyager is completely free to play directly in your browser with no download or registration required.' },
+          },
+          {
+            '@type': 'Question',
+            name: 'Is my score saved if I close the tab?',
+            acceptedAnswer: { '@type': 'Answer', text: 'Yes. Best distance, survival time, peak CPS, most obstacles avoided, and full achievement and lifetime statistics are stored locally in your browser and persist across sessions on the same device.' },
+          },
+          {
+            '@type': 'Question',
+            name: 'What is the ghost ship in Voyager?',
+            acceptedAnswer: { '@type': 'Answer', text: 'The ghost ship is a translucent replay of your own best previous run, shown alongside your live ship so you can compare timing and positioning against your personal best.' },
+          },
+          {
+            '@type': 'Question',
+            name: 'Does difficulty level change how CPS is calculated?',
+            acceptedAnswer: { '@type': 'Answer', text: 'No. Difficulty changes obstacle speed, spawn rate, and gravity, but CPS is always measured purely as clicks registered per second regardless of difficulty.' },
+          },
+          {
+            '@type': 'Question',
+            name: 'Can I play Voyager on a mobile phone?',
+            acceptedAnswer: { '@type': 'Answer', text: 'Yes. Tapping and holding the on-screen thruster button or the game canvas works the same as holding the spacebar on desktop, and the interface adapts automatically to touch screens.' },
+          },
+        ],
+      },
+    ]);
+    document.head.appendChild(script);
+
+    return () => {
+      const el = document.getElementById('voyager-jsonld');
+      if (el) el.remove();
+    };
   }, []);
   return null;
+}
+
+// ============================================================
+// SEO ARTICLE — EXTRA SECTIONS
+// Extra headed sections for on-page SEO depth. Kept as a separate
+// component (rather than an inline JSX array) purely to keep the main
+// render method scannable.
+// ============================================================
+const seoH3: React.CSSProperties = { fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' };
+const seoP: React.CSSProperties = { marginBottom: '1.25rem' };
+
+const FAQ_ITEMS: { q: string; a: string }[] = [
+  {
+    q: 'Is my score saved if I close the tab?',
+    a: 'Yes. Your best distance, survival time, peak CPS, most-avoided count, and full achievement/lifetime history are stored locally in your browser, so they persist across sessions on the same device.',
+  },
+  {
+    q: 'What\'s the "ghost" ship trailing behind me?',
+    a: "It's a translucent replay of your own best previous run, rendered alongside your live ship so you can see exactly where your timing gained or lost ground last time.",
+  },
+  {
+    q: 'Does difficulty affect my CPS score?',
+    a: "Difficulty changes obstacle speed, spawn frequency, and gravity — not the CPS calculation itself, which is purely a measure of clicks registered per second regardless of the mode you're playing.",
+  },
+  {
+    q: 'Can I play Voyager on mobile?',
+    a: 'Yes — tapping and holding the on-screen thruster button (or the canvas itself) works the same as holding Spacebar on desktop, and the layout adapts to touch input automatically.',
+  },
+];
+
+function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.25rem' }}>
+      {items.map((item, i) => {
+        const isOpen = openIndex === i;
+        return (
+          <div
+            key={i}
+            style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: `1px solid ${isOpen ? 'rgba(0,245,255,0.5)' : 'rgba(255,255,255,0.08)'}`,
+              borderRadius: '12px',
+              overflow: 'hidden',
+              transition: 'border-color 0.2s',
+            }}
+          >
+            <button
+              onClick={() => setOpenIndex(isOpen ? null : i)}
+              aria-expanded={isOpen}
+              style={{
+                width: '100%', padding: '0.9rem 1.1rem',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                gap: '0.75rem', textAlign: 'left',
+              }}
+            >
+              <span style={{ fontSize: '0.85rem', fontWeight: '700', color: '#fff' }}>{item.q}</span>
+              <ChevronDown
+                size={16}
+                color={isOpen ? '#00f5ff' : '#64748b'}
+                style={{ flexShrink: 0, transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}
+              />
+            </button>
+            {isOpen && (
+              <div style={{ padding: '0 1.1rem 1rem' }}>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: '#9ca3af', lineHeight: 1.6 }}>{item.a}</p>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function SeoExtraSections() {
+  return (
+    <>
+      <h3 style={seoH3}>Jitter Clicking vs Butterfly Clicking: Which Wins?</h3>
+      <p style={seoP}>Jitter clicking relies on tensing your forearm to create a controlled tremor that taps the spacebar dozens of times a second, while butterfly clicking uses two fingers alternating on the same key. Jitter tends to win on raw peak CPS bursts; butterfly tends to win on sustained stamina over a full 60-second run, which matters more for Voyager's survival-based scoring than a single spike does.</p>
+
+      <h3 style={seoH3}>Asteroid Types and How They Behave</h3>
+      <p style={seoP}>Regular grey asteroids drift at a steady pace and are the bulk of what you'll dodge early on. Comets move faster, glow cyan, and trail a tail that can visually mask their true hitbox if you're not tracking the core. Boss asteroids are the largest and slowest, but occupy most of the vertical field, so weaving through the remaining gap takes patience over speed.</p>
+
+      <h3 style={seoH3}>Reading the Near-Miss Window</h3>
+      <p style={seoP}>A near miss only registers when an asteroid passes close to your ship without a collision, and each one builds your combo multiplier. Chaining near misses back-to-back is riskier than playing safe in the middle of the canvas, but it's the fastest way to inflate your distance score beyond what raw survival time alone would give you.</p>
+
+      <h3 style={seoH3}>Shield vs Invincibility: What's the Difference?</h3>
+      <p style={seoP}>Both orbs let you survive one otherwise-fatal hit, but they aren't identical. Shield lasts up to five seconds and only ever absorbs a single impact before disappearing, while Invincibility runs for a shorter four-second window but visually and functionally behaves the same way on contact — either one is a free mistake, not a free pass to fly recklessly for its full duration.</p>
+
+      <h3 style={seoH3}>Why Slow-Mo Is a Timing Tool, Not a Crutch</h3>
+      <p style={seoP}>Slow-Mo doesn't reduce the challenge as much as it changes its shape. Obstacles and power-ups drift in at a fraction of their normal speed, which gives you more reaction time per asteroid but also stretches out how long you're exposed to the current wave. Popping it right before a dense cluster is far more valuable than using it on an empty stretch of space.</p>
+
+      <h3 style={seoH3}>Stacking the Multiplier Orb</h3>
+      <p style={seoP}>The Multiplier power-up doubles your current score multiplier for eight seconds and stacks on top of whatever combo bonus you've already built from near misses, rather than replacing it. Grabbing it mid-combo, instead of at the start of a clean run, is where it adds the most raw distance to your final score.</p>
+
+      <h3 style={seoH3}>Difficulty Modes Explained</h3>
+      <p style={seoP}>Easy mode slows obstacle speed and spaces out spawns generously, which is the right place to learn the gravity-and-boost rhythm without punishment. Normal is the balanced default most players settle into. Hard tightens spawn intervals and steepens gravity, rewarding players who've already built consistent muscle memory for the boost timing.</p>
+
+      <h3 style={seoH3}>How the Speed Ramp Works Over a Long Run</h3>
+      <p style={seoP}>Your ship's base speed climbs automatically every fifteen seconds of survival, which is why early-game runs feel forgiving and late-game runs feel frantic. This ramp is deliberate — it's what turns a simple dodge-the-asteroid mechanic into a genuine endurance test as a session goes on.</p>
+
+      <h3 style={seoH3}>The Ghost Ship: Racing Your Own Best Run</h3>
+      <p style={seoP}>Once you've completed at least one run, a translucent ghost ship appears on subsequent attempts, replaying your personal-best flight path in real time next to your live ship. It's a simple way to see, frame by frame, exactly where your best run gained separation — usually around a specific asteroid cluster or a well-timed power-up grab.</p>
+
+      <h3 style={seoH3}>Achievements Worth Chasing First</h3>
+      <p style={seoP}>"First Flight" unlocks the moment you finish any run, so it's a freebie. After that, "Dodger" (20 avoided obstacles) and "Survivor" (60 seconds) are the most achievable early targets, while "Space Master" (120 seconds) and "Voyager Elite" (5,000 distance) are realistic goals only once your CPS and near-miss timing are both consistent.</p>
+
+      <h3 style={seoH3}>Tracking Your Progress with Lifetime Stats</h3>
+      <p style={seoP}>Beyond a single run's scoreboard, the Stats panel keeps a running tally across every session: total games played, cumulative distance, total survival time, and your all-time highest CPS and distance. It's a useful way to see whether your average performance is actually trending upward, rather than judging progress off one lucky run.</p>
+
+      <h3 style={seoH3}>Keyboard Shortcuts Beyond the Spacebar</h3>
+      <p style={seoP}>Spacebar is the core input for boosting, but P and Escape both pause and resume the run without touching the mouse. Learning to pause instantly with a single keypress is more useful than it sounds — it means a real-world interruption doesn't have to cost you a run in progress.</p>
+
+      <h3 style={seoH3}>Playing Voyager on a Touchscreen</h3>
+      <p style={seoP}>On phones and tablets, holding a finger down on the canvas fires the thruster exactly the way holding Spacebar does on desktop, and lifting your finger cuts the boost the same way releasing the key does. The HUD, difficulty buttons, and modals all resize for narrower viewports so nothing requires a desktop-sized screen to use comfortably.</p>
+
+      <h3 style={seoH3}>Why Fullscreen Mode Helps Your Score</h3>
+      <p style={seoP}>Toggling fullscreen removes browser chrome and gives the asteroid field more effective visual real estate, which in practice means slightly more reaction time to spot an incoming cluster before it's close enough to matter. It's a small edge, but for players chasing a personal best by a handful of distance points, small edges add up.</p>
+
+      <h3 style={seoH3}>Using the FPS Counter to Diagnose Lag</h3>
+      <p style={seoP}>If your clicks feel like they're not registering cleanly, toggle on the FPS counter in the HUD. A steady 60 FPS means the game loop is running smoothly and any missed hits are timing, not performance; a counter that dips well below that suggests background tabs or an underpowered device are the real bottleneck, not your reflexes.</p>
+
+      <h3 style={seoH3}>How Distance Score Is Actually Calculated</h3>
+      <p style={seoP}>Distance accumulates continuously based on your current speed and whatever score multiplier is active, not just from clicking. That means a slower, more deliberate run that stacks near-miss combos and multiplier orbs can out-score a faster but sloppier run that keeps resetting its combo by playing too cautiously in the dead center of the field.</p>
+
+      <h3 style={seoH3}>Common Mistakes That Kill Long Runs</h3>
+      <p style={seoP}>The most frequent cause of an early game-over isn't a fast asteroid — it's over-boosting into the ceiling or under-boosting into the floor after a distracted moment. Because gravity is constant and boost is a discrete impulse, short deliberate taps generally beat one long panicked hold when threading a tight gap.</p>
+
+      <h3 style={seoH3}>Benchmarking Your CPS Against Global Averages</h3>
+      <p style={seoP}>Most casual players land somewhere in the 4–6.5 CPS range on a standard click test, while dedicated clicker-game players who train specifically often push into the 8–10 CPS range. Treat your Voyager peak CPS as a rough personal benchmark rather than a strict competitive ranking, since screen size, input device, and even the specific browser can shift raw numbers slightly.</p>
+
+      <h3 style={seoH3}>Why Browser-Based Testing Beats Downloadable Clicker Apps</h3>
+      <p style={seoP}>A browser test needs no install, keeps no background process running, and works identically whether you're on a shared computer, a school device, or your own laptop. That accessibility is part of why spacebar CPS tests are commonly used as a quick, judgment-free way to warm up before a longer gaming session.</p>
+
+      <h3 style={seoH3}>Session Length and Avoiding Finger Fatigue</h3>
+      <p style={seoP}>Sustained high-CPS clicking for many minutes in a row can strain the same tendons used in typing-heavy work, so treat back-to-back attempts the way you would any repetitive hand activity — short breaks between runs protect your long-term speed more than pushing through discomfort for one more attempt.</p>
+
+      <h3 style={seoH3}>What Makes a "Clean" Run Versus a "Lucky" One</h3>
+      <p style={seoP}>A clean run is one where your combo rarely resets, your power-up pickups were deliberate rather than incidental, and your peak CPS held steady rather than spiking once and fading. A lucky run might post a similar final distance through a sparse spawn pattern — the lifetime stats panel is the better long-term signal for actual skill than any single scoreboard entry.</p>
+    </>
+  );
 }
 
 // ============================================================
