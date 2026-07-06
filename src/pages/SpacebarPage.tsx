@@ -1500,7 +1500,12 @@ export default function SpacebarPage() {
         {/* ── Header ── */}
         <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="section-label">Keyboard Tool</div>
-          <h1 className="tool-title">Spacebar Counter</h1>
+          <h1 className="tool-title">
+            Spacebar Counter{' '}
+            <span style={{ fontSize: '0.5em', color: 'var(--neon-cyan)', fontWeight: '700' }}>
+              (KPS Test)
+            </span>
+          </h1>
           <p className="tool-subtitle">Hit that spacebar as fast as you can!</p>
         </header>
 
