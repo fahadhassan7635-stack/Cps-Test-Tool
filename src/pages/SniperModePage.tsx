@@ -1408,7 +1408,7 @@ export default function SniperModePage() {
         <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div className="section-label">Aim Tool</div>
           <h1 className="tool-title">
-            Aim Trainer
+            Sniper Mode
           </h1>
           <p className="tool-subtitle">Track and hit the small moving target — precision matters!</p>
         </header>
@@ -1769,7 +1769,29 @@ export default function SniperModePage() {
                 Consistent tracking aim is one of the most feared skills in competitive gaming. A player who
                 keeps their crosshair glued to a moving enemy applies constant pressure and converts more shots
                 into eliminations. This aim trainer sharpens that skill through repeated, focused repetitions
-                — the only reliable path to durable muscle memory.
+                — the only reliable path to durable muscle memory. Research by{' '}
+                <a
+                  href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7908336/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: 'var(--neon-cyan)', textDecoration: 'none',
+                    display: 'inline-flex', alignItems: 'center', gap: '3px',
+                  }}
+                >
+                  hand-eye coordination researchers
+                  <svg
+                    width="13" height="13" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
+                    aria-hidden="true" style={{ flexShrink: 0 }}
+                  >
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                </a>{' '}
+                shows that short, focused tracking drills produce measurable reaction-time and coordination
+                gains within days of consistent practice.
               </p>
               <p style={{ marginBottom: '1.5rem' }}>
                 Daily sessions with a <strong>tracking aim trainer</strong> like this one measurably improve
@@ -1848,6 +1870,519 @@ export default function SniperModePage() {
                 tracking sweeps. Reduce your DPI, reclaim control, and let this aim trainer confirm the
                 improvement session by session.
               </InfoBox>
+            </section>
+
+            <section aria-labelledby="science-heading" style={{ marginTop: '3rem' }}>
+              <h2
+                id="science-heading"
+                style={{
+                  fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                  color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+                }}
+              >
+                The Science and History Behind Aim Trainers
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+                <p style={{ margin: 0 }}>
+                  Dedicated aim practice is nowhere near a new idea — it just used to look very different.
+                  In the late 1990s, competitive players of early arena shooters like <strong>Quake</strong> and{' '}
+                  <strong>Unreal Tournament</strong> built custom maps filled with bots that spawned in rapid,
+                  predictable sequences purely so they could grind flick shots and tracking between matches.
+                  There was no scoring system, no difficulty curve, and no way to compare a session today
+                  against a session from last week — just a private map, a keyboard, and thousands of repeated
+                  clicks. That grassroots culture of self-directed practice is the direct ancestor of every
+                  modern <strong>online aim trainer</strong>, including this one.
+                </p>
+                <p style={{ margin: 0 }}>
+                  Standalone aim-training software started appearing in the 2010s as esports scenes around{' '}
+                  <strong>Counter-Strike</strong> and later <strong>Valorant</strong> and <strong>Overwatch</strong>{' '}
+                  matured into full-time careers. These tools introduced the ideas players now take for
+                  granted: adjustable target size, configurable movement speed, session-by-session score
+                  tracking, and leaderboard comparisons. What they were chasing was a way to isolate a single
+                  mechanical skill — tracking, flicking, target switching — away from the noise of an actual
+                  match, where a missed shot could just as easily be blamed on positioning, game sense, or
+                  bad luck instead of the hand itself.
+                </p>
+                <p style={{ margin: 0 }}>
+                  Underneath the game-like presentation, aim training rests on decades of motor-learning
+                  research. Skill acquisition scientists distinguish between <strong>open-loop</strong> movements
+                  planned in advance and fired off without feedback, and <strong>closed-loop</strong> movements
+                  that are continuously corrected using visual feedback while they happen. Tracking a moving
+                  target is almost entirely closed-loop: your eyes feed position information to your hand in a
+                  tight, repeating cycle, dozens of times per second. The more often that loop runs under
+                  realistic conditions, the faster and more accurate each correction becomes — which is exactly
+                  why short, frequent, focused sessions consistently outperform occasional marathon ones for
+                  building this specific skill.
+                </p>
+                <p style={{ margin: 0 }}>
+                  Psychologist Anders Ericsson&apos;s research on <strong>deliberate practice</strong> adds an
+                  important refinement to that picture: raw repetition isn&apos;t enough on its own. Practice
+                  only compounds into real improvement when it includes a clear target to hit, immediate
+                  feedback on whether you hit it, and enough difficulty to sit right at the edge of your current
+                  ability. This trainer is built around exactly that loop — a visible score, an accuracy
+                  percentage updated in real time, and four difficulty tiers so you can always be practicing
+                  at a level that stretches you without being so far beyond your current skill that every
+                  attempt ends in a miss.
+                </p>
+              </div>
+
+              <InfoBox
+                accent="var(--neon-cyan)" bg="rgba(52, 211, 153, 0.05)"
+                icon="🧠" title="Why Repetition Beats Raw Talent"
+                borderStyle="full"
+              >
+                Fine motor skills like tracking aim live largely in procedural memory — the same system that
+                stores how to ride a bicycle or type without looking at the keyboard. Procedural memory is
+                built almost exclusively through repetition under feedback, not through reading, watching, or
+                thinking about the skill. This is good news for anyone who feels &quot;naturally&quot; behind
+                more mechanically gifted players: consistent short sessions on a tracking trainer reliably
+                narrow that gap over a few weeks, because the underlying skill is trained, not fixed.
+              </InfoBox>
+            </section>
+
+            <section aria-labelledby="mistakes-heading" style={{ marginTop: '3rem' }}>
+              <h2
+                id="mistakes-heading"
+                style={{
+                  fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                  color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+                }}
+              >
+                Common Aim Training Mistakes That Quietly Sabotage Progress
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <FaqItem question="1. Training at a sensitivity that doesn't match your main game">
+                  It&apos;s tempting to lower your sensitivity for aim training because slower, more careful
+                  movements feel easier to control. The problem is that the muscle memory you build only
+                  transfers back to your actual games if the underlying arm-to-cursor mapping stays the same.
+                  Always train at the exact sensitivity, DPI, and (where relevant) polling rate you use when
+                  you queue up — otherwise you&apos;re quietly building two separate, non-transferable skills.
+                </FaqItem>
+
+                <FaqItem question="2. Grinding long sessions instead of short, focused ones">
+                  Tracking accuracy is a fine motor skill, and fine motor skills degrade under fatigue faster
+                  than most players notice. A 45-minute uninterrupted session often produces worse practice
+                  data than three separate 10-minute sessions spread across the day, because the last third of
+                  a long grind is frequently spent reinforcing tired, sloppy habits rather than clean ones.
+                  Watch your accuracy stat — if it's trending downward within a session, that's the signal to
+                  stop, not to push through.
+                </FaqItem>
+
+                <FaqItem question="3. Jumping straight to the hardest difficulty">
+                  Impossible difficulty's tiny, erratic target is satisfying to attempt but teaches the wrong
+                  lessons if your fundamentals aren't solid yet. Players who train exclusively on Hard or
+                  Impossible before their tracking is consistent on Easy or Medium tend to develop jerky,
+                  overcorrecting movement patterns, because the target is moving faster than their current
+                  skill can smoothly follow. Difficulty should scale with your accuracy, not your ego.
+                </FaqItem>
+
+                <FaqItem question="4. Skipping a warm-up before ranked or competitive play">
+                  Cold, un-warmed-up tracking is measurably less accurate for the first several minutes of any
+                  session, in the same way a cold muscle underperforms before stretching. Queueing directly
+                  into a ranked match without five to ten minutes on a trainer like this one means your first
+                  few engagements are effectively still part of your warm-up — except now they count.
+                </FaqItem>
+
+                <FaqItem question="5. Comparing your score to strangers instead of your own history">
+                  Public leaderboards and clip culture make it easy to fixate on how your score stacks up
+                  against other players, but difficulty settings, monitor refresh rates, and even mouse
+                  hardware all shift raw scores in ways that make cross-player comparison mostly meaningless.
+                  The number that actually matters is whether this week's average score and accuracy beat last
+                  week's, on the same difficulty and duration settings.
+                </FaqItem>
+
+                <FaqItem question="6. Training with poor posture or an unstable mouse surface">
+                  A cursor that jitters because your desk wobbles, your mousepad slides, or your wrist is
+                  bent at an awkward angle introduces noise that no amount of practice can train around. Before
+                  blaming your aim, check that your chair height, desk stability, and mousepad are actually
+                  letting your arm move the way you intend it to — many &quot;aim problems&quot; are really
+                  equipment or ergonomics problems in disguise.
+                </FaqItem>
+              </div>
+            </section>
+
+            <section aria-labelledby="routine-heading" style={{ marginTop: '3rem' }}>
+              <h2
+                id="routine-heading"
+                style={{
+                  fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                  color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+                }}
+              >
+                Building a Sustainable Weekly Aim Training Routine
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+                <p style={{ margin: 0 }}>
+                  A routine beats a single heroic session every time. Below is a simple structure that fits
+                  around most schedules and scales naturally as your accuracy improves — treat it as a
+                  starting template rather than a strict rulebook.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Warm-up (2–3 minutes):</strong> Start every session on Easy or Medium difficulty with
+                  a short duration preset, regardless of how advanced you are. The goal isn&apos;t score, it&apos;s
+                  waking up the tracking loop between your eyes and your hand before you ask it to do anything
+                  demanding.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Core session (10–15 minutes):</strong> Move to whichever difficulty currently sits at
+                  the edge of your comfort zone — the one where your accuracy hovers around 70–85%. Run several
+                  rounds back to back on the same duration setting so your scores are directly comparable, and
+                  jot down (mentally or otherwise) your best score and accuracy for the day.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Stress test (3–5 minutes, optional):</strong> Finish with one or two rounds a
+                  difficulty tier above your core session, or switch to Unlimited mode and see how long you can
+                  sustain your accuracy before it drops. This is where the progressive speed ramp becomes
+                  useful — it's specifically designed to find the point where your tracking starts to break
+                  down, which tells you exactly what to target in tomorrow's session.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Frequency:</strong> Three to five sessions per week produces steadier long-term gains
+                  than daily marathon grinding, largely because motor learning consolidates during rest, not
+                  just during practice. If you only have time for one thing before a ranked queue, the warm-up
+                  step alone still meaningfully reduces your early-game miss rate.
+                </p>
+                <p style={{ margin: 0 }}>
+                  <strong>Tracking progress:</strong> Because this trainer saves your best score, best streak,
+                  best combo, and lifetime average accuracy locally after every match, you don&apos;t need a
+                  separate spreadsheet to see whether the routine is working — just glance at the all-time
+                  records panel every few sessions and look for the trend, not any single result.
+                </p>
+              </div>
+            </section>
+
+            <section aria-labelledby="topic-beginner-advanced-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-beginner-advanced-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Aim Training for Beginners vs. Advanced Players
+              </h2>
+              <p style={{ margin: 0 }}>
+                A beginner and a veteran player shouldn&apos;t be doing the same drill. Newer players get the
+                most value from Easy and Medium difficulty at longer durations, since the priority is simply
+                building a stable, repeatable tracking motion without the pressure of a fast timer. Advanced
+                players already have that foundation, so their time is better spent on Hard or Impossible at
+                short, high-intensity durations that stress-test reaction speed and consistency under fatigue.
+                Using the wrong tier for your level either wastes time on drills that are too easy to teach
+                anything new, or builds bad habits by forcing corrections faster than your hand can currently
+                make them cleanly.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-mouse-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-mouse-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Choosing the Right Mouse for Aim Training
+              </h2>
+              <p style={{ margin: 0 }}>
+                Weight, shape, and sensor quality all shape how consistent your tracking can become, regardless
+                of how much you practice. A mouse that&apos;s too heavy for your grip style encourages
+                shoulder and wrist compensation instead of clean arm movement, while an unreliable sensor
+                introduces tiny position errors your brain has no way to correct for. You don&apos;t need the
+                most expensive mouse on the market — you need one that fits your hand size and grip comfortably
+                enough that you stop thinking about the hardware entirely and can focus on the target.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-display-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-display-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Monitor and Display Settings for Better Tracking
+              </h2>
+              <p style={{ margin: 0 }}>
+                Beyond refresh rate, response time and input lag quietly affect how &quot;honest&quot; your
+                screen is about where the target actually is at any given instant. A monitor with slow pixel
+                response can smear a fast-moving target just enough to throw off precise tracking, even if your
+                hand movement is perfect. If competitive accuracy matters to you, prioritise a display with low
+                input lag and a response time suited to fast motion over one with higher resolution but sluggish
+                pixel transitions — the extra sharpness rarely offsets the tracking cost.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-balance-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-balance-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Aim Training vs. In-Game Practice: Finding the Balance
+              </h2>
+              <p style={{ margin: 0 }}>
+                Aim trainers isolate one mechanical skill, but real matches layer that skill on top of
+                positioning, decision-making, and game-specific weapon behaviour. Treat this trainer as a
+                supplement rather than a replacement: a focused warm-up and a couple of weekly sessions to
+                target weak points, alongside regular time actually playing your main game, transfers far
+                better than spending all your practice time in isolation. Players who only ever aim-train and
+                never scrimmage often find their raw tracking is excellent but their in-game decision-making
+                lags behind.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-peripheral-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-peripheral-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                The Role of Peripheral Vision in Target Tracking
+              </h2>
+              <p style={{ margin: 0 }}>
+                Skilled trackers rely on more than just staring directly at the target — peripheral vision
+                helps anticipate walls, edges, and the target&apos;s likely bounce direction before it happens.
+                Deliberately softening your focus to take in the whole arena, rather than tunnel-visioning on
+                the dot itself, often improves reaction time to sudden direction changes because your brain
+                receives movement cues a fraction of a second earlier than central vision alone would provide.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-grip-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-grip-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                How Mouse Grip Style Affects Aim Consistency
+              </h2>
+              <p style={{ margin: 0 }}>
+                Palm, claw, and fingertip grips each distribute control differently between the wrist, fingers,
+                and forearm, and switching between them mid-training can quietly reset your progress by
+                changing the fundamental motion your muscle memory is built around. Pick one grip style that
+                feels sustainable for long sessions and stick with it consistently across both training and
+                actual matches — the specific grip matters far less than using the same one everywhere.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-flick-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-flick-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Understanding Flick Aim vs. Tracking Aim
+              </h2>
+              <p style={{ margin: 0 }}>
+                Flick aim is a single fast, ballistic movement to a stationary or newly appeared target, while
+                tracking aim is the continuous, corrective following of a target that&apos;s already moving —
+                exactly what this trainer builds. The two rely on overlapping but distinct motor patterns:
+                flicking rewards a clean, decisive stop on target, while tracking rewards smooth, ongoing
+                micro-corrections. Most FPS engagements use a blend of both, so it&apos;s worth training each
+                skill somewhat separately rather than assuming progress in one automatically improves the other.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-ranked-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-ranked-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Aim Training for Competitive Ranked Play
+              </h2>
+              <p style={{ margin: 0 }}>
+                Ranked matches add time pressure and consequences that casual practice never fully replicates,
+                which is exactly why a pre-queue warm-up matters more than an equivalent amount of practice
+                earlier in the day. A short, focused session immediately before ranked play primes the same
+                tracking loop you&apos;ll rely on in your first engagements, reducing the chance that your
+                opening rounds double as an accidental warm-up that costs you rating.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-lifestyle-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-lifestyle-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Sleep, Hydration, and Aim Performance
+              </h2>
+              <p style={{ margin: 0 }}>
+                Fine motor control and reaction time are both measurably worse after poor sleep or dehydration,
+                regardless of how much you&apos;ve practiced. Competitive players often chase equipment and
+                settings changes to fix an aim slump that&apos;s actually rooted in a few nights of bad sleep or
+                skipped meals. Before assuming your sensitivity or mouse is the problem, rule out the basics —
+                consistent sleep and hydration produce a bigger accuracy swing than most gear changes ever will.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-myths-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-myths-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Common Myths About Aim Training
+              </h2>
+              <p style={{ margin: 0 }}>
+                Two myths persist despite little supporting evidence: that a higher DPI number is inherently
+                better, and that natural talent makes structured practice unnecessary. DPI is just a scaling
+                factor — what matters is your effective sensitivity and how consistently you move at it, not
+                the raw number. And while some players do pick up tracking faster than others initially, the
+                gap closes dramatically with consistent, feedback-driven practice, which is the entire premise
+                behind deliberate practice research.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-goals-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-goals-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                How to Set Realistic Aim Training Goals
+              </h2>
+              <p style={{ margin: 0 }}>
+                Vague goals like &quot;get better at aiming&quot; are hard to act on and even harder to measure.
+                Instead, pick a specific, trackable target: raise your Medium-difficulty accuracy from 70% to
+                85% over three weeks, or beat your best combo three sessions in a row. Because this trainer
+                logs best score, best streak, best combo, and average accuracy automatically, you always have
+                a concrete number to hold a goal against instead of relying on a vague feeling of improvement.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-offline-drills-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-offline-drills-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Aim Drills You Can Practice Without Any Tool
+              </h2>
+              <p style={{ margin: 0 }}>
+                Not every session needs a screen. Slowly tracing the edge of an object across a room with your
+                eyes and a pointed finger, or following a moving car or pedestrian with a steady head turn,
+                exercises the same smooth-pursuit eye movement that underlies in-game tracking. These low-key
+                exercises won&apos;t replace focused trainer sessions, but they're a useful way to keep the
+                underlying visual-motor skill warm on days you don&apos;t have time to play.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-casual-competitive-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-casual-competitive-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Casual vs. Competitive Use of Aim Trainers
+              </h2>
+              <p style={{ margin: 0 }}>
+                Not everyone using an aim trainer is chasing a ranked ladder. Plenty of players simply enjoy the
+                satisfying feedback loop of hitting a moving target, treating it closer to a quick arcade game
+                than a training regimen — and that's a completely valid way to use it. The difficulty tiers,
+                combo system, and score multipliers work equally well as a five-minute break from work as they
+                do as a structured competitive warm-up; the tool doesn&apos;t require a competitive goal to be
+                worth playing.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-age-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-age-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Does Age Affect Aim Training Progress?
+              </h2>
+              <p style={{ margin: 0 }}>
+                Reaction time does slow gradually with age on average, but the practical impact on tracking
+                aim is much smaller than most people assume, and structured practice narrows the gap
+                considerably. Older players who train consistently regularly outperform younger players who
+                don&apos;t train at all, since the trainable component of tracking skill — smooth, corrective
+                motion — responds to practice at essentially any age.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-lefthanded-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-lefthanded-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Aim Training Tips for Left-Handed Players
+              </h2>
+              <p style={{ margin: 0 }}>
+                Left-handed players sometimes use a mouse with their non-dominant hand due to right-handed
+                keyboard layouts, which slightly changes the fine motor demands compared to using your dominant
+                hand. If that applies to you, don&apos;t assume your progress curve should match a right-handed
+                player&apos;s — the coordination between your dominant and non-dominant hand strengthens with
+                practice regardless of which hand controls the mouse, it just may take a little longer to feel
+                fully natural.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-break-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-break-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Using Aim Trainers to Recover From a Break
+              </h2>
+              <p style={{ margin: 0 }}>
+                Coming back after weeks or months away from a game, tracking accuracy is usually the first
+                thing to feel rusty, well before positioning or game sense catch up. A few days of short,
+                low-pressure sessions on Easy or Medium difficulty is an efficient way to reload that muscle
+                memory faster than jumping straight back into ranked matches, where the stakes make every
+                early miss feel more costly than it needs to.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-psychology-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-psychology-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Staying Calm Under Pressure While Aiming
+              </h2>
+              <p style={{ margin: 0 }}>
+                Tension is the quiet enemy of smooth tracking — a tight grip, held breath, or racing heartbeat
+                all reduce fine motor precision exactly when a match needs it most. Practicing under a visible
+                timer and a live combo counter, the way this trainer presents them, gives you low-stakes
+                exposure to that same pressure response, so the adrenaline of a real clutch moment feels more
+                familiar and less disruptive when it actually matters.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-genres-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-genres-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                Aim Training Across Different Game Genres
+              </h2>
+              <p style={{ margin: 0 }}>
+                Tracking aim isn&apos;t exclusive to military shooters. Battle royale looting fights, hero
+                shooters with mobility-heavy characters, and even top-down twin-stick games all reward the
+                same underlying skill of keeping a reticle glued to something that&apos;s trying to get away
+                from it. Whatever genre you play most, the transferable core is identical: smooth, corrective
+                tracking beats jerky overcorrection every time.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-burnout-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-burnout-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                How to Avoid Burnout From Aim Training
+              </h2>
+              <p style={{ margin: 0 }}>
+                Because aim trainers are scored and endlessly repeatable, it&apos;s easy to slide from
+                productive practice into compulsive grinding that stops producing improvement and starts
+                producing frustration. Cap sessions at a length you can sustain enjoyably, take full rest days
+                between training blocks, and treat a plateau as a sign to change difficulty or duration rather
+                than simply playing more of the same round.
+              </p>
+            </section>
+
+            <section aria-labelledby="topic-future-heading" style={{ marginTop: '3rem' }}>
+              <h2 id="topic-future-heading" style={{
+                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+              }}>
+                The Future of Aim Training Technology
+              </h2>
+              <p style={{ margin: 0 }}>
+                Browser-based trainers like this one benefit from zero-install accessibility, but the space
+                keeps evolving — eye-tracking hardware, VR training environments, and AI-driven adaptive
+                difficulty are all active areas of development. Whatever form future tools take, the underlying
+                principle stays the same: focused, feedback-driven repetition on an isolated skill remains the
+                most reliable path to measurable improvement, technology aside.
+              </p>
             </section>
 
             <section aria-labelledby="faq-heading" style={{ marginTop: '3rem' }}>
@@ -2020,6 +2555,39 @@ export default function SniperModePage() {
                   Five to ten short rounds with brief breaks between them tends to beat one long unbroken
                   grind — fatigue quietly erodes precision even when it doesn&apos;t feel like it. Watch your
                   accuracy stat: if it starts trending down round over round, that&apos;s your cue to stop.
+                </AccordionItem>
+
+                <AccordionItem id="faq-baseline-accuracy" question="What's a good baseline accuracy for a beginner?"
+                  isOpen={openFaqId === 'faq-baseline-accuracy'} onToggle={() => toggleFaq('faq-baseline-accuracy')}>
+                  Most new players land somewhere between 40% and 60% accuracy on Medium difficulty in their
+                  first few sessions, which is completely normal. Treat 75–85% on Medium as a reasonable
+                  milestone before moving up to Hard, rather than comparing yourself to advanced players who
+                  may have months of dedicated practice behind their numbers.
+                </AccordionItem>
+
+                <AccordionItem id="faq-wrist-strain" question="Can aim training cause wrist strain, and how do I avoid it?"
+                  isOpen={openFaqId === 'faq-wrist-strain'} onToggle={() => toggleFaq('faq-wrist-strain')}>
+                  Like any repetitive fine-motor activity, extended aim training can aggravate wrist or forearm
+                  strain if your grip is tense or your wrist is bent at an angle for long periods. Keep sessions
+                  short, take breaks between rounds, favour arm and elbow movement over wrist-only flicking, and
+                  stop immediately if you feel any tingling, numbness, or sharp discomfort.
+                </AccordionItem>
+
+                <AccordionItem id="faq-controller-vs-mouse" question="Does this trainer work for controller aim as well as mouse?"
+                  isOpen={openFaqId === 'faq-controller-vs-mouse'} onToggle={() => toggleFaq('faq-controller-vs-mouse')}>
+                  The arena responds to any pointer input your browser recognises, including a controller
+                  configured to move an on-screen cursor, though it was primarily designed and tuned around
+                  mouse and touch input. Console players using stick-to-cursor accessibility tools can still
+                  use it for general tracking practice, but expect the feel to differ from in-game aiming.
+                </AccordionItem>
+
+                <AccordionItem id="faq-vs-paid-software" question="How does this compare to paid aim trainer software?"
+                  isOpen={openFaqId === 'faq-vs-paid-software'} onToggle={() => toggleFaq('faq-vs-paid-software')}>
+                  Dedicated desktop aim trainers often add extras like 3D environments, weapon-specific
+                  recoil simulation, and detailed analytics dashboards. This browser-based trainer focuses
+                  specifically on 2D tracking — the core skill of following a moving target — with zero
+                  installs, zero cost, and instant access from any device, making it a solid daily-driver for
+                  the tracking fundamental even if you also use heavier software for weapon-specific practice.
                 </AccordionItem>
               </div>
             </section>
