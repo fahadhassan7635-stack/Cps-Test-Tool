@@ -20,7 +20,8 @@ import {
   Minimize,
   Shield,
   Star,
-  Flame
+  Flame,
+  ExternalLink
 } from 'lucide-react';
 
 // ============================================================
@@ -104,6 +105,18 @@ if (typeof document !== 'undefined') {
       { '@type': 'Question', name: 'What is CPS in Space Defense?', acceptedAnswer: { '@type': 'Answer', text: 'CPS stands for Clicks Per Second. In Space Defense, it measures how many shots you fire per second. A higher CPS means more projectiles hitting meteors, which is especially important during boss battles and at higher difficulty levels.' } },
       { '@type': 'Question', name: 'Does Space Defense require download?', acceptedAnswer: { '@type': 'Answer', text: 'No. Space Defense runs entirely in your browser using HTML5 Canvas technology. No download, installation, and no plugins are required. Simply open the page and start playing immediately.' } },
       { '@type': 'Question', name: 'What are the difficulty levels?', acceptedAnswer: { '@type': 'Answer', text: 'Space Defense offers three difficulty levels: Easy (slower meteors, lower spawn rate, great for beginners), Normal (balanced gameplay for most players), and Hard (fast meteors, high spawn rate, tougher HP, but higher score multipliers for competitive players).' } },
+      { '@type': 'Question', name: 'Can playing Space Defense improve reaction time?', acceptedAnswer: { '@type': 'Answer', text: 'Research on fast-paced action games has linked regular play to faster visual reaction times and better hand-eye coordination without a loss in accuracy. Space Defense tracks CPS, Peak CPS, and Accuracy across every run.' } },
+      { '@type': 'Question', name: 'How many lives do I get?', acceptedAnswer: { '@type': 'Answer', text: 'Each run starts with 10 hull points. Every meteor that hits you, or reaches the bottom of the screen unshot, costs one hull point. The run ends when hull reaches zero.' } },
+      { '@type': 'Question', name: 'When do boss meteors appear?', acceptedAnswer: { '@type': 'Answer', text: 'A boss meteor spawns automatically every 5 levels, with a much larger health bar and a guaranteed power-up drop when defeated.' } },
+      { '@type': 'Question', name: 'What does the combo counter do?', acceptedAnswer: { '@type': 'Answer', text: 'Destroying meteors back-to-back without missing or taking damage builds a combo counter that multiplies score earned per kill. Getting hit or missing resets the combo to zero.' } },
+      { '@type': 'Question', name: 'Can I pause the game?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, press Esc at any time to pause. From the pause screen you can resume, restart, or return to the main menu.' } },
+      { '@type': 'Question', name: 'Can I play Space Defense in fullscreen?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, click the fullscreen icon on the menu or in-game HUD to expand the play field to your entire display.' } },
+      { '@type': 'Question', name: 'Does Space Defense work on mobile phones?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, on touch devices an on-screen directional pad and fire button appear automatically, and fullscreen mode is supported for a larger play area.' } },
+      { '@type': 'Question', name: 'What is the difference between the three difficulty levels?', acceptedAnswer: { '@type': 'Answer', text: 'Easy slows meteors and lowers health at a reduced score multiplier. Normal is balanced at a 1x multiplier. Hard increases speed, spawn rate, and health by 1.5x but doubles the score multiplier.' } },
+      { '@type': 'Question', name: 'Can I turn off the sound?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, click the speaker icon on the menu or HUD to mute all sound effects including laser shots, explosions, power-ups, and countdown beeps.' } },
+      { '@type': 'Question', name: 'What happens if two power-ups overlap?', acceptedAnswer: { '@type': 'Answer', text: 'Power-ups of different types stack and run simultaneously with their own countdown timers. Picking up a second copy of the same power-up refreshes its duration instead of stacking.' } },
+      { '@type': 'Question', name: 'Is Space Defense free to play?', acceptedAnswer: { '@type': 'Answer', text: 'Yes, Space Defense is completely free with no purchases, subscriptions, or ads blocking gameplay.' } },
+      { '@type': 'Question', name: 'How is accuracy percentage calculated?', acceptedAnswer: { '@type': 'Answer', text: 'Accuracy is the number of shots that hit a meteor divided by total shots fired, shown as a percentage in the HUD and game-over summary.' } },
     ]
   });
 }
@@ -230,6 +243,28 @@ class GameSound {
     gain.gain.setValueAtTime(0.08, now);
     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
     osc.connect(gain); gain.connect(context.destination); osc.start(); osc.stop(now + 0.15);
+  }
+
+  playCountdownBeep() {
+    const context = this.getCtx(); if (!context) return;
+    const now = context.currentTime;
+    const osc = context.createOscillator(); const gain = context.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(440, now);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.2, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+    osc.connect(gain); gain.connect(context.destination); osc.start(now); osc.stop(now + 0.2);
+  }
+
+  playCountdownGo() {
+    const context = this.getCtx(); if (!context) return;
+    const now = context.currentTime;
+    const osc = context.createOscillator(); const gain = context.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(880, now);
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.25, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain); gain.connect(context.destination); osc.start(now); osc.stop(now + 0.35);
   }
 }
 
@@ -583,10 +618,15 @@ export default function SpaceDefensePage() {
     gameStateRef.current = 'countdown';
     let n = 3;
     setCountdownNum(3);
+    sounds.playCountdownBeep();
     const tick = () => {
       n--;
-      if (n > 0) { setCountdownNum(n); setTimeout(tick, 900); }
-      else { setCountdownNum('GO!'); setTimeout(() => {
+      if (n > 0) {
+        setCountdownNum(n);
+        sounds.playCountdownBeep();
+        setTimeout(tick, 900);
+      }
+      else { setCountdownNum('GO!'); sounds.playCountdownGo(); setTimeout(() => {
         statsRef.current.startTime = Date.now();
         setGameState('playing');
         gameStateRef.current = 'playing';
@@ -1223,39 +1263,192 @@ export default function SpaceDefensePage() {
           ============================================================ */}
       <hr style={{ borderColor: 'var(--border)', margin: '5rem 0 4rem' }} />
 
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '3rem 2.5rem' }}>
+      <div style={{ border: '1px solid var(--border)', borderRadius: '16px', padding: '3rem 2.5rem' }}>
         <section style={{ maxWidth: '900px', margin: '0 auto', color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.05rem' }}>
 
           <h2 style={{ color: 'var(--text-primary)', fontSize: '2.25rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>
-            Why You Should Play Space Defence
+            Why You Should Play Space Defense
           </h2>
 
+          <p style={{ marginBottom: '1.5rem' }}>
+            Space Defense is more than just a simple browser game. It combines fast reactions, keyboard control, mouse accuracy, and hand-eye coordination into one exciting challenge. Whether you're a gamer looking to sharpen your skills or simply want a fun way to pass the time, Space Defense offers an engaging experience that keeps you coming back for higher scores.
+          </p>
+
           <p style={{ marginBottom: '2rem' }}>
-            Space Defence is more than just a simple browser game. It combines fast reactions, keyboard control, mouse accuracy, and hand-eye coordination into one exciting challenge. Whether you're a gamer looking to sharpen your skills or simply want a fun way to pass the time, Space Defence offers an engaging experience that keeps you coming back for higher scores.
+            Unlike a lot of casual browser games that rely purely on luck or repetitive tapping, Space Defense is built around a genuine skill loop. Every meteor you destroy, every boss you survive, and every combo you chain together is a small test of how quickly your brain can read a moving target and turn that information into an accurate, well-timed shot. That loop is exactly the kind of task that cognitive scientists have spent decades studying in relation to fast-paced video games, and it's worth understanding why it works so well before you jump into your next run.
           </p>
 
           <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Improve Your Reaction Speed</h3>
-            <p style={{ marginBottom: '1rem' }}>Every meteor that falls from the sky requires quick decisions. As the game progresses, meteors become faster and more difficult to destroy. Players must react instantly to avoid collisions and eliminate threats before they reach the bottom of the screen.</p>
-            <p style={{ margin: '0' }}>Regular play can help improve reaction time, focus, and decision-making speed.</p>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Improve Your Reaction Speed</h2>
+            <p style={{ marginBottom: '1rem' }}>Every meteor that falls from the sky requires quick decisions. As the game progresses, meteors become faster and more difficult to destroy. Players must react instantly to avoid collisions and eliminate threats before they reach the bottom of the screen. This is not just a design gimmick — it's the same principle that researchers have used for years to study how fast-paced action gameplay trains the visual system.</p>
+            <p style={{ marginBottom: '1rem' }}>
+              A widely cited review of action video game research, led by cognitive neuroscientist Daphne Bavelier and published on <SourceLink href="https://pmc.ncbi.nlm.nih.gov/articles/PMC2871325/">the National Center for Biotechnology Information</SourceLink>, found that experienced action-game players consistently respond faster across a wide range of visual tasks than people who don't play these games, and crucially, that speed didn't come at the cost of accuracy. The review's authors argued that the fast, unpredictable stream of targets in games like meteor shooters forces the visual system to become more efficient at picking out relevant information under time pressure — which is essentially the exact scenario Space Defense recreates with every wave of meteors.
+            </p>
+            <p style={{ margin: '0' }}>Regular play can help improve reaction time, focus, and decision-making speed, and the built-in CPS and accuracy tracker in Space Defense lets you see that improvement in numbers rather than just a feeling.</p>
           </div>
 
           <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Train Keyboard Control Skills</h3>
-            <p style={{ marginBottom: '1rem' }}>Space Defence uses multiple keyboard controls simultaneously, creating an excellent exercise for coordination and response speed.</p>
+            <h2 style={{ color: 'var(--neon-purple)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Sharpen Hand-Eye Coordination</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Hand-eye coordination is the skill of translating what your eyes see into precise, well-timed movement — exactly what happens every time you line up a shot on a spinning meteor while still dodging incoming debris. It's a skill set that shows up far beyond gaming, from parallel parking a car to catching an object thrown across a room.
+            </p>
+            <p style={{ marginBottom: '1rem' }}>
+              A study out of the University of Toronto, summarized in a release from <SourceLink href="https://media.utoronto.ca/media-releases/university-of-toronto-study-finds-action-video-games-bolster-sensorimotor-skills/">the university's media office</SourceLink>, found that people who regularly played action video games showed measurably better sensorimotor control — the coordinated function of vision and hand movement — than people who didn't. The researchers behind the study noted that the improvement seemed to come from better visuomotor prediction, meaning gamers got better at anticipating where a moving object was headed and adjusting their aim accordingly.
+            </p>
+            <p style={{ margin: '0' }}>
+              More recent work has extended those findings across a broader mix of game genres. A 2024 paper published in the journal <em>Behavioral Sciences</em> and hosted on <SourceLink href="https://www.mdpi.com/2076-328X/14/10/874">MDPI's open-access platform</SourceLink> linked higher videogaming proficiency to measurable gains in psychomotor speed and hand-eye coordination, alongside improvements in short-term visuospatial memory. In Space Defense, that translates directly into cleaner shots, fewer wasted projectiles, and a higher accuracy percentage on your end-of-run stat card.
+            </p>
           </div>
 
           <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Practice Mouse Accuracy</h3>
-            <p style={{ margin: '0' }}>In addition to keyboard controls, players can shoot using the left mouse button. This adds another layer of control and helps improve clicking accuracy and timing.</p>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Train Keyboard Control and Multitasking</h2>
+            <p style={{ marginBottom: '1rem' }}>Space Defense uses multiple keyboard controls simultaneously, creating an excellent exercise for coordination and response speed. You're steering with WASD or the arrow keys, firing with F or Space, and mentally tracking your Hull meter, your combo counter, and any active power-ups — often all within the same second.</p>
+            <p style={{ margin: '0' }}>
+              This kind of simultaneous input handling is a form of divided attention, and it's one of the cognitive skills most consistently linked to action gaming in the research literature. A long-running review of three decades of video-game studies, archived on <SourceLink href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3772618/">PMC</SourceLink>, points to task switching and sustained visual attention as two of the abilities that show up again and again when scientists test experienced players against non-gamers. Practically speaking, the more you play Space Defense, the more automatic your movement becomes, freeing up mental bandwidth to focus on aiming and threat assessment instead of hunting for the right key.
+            </p>
           </div>
 
           <div style={{ margin: '2.5rem 0' }}>
-            <h3 style={{ color: 'var(--neon-yellow)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Track Your Performance</h3>
-            <p style={{ margin: '0' }}>At the end of each run, players can review Final Score, Meteors Destroyed, Peak CPS, Accuracy Percentage, and Survival Time — making it easy to track improvement across sessions.</p>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Practice Mouse Accuracy and Understand Your CPS</h2>
+            <p style={{ marginBottom: '1rem' }}>In addition to keyboard controls, players can shoot using the left mouse button or a tap on mobile. This adds another layer of control and helps improve clicking accuracy and timing, since firing too early or too late against a moving meteor means a wasted shot.</p>
+            <p style={{ marginBottom: '1rem' }}>
+              CPS, or Clicks Per Second, is the metric Space Defense uses to measure how quickly you can fire. It sits in the HUD next to your Peak CPS, which records the fastest burst you managed during the run. A higher sustained CPS matters most during boss fights, when a large health bar needs to be worn down before the boss reaches the bottom of the play field, and during Hard difficulty runs, where meteors move faster and spawn more often.
+            </p>
+            <p style={{ margin: '0' }}>
+              CPS on its own isn't the whole story, though. Firing as fast as possible while missing every other shot will tank your accuracy percentage, which is exactly why Space Defense tracks both numbers side by side. The most efficient runs tend to come from players who find a rhythm — firing quickly, but only when a meteor is actually lined up — rather than simply mashing the fire key nonstop.
+            </p>
           </div>
 
-          <div style={{ margin: '3rem 0' }}>
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-yellow)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Boss Battles and Sustained Attention</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Every fifth level in Space Defense introduces a boss meteor: a slower but far tougher target with its own dedicated health bar and a much larger blast radius when it finally breaks apart. Bosses change the rhythm of the game. Instead of reacting to a stream of short-lived threats, you have to hold your focus on a single target for a sustained period, all while smaller meteors can still spawn around it.
+            </p>
+            <p style={{ margin: '0' }}>
+              That shift from quick, reactive attention to longer sustained focus is itself a distinct cognitive skill, and it's one of the reasons boss encounters tend to feel noticeably more demanding than the regular meteor waves that precede them. Treat a boss fight as a different mode of concentration rather than "the same thing, but longer," and you'll find it easier to keep your aim steady instead of panicking and burning through your ammo.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Power-Ups and Strategic Decision-Making</h2>
+            <p style={{ marginBottom: '1rem' }}>Space Defense includes five power-ups, each dropped randomly from destroyed meteors and especially likely to appear after a boss fight: Shield grants temporary invincibility, Rapid Fire doubles your rate of fire, Double Shot adds two angled side projectiles to every shot, Magnet pulls nearby drops toward your ship, and Slow Motion reduces meteor speed to 40 percent for a short window.</p>
+            <p style={{ margin: '0' }}>
+              None of these are simply "free points." Picking up a power-up at the wrong moment, or ignoring one that's about to drift off-screen, is itself a small decision under pressure. Do you break formation to chase a Magnet pickup while three meteors are closing in, or do you let it go and keep your position? Space Defense is deliberately designed so that these micro-decisions stack on top of the raw reaction-time challenge, which is part of why a single run rarely feels repetitive even after dozens of attempts.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-purple)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>The Combo System: Risk, Reward, and Rhythm</h2>
+            <p style={{ margin: '0' }}>
+              Destroying meteors back-to-back without missing or getting hit builds a combo multiplier that directly boosts your score. Combos reward consistency over bursts of luck: a two-combo streak is nice, but a ten-combo streak — visible as a bright "COMBO!" popup on screen — can be the difference between a mediocre run and a new personal best. Because taking a hit resets your combo to zero, the system quietly encourages a calmer, more controlled playstyle rather than frantic button mashing, especially once meteors start moving fast enough that a single missed dodge can end a long streak.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Track Your Performance Across Sessions</h2>
+            <p style={{ margin: '0' }}>At the end of each run, players can review their Final Score, Meteors Destroyed, Peak CPS, Accuracy Percentage, and Survival Time, alongside their personal best in each category — making it easy to track improvement across sessions instead of relying on a vague sense of "I think I did better that time." Because high scores are saved locally in your browser, you can close the tab, come back the next day, and immediately see how today's run compares to your best.</p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Choosing the Right Difficulty for Your Goals</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Space Defense offers three difficulty levels, and picking the right one matters more than it might seem. Easy mode slows meteors down and reduces their spawn rate and health, which makes it the better choice if your goal is simply to practice clean aim and build muscle memory for the controls without the added pressure of a fast-moving screen.
+            </p>
+            <p style={{ margin: '0' }}>
+              Normal mode is balanced for most players and is the best starting point if you want a fair read on your current reaction time and accuracy. Hard mode multiplies meteor speed and spawn rate by 1.5x and meteor health by the same amount, but it also doubles your score multiplier — so competitive players chasing a spot at the top of their personal leaderboard will usually want to push into Hard once Normal starts to feel too easy. There's no single "correct" difficulty; the right one is whichever setting keeps you right at the edge of your current skill level, since that's where the fastest improvement tends to happen.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Seven Tips to Push Your High Score Higher</h2>
+            <ol style={{ paddingLeft: '1.25rem', margin: 0, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Stay mobile, not centered.</strong> Sitting in the middle of the play field feels safe but gives you the least time to react to meteors spawning on either side. Drift toward whichever side has fewer active threats.</li>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Prioritize threats near your ship.</strong> A meteor about to reach the bottom of the screen costs you a life the moment it passes; a meteor still high on the screen can wait a second longer.</li>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Save Shield for boss levels.</strong> Since power-ups are timed rather than stockpiled, picking up Shield right before a boss spawns gets you more value than using it during a quiet stretch.</li>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Don't break your combo for greed.</strong> Chasing a distant power-up while ignoring a nearby meteor is often a losing trade once you factor in the combo multiplier you'd lose from a missed hit.</li>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Use Slow Motion to reset your rhythm.</strong> If the screen gets chaotic, a Slow Motion pickup is the easiest way to regain control without losing lives.</li>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Watch your accuracy, not just your CPS.</strong> A high CPS with low accuracy usually means you're firing blind. Slow down fractionally and aim for a rhythm where most shots connect.</li>
+              <li><strong style={{ color: 'var(--text-primary)' }}>Play in short, focused sessions.</strong> Reaction-time tasks are known to be sensitive to fatigue, so a handful of sharp five-minute runs will usually beat one long, tired session for both your score and your enjoyment.</li>
+            </ol>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-yellow)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Playing in Moderation: Protecting Your Eyes</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Space Defense is designed to be played in short, high-intensity bursts rather than marathon sessions, and that's a good habit for screen-based activities in general. Extended, uninterrupted screen time is one of the most common causes of digital eye strain, sometimes called computer vision syndrome.
+            </p>
+            <p style={{ margin: '0' }}>
+              <SourceLink href="https://www.aoa.org/healthy-eyes/eye-and-vision-conditions/computer-vision-syndrome">The American Optometric Association</SourceLink> recommends these as effective ways to reduce eye strain during long screen sessions: follow the 20-20-20 rule by looking at something roughly 20 feet away for 20 seconds every 20 minutes, blink deliberately and often since screen focus tends to reduce blink rate, and take a longer rest break after about two hours of continuous device use. Building a short break into your Space Defense sessions — between runs rather than mid-boss-fight, ideally — costs you almost nothing in score and does your eyes a real favor.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>What the Research Says About Gaming and Wellbeing</h2>
+            <p style={{ margin: '0' }}>
+              Fast-paced games like Space Defense are sometimes assumed to be "just" entertainment, but the picture from the psychology literature is more nuanced than that. <SourceLink href="https://www.apa.org/monitor/2024/07/inclusive-ethical-video-games">The American Psychological Association</SourceLink> has published research pointing to learning, social, and stress-relief benefits tied to regular, moderate video game play, alongside the well-documented cognitive gains in attention and visuomotor control discussed earlier in this article. As with most leisure activities, the benefits show up most clearly when play is balanced against sleep, movement, and time away from the screen — which is exactly why Space Defense keeps its runs short, scoreable, and easy to step away from between sessions.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-purple)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Playing on Mobile and Touch Devices</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Space Defense includes an on-screen directional pad and a dedicated fire button for phones and tablets, and the whole game supports fullscreen mode so a small screen doesn't cost you visibility over incoming meteors. Touch input changes the shape of the challenge slightly: instead of holding a key down, you're tapping repeatedly, which shifts the emphasis from raw fire rate toward precise timing.
+            </p>
+            <p style={{ margin: '0' }}>
+              If you're playing on a touchscreen, it's usually worth favoring accuracy over speed a little more than you would on keyboard and mouse, since each tap takes marginally longer to register than a key held under your fingers. The CPS and accuracy stats work exactly the same way regardless of input method, so mobile players can still compare their runs directly against a desktop high score.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-yellow)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>How the Difficulty Curve Actually Works</h2>
+            <p style={{ marginBottom: '1rem' }}>
+              Space Defense doesn't just get "harder" in a vague sense as you level up — the underlying numbers shift in specific, learnable ways. In the first three levels, meteors are single-hit kills moving at a gentle pace, which gives new players room to learn the controls without much punishment for a missed shot. From level four onward, meteor health starts to climb gradually, meaning some meteors will now soak up two or three hits before breaking apart, and their speed increases in small, steady steps.
+            </p>
+            <p style={{ margin: '0' }}>
+              Past level seven, both health and speed continue to scale, and the threshold of meteors you need to destroy to reach the next level also increases, which is the game's way of making sure later levels feel earned rather than arbitrary. Every fifth level layers a boss meteor on top of that curve, so the difficulty isn't just "more of the same" — it's a steady ramp punctuated by distinct spikes that test a different kind of focus. Understanding this curve is part of why experienced players can plan their power-up usage in advance instead of reacting to each level as a surprise.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Space Defense vs. Idle Clicker Browser Games</h2>
+            <p style={{ margin: '0' }}>
+              A lot of free browser games in the "clicker" or "idle" category are built around waiting, not skill: numbers go up whether or not you're paying attention. Space Defense is the opposite. Every point on the scoreboard comes from a shot you aimed, a dodge you timed, or a power-up you chose to grab. That's the main reason a five-minute Space Defense run tends to feel more satisfying than an hour of idle tapping — the score is a direct reflection of how you played, not how long you left the tab open.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-purple)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>The Sound Design Behind Every Explosion</h2>
+            <p style={{ margin: '0' }}>
+              Every laser shot, meteor explosion, boss kill, power-up pickup, and level-up chime in Space Defense is generated live using the Web Audio API rather than played back from pre-recorded audio files. That's also true of the countdown before each run: the "3, 2, 1" numbers each play a short beep, and "GO!" triggers a higher-pitched tone so you always have an audio cue for exactly when control returns to you. If you'd rather play in silence, the speaker icon in the corner mutes everything instantly.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-green)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Setting Up the Perfect Play Session</h2>
+            <p style={{ margin: '0' }}>
+              A few small setup choices make a real difference to your score. Play in fullscreen mode so you can see meteors the moment they spawn instead of after they've already crossed half the screen. Make sure your browser tab is the active window, since background tabs can throttle animation timing in some browsers. And if you're on a laptop trackpad, switching to a mouse for a session or two tends to noticeably tighten up your aim, since a trackpad's shorter travel distance makes fine adjustments harder to land consistently.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-orange)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Why No Download Is Ever Required</h2>
+            <p style={{ margin: '0' }}>
+              Space Defense runs entirely inside the browser's built-in HTML5 Canvas, which draws every meteor, projectile, and particle effect frame by frame without needing a plugin, an app store listing, or an installer. That also means there's nothing to update: the moment you refresh the page, you're on the current version. It's the same technology that powers most modern browser-based games and keeps Space Defense equally playable on a school computer, a work laptop, or a personal phone.
+            </p>
+          </div>
+
+          <div style={{ margin: '2.5rem 0' }}>
+            <h2 style={{ color: 'var(--neon-yellow)', fontSize: '1.5rem', fontWeight: '700', marginBottom: '0.75rem' }}>Building a Personal Practice Routine</h2>
+            <p style={{ margin: '0' }}>
+              If your goal is steady improvement rather than a single lucky run, treat Space Defense a bit like a warm-up drill. Start on Easy for a run or two to loosen up your aim, move to Normal for your "real" attempts, and only push into Hard once your Normal-mode accuracy is consistently sitting above 80 percent. Because your best score, best time, and best level are all saved automatically, you don't need to track anything yourself — just check the menu screen before each session to see exactly what you're trying to beat.
+            </p>
+          </div>
+
+          <p style={{ marginTop: '2.5rem', marginBottom: '0' }}>
+            Space Defense packs a surprising amount of depth into a free browser game: a reaction-time challenge tuned by three difficulty levels, a combo system that rewards consistency, five power-ups that force real strategic choices, and boss fights that test sustained focus rather than pure reflex. Whether you're chasing a new Peak CPS, trying to push your accuracy above 90 percent, or just want a few minutes of focused, satisfying gameplay, the mission is the same: get in your ship, defend the skies, and see how far your reflexes can take you.
+          </p>
+
+          <div style={{ margin: '3rem 0 0' }}>
             <h2 style={{ color: 'var(--text-primary)', fontSize: '1.9rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>Frequently Asked Questions</h2>
             <FaqAccordion items={FAQ_ITEMS} />
           </div>
@@ -1277,6 +1470,18 @@ const FAQ_ITEMS = [
   { q: 'What power-ups are available?', a: 'There are five power-ups: Shield (5s invincibility), Rapid Fire (doubles fire rate for 6s), Double Shot (adds side projectiles for 7s), Magnet (attracts drops for 5s), and Slow Motion (slows meteors to 40% for 4s).' },
   { q: 'Does Space Defense require a download?', a: 'No. Space Defense runs entirely in your browser using HTML5 Canvas and Web Audio API technology. No download, installation, or plugin is required.' },
   { q: 'How are high scores saved?', a: "High scores are saved automatically to your browser's LocalStorage after each game over. No account or internet connection is needed." },
+  { q: 'Can playing Space Defense actually improve reaction time?', a: 'Research on fast-paced action games has repeatedly linked regular play to faster visual reaction times and better hand-eye coordination, without a loss in accuracy. Space Defense tracks your CPS, Peak CPS, and Accuracy across every run so you can see that kind of progress for yourself.' },
+  { q: 'How many lives do I get?', a: 'You start each run with 10 hull points, shown as small bars in the top-left corner. Every meteor that hits you, or reaches the bottom of the screen unshot, costs one hull point. The run ends when your hull reaches zero.' },
+  { q: 'When do boss meteors appear?', a: 'A boss meteor spawns automatically every 5 levels. Bosses have a much larger health bar, take longer to destroy, and reward extra score plus a guaranteed power-up drop when defeated.' },
+  { q: 'What does the combo counter do?', a: 'Destroying meteors back-to-back without missing a shot or taking damage builds your combo counter. Higher combos multiply the score you earn from each kill, but getting hit or letting a meteor pass resets the combo to zero.' },
+  { q: 'Can I pause the game?', a: 'Yes. Press Esc at any time during a run to pause. From the pause screen you can resume, restart the run, or return to the main menu.' },
+  { q: 'Can I play Space Defense in fullscreen?', a: 'Yes. Click the fullscreen icon in the top corner of the game or menu screen to expand the play field to your entire display, then click it again (or press Esc) to exit fullscreen.' },
+  { q: 'Does Space Defense work on mobile phones?', a: 'Yes. On touch devices, an on-screen directional pad and a fire button appear automatically at the bottom of the screen, and the game also supports fullscreen mode for a larger play area.' },
+  { q: 'What is the difference between the three difficulty levels?', a: 'Easy slows meteors down and lowers their health for beginners at a reduced score multiplier. Normal offers balanced, standard gameplay at a 1x multiplier. Hard increases meteor speed, spawn rate, and health by 1.5x but doubles your score multiplier for experienced players.' },
+  { q: 'Can I turn off the sound?', a: 'Yes. Click the speaker icon on the menu screen or in-game HUD to mute all sound effects, including laser shots, explosions, power-up pickups, and the countdown beeps before each run.' },
+  { q: 'What happens if two power-ups overlap?', a: 'Power-ups of different types stack and run simultaneously, each shown with its own countdown timer in the HUD. Picking up a second copy of a power-up you already have refreshes its duration instead of stacking the effect.' },
+  { q: 'Is Space Defense free to play?', a: 'Yes, Space Defense is completely free, with no purchases, subscriptions, or ads blocking gameplay. It runs directly in the browser at no cost.' },
+  { q: 'How is my accuracy percentage calculated?', a: 'Accuracy is calculated as the number of shots that hit a meteor divided by your total shots fired, shown as a percentage in both the HUD and the game-over summary screen.' },
 ];
 
 const FaqAccordion = ({ items }: { items: { q: string; a: string }[] }) => {
@@ -1339,4 +1544,27 @@ const GameOverStat = ({ label, value, icon, highlight = '#fff' }: { label: strin
     </div>
     <div style={{ fontSize: '1.15rem', fontWeight: '800', fontFamily: 'monospace', color: highlight, lineHeight: 1 }}>{value}</div>
   </div>
+);
+
+// ── External source link (styled like an inline citation) ────────
+const SourceLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{
+      color: '#ff2d95',
+      fontWeight: 700,
+      textDecoration: 'none',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '3px',
+      borderBottom: '1px solid rgba(255,45,149,0.35)',
+    }}
+    onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = '#ff2d95'; }}
+    onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.borderBottomColor = 'rgba(255,45,149,0.35)'; }}
+  >
+    {children}
+    <ExternalLink size={13} style={{ position: 'relative', top: '1px' }} />
+  </a>
 );
