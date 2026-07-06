@@ -61,7 +61,7 @@ type Action =
   | { type: 'TOGGLE_MUTE' }
   | { type: 'SET_TIMER';    payload: TimerOption }
   | { type: 'SET_CUSTOM_TEXT'; payload: string }
-  | { type: 'TOGGLE_CUSTOM' };
+  | { type: 'SET_CUSTOM_ENABLED'; payload: boolean };
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
@@ -118,8 +118,8 @@ function reducer(state: TestState, action: Action): TestState {
       return { ...state, timerMode: action.payload, timeLeft: action.payload };
     case 'SET_CUSTOM_TEXT':
       return { ...state, customText: action.payload };
-    case 'TOGGLE_CUSTOM':
-      return { ...state, useCustom: !state.useCustom };
+    case 'SET_CUSTOM_ENABLED':
+      return { ...state, useCustom: action.payload };
     default:
       return state;
   }
@@ -214,6 +214,12 @@ const ConfettiCanvas = memo(function ConfettiCanvas() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 
+    const handleResize = () => {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', handleResize);
+
     const pieces: Array<{
       x: number; y: number; r: number;
       d: number; color: string; tilt: number; tiltAngle: number;
@@ -249,7 +255,11 @@ const ConfettiCanvas = memo(function ConfettiCanvas() {
     draw();
 
     const timeout = setTimeout(() => cancelAnimationFrame(rafId), 5000);
-    return () => { cancelAnimationFrame(rafId); clearTimeout(timeout); };
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return (
@@ -667,49 +677,6 @@ const ResultModal = memo(function ResultModal({
   );
 });
 
-// ─── Breadcrumb ───────────────────────────────────────────────────────────────
-
-const Breadcrumb = memo(function Breadcrumb() {
-  const crumbs = [
-    { label: 'Home', href: '/' },
-    { label: 'Keyboard Tools', href: '/keyboard-tools' },
-    { label: 'Keyboard Accuracy Test', href: '/keyboard-accuracy-test' },
-  ];
-  return (
-    <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem' }}>
-      <ol style={{
-        display: 'flex', alignItems: 'center', gap: '0.4rem',
-        listStyle: 'none', margin: 0, padding: 0,
-        fontSize: '0.8rem', color: 'var(--text-muted)',
-        flexWrap: 'wrap',
-      }}>
-        {crumbs.map((c, i) => (
-          <li key={c.href} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            {i < crumbs.length - 1 ? (
-              <>
-                <a href={c.href} style={{
-                  color: 'var(--neon-cyan)', textDecoration: 'none',
-                  transition: 'opacity 0.2s',
-                }}
-                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
-                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-                >
-                  {c.label}
-                </a>
-                <span aria-hidden="true">›</span>
-              </>
-            ) : (
-              <span aria-current="page" style={{ color: '#fff', fontWeight: 600 }}>
-                {c.label}
-              </span>
-            )}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  );
-});
-
 // ─── SEO Meta (injected into <head> via portal-like effect) ──────────────────
 
 function SEOHead() {
@@ -909,6 +876,14 @@ const FAQ_ITEMS = [
     q: 'Does screen size affect the test?',
     a: 'No. The test is fully responsive and works on desktop, tablet, and mobile devices, though a physical keyboard generally produces higher accuracy than a touchscreen.',
   },
+  {
+    q: 'Does keyboard layout (QWERTY, Dvorak, Colemak) affect accuracy?',
+    a: 'Layout changes finger travel distance and common-letter placement, which can influence long-term accuracy ceilings, but consistent practice on any layout improves your score.',
+  },
+  {
+    q: 'Can typing accuracy tests help prevent repetitive strain injury?',
+    a: 'Indirectly, yes. Tracking accuracy encourages a controlled, relaxed typing rhythm rather than tense, error-driven pounding, which reduces strain on tendons over long sessions.',
+  },
 ];
 
 // ─── Main Component ───────────────────────────────────────────────────────────
@@ -919,6 +894,16 @@ export default function AccuracyTestPage() {
   const [customInput, setCustomInput] = useState('');
   const [customError, setCustomError] = useState('');
   const [showCustomForm, setShowCustomForm] = useState(false);
+  const [openFaqs, setOpenFaqs] = useState<Set<number>>(new Set());
+
+  const toggleFaq = useCallback((idx: number) => {
+    setOpenFaqs(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }, []);
 
   const inputRef    = useRef<HTMLInputElement>(null);
   const timerRef    = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -952,6 +937,13 @@ export default function AccuracyTestPage() {
     if (audioCtxRef.current?.state === 'suspended') audioCtxRef.current.resume();
   }, []);
 
+  // Clean up audio context on unmount
+  useEffect(() => {
+    return () => {
+      audioCtxRef.current?.close().catch(() => {});
+    };
+  }, []);
+
   // Timer
   useEffect(() => {
     if (state.phase === 'running') {
@@ -982,20 +974,20 @@ export default function AccuracyTestPage() {
       if (state.phase === 'idle') dispatch({ type: 'SET_PHASE', payload: 'running' });
       if (state.phase === 'done') return;
 
-      // Count errors per character
+      // Recompute key stats from scratch every keystroke. This is intentionally
+      // a full recount (not an incremental merge onto the previous totals) so
+      // that backspacing/editing never double-counts a character that was
+      // already tallied on a prior keystroke.
       let errs = 0;
-      const newErrors  = { ...state.keyErrors };
-      const newPresses = { ...state.keyPresses };
+      const newErrors: Record<string, number>  = {};
+      const newPresses: Record<string, number> = {};
 
       for (let i = 0; i < val.length; i++) {
+        const k = targetText[i].toLowerCase();
+        newPresses[k] = (newPresses[k] || 0) + 1;
         if (val[i] !== targetText[i]) {
           errs++;
-          const k = targetText[i].toLowerCase();
-          newErrors[k]  = (newErrors[k]  || 0) + 1;
-          newPresses[k] = (newPresses[k] || 0) + 1;
-        } else {
-          const k = targetText[i].toLowerCase();
-          newPresses[k] = (newPresses[k] || 0) + 1;
+          newErrors[k] = (newErrors[k] || 0) + 1;
         }
       }
 
@@ -1024,7 +1016,7 @@ export default function AccuracyTestPage() {
       }
     },
     [state.phase, state.typed, state.errors, state.elapsed, state.muted,
-     state.keyErrors, state.keyPresses, targetText, ensureAudio],
+     targetText, ensureAudio],
   );
 
   const focusInput = useCallback(() => {
@@ -1043,7 +1035,8 @@ export default function AccuracyTestPage() {
   }, []);
 
   const handleTimerChange = useCallback((v: TimerOption) => {
-    dispatch({ type: 'SET_TIMER', payload: v });
+    // RESET already sets timerMode/timeLeft, so a separate SET_TIMER dispatch
+    // is unnecessary and was previously causing a redundant extra re-render.
     dispatch({ type: 'RESET', payload: { timerMode: v } });
     prevErrRef.current = 0;
     focusInput();
@@ -1054,18 +1047,17 @@ export default function AccuracyTestPage() {
     if (customInput.trim().length < 10) { setCustomError('Text must be at least 10 characters.'); return; }
     setCustomError('');
     dispatch({ type: 'SET_CUSTOM_TEXT', payload: customInput.trim() });
-    dispatch({ type: 'TOGGLE_CUSTOM' }); // ensure on
+    dispatch({ type: 'SET_CUSTOM_ENABLED', payload: true });
     setShowCustomForm(false);
     handleReset();
   }, [customInput, handleReset]);
 
   const handleDisableCustom = useCallback(() => {
     dispatch({ type: 'SET_CUSTOM_TEXT', payload: '' });
-    // Force useCustom off by re-checking
-    if (state.useCustom) dispatch({ type: 'TOGGLE_CUSTOM' });
+    dispatch({ type: 'SET_CUSTOM_ENABLED', payload: false });
     setShowCustomForm(false);
     handleReset();
-  }, [state.useCustom, handleReset]);
+  }, [handleReset]);
 
   // Timer display
   const timerDisplay = useMemo(() => {
@@ -1110,9 +1102,6 @@ export default function AccuracyTestPage() {
       <SEOHead />
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-
-        {/* Breadcrumb */}
-        <Breadcrumb />
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -1302,13 +1291,14 @@ export default function AccuracyTestPage() {
           </div>
         )}
 
-        {/* Hidden real input */}
+        {/* Real input — visually hidden but must remain accessible, so
+            no aria-hidden here. It's the actual control screen-reader
+            and keyboard users type into. */}
         <input
           ref={inputRef}
           value={state.typed}
           onChange={handleChange}
           disabled={state.phase === 'done'}
-          aria-hidden="true"
           aria-label="Typing input"
           style={{ position: 'fixed', top: '-9999px', left: '-9999px', opacity: 0 }}
           autoComplete="off"
@@ -1548,7 +1538,11 @@ export default function AccuracyTestPage() {
           <p style={p}>
             Data-entry positions are among the most accuracy-sensitive roles in the workforce. A single transposed
             digit in a financial record, a misspelled patient name in a medical database, or an incorrect postal
-            code in a shipping system can cascade into costly downstream errors. Standards for data-entry
+            code in a shipping system can cascade into costly downstream errors. Standards tracked by{' '}
+            <a href="https://www.bls.gov/ooh/office-and-administrative-support/data-entry-keyers.htm" target="_blank" rel="noopener noreferrer" style={extLink}>
+              labor statistics researchers<ExtLinkIcon />
+            </a>{' '}
+            show that data-entry
             professionals typically start at <strong>98%</strong> accuracy and often require verified certification
             from a recognised typing assessment. Using this tool's 120-second mode is an excellent way to
             simulate the endurance required for data-entry work.
@@ -1571,11 +1565,173 @@ export default function AccuracyTestPage() {
             of the same neural pathways.
           </p>
 
+          <h2 style={h2}>The Science Behind Typing Accuracy</h2>
+          <p style={p}>
+            Typing is a form of procedural memory — the same category of learning responsible for riding a
+            bicycle or playing a musical instrument. Unlike declarative memory, which stores facts and can be
+            consciously recalled, procedural memory is built through repetition and stored largely in the
+            cerebellum and basal ganglia, structures that coordinate fine motor sequences. Each time you type a
+            word correctly, the neural pathway associated with that specific finger sequence is reinforced. Each
+            time you type it incorrectly, a competing, weaker pathway is also strengthened, which is why
+            "unlearning" a persistent mistake often takes longer than learning it correctly would have in the
+            first place.
+          </p>
+          <p style={p}>
+            Sleep plays a documented role in this consolidation process. Research by{' '}
+            <a href="https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-understanding-sleep" target="_blank" rel="noopener noreferrer" style={extLink}>
+              sleep and motor-learning scientists<ExtLinkIcon />
+            </a>{' '}
+            has repeatedly shown that a skill practised shortly before sleep shows measurable overnight improvement
+            without any additional practice, because the brain replays and strengthens the relevant motor
+            sequences during certain sleep stages. This is one of the strongest arguments for short, frequent,
+            daily practice sessions rather than infrequent marathon sessions: each practice window seeds a
+            consolidation cycle, and more cycles compound into faster skill acquisition.
+          </p>
+          <p style={p}>
+            Accuracy also has a strong attentional component. Working memory has limited capacity, and a
+            beginner's attention is split between recalling key locations, monitoring the screen, and composing
+            the intended message. As key locations become automatic, that freed attention can be redirected
+            toward accuracy monitoring and, eventually, toward the content being written rather than the
+            mechanics of writing it. This is why experienced typists often report that fast, accurate typing
+            "feels effortless" — the cognitive load of the physical act has been almost entirely offloaded to
+            procedural memory.
+          </p>
+
+          <h2 style={h2}>Typing Accuracy Across Keyboard Layouts</h2>
+          <p style={p}>
+            While QWERTY remains the dominant keyboard layout worldwide, alternative layouts such as Dvorak and
+            Colemak were specifically engineered around accuracy and efficiency principles. QWERTY's letter
+            arrangement was originally designed in the 1870s to reduce the mechanical jamming of typewriter
+            hammers, not to optimise for human hand movement — a constraint that no longer applies to modern
+            keyboards but persists as the global standard purely through inertia and familiarity.
+          </p>
+          <p style={p}>
+            The Dvorak Simplified Keyboard places the most frequently used English letters on the home row,
+            claiming to reduce finger travel distance by a significant margin compared with QWERTY. Colemak, a
+            more recent alternative, preserves many common QWERTY shortcut positions (like Z, X, C, V for
+            undo/cut/copy/paste) while still moving high-frequency letters closer to the home row, making the
+            transition less disruptive for touch typists switching from QWERTY. Studies comparing layouts show
+            mixed results on raw speed gains, but many switchers report a genuine reduction in awkward finger
+            stretches and, consequently, fewer substitution errors. Regardless of layout, the underlying
+            principle for building accuracy is identical: minimise finger travel, anchor to a stable home
+            position, and build the motor sequence through repetition.
+          </p>
+
+          <h2 style={h2}>Ergonomics and Injury Prevention</h2>
+          <p style={p}>
+            Accuracy and ergonomics are more closely linked than most typists realise. Poor posture and awkward
+            wrist angles do not just cause discomfort — they actively degrade fine motor control, leading to more
+            substitution and omission errors as fatigue sets in during longer sessions. Maintaining a neutral
+            wrist position (neither bent up nor down), keeping elbows at roughly a 90-degree angle, and
+            positioning the monitor at eye level all reduce the physical strain that erodes accuracy over time.
+          </p>
+          <p style={p}>
+            Repetitive strain injuries, including carpal tunnel syndrome and tendonitis, are strongly associated
+            with tense, high-force keystrokes rather than with typing volume alone, according to{' '}
+            <a href="https://www.osha.gov/etools/computer-workstations" target="_blank" rel="noopener noreferrer" style={extLink}>
+              occupational health researchers<ExtLinkIcon />
+            </a>
+            . Typists who consciously
+            practise a light touch — pressing keys just enough to actuate them rather than bottoming out
+            forcefully — tend to report both fewer injuries and higher long-term accuracy, since a controlled,
+            relaxed keystroke is inherently more precise than a tense, forceful one. Taking short breaks every
+            20–30 minutes to stretch the hands and wrists is a simple, evidence-based habit that protects both
+            long-term health and typing precision.
+          </p>
+
+          <h2 style={h2}>A Brief History of Typing Tests</h2>
+          <p style={p}>
+            Formal typing assessments date back to the earliest typewriter competitions of the late 19th century,
+            when manufacturers staged public speed contests to promote their machines. As typewriters became
+            standard office equipment through the 20th century, businesses formalised typing tests as a hiring
+            requirement for secretarial and clerical roles, typically measuring gross words per minute over a
+            five-minute passage with a fixed error penalty. The transition to computers in the 1980s and 1990s
+            introduced software-based tests capable of tracking individual keystrokes in real time, enabling far
+            more granular accuracy metrics than were previously possible on paper-based assessments.
+          </p>
+          <p style={p}>
+            Today's browser-based typing tests, including this one, extend that tradition with instant visual
+            feedback: live accuracy percentages, per-key error heatmaps, and accuracy-over-time graphs that would
+            have been impossible to produce with a stopwatch and a typed page. This real-time feedback loop is
+            itself a training aid — seeing an error highlighted immediately reinforces the correction far more
+            effectively than reviewing a final tally after the fact.
+          </p>
+
+          <h2 style={h2}>Typing Accuracy for Gamers and Streamers</h2>
+          <p style={p}>
+            Competitive gaming and live streaming place unusual demands on typing accuracy. In-game chat commands,
+            build orders, and callouts often need to be typed in seconds without diverting visual attention from
+            the game itself — a skill that depends entirely on touch-typing accuracy rather than speed alone,
+            since even a single mistyped command can fail silently. Streamers additionally need to type chat
+            responses, moderation commands, and donation acknowledgements while maintaining commentary, making
+            error-free "blind" typing (without looking at the keyboard or even the text field) a genuinely
+            valuable skill. Short-burst practice modes, like this tool's 15-second and 30-second timers, closely
+            mirror the quick, high-pressure typing bursts gamers and streamers actually need.
+          </p>
+
+          <h2 style={h2}>Typing Accuracy Certifications</h2>
+          <p style={p}>
+            Several organisations offer recognised typing certifications that combine speed and accuracy
+            benchmarks, often required for government, legal, and administrative positions. These certifications
+            typically involve a proctored, timed test measuring gross WPM alongside a strict accuracy threshold,
+            with results provided as an official, verifiable document. While this tool is not a certification
+            provider, regularly training on it — particularly in the 60-second and 120-second modes it offers —
+            is a practical, no-cost way to prepare for the format and pressure of a proctored certification exam
+            before sitting one.
+          </p>
+
+          <h2 style={h2}>Using This Tool to Track Long-Term Progress</h2>
+          <p style={p}>
+            The most effective way to use any typing accuracy test is not as a one-off score, but as a recurring
+            checkpoint. Re-run the same timer mode (for example, the 60-second test) at a fixed cadence — once a
+            day or a few times a week — and record the accuracy and Net WPM shown in the results modal after each
+            session using the "Copy Results" button. Over a few weeks, a clear trend line emerges: accuracy
+            typically climbs quickly at first, plateaus, and then rises again once weak keys identified by the
+            heatmap have been specifically drilled. Pairing the built-in accuracy-over-time graph within a single
+            session with a personal log across sessions gives visibility at both the micro level (did accuracy
+            dip toward the end of this test, suggesting fatigue?) and the macro level (is accuracy trending
+            upward month over month?).
+          </p>
+
+          <h2 style={h2}>Typing Accuracy in Other Languages</h2>
+          <p style={p}>
+            Accuracy dynamics shift noticeably when typing in languages beyond English. Languages with diacritics,
+            such as French, Spanish, or Vietnamese, require additional keystrokes or dead-key sequences (pressing
+            an accent key followed by a letter), introducing new categories of possible errors around timing and
+            sequencing rather than simple key substitution. Input-method editors used for Chinese, Japanese, and
+            Korean layer a phonetic or component-based typing stage on top of the physical keyboard, meaning
+            "accuracy" partly depends on correctly selecting the right candidate character from a list rather than
+            on keystroke precision alone. Right-to-left languages like Arabic and Hebrew introduce their own
+            layout and directionality considerations that can affect cursor tracking and error visualisation in
+            typing software. Regardless of language, the underlying training principle holds: build the specific
+            motor sequences for that language's most frequent letter combinations through deliberate, unhurried
+            repetition, and let speed follow accuracy rather than the other way around.
+          </p>
+
+          <h2 style={h2}>Building a Personal Practice Routine</h2>
+          <p style={p}>
+            A well-structured practice routine treats accuracy training the same way an athlete treats technical
+            drills: short, focused, and specific to identified weaknesses rather than generic repetition. A
+            practical weekly structure might begin with a baseline 60-second test to establish a starting accuracy
+            and Net WPM figure, followed by several days of targeted drills built around the keys flagged in that
+            session's heatmap — typing word lists or short phrases that repeat the problem letters at a
+            deliberately reduced speed. Toward the end of the week, a second 60-second test measures whether
+            accuracy improved, and the cycle repeats with a fresh set of target keys. This heatmap-driven,
+            iterative approach is considerably more efficient than simply retyping the same generic passage
+            dozens of times, because it directs limited practice time toward the specific motor patterns that are
+            actually failing rather than reinforcing patterns that are already reliable.
+          </p>
+          <p style={p}>
+            It is also worth varying practice material periodically. Relying solely on pangram-style sentences
+            like the one used as this tool's default text builds strong general letter coverage, but real-world
+            typing — emails, reports, code, chat messages — has its own rhythm and vocabulary. Switching between
+            the default text and the Custom Text feature, loaded with material genuinely relevant to your work,
+            ensures that the accuracy gains measured here translate directly into the accuracy you experience
+            day to day.
+          </p>
+
           {/* FAQ */}
-          <div style={{
-            marginTop: '3rem', background: 'var(--bg-card)',
-            border: '1px solid var(--border)', borderRadius: '12px', padding: '1.5rem',
-          }}>
+          <div style={{ marginTop: '3rem' }}>
             <h2 style={{
               color: 'var(--neon-cyan)', fontSize: '1.3rem', fontWeight: 700,
               marginTop: 0, marginBottom: '1.25rem',
@@ -1583,25 +1739,68 @@ export default function AccuracyTestPage() {
               Frequently Asked Questions
             </h2>
 
-            {FAQ_ITEMS.map(({ q, a }, idx) => (
-              <details key={q} style={{
-                marginBottom: idx < FAQ_ITEMS.length - 1 ? '1rem' : 0,
-                borderBottom: idx < FAQ_ITEMS.length - 1 ? '1px solid var(--border)' : 'none',
-                paddingBottom: idx < FAQ_ITEMS.length - 1 ? '1rem' : 0,
-              }}>
-                <summary style={{
-                  cursor: 'pointer', color: '#fff', fontWeight: 600,
-                  fontSize: '0.95rem', listStyle: 'none', display: 'flex',
-                  justifyContent: 'space-between', alignItems: 'center',
-                }}>
-                  {q}
-                  <span style={{ color: 'var(--neon-cyan)', fontSize: '1.2rem', marginLeft: '0.5rem' }}>+</span>
-                </summary>
-                <p style={{ margin: '0.5rem 0 0', color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.7' }}>
-                  {a}
-                </p>
-              </details>
-            ))}
+            {FAQ_ITEMS.map(({ q, a }, idx) => {
+              const isOpen = openFaqs.has(idx);
+              return (
+                <div
+                  key={q}
+                  style={{
+                    background: isOpen ? 'rgba(0,245,255,0.06)' : 'var(--bg-card)',
+                    border: `1px solid ${isOpen ? 'var(--neon-cyan)' : 'var(--border)'}`,
+                    borderRadius: '12px',
+                    padding: '1.1rem 1.25rem',
+                    marginBottom: '0.75rem',
+                    transition: 'background 0.2s ease, border-color 0.2s ease',
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleFaq(idx)}
+                    aria-expanded={isOpen}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      gap: '1rem',
+                      background: 'transparent',
+                      border: 'none',
+                      padding: 0,
+                      margin: 0,
+                      cursor: 'pointer',
+                      color: '#fff',
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      textAlign: 'left',
+                      font: 'inherit',
+                    }}
+                  >
+                    <span>{q}</span>
+                    <svg
+                      width="18" height="18" viewBox="0 0 24 24" fill="none"
+                      stroke={isOpen ? 'var(--neon-cyan)' : 'var(--text-muted)'}
+                      strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                      style={{
+                        flexShrink: 0,
+                        transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transition: 'transform 0.25s ease, stroke 0.2s ease',
+                      }}
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+
+                  {isOpen && (
+                    <p style={{
+                      margin: '0.85rem 0 0', color: 'var(--text-muted)',
+                      fontSize: '0.9rem', lineHeight: '1.7',
+                    }}>
+                      {a}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </article>
       </div>
@@ -1639,3 +1838,21 @@ const h2: React.CSSProperties = {
 const p:  React.CSSProperties = { marginBottom: '1.25rem' };
 const ul: React.CSSProperties = { paddingLeft: '1.25rem', marginBottom: '1.25rem' };
 const li: React.CSSProperties = { marginBottom: '0.5rem' };
+const extLink: React.CSSProperties = {
+  color: 'var(--neon-cyan)',
+  textDecoration: 'none',
+  fontWeight: 600,
+};
+
+function ExtLinkIcon() {
+  return (
+    <svg
+      width="12" height="12" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round"
+      style={{ display: 'inline-block', marginLeft: '2px', verticalAlign: 'text-top' }}
+    >
+      <path d="M7 17L17 7M7 7h10v10" />
+    </svg>
+  );
+}
