@@ -14,6 +14,7 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [hoveredTool, setHoveredTool] = useState<{ label: string; top: number; left: number } | null>(null);
   const location = useLocation();
 
   const navItems = [
@@ -100,6 +101,7 @@ export default function Layout() {
               <NavLink
                 to={item.to}
                 end={item.exact}
+                className="top-nav-link"
                 style={({ isActive }) => {
                   const isGame = item.label.includes('Games');
                   return {
@@ -150,6 +152,7 @@ export default function Layout() {
             <NavLink
               key={item.to} to={item.to} end={item.exact}
               onClick={() => setMenuOpen(false)}
+              className="mobile-nav-link"
               style={({ isActive }) => {
                 const isGame = item.label.includes('Games');
                 return {
@@ -192,7 +195,7 @@ export default function Layout() {
           zIndex: 10,
           padding: sidebarOpen ? '1.25rem' : '1.25rem 0.5rem',
           transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          overflow: 'hidden',
+          overflow: 'visible',
           boxSizing: 'border-box'
         }}>
 
@@ -215,22 +218,33 @@ export default function Layout() {
                 🛠️ All Tools
               </div>
             )}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{
-                background: 'transparent', border: 'none', cursor: 'pointer',
-                color: 'var(--text-secondary)', display: 'flex', alignItems: 'center',
-                justifyContent: 'center', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--neon-cyan)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)' }}
-            >
-              {sidebarOpen ? (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-              )}
-            </button>
+
+            {/* TOGGLE BUTTON + GEMINI-STYLE TOOLTIP */}
+            <div className="sidebar-toggle-wrap">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                style={{
+                  background: 'transparent', border: 'none', cursor: 'pointer',
+                  color: 'var(--text-secondary)', display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', padding: '6px', borderRadius: '6px', transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--neon-cyan)'; e.currentTarget.style.background = 'rgba(0,245,255,0.08)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.background = 'transparent'; }}
+              >
+                {sidebarOpen ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                )}
+              </button>
+
+              <span
+                className={`sidebar-toggle-tooltip ${sidebarOpen ? 'tooltip-right' : 'tooltip-right'}`}
+              >
+                {sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+              </span>
+            </div>
           </div>
 
           {/* FILTER DROPDOWN */}
@@ -262,63 +276,99 @@ export default function Layout() {
             {filteredTools.map((tool) => {
               const isCurrentActive = location.pathname === tool.to;
               const isPinned = tool.to === '/cps-test';
+              const showLabel = sidebarOpen || isPinned;
               return (
-                <Link
-                  key={tool.to} to={tool.to}
-                  style={{
-                    display: 'flex', alignItems: 'center',
-                    justifyContent: sidebarOpen ? 'flex-start' : 'center',
-                    gap: sidebarOpen ? '0.75rem' : '0.4rem',
-                    padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
-                    borderRadius: '6px', textDecoration: 'none',
-                    position: isPinned ? 'sticky' : 'static', top: isPinned ? 0 : 'auto', zIndex: isPinned ? 10 : 1,
-                    background: isPinned ? (isCurrentActive ? 'rgba(0, 245, 255, 0.15)' : 'rgba(15, 23, 42, 0.95)') : (isCurrentActive ? 'rgba(0, 245, 255, 0.08)' : 'transparent'),
-                    backdropFilter: isPinned ? 'blur(5px)' : 'none',
-                    border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
-                    borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
-                    marginBottom: isPinned ? '5px' : '0',
-                    fontSize: '0.85rem', fontWeight: isCurrentActive ? '600' : '500',
-                    color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
-                    textShadow: isCurrentActive ? '0 0 8px rgba(0,245,255,0.6)' : 'none',
-                    transition: 'all 0.3s ease', transform: 'translateX(0)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isCurrentActive) {
-                      e.currentTarget.style.background = isPinned ? 'rgba(0, 245, 255, 0.15)' : 'rgba(0, 245, 255, 0.1)';
-                      e.currentTarget.style.color = '#00f5ff'; 
-                      e.currentTarget.style.transform = 'translateX(6px)'; 
-                      e.currentTarget.style.border = '1px solid rgba(0, 245, 255, 0.1)';
-                      e.currentTarget.style.textShadow = '0 0 8px rgba(0,245,255,0.6)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isCurrentActive) {
-                      e.currentTarget.style.background = isPinned ? 'rgba(15, 23, 42, 0.95)' : 'transparent';
-                      e.currentTarget.style.color = 'var(--text-secondary)';
-                      e.currentTarget.style.transform = 'translateX(0)';
-                      e.currentTarget.style.border = '1px solid transparent';
-                      e.currentTarget.style.textShadow = 'none';
-                    }
-                  }}
-                >
-                  <span style={{
-                    fontSize: '1.1rem',
-                    filter: isCurrentActive
-                      ? 'drop-shadow(0 0 6px rgba(0,245,255,0.9)) drop-shadow(0 0 14px rgba(0,245,255,0.5))'
-                      : 'drop-shadow(0 0 4px rgba(0,245,255,0.35))'
-                  }}>{tool.icon}</span>
-                  <span style={{ 
-                    display: (sidebarOpen || isPinned) ? 'block' : 'none', 
-                    textTransform: 'uppercase', fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
-                    letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
-                  }}>
-                    {tool.label}
-                  </span>
-                </Link>
+                <div key={tool.to} style={{ position: 'relative' }}>
+                  <Link
+                    to={tool.to}
+                    onMouseEnter={(e) => {
+                      if (!isCurrentActive) {
+                        e.currentTarget.style.background = isPinned ? 'rgba(0, 245, 255, 0.15)' : 'rgba(0, 245, 255, 0.1)';
+                        e.currentTarget.style.color = '#00f5ff'; 
+                        e.currentTarget.style.transform = 'translateX(6px)'; 
+                        e.currentTarget.style.border = '1px solid rgba(0, 245, 255, 0.1)';
+                        e.currentTarget.style.textShadow = '0 0 8px rgba(0,245,255,0.6)';
+                      }
+                      if (!sidebarOpen) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredTool({ label: tool.label, top: rect.top + rect.height / 2, left: rect.right + 10 });
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isCurrentActive) {
+                        e.currentTarget.style.background = isPinned ? 'rgba(15, 23, 42, 0.95)' : 'transparent';
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                        e.currentTarget.style.transform = 'translateX(0)';
+                        e.currentTarget.style.border = '1px solid transparent';
+                        e.currentTarget.style.textShadow = 'none';
+                      }
+                      setHoveredTool(null);
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center',
+                      justifyContent: sidebarOpen ? 'flex-start' : 'center',
+                      gap: sidebarOpen ? '0.75rem' : '0.4rem',
+                      padding: sidebarOpen ? '0.65rem 0.85rem' : '0.65rem 0.25rem',
+                      borderRadius: '6px', textDecoration: 'none',
+                      position: isPinned ? 'sticky' : 'static', top: isPinned ? 0 : 'auto', zIndex: isPinned ? 10 : 1,
+                      background: isPinned ? (isCurrentActive ? 'rgba(0, 245, 255, 0.15)' : 'rgba(15, 23, 42, 0.95)') : (isCurrentActive ? 'rgba(0, 245, 255, 0.08)' : 'transparent'),
+                      backdropFilter: isPinned ? 'blur(5px)' : 'none',
+                      border: isCurrentActive ? '1px solid rgba(0, 245, 255, 0.3)' : '1px solid transparent',
+                      borderBottom: (isPinned && !isCurrentActive) ? '1px solid rgba(255,255,255,0.05)' : undefined,
+                      marginBottom: isPinned ? '5px' : '0',
+                      fontSize: '0.85rem', fontWeight: isCurrentActive ? '600' : '500',
+                      color: isCurrentActive ? '#00f5ff' : 'var(--text-secondary)',
+                      textShadow: isCurrentActive ? '0 0 8px rgba(0,245,255,0.6)' : 'none',
+                      transition: 'all 0.3s ease', transform: 'translateX(0)'
+                    }}
+                  >
+                    <span style={{
+                      fontSize: '1.1rem',
+                      filter: isCurrentActive
+                        ? 'drop-shadow(0 0 6px rgba(0,245,255,0.9)) drop-shadow(0 0 14px rgba(0,245,255,0.5))'
+                        : 'drop-shadow(0 0 4px rgba(0,245,255,0.35))'
+                    }}>{tool.icon}</span>
+                    <span style={{ 
+                      display: showLabel ? 'block' : 'none', 
+                      textTransform: 'uppercase', fontSize: (!sidebarOpen && isPinned) ? '0.65rem' : '0.75rem', 
+                      letterSpacing: '0.02em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' 
+                    }}>
+                      {tool.label}
+                    </span>
+                  </Link>
+                </div>
               );
             })}
           </div>
         </aside>
+
+        {/* FIXED GLOBAL TOOLTIP — escapes all scroll/overflow clipping */}
+        <span
+          style={{
+            position: 'fixed',
+            top: hoveredTool ? hoveredTool.top : 0,
+            left: hoveredTool ? hoveredTool.left : 0,
+            transform: hoveredTool ? 'translateY(-50%) translateX(0)' : 'translateY(-50%) translateX(-6px)',
+            background: 'rgba(0,245,255,0.12)',
+            border: '1px solid rgba(0,245,255,0.4)',
+            color: '#00f5ff',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            padding: '6px 10px',
+            borderRadius: '6px',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 2px 10px rgba(0,245,255,0.25)',
+            textShadow: '0 0 6px rgba(0,245,255,0.6)',
+            opacity: hoveredTool ? 1 : 0,
+            visibility: hoveredTool ? 'visible' : 'hidden',
+            pointerEvents: 'none',
+            transition: 'opacity 0.18s ease, transform 0.18s ease, visibility 0.18s',
+            transitionDelay: hoveredTool ? '0.3s' : '0s',
+            zIndex: 200
+          }}
+        >
+          {hoveredTool?.label}
+        </span>
 
         {/* MAIN DYNAMIC CONTENT */}
         <main className="main-content" style={{ 
@@ -427,15 +477,65 @@ export default function Layout() {
         .mobile-menu-overlay { padding: 1rem 2rem; }
 
         .footer-grid { grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; }
-        
-        .footer-link { color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
-        .footer-link:hover { color: var(--text-primary, #ffffff); }
+
+        /* ===== TOP NAV LINK HOVER - CYAN ===== */
+        .top-nav-link:hover {
+          color: var(--neon-cyan, #00f5ff) !important;
+          background: rgba(0,245,255,0.1) !important;
+          text-shadow: 0 0 8px rgba(0,245,255,0.6);
+        }
+
+        /* ===== MOBILE NAV LINK HOVER - CYAN ===== */
+        .mobile-nav-link:hover {
+          color: var(--neon-cyan, #00f5ff) !important;
+          background: rgba(0,245,255,0.1) !important;
+        }
+
+        /* ===== FOOTER LINKS HOVER - CYAN ===== */
+        .footer-link { color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s, text-shadow 0.2s; }
+        .footer-link:hover { color: var(--neon-cyan, #00f5ff); text-shadow: 0 0 8px rgba(0,245,255,0.5); }
         
         .footer-bottom-link { color: #64748b; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-        .footer-bottom-link:hover { color: var(--text-primary, #ffffff); }
+        .footer-bottom-link:hover { color: var(--neon-cyan, #00f5ff); }
         
+        /* ===== SOCIAL BUTTONS HOVER - CYAN ===== */
         .social-btn { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s; }
-        .social-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-primary, #ffffff); }
+        .social-btn:hover { background: rgba(0,245,255,0.12); color: var(--neon-cyan, #00f5ff); box-shadow: 0 0 10px rgba(0,245,255,0.4); }
+
+        /* ===== GEMINI-STYLE TOOLTIPS (smooth fade + slide) ===== */
+        .sidebar-toggle-wrap {
+          position: relative;
+          display: inline-flex;
+        }
+
+        .sidebar-toggle-tooltip {
+          position: absolute;
+          left: calc(100% + 10px);
+          top: 50%;
+          transform: translateY(-50%) translateX(-6px);
+          background: rgba(0,245,255,0.12);
+          border: 1px solid rgba(0,245,255,0.4);
+          color: #00f5ff;
+          font-size: 0.75rem;
+          font-weight: 600;
+          padding: 6px 10px;
+          border-radius: 6px;
+          white-space: nowrap;
+          box-shadow: 0 2px 10px rgba(0,245,255,0.25);
+          text-shadow: 0 0 6px rgba(0,245,255,0.6);
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+          z-index: 50;
+        }
+
+        .sidebar-toggle-wrap:hover .sidebar-toggle-tooltip {
+          opacity: 1;
+          visibility: visible;
+          transform: translateY(-50%) translateX(0);
+          transition-delay: 0.35s;
+        }
 
         @media (max-width: 1024px) {
           .desktop-nav { display: none !important; }
