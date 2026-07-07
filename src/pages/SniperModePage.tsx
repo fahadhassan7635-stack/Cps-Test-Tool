@@ -43,6 +43,7 @@ import React, {
   useMemo,
   memo,
 } from 'react';
+import { Maximize, Minimize } from 'lucide-react';
 
 /* ═══════════════════════════════════════════════════════════════
    TYPES
@@ -430,6 +431,7 @@ function saveRecords(r: StoredRecords): void {
 /* ── Physics ── */
 function spawnTarget(
   areaWidth: number,
+  areaHeight: number,
   cfg: DifficultyDef,
   existingT?: TargetPhysics | null,
 ): TargetPhysics {
@@ -440,7 +442,7 @@ function spawnTarget(
   let attempts = 0;
   do {
     x = clamp(pad + Math.random() * (areaWidth - pad * 2), pad, areaWidth - pad);
-    y = clamp(pad + Math.random() * (AREA_HEIGHT - pad * 2), pad, AREA_HEIGHT - pad);
+    y = clamp(pad + Math.random() * (areaHeight - pad * 2), pad, areaHeight - pad);
     attempts++;
   } while (
     existingT &&
@@ -462,6 +464,7 @@ function spawnTarget(
 function stepPhysics(
   t: TargetPhysics,
   areaWidth: number,
+  areaHeight: number,
   speedMult: number,
   dtFactor: number,
   isImpossible: boolean,
@@ -482,7 +485,7 @@ function stepPhysics(
   else if (x + size > areaWidth){ x = areaWidth - size; newVx = -Math.abs(vx); }
 
   if (y - size < 0)              { y = size;             newVy =  Math.abs(vy); }
-  else if (y + size > AREA_HEIGHT){ y = AREA_HEIGHT - size; newVy = -Math.abs(vy); }
+  else if (y + size > areaHeight){ y = areaHeight - size; newVy = -Math.abs(vy); }
 
   if (isImpossible && Math.random() < IMPOSSIBLE_NUDGE_P) {
     const nudge = cfg.accelVariance * 0.35;
@@ -851,6 +854,24 @@ export default function SniperModePage() {
   const [muted,       setMuted]       = useState(false);
   const [openFaqId,   setOpenFaqId]   = useState<string | null>(null);
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      const el = areaRef.current;
+      if (!el) return;
+      el.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
   const areaRef          = useRef<HTMLDivElement>(null);
   const targetElRef      = useRef<HTMLButtonElement>(null);
   const animRafRef       = useRef<number>(0);
@@ -1049,9 +1070,9 @@ export default function SniperModePage() {
     const speedMult = clamp(1 + elapsed * PROGRESSIVE_ACCEL, 1, MAX_SPEED_MULT);
 
     const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
-    const { width: areaWidth } = area.getBoundingClientRect();
+    const { width: areaWidth, height: areaHeight } = area.getBoundingClientRect();
 
-    const next = stepPhysics(t, areaWidth, speedMult, dtFactor, difficultyRef.current === 'impossible', cfg);
+    const next = stepPhysics(t, areaWidth, areaHeight, speedMult, dtFactor, difficultyRef.current === 'impossible', cfg);
     targetRef.current = next;
 
     applyTargetTransform(next);
@@ -1102,7 +1123,7 @@ export default function SniperModePage() {
     durationSecondsRef.current = resolved;
     isUnlimitedRef.current = resolved === null;
 
-    const { width: areaWidth } = area.getBoundingClientRect();
+    const { width: areaWidth, height: areaHeight } = area.getBoundingClientRect();
     const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
 
     const gs: GameState = {
@@ -1114,7 +1135,7 @@ export default function SniperModePage() {
     setComboLabel('');
     hitGuardRef.current = false;
 
-    const t = spawnTarget(areaWidth, cfg, null);
+    const t = spawnTarget(areaWidth, areaHeight, cfg, null);
     targetRef.current = t;
 
     const el = targetElRef.current;
@@ -1300,8 +1321,8 @@ export default function SniperModePage() {
     ]);
     setTimeout(() => setFeedbacks(prev => prev.filter(f => f.id !== fid)), FEEDBACK_TTL_MS);
 
-    const { width: areaWidth } = area.getBoundingClientRect();
-    const next = spawnTarget(areaWidth, cfg, t);
+    const { width: areaWidth, height: areaHeight } = area.getBoundingClientRect();
+    const next = spawnTarget(areaWidth, areaHeight, cfg, t);
     targetRef.current = next;
 
     const el = targetElRef.current;
@@ -1552,8 +1573,14 @@ export default function SniperModePage() {
           {/* ── Arena ── */}
           <div
             ref={areaRef}
-            onClick={isPlaying ? handleMiss : undefined}
-            onTouchStart={isPlaying ? handleMissTouch : undefined}
+            onClick={(e) => {
+              if (isPlaying) handleMiss();
+              else if (phase === 'idle' || phase === 'done') beginCountdown();
+            }}
+            onTouchStart={(e) => {
+              if (isPlaying) handleMissTouch(e);
+              else if (phase === 'idle' || phase === 'done') beginCountdown();
+            }}
             role="application"
             aria-label={
               phase === 'running'   ? 'Click the moving red target. Clicking elsewhere counts as a miss.' :
@@ -1564,8 +1591,8 @@ export default function SniperModePage() {
             }
             className={isPlaying ? 'arena-playing' : undefined}
             style={{
-              position: 'relative', width: '100%', height: `${AREA_HEIGHT}px`,
-              background: '#0a0f18',
+              position: 'relative', width: '100%', height: isFullscreen ? '100vh' : `${AREA_HEIGHT}px`,
+              background: isFullscreen ? '#02040a' : '#0a0f18',
               border: `2px solid ${isPlaying ? 'rgba(255,45,85,0.5)' : 'var(--border)'}`,
               borderRadius: '16px', overflow: 'hidden',
               cursor: isPlaying ? undefined : 'default', // cursor set by class above when playing
@@ -1590,6 +1617,21 @@ export default function SniperModePage() {
               </>
             )}
 
+            {/* Fullscreen Exit Floating Button */}
+            {isFullscreen && (
+              <button
+                onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+                aria-label="Exit fullscreen"
+                style={{
+                  position: 'absolute', top: '1rem', right: '1rem', zIndex: 50,
+                  background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px',
+                  padding: '0.5rem', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', backdropFilter: 'blur(8px)',
+                }}
+              >
+                <Minimize size={18} />
+              </button>
+            )}
+
             {isPlaying && <ComboToast label={comboLabel} />}
 
             {phase === 'countdown' && <CountdownOverlay value={countdown} />}
@@ -1606,8 +1648,11 @@ export default function SniperModePage() {
                   fontSize: '1.5rem', fontWeight: 800,
                   color: phase === 'done' ? 'var(--neon-orange)' : 'var(--neon-red)',
                 }}>
-                  {phase === 'done' ? `Final Score: ${gameState.score}` : 'Click Start — Hit the Moving Target'}
+                  {phase === 'done' ? `Final Score: ${gameState.score}` : 'Click anywhere to start — Hit the Moving Target'}
                 </span>
+                {phase === 'done' && (
+                  <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Click anywhere to play again</div>
+                )}
                 {phase === 'done' && (
                   <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.88rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <span style={{ color: 'var(--neon-green)' }}>{accuracy}% Accuracy</span>
@@ -1692,6 +1737,16 @@ export default function SniperModePage() {
               style={{ minWidth: '2.8rem', fontSize: '1.1rem', padding: '0.5rem 0.85rem' }}
             >
               {muted ? '🔇' : '🔊'}
+            </button>
+
+            {/* Fullscreen */}
+            <button
+              className="btn btn-secondary"
+              onClick={toggleFullscreen}
+              aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+              style={{ minWidth: '2.8rem', fontSize: '1.1rem', padding: '0.5rem 0.85rem' }}
+            >
+              {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
             </button>
           </div>
 
@@ -2052,337 +2107,6 @@ export default function SniperModePage() {
                   records panel every few sessions and look for the trend, not any single result.
                 </p>
               </div>
-            </section>
-
-            <section aria-labelledby="topic-beginner-advanced-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-beginner-advanced-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Aim Training for Beginners vs. Advanced Players
-              </h2>
-              <p style={{ margin: 0 }}>
-                A beginner and a veteran player shouldn&apos;t be doing the same drill. Newer players get the
-                most value from Easy and Medium difficulty at longer durations, since the priority is simply
-                building a stable, repeatable tracking motion without the pressure of a fast timer. Advanced
-                players already have that foundation, so their time is better spent on Hard or Impossible at
-                short, high-intensity durations that stress-test reaction speed and consistency under fatigue.
-                Using the wrong tier for your level either wastes time on drills that are too easy to teach
-                anything new, or builds bad habits by forcing corrections faster than your hand can currently
-                make them cleanly.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-mouse-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-mouse-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Choosing the Right Mouse for Aim Training
-              </h2>
-              <p style={{ margin: 0 }}>
-                Weight, shape, and sensor quality all shape how consistent your tracking can become, regardless
-                of how much you practice. A mouse that&apos;s too heavy for your grip style encourages
-                shoulder and wrist compensation instead of clean arm movement, while an unreliable sensor
-                introduces tiny position errors your brain has no way to correct for. You don&apos;t need the
-                most expensive mouse on the market — you need one that fits your hand size and grip comfortably
-                enough that you stop thinking about the hardware entirely and can focus on the target.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-display-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-display-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Monitor and Display Settings for Better Tracking
-              </h2>
-              <p style={{ margin: 0 }}>
-                Beyond refresh rate, response time and input lag quietly affect how &quot;honest&quot; your
-                screen is about where the target actually is at any given instant. A monitor with slow pixel
-                response can smear a fast-moving target just enough to throw off precise tracking, even if your
-                hand movement is perfect. If competitive accuracy matters to you, prioritise a display with low
-                input lag and a response time suited to fast motion over one with higher resolution but sluggish
-                pixel transitions — the extra sharpness rarely offsets the tracking cost.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-balance-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-balance-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Aim Training vs. In-Game Practice: Finding the Balance
-              </h2>
-              <p style={{ margin: 0 }}>
-                Aim trainers isolate one mechanical skill, but real matches layer that skill on top of
-                positioning, decision-making, and game-specific weapon behaviour. Treat this trainer as a
-                supplement rather than a replacement: a focused warm-up and a couple of weekly sessions to
-                target weak points, alongside regular time actually playing your main game, transfers far
-                better than spending all your practice time in isolation. Players who only ever aim-train and
-                never scrimmage often find their raw tracking is excellent but their in-game decision-making
-                lags behind.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-peripheral-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-peripheral-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                The Role of Peripheral Vision in Target Tracking
-              </h2>
-              <p style={{ margin: 0 }}>
-                Skilled trackers rely on more than just staring directly at the target — peripheral vision
-                helps anticipate walls, edges, and the target&apos;s likely bounce direction before it happens.
-                Deliberately softening your focus to take in the whole arena, rather than tunnel-visioning on
-                the dot itself, often improves reaction time to sudden direction changes because your brain
-                receives movement cues a fraction of a second earlier than central vision alone would provide.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-grip-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-grip-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                How Mouse Grip Style Affects Aim Consistency
-              </h2>
-              <p style={{ margin: 0 }}>
-                Palm, claw, and fingertip grips each distribute control differently between the wrist, fingers,
-                and forearm, and switching between them mid-training can quietly reset your progress by
-                changing the fundamental motion your muscle memory is built around. Pick one grip style that
-                feels sustainable for long sessions and stick with it consistently across both training and
-                actual matches — the specific grip matters far less than using the same one everywhere.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-flick-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-flick-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Understanding Flick Aim vs. Tracking Aim
-              </h2>
-              <p style={{ margin: 0 }}>
-                Flick aim is a single fast, ballistic movement to a stationary or newly appeared target, while
-                tracking aim is the continuous, corrective following of a target that&apos;s already moving —
-                exactly what this trainer builds. The two rely on overlapping but distinct motor patterns:
-                flicking rewards a clean, decisive stop on target, while tracking rewards smooth, ongoing
-                micro-corrections. Most FPS engagements use a blend of both, so it&apos;s worth training each
-                skill somewhat separately rather than assuming progress in one automatically improves the other.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-ranked-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-ranked-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Aim Training for Competitive Ranked Play
-              </h2>
-              <p style={{ margin: 0 }}>
-                Ranked matches add time pressure and consequences that casual practice never fully replicates,
-                which is exactly why a pre-queue warm-up matters more than an equivalent amount of practice
-                earlier in the day. A short, focused session immediately before ranked play primes the same
-                tracking loop you&apos;ll rely on in your first engagements, reducing the chance that your
-                opening rounds double as an accidental warm-up that costs you rating.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-lifestyle-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-lifestyle-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Sleep, Hydration, and Aim Performance
-              </h2>
-              <p style={{ margin: 0 }}>
-                Fine motor control and reaction time are both measurably worse after poor sleep or dehydration,
-                regardless of how much you&apos;ve practiced. Competitive players often chase equipment and
-                settings changes to fix an aim slump that&apos;s actually rooted in a few nights of bad sleep or
-                skipped meals. Before assuming your sensitivity or mouse is the problem, rule out the basics —
-                consistent sleep and hydration produce a bigger accuracy swing than most gear changes ever will.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-myths-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-myths-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Common Myths About Aim Training
-              </h2>
-              <p style={{ margin: 0 }}>
-                Two myths persist despite little supporting evidence: that a higher DPI number is inherently
-                better, and that natural talent makes structured practice unnecessary. DPI is just a scaling
-                factor — what matters is your effective sensitivity and how consistently you move at it, not
-                the raw number. And while some players do pick up tracking faster than others initially, the
-                gap closes dramatically with consistent, feedback-driven practice, which is the entire premise
-                behind deliberate practice research.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-goals-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-goals-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                How to Set Realistic Aim Training Goals
-              </h2>
-              <p style={{ margin: 0 }}>
-                Vague goals like &quot;get better at aiming&quot; are hard to act on and even harder to measure.
-                Instead, pick a specific, trackable target: raise your Medium-difficulty accuracy from 70% to
-                85% over three weeks, or beat your best combo three sessions in a row. Because this trainer
-                logs best score, best streak, best combo, and average accuracy automatically, you always have
-                a concrete number to hold a goal against instead of relying on a vague feeling of improvement.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-offline-drills-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-offline-drills-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Aim Drills You Can Practice Without Any Tool
-              </h2>
-              <p style={{ margin: 0 }}>
-                Not every session needs a screen. Slowly tracing the edge of an object across a room with your
-                eyes and a pointed finger, or following a moving car or pedestrian with a steady head turn,
-                exercises the same smooth-pursuit eye movement that underlies in-game tracking. These low-key
-                exercises won&apos;t replace focused trainer sessions, but they're a useful way to keep the
-                underlying visual-motor skill warm on days you don&apos;t have time to play.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-casual-competitive-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-casual-competitive-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Casual vs. Competitive Use of Aim Trainers
-              </h2>
-              <p style={{ margin: 0 }}>
-                Not everyone using an aim trainer is chasing a ranked ladder. Plenty of players simply enjoy the
-                satisfying feedback loop of hitting a moving target, treating it closer to a quick arcade game
-                than a training regimen — and that's a completely valid way to use it. The difficulty tiers,
-                combo system, and score multipliers work equally well as a five-minute break from work as they
-                do as a structured competitive warm-up; the tool doesn&apos;t require a competitive goal to be
-                worth playing.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-age-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-age-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Does Age Affect Aim Training Progress?
-              </h2>
-              <p style={{ margin: 0 }}>
-                Reaction time does slow gradually with age on average, but the practical impact on tracking
-                aim is much smaller than most people assume, and structured practice narrows the gap
-                considerably. Older players who train consistently regularly outperform younger players who
-                don&apos;t train at all, since the trainable component of tracking skill — smooth, corrective
-                motion — responds to practice at essentially any age.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-lefthanded-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-lefthanded-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Aim Training Tips for Left-Handed Players
-              </h2>
-              <p style={{ margin: 0 }}>
-                Left-handed players sometimes use a mouse with their non-dominant hand due to right-handed
-                keyboard layouts, which slightly changes the fine motor demands compared to using your dominant
-                hand. If that applies to you, don&apos;t assume your progress curve should match a right-handed
-                player&apos;s — the coordination between your dominant and non-dominant hand strengthens with
-                practice regardless of which hand controls the mouse, it just may take a little longer to feel
-                fully natural.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-break-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-break-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Using Aim Trainers to Recover From a Break
-              </h2>
-              <p style={{ margin: 0 }}>
-                Coming back after weeks or months away from a game, tracking accuracy is usually the first
-                thing to feel rusty, well before positioning or game sense catch up. A few days of short,
-                low-pressure sessions on Easy or Medium difficulty is an efficient way to reload that muscle
-                memory faster than jumping straight back into ranked matches, where the stakes make every
-                early miss feel more costly than it needs to.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-psychology-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-psychology-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Staying Calm Under Pressure While Aiming
-              </h2>
-              <p style={{ margin: 0 }}>
-                Tension is the quiet enemy of smooth tracking — a tight grip, held breath, or racing heartbeat
-                all reduce fine motor precision exactly when a match needs it most. Practicing under a visible
-                timer and a live combo counter, the way this trainer presents them, gives you low-stakes
-                exposure to that same pressure response, so the adrenaline of a real clutch moment feels more
-                familiar and less disruptive when it actually matters.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-genres-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-genres-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                Aim Training Across Different Game Genres
-              </h2>
-              <p style={{ margin: 0 }}>
-                Tracking aim isn&apos;t exclusive to military shooters. Battle royale looting fights, hero
-                shooters with mobility-heavy characters, and even top-down twin-stick games all reward the
-                same underlying skill of keeping a reticle glued to something that&apos;s trying to get away
-                from it. Whatever genre you play most, the transferable core is identical: smooth, corrective
-                tracking beats jerky overcorrection every time.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-burnout-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-burnout-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                How to Avoid Burnout From Aim Training
-              </h2>
-              <p style={{ margin: 0 }}>
-                Because aim trainers are scored and endlessly repeatable, it&apos;s easy to slide from
-                productive practice into compulsive grinding that stops producing improvement and starts
-                producing frustration. Cap sessions at a length you can sustain enjoyably, take full rest days
-                between training blocks, and treat a plateau as a sign to change difficulty or duration rather
-                than simply playing more of the same round.
-              </p>
-            </section>
-
-            <section aria-labelledby="topic-future-heading" style={{ marginTop: '3rem' }}>
-              <h2 id="topic-future-heading" style={{
-                fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
-                color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
-              }}>
-                The Future of Aim Training Technology
-              </h2>
-              <p style={{ margin: 0 }}>
-                Browser-based trainers like this one benefit from zero-install accessibility, but the space
-                keeps evolving — eye-tracking hardware, VR training environments, and AI-driven adaptive
-                difficulty are all active areas of development. Whatever form future tools take, the underlying
-                principle stays the same: focused, feedback-driven repetition on an isolated skill remains the
-                most reliable path to measurable improvement, technology aside.
-              </p>
             </section>
 
             <section aria-labelledby="faq-heading" style={{ marginTop: '3rem' }}>
