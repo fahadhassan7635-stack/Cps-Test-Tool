@@ -3,6 +3,7 @@
 import {
   useState, useRef, useCallback, useEffect, useReducer
 } from 'react';
+import { Maximize, Minimize } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Phase = 'idle' | 'countdown' | 'running' | 'paused' | 'done';
@@ -479,6 +480,25 @@ export default function AimTrainerPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [customInput, setCustomInput] = useState('15');
   const [openFaqId, setOpenFaqId] = useState<string | null>(null);
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      const el = areaRef.current;
+      if (!el) return;
+      el.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
 
   const areaRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -979,6 +999,18 @@ export default function AimTrainerPage() {
             />
           )}
 
+          {/* Fullscreen */}
+          <button
+            onClick={toggleFullscreen}
+            aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            style={{
+              background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px',
+              padding: '0.35rem 0.6rem', color: '#8888a0', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'all 0.15s ease',
+            }}
+          >
+            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+          </button>
+
           {/* Reset */}
           {(isActive || phase === 'done') && (
             <button
@@ -1061,8 +1093,8 @@ export default function AimTrainerPage() {
           style={{
             position: 'relative',
             width: '100%',
-            height: 'clamp(380px, 65vh, 680px)',
-            background: 'rgba(255,255,255,0.015)',
+            height: isFullscreen ? '100vh' : 'clamp(380px, 65vh, 680px)',
+            background: isFullscreen ? '#02040a' : 'rgba(255,255,255,0.015)',
             border: `1px solid ${
               phase === 'running' ? `rgba(${activeCfg.accentRgb},0.35)` :
               phase === 'paused' ? 'rgba(245,158,11,0.3)' :
@@ -1090,6 +1122,21 @@ export default function AimTrainerPage() {
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
           </svg>
+
+          {/* Fullscreen Exit Floating Button */}
+          {isFullscreen && (
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+              aria-label="Exit fullscreen"
+              style={{
+                position: 'absolute', top: '1rem', right: '1rem', zIndex: 50,
+                background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px',
+                padding: '0.5rem', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', backdropFilter: 'blur(8px)',
+              }}
+            >
+              <Minimize size={18} />
+            </button>
+          )}
 
           {/* Idle / done overlay */}
           {(phase === 'idle' || phase === 'done') && (
