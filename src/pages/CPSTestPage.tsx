@@ -8,6 +8,7 @@ import {
   useMemo,
   lazy,
 } from 'react';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 // ─────────────────────────────────────────────
 // TYPES & CONSTANTS
@@ -935,6 +936,29 @@ SeoArticle.displayName = 'SeoArticle';
 // MAIN PAGE COMPONENT
 // ─────────────────────────────────────────────
 export default function CPSTestPage() {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const areaRef = useRef<HTMLDivElement>(null);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      const el = areaRef.current;
+      if (!el) return;
+      el.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false));
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
   const [duration, setDuration] = useState(5);
   const [customTime, setCustomTime] = useState<string>(''); 
   const [phase, setPhase] = useState<Phase>('idle');
@@ -1361,6 +1385,7 @@ export default function CPSTestPage() {
 
       {/* ── CLICK AREA ── */}
       <div
+        ref={areaRef}
         role="button"
         tabIndex={0}
         aria-label="Click area to start CPS test"
@@ -1368,9 +1393,10 @@ export default function CPSTestPage() {
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e as any); }}
         style={{
           position: 'relative', overflow: 'hidden', width: '100%', minHeight: '220px',
-          borderRadius: '16px',
-          border: phase === 'running' ? '2px solid var(--neon-green, #00ff88)' : phase === 'done' ? '2px solid var(--neon-orange, #ff9f43)' : '2px solid var(--border, #2a3047)',
-          background: phase === 'running' ? 'rgba(0,255,136,0.04)' : 'var(--bg-card, #1e2235)',
+          height: isFullscreen ? '100vh' : undefined,
+          borderRadius: isFullscreen ? '0' : '16px',
+          border: phase === 'running' ? '2px solid var(--neon-green, #00ff88)' : phase === 'done' ? '2px solid var(--neon-orange, #ff9f43)' : (isFullscreen ? 'none' : '2px solid var(--border, #2a3047)'),
+          background: phase === 'running' ? 'rgba(0,255,136,0.04)' : (isFullscreen ? '#02040a' : 'var(--bg-card, #1e2235)'),
           cursor: phase === 'done' ? 'default' : 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           flexDirection: 'column', gap: '0.75rem', userSelect: 'none',
@@ -1379,6 +1405,29 @@ export default function CPSTestPage() {
           boxShadow: phase === 'running' ? '0 0 30px rgba(0,255,136,0.1)' : 'none',
         }}
       >
+        <button
+          onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            zIndex: 50,
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: 'none',
+            borderRadius: '8px',
+            padding: '0.5rem',
+            color: '#fff',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'background 0.2s',
+          }}
+          title="Toggle Fullscreen"
+        >
+          {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+        </button>
+
         {ripples.map(r => (
           <span key={r.id} style={{
             position: 'absolute', left: r.x, top: r.y, width: '16px', height: '16px',
