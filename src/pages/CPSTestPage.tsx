@@ -1460,6 +1460,120 @@ export default function CPSTestPage() {
             <span style={{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--neon-orange, #ff9f43)' }}>Test Complete!</span>
           </>
         )}
+
+        {/* ── RESULT MODAL (inside click-area so it works in fullscreen) ── */}
+        {phase === 'done' && finalRating && (
+          <>
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
+              zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards',
+            }} />
+
+            <div
+              className="cps-modal-inner"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="modal-title"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                position: 'absolute', top: '50%', left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '95%',
+                maxWidth: '560px',
+                maxHeight: '90%',
+                overflowY: 'auto',
+                background: '#0d1117',
+                border: `2px solid ${finalRating.color}`,
+                borderRadius: '20px',
+                padding: '2rem 1.5rem',
+                textAlign: 'center',
+                zIndex: 1000,
+                animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                boxShadow: `0 0 40px ${finalRating.color}25`,
+              }}
+            >
+              {/* Close button with 800ms cooldown protection */}
+              <button
+                onClick={resetTest}
+                aria-label="Close modal"
+                style={{
+                  position: 'absolute', top: '0.75rem', right: '0.75rem',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${finalRating.color}40`,
+                  color: finalRating.color, width: '32px', height: '32px',
+                  borderRadius: '50%', cursor: 'pointer', fontSize: '0.9rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >✕</button>
+
+              <div
+                className="cps-modal-split"
+                style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.25rem', alignItems: 'center', minHeight: '130px', marginBottom: '1.25rem' }}
+              >
+                <div
+                  className="cps-modal-left"
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '1rem', height: '100%' }}
+                >
+                  <span
+                    className="cps-modal-emoji"
+                    style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}
+                  >{finalRating.emoji}</span>
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  <div id="modal-title" style={{ fontSize: '0.85rem', color: 'var(--text-muted, #8395a7)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Rank is</div>
+                  <div
+                    className="cps-modal-rank"
+                    style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}
+                  >{finalRating.label}!</div>
+                  <div style={{ display: 'flex', gap: '3px', marginBottom: '0.5rem' }}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} style={{ fontSize: '1.2rem', color: i < finalRating.stars ? '#ffca28' : 'rgba(255,255,255,0.1)' }}>★</span>
+                    ))}
+                  </div>
+                  <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary, #cbd5e1)' }}>You clicked with a speed of <strong style={{ color: '#fff', fontSize: '1.15rem', fontVariantNumeric: 'tabular-nums' }}>{finalCpsValue}</strong> CPS</div>
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.85rem 1rem', borderRadius: '12px', borderLeft: `3px solid ${finalRating.color}`, fontStyle: 'italic', color: '#cbd5e1', fontSize: '0.88rem', textAlign: 'left', marginBottom: '1.25rem', lineHeight: '1.5' }}>
+                {finalRating.desc}
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                {[
+                  { value: clicks, label: 'Total Clicks', color: 'var(--neon-green, #00ff88)' },
+                  { value: maxCps, label: 'Peak (1s)', color: 'var(--neon-cyan, #00f5ff)' },
+                  { value: `${duration}s`, label: 'Duration', color: 'var(--neon-orange, #ff9f43)' },
+                ].map(s => (
+                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.5rem 0.25rem', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '1.2rem', fontWeight: '800', color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: '0.55rem', color: 'var(--text-muted, #8395a7)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px' }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                <button
+                  onClick={resetTest}
+                  style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', background: 'var(--bg-card, #1e2235)', border: '1px solid var(--border, #2a3047)', color: '#fff' }}
+                >
+                  🔄 Reset
+                </button>
+                <button
+                  onClick={() => {
+                    if (Date.now() - lastEndTimeRef.current >= 800) {
+                      resetTest();
+                      startTest();
+                    }
+                  }}
+                  style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', backgroundColor: finalRating.color, border: `1px solid ${finalRating.color}`, color: '#000', fontWeight: '700' }}
+                >
+                  ▶ Try Again
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* ── RESET BUTTON (while running) ── */}
@@ -1492,121 +1606,6 @@ export default function CPSTestPage() {
         </div>
       )}
 
-      {/* ── RESULT MODAL ── */}
-      {phase === 'done' && finalRating && (
-        <>
-          <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
-            zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards',
-          }} />
-
-          <div
-            className="cps-modal-inner"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-            style={{
-              position: 'fixed', top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '95%', 
-              maxWidth: '560px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              background: '#0d1117',
-              border: `2px solid ${finalRating.color}`,
-              borderRadius: '20px',
-              padding: '2rem 1.5rem',
-              textAlign: 'center',
-              zIndex: 1000,
-              animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
-              boxShadow: `0 0 40px ${finalRating.color}25`,
-            }}
-          >
-            {/* Close button with 800ms cooldown protection */}
-            <button 
-              onClick={resetTest} 
-              aria-label="Close modal"
-              style={{
-                position: 'absolute', top: '0.75rem', right: '0.75rem',
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${finalRating.color}40`,
-                color: finalRating.color, width: '32px', height: '32px',
-                borderRadius: '50%', cursor: 'pointer', fontSize: '0.9rem',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}
-            >✕</button>
-
-            <div
-              className="cps-modal-split"
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.25rem', alignItems: 'center', minHeight: '130px', marginBottom: '1.25rem' }}
-            >
-              <div
-                className="cps-modal-left"
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRight: '1px solid rgba(255,255,255,0.08)', paddingRight: '1rem', height: '100%' }}
-              >
-                <span
-                  className="cps-modal-emoji"
-                  style={{ fontSize: '4.5rem', lineHeight: '1', filter: `drop-shadow(0 0 15px ${finalRating.color}40)` }}
-                >{finalRating.emoji}</span>
-              </div>
-              <div style={{ textAlign: 'left' }}>
-                <div id="modal-title" style={{ fontSize: '0.85rem', color: 'var(--text-muted, #8395a7)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Your Rank is</div>
-                <div
-                  className="cps-modal-rank"
-                  style={{ fontSize: '2.2rem', fontWeight: '900', color: finalRating.color, fontStyle: 'italic', margin: '0.1rem 0' }}
-                >{finalRating.label}!</div>
-                <div style={{ display: 'flex', gap: '3px', marginBottom: '0.5rem' }}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <span key={i} style={{ fontSize: '1.2rem', color: i < finalRating.stars ? '#ffca28' : 'rgba(255,255,255,0.1)' }}>★</span>
-                  ))}
-                </div>
-                <div style={{ fontSize: '0.88rem', color: 'var(--text-secondary, #cbd5e1)' }}>You clicked with a speed of <strong style={{ color: '#fff', fontSize: '1.15rem', fontVariantNumeric: 'tabular-nums' }}>{finalCpsValue}</strong> CPS</div>
-              </div>
-            </div>
-
-            <div style={{ background: 'rgba(0,0,0,0.25)', padding: '0.85rem 1rem', borderRadius: '12px', borderLeft: `3px solid ${finalRating.color}`, fontStyle: 'italic', color: '#cbd5e1', fontSize: '0.88rem', textAlign: 'left', marginBottom: '1.25rem', lineHeight: '1.5' }}>
-              {finalRating.desc}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '1.5rem' }}>
-              {[
-                { value: clicks, label: 'Total Clicks', color: 'var(--neon-green, #00ff88)' },
-                { value: maxCps, label: 'Peak (1s)', color: 'var(--neon-cyan, #00f5ff)' },
-                { value: `${duration}s`, label: 'Duration', color: 'var(--neon-orange, #ff9f43)' },
-              ].map(s => (
-                <div key={s.label} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', padding: '0.5rem 0.25rem', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  <div style={{ fontSize: '1.2rem', fontWeight: '800', color: s.color }}>{s.value}</div>
-                  <div style={{ fontSize: '0.55rem', color: 'var(--text-muted, #8395a7)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '2px' }}>{s.label}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-              {/* Reset button inside modal with cooldown protection */}
-              <button 
-                onClick={resetTest} 
-                style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', background: 'var(--bg-card, #1e2235)', border: '1px solid var(--border, #2a3047)', color: '#fff' }}
-              >
-                🔄 Reset
-              </button>
-              {/* Restart button with cooldown protection */}
-              <button 
-                onClick={() => {
-                  // Only run start test if reset cooldown passes
-                  if (Date.now() - lastEndTimeRef.current >= 800) {
-                    resetTest(); 
-                    startTest();
-                  }
-                }} 
-                style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', borderRadius: '8px', cursor: 'pointer', backgroundColor: finalRating.color, border: `1px solid ${finalRating.color}`, color: '#000', fontWeight: '700' }}
-              >
-                ▶ Try Again
-              </button>
-            </div>
-          </div>
-        </>
-      )}
 
       {/* ── SESSION HISTORY ── */}
       {history.length > 0 && <SessionHistory history={history} />}
