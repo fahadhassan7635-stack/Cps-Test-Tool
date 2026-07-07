@@ -7,6 +7,7 @@ import {
   useReducer,
   memo,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -528,11 +529,15 @@ const ResultModal = memo(function ResultModal({
     navigator.clipboard.writeText(txt).catch(() => {});
   }, [accuracy, wpm, rawWpm, netWpm, cpm, correctChars, errors, elapsed, rating.label, completion]);
 
-  // ESC to close
+  // Prevent background scrolling and ESC to close
   useEffect(() => {
+    document.body.style.overflow = 'hidden';
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handler);
+    };
   }, [onClose]);
 
   const stats = [
@@ -547,133 +552,197 @@ const ResultModal = memo(function ResultModal({
     { v: `${completion}%`,     l: 'Completion',    c: 'var(--neon-yellow)' },
   ];
 
-  return (
+  return createPortal(
     <>
       {isPerfect && <ConfettiCanvas />}
 
       {/* Backdrop */}
       <div
+        style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 999,
+          animation: 'fadeIn 0.3s ease-out forwards',
+        }}
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <div
         role="dialog"
         aria-modal="true"
-        aria-label="Test results"
-        onClick={onClose}
+        aria-label="Test Results"
         style={{
-          position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0,0,0,0.75)',
-          backdropFilter: 'blur(12px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '1rem',
-          animation: 'fadeIn 0.25s ease',
+          position: 'fixed', top: '50%', left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%', maxWidth: '380px',
+          background: 'linear-gradient(135deg, rgba(0,245,255,0.08), rgba(0,255,136,0.08))',
+          border: '2px solid rgba(0,245,255,0.3)',
+          borderRadius: '20px',
+          padding: '1.5rem 0.75rem 0.75rem 0.75rem',
+          textAlign: 'center',
+          zIndex: 1000,
+          animation: 'modalPopIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+          maxHeight: '90vh',
+          overflowY: 'auto',
+          boxShadow: '0 0 60px rgba(0,245,255,0.2), 0 0 120px rgba(0,255,136,0.1)',
         }}
       >
-        {/* Panel */}
-        <div
-          onClick={e => e.stopPropagation()}
+        <button
+          onClick={onClose}
+          aria-label="Close results"
           style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '20px',
-            padding: '2rem',
-            width: '100%',
-            maxWidth: '680px',
-            maxHeight: '90vh',
-            overflowY: 'auto',
-            animation: 'slideUp 0.3s ease',
+            position: 'absolute', top: '0.5rem', right: '0.5rem',
+            background: 'rgba(0,245,255,0.1)',
+            border: '1px solid rgba(0,245,255,0.3)',
+            color: 'var(--neon-cyan)',
+            width: '32px', height: '32px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
-        >
-          {/* Header */}
-          <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-            {isPerfect && (
-              <div style={{ fontSize: '3rem', marginBottom: '0.5rem', animation: 'popIn 0.4s ease' }}>
-                🏆
+        >X</button>
+
+        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.1rem' }}>
+          Your Result
+        </div>
+
+        <div style={{
+          fontSize: 'clamp(1.9rem, 5.5vw, 3rem)',
+          fontWeight: '900',
+          color: 'var(--neon-cyan)',
+          fontVariantNumeric: 'tabular-nums',
+          marginBottom: '0.05rem',
+        }}>
+          {accuracy}%{' '}
+          <span style={{ fontSize: '1rem', color: 'var(--text-secondary)' }}>Accuracy</span>
+        </div>
+
+        <div style={{
+          display: 'inline-flex', alignItems: 'center',
+          padding: '0.3rem 0.85rem', borderRadius: '50px',
+          background: `${rating.color}20`,
+          border: `2px solid ${rating.color}50`,
+          color: rating.color,
+          fontSize: '0.88rem', fontWeight: '700',
+          marginBottom: '0.45rem',
+        }}>{rating.label}</div>
+
+        {/* Top 3 stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.2rem', marginBottom: '0.35rem' }}>
+          {[
+            { value: `${netWpm}`,               label: 'Net WPM' },
+            { value: `${cpm}`,                  label: 'CPM' },
+            { value: `${formatTime(elapsed)}`,  label: 'Elapsed' },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: '12px',
+              padding: '0.3rem',
+              border: '1px solid rgba(0,245,255,0.2)',
+            }}>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: 'var(--neon-cyan)' }}>
+                {s.value}
               </div>
-            )}
-            <div style={{
-              fontSize: '3.5rem', fontWeight: 900,
-              color: isPerfect ? 'var(--neon-yellow)' : 'var(--neon-green)',
-            }}>
-              {accuracy}%
-            </div>
-
-            {/* Rating badge */}
-            <div style={{
-              display: 'inline-flex', padding: '0.4rem 1.2rem',
-              borderRadius: '50px',
-              background: `${rating.color}20`,
-              border: `1px solid ${rating.color}40`,
-              color: rating.color, fontWeight: 700, marginTop: '0.5rem',
-            }}>
-              {rating.label}
-            </div>
-
-            {isPerfect && (
               <div style={{
-                marginTop: '0.75rem',
-                background: 'rgba(255,215,0,0.1)',
-                border: '1px solid rgba(255,215,0,0.3)',
-                borderRadius: '8px', padding: '0.5rem 1rem',
-                color: 'var(--neon-yellow)', fontSize: '0.875rem', fontWeight: 600,
-              }}>
-                ✨ Flawless! Zero errors — perfect score!
-              </div>
-            )}
-          </div>
+                fontSize: '0.45rem', color: 'var(--text-muted)',
+                textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.04rem',
+              }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
 
-          {/* Stats grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-            gap: '0.75rem',
-            marginBottom: '1.5rem',
-          }}>
-            {stats.map(({ v, l, c }) => (
-              <div key={l} style={{
-                background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '0.85rem',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: '1.4rem', fontWeight: 800, color: c }}>{v}</div>
-                <div style={{
-                  fontSize: '0.65rem', color: 'var(--text-muted)',
-                  textTransform: 'uppercase', letterSpacing: '0.05em',
-                }}>{l}</div>
-              </div>
-            ))}
-          </div>
+        {/* Extended stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.2rem', marginBottom: '0.45rem' }}>
+          {[
+            { value: correctChars,  label: 'Correct',   color: 'var(--neon-green, #10b981)' },
+            { value: errors,        label: 'Errors',    color: 'var(--neon-red, #ff2d55)' },
+            { value: rawWpm,        label: 'Raw WPM',   color: 'var(--neon-orange, #f97316)' },
+            { value: `${completion}%`, label: 'Complete', color: 'var(--text-secondary)' },
+          ].map(s => (
+            <div key={s.label} style={{
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: '10px',
+              padding: '0.3rem',
+              border: '1px solid rgba(255,255,255,0.08)',
+            }}>
+              <div style={{ fontSize: '0.9rem', fontWeight: '800', color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: '0.42rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
 
-          {/* Heatmap */}
-          <KeyboardHeatmap keyErrors={keyErrors} keyPresses={keyPresses} />
-
-          {/* Graph */}
-          <AccuracyGraph data={accuracyLog} />
-
-          {/* Actions */}
-          <div style={{
-            display: 'flex', gap: '0.75rem', justifyContent: 'center',
-            marginTop: '1.75rem', flexWrap: 'wrap',
-          }}>
-            <button className="btn btn-primary" onClick={onRestart}>
-              🔄 Restart
-            </button>
-            <button className="btn btn-secondary" onClick={onClose}>
-              ✏️ Try Again
-            </button>
-            <button className="btn btn-secondary" onClick={copyResults}>
-              📋 Copy Results
-            </button>
-          </div>
-
-          <div style={{
-            textAlign: 'center', marginTop: '1rem',
-            fontSize: '0.75rem', color: 'var(--text-muted)',
-          }}>
-            Press <kbd style={{
-              background: 'rgba(255,255,255,0.1)', padding: '0.1rem 0.4rem',
-              borderRadius: '4px', fontSize: '0.7rem',
-            }}>Esc</kbd> to close
-          </div>
+        <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1rem' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={onRestart}
+            style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}
+          >Reset</button>
+          <button
+            className="btn btn-primary"
+            onClick={onRestart}
+            style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}
+          >Try Again</button>
         </div>
       </div>
-    </>
+
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes modalPopIn {
+          from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+      `}</style>
+    </>,
+    document.body
+  );
+});
+
+// ─── Breadcrumb ───────────────────────────────────────────────────────────────
+
+const Breadcrumb = memo(function Breadcrumb() {
+  const crumbs = [
+    { label: 'Home', href: '/' },
+    { label: 'Keyboard Tools', href: '/keyboard-tools' },
+    { label: 'Keyboard Accuracy Test', href: '/keyboard-accuracy-test' },
+  ];
+  return (
+    <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem' }}>
+      <ol style={{
+        display: 'flex', alignItems: 'center', gap: '0.4rem',
+        listStyle: 'none', margin: 0, padding: 0,
+        fontSize: '0.8rem', color: 'var(--text-muted)',
+        flexWrap: 'wrap',
+      }}>
+        {crumbs.map((c, i) => (
+          <li key={c.href} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {i < crumbs.length - 1 ? (
+              <>
+                <a href={c.href} style={{
+                  color: 'var(--neon-cyan)', textDecoration: 'none',
+                  transition: 'opacity 0.2s',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+                >
+                  {c.label}
+                </a>
+                <span aria-hidden="true">›</span>
+              </>
+            ) : (
+              <span aria-current="page" style={{ color: '#fff', fontWeight: 600 }}>
+                {c.label}
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </nav>
   );
 });
 
@@ -1102,6 +1171,9 @@ export default function AccuracyTestPage() {
       <SEOHead />
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+
+        {/* Breadcrumb */}
+        <Breadcrumb />
 
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -1538,11 +1610,7 @@ export default function AccuracyTestPage() {
           <p style={p}>
             Data-entry positions are among the most accuracy-sensitive roles in the workforce. A single transposed
             digit in a financial record, a misspelled patient name in a medical database, or an incorrect postal
-            code in a shipping system can cascade into costly downstream errors. Standards tracked by{' '}
-            <a href="https://www.bls.gov/ooh/office-and-administrative-support/data-entry-keyers.htm" target="_blank" rel="noopener noreferrer" style={extLink}>
-              labor statistics researchers<ExtLinkIcon />
-            </a>{' '}
-            show that data-entry
+            code in a shipping system can cascade into costly downstream errors. Standards for data-entry
             professionals typically start at <strong>98%</strong> accuracy and often require verified certification
             from a recognised typing assessment. Using this tool's 120-second mode is an excellent way to
             simulate the endurance required for data-entry work.
@@ -1577,11 +1645,8 @@ export default function AccuracyTestPage() {
             first place.
           </p>
           <p style={p}>
-            Sleep plays a documented role in this consolidation process. Research by{' '}
-            <a href="https://www.ninds.nih.gov/health-information/public-education/brain-basics/brain-basics-understanding-sleep" target="_blank" rel="noopener noreferrer" style={extLink}>
-              sleep and motor-learning scientists<ExtLinkIcon />
-            </a>{' '}
-            has repeatedly shown that a skill practised shortly before sleep shows measurable overnight improvement
+            Sleep plays a documented role in this consolidation process. Research on motor-skill learning has
+            repeatedly shown that a skill practised shortly before sleep shows measurable overnight improvement
             without any additional practice, because the brain replays and strengthens the relevant motor
             sequences during certain sleep stages. This is one of the strongest arguments for short, frequent,
             daily practice sessions rather than infrequent marathon sessions: each practice window seeds a
@@ -1627,11 +1692,7 @@ export default function AccuracyTestPage() {
           </p>
           <p style={p}>
             Repetitive strain injuries, including carpal tunnel syndrome and tendonitis, are strongly associated
-            with tense, high-force keystrokes rather than with typing volume alone, according to{' '}
-            <a href="https://www.osha.gov/etools/computer-workstations" target="_blank" rel="noopener noreferrer" style={extLink}>
-              occupational health researchers<ExtLinkIcon />
-            </a>
-            . Typists who consciously
+            with tense, high-force keystrokes rather than with typing volume alone. Typists who consciously
             practise a light touch — pressing keys just enough to actuate them rather than bottoming out
             forcefully — tend to report both fewer injuries and higher long-term accuracy, since a controlled,
             relaxed keystroke is inherently more precise than a tense, forceful one. Taking short breaks every
@@ -1838,21 +1899,3 @@ const h2: React.CSSProperties = {
 const p:  React.CSSProperties = { marginBottom: '1.25rem' };
 const ul: React.CSSProperties = { paddingLeft: '1.25rem', marginBottom: '1.25rem' };
 const li: React.CSSProperties = { marginBottom: '0.5rem' };
-const extLink: React.CSSProperties = {
-  color: 'var(--neon-cyan)',
-  textDecoration: 'none',
-  fontWeight: 600,
-};
-
-function ExtLinkIcon() {
-  return (
-    <svg
-      width="12" height="12" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2.5"
-      strokeLinecap="round" strokeLinejoin="round"
-      style={{ display: 'inline-block', marginLeft: '2px', verticalAlign: 'text-top' }}
-    >
-      <path d="M7 17L17 7M7 7h10v10" />
-    </svg>
-  );
-}
