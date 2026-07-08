@@ -33,6 +33,11 @@
  *    Unlimited mode counts time up instead of down and ends only when the
  *    player presses "Finish", at which point the score is saved to records
  *    exactly like a normal timed match.
+ *
+ * v5 additions:
+ *  - NEW: "More Tools" navigation grid (matches the shared cross-tool nav used
+ *    on other pages such as the Spacebar Counter) so players can jump directly
+ *    to related keyboard/mouse benchmarking tools from the Sniper Mode page.
  */
 
 import React, {
@@ -202,6 +207,26 @@ const DEFAULT_RECORDS: Readonly<StoredRecords> = {
 };
 
 const LS_MUTE_KEY = 'sniper_aim_trainer_muted';
+
+/** Cross-tool navigation grid shown near the bottom of the page, matching the
+ *  shared "More Tools" section used on other pages (e.g. Spacebar Counter).
+ *  Each entry links to a related keyboard/mouse benchmarking tool. */
+const MORE_TOOLS: ReadonlyArray<{ label: string; href: string; icon: React.ReactNode }> = [
+  { label: 'CPS Test',        href: '/cps-test',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Spacebar Counter', href: '/spacebar-counter', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="6" y="15" width="12" height="3" rx="1"/></svg> },
+  { label: 'Typing Test',     href: '/typing-test',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8M7 11h2m3 0h2m3 0h-1"/></svg> },
+  { label: 'Reaction Time',   href: '/reaction-time',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+  { label: 'Aim Trainer',     href: '/aim-trainer',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg> },
+  { label: 'Scroll Test',     href: '/scroll-test',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="9"/><path d="M9 11l3-3 3 3"/><path d="M9 13l3 3 3-3"/></svg> },
+  { label: 'Double Click',    href: '/double-click',   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/></svg> },
+  { label: 'Mouse Accuracy',  href: '/mouse-accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 2v10"/></svg> },
+  { label: 'Key Visualizer',  href: '/key-visualizer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1m4 0h1m4 0h1M6 13h1m4 0h1m4 0h1"/></svg> },
+  { label: 'F1 Reaction',     href: '/f1-reaction',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+  { label: 'Space Defense',   href: '/space-defense',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { label: 'Accuracy Test',   href: '/accuracy',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+  { label: 'CPS Rush',        href: '/cps-rush',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 12v-4"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Voyager Game',    href: '/voyager-game',   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
+];
 
 /* ═══════════════════════════════════════════════════════════════
    SOUND ENGINE  (Web Audio API – zero dependencies, zero network)
@@ -832,10 +857,106 @@ const HitFeedbackLayer = memo(function HitFeedbackLayer({ feedbacks }: { feedbac
   );
 });
 
+/** Cross-tool navigation grid – links out to related keyboard/mouse
+ *  benchmarking tools. Purely presentational; card data lives in MORE_TOOLS. */
+const MoreToolsSection = memo(function MoreToolsSection() {
+  return (
+    <section aria-label="More Tools" style={{ marginTop: '3rem', marginBottom: '2.5rem' }}>
+      <h2 style={{
+        fontWeight: 800, fontSize: '1.5rem', color: '#fff',
+        marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.3px',
+      }}>More Tools</h2>
+      <div
+        className="more-tools-grid"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(6, 1fr)',
+          gap: '1rem',
+        }}
+      >
+        {MORE_TOOLS.map(({ label, href, icon }) => (
+          <a
+            key={href}
+            href={href}
+            style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', gap: '0.6rem',
+              background: '#141a2a',
+              border: '1px solid rgba(255,255,255,0.06)',
+              borderRadius: '14px',
+              padding: '1.2rem 0.5rem',
+              cursor: 'pointer', textDecoration: 'none',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,85,0.07)';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,45,85,0.3)';
+              (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = '#141a2a';
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)';
+              (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+            }}
+          >
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '12px',
+              background: 'rgba(255,255,255,0.05)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--neon-red, #ff2d55)',
+            }}>
+              {icon}
+            </div>
+            <span style={{
+              fontSize: '0.75rem', fontWeight: 700,
+              color: '#cbd5e1', textAlign: 'center', lineHeight: 1.3,
+            }}>{label}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+});
+
 const kbdStyle: React.CSSProperties = {
   background: 'var(--bg-card)', border: '1px solid var(--border)',
   borderRadius: '4px', padding: '1px 5px', fontSize: '0.7rem',
 };
+
+/** Inline citation link used throughout the SEO article – cyan text,
+ *  underline, and a small external-link glyph. Mirrors the SourceLink
+ *  pattern used on other tool pages so citation styling stays consistent
+ *  site-wide. Always opens in a new tab with noopener/noreferrer/nofollow. */
+const SourceLink = memo(function SourceLink({
+  href, children,
+}: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      style={{
+        color: 'var(--neon-cyan, #00f5ff)',
+        textDecoration: 'none',
+        borderBottom: '1px solid rgba(0,245,255,0.35)',
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
+      <svg
+        width="12" height="12" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+        aria-hidden="true"
+        style={{ display: 'inline-block', marginLeft: '3px', verticalAlign: 'middle', position: 'relative', top: '-2px' }}
+      >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </a>
+  );
+});
 
 /* ═══════════════════════════════════════════════════════════════
    MAIN PAGE COMPONENT
@@ -1419,6 +1540,10 @@ export default function SniperModePage() {
         .arena-playing {
           cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='7' stroke='%23ff2d55' stroke-width='1.5' fill='none'/%3E%3Cline x1='16' y1='2' x2='16' y2='10' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='16' y1='22' x2='16' y2='30' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='2' y1='16' x2='10' y2='16' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='22' y1='16' x2='30' y2='16' stroke='%23ff2d55' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, crosshair;
         }
+
+        @media (max-width: 520px) {
+          .more-tools-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
       `}</style>
 
       <main
@@ -1771,6 +1896,9 @@ export default function SniperModePage() {
 
         </section>
 
+        {/* ── MORE TOOLS GRID ── */}
+        <MoreToolsSection />
+
         {/* ══════════════════════════════════════
             SEO ARTICLE
         ══════════════════════════════════════ */}
@@ -1824,27 +1952,8 @@ export default function SniperModePage() {
                 Consistent tracking aim is one of the most feared skills in competitive gaming. A player who
                 keeps their crosshair glued to a moving enemy applies constant pressure and converts more shots
                 into eliminations. This aim trainer sharpens that skill through repeated, focused repetitions
-                — the only reliable path to durable muscle memory. Research by{' '}
-                <a
-                  href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7908336/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    color: 'var(--neon-cyan)', textDecoration: 'none',
-                    display: 'inline-flex', alignItems: 'center', gap: '3px',
-                  }}
-                >
-                  hand-eye coordination researchers
-                  <svg
-                    width="13" height="13" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                    aria-hidden="true" style={{ flexShrink: 0 }}
-                  >
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                    <polyline points="15 3 21 3 21 9" />
-                    <line x1="10" y1="14" x2="21" y2="3" />
-                  </svg>
-                </a>{' '}
+                — the only reliable path to durable muscle memory. Research on{' '}
+                <SourceLink href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7908336/">hand-eye coordination</SourceLink>{' '}
                 shows that short, focused tracking drills produce measurable reaction-time and coordination
                 gains within days of consistent practice.
               </p>
@@ -1922,7 +2031,8 @@ export default function SniperModePage() {
                 in tracking consistency. If you constantly overshoot the red target, your eDPI is too high; if
                 you trail behind it, increase sensitivity or use a larger mousepad. Most top-level FPS players
                 use 400–800 DPI and move primarily from the elbow and forearm rather than the wrist for long
-                tracking sweeps. Reduce your DPI, reclaim control, and let this aim trainer confirm the
+                tracking sweeps, a pattern documented in general <SourceLink href="https://en.wikipedia.org/wiki/Computer_mouse">computer input device</SourceLink>{' '}
+                ergonomics literature. Reduce your DPI, reclaim control, and let this aim trainer confirm the
                 improvement session by session.
               </InfoBox>
             </section>
@@ -1960,8 +2070,9 @@ export default function SniperModePage() {
                   bad luck instead of the hand itself.
                 </p>
                 <p style={{ margin: 0 }}>
-                  Underneath the game-like presentation, aim training rests on decades of motor-learning
-                  research. Skill acquisition scientists distinguish between <strong>open-loop</strong> movements
+                  Underneath the game-like presentation, aim training rests on decades of{' '}
+                  <SourceLink href="https://en.wikipedia.org/wiki/Motor_learning">motor-learning research</SourceLink>.
+                  Skill acquisition scientists distinguish between <strong>open-loop</strong> movements
                   planned in advance and fired off without feedback, and <strong>closed-loop</strong> movements
                   that are continuously corrected using visual feedback while they happen. Tracking a moving
                   target is almost entirely closed-loop: your eyes feed position information to your hand in a
@@ -1971,8 +2082,9 @@ export default function SniperModePage() {
                   building this specific skill.
                 </p>
                 <p style={{ margin: 0 }}>
-                  Psychologist Anders Ericsson&apos;s research on <strong>deliberate practice</strong> adds an
-                  important refinement to that picture: raw repetition isn&apos;t enough on its own. Practice
+                  Psychologist Anders Ericsson&apos;s research on{' '}
+                  <SourceLink href="https://en.wikipedia.org/wiki/Practice_(learning_method)#Deliberate_practice">deliberate practice</SourceLink>{' '}
+                  adds an important refinement to that picture: raw repetition isn&apos;t enough on its own. Practice
                   only compounds into real improvement when it includes a clear target to hit, immediate
                   feedback on whether you hit it, and enough difficulty to sit right at the edge of your current
                   ability. This trainer is built around exactly that loop — a visible score, an accuracy
@@ -1987,9 +2099,9 @@ export default function SniperModePage() {
                 icon="🧠" title="Why Repetition Beats Raw Talent"
                 borderStyle="full"
               >
-                Fine motor skills like tracking aim live largely in procedural memory — the same system that
-                stores how to ride a bicycle or type without looking at the keyboard. Procedural memory is
-                built almost exclusively through repetition under feedback, not through reading, watching, or
+                Fine motor skills like tracking aim live largely in <SourceLink href="https://en.wikipedia.org/wiki/Procedural_memory">procedural memory</SourceLink> —
+                the same system that stores how to ride a bicycle or type without looking at the keyboard.
+                Procedural memory is built almost exclusively through repetition under feedback, not through reading, watching, or
                 thinking about the skill. This is good news for anyone who feels &quot;naturally&quot; behind
                 more mechanically gifted players: consistent short sessions on a tracking trainer reliably
                 narrow that gap over a few weeks, because the underlying skill is trained, not fixed.
@@ -2017,7 +2129,7 @@ export default function SniperModePage() {
                 </FaqItem>
 
                 <FaqItem question="2. Grinding long sessions instead of short, focused ones">
-                  Tracking accuracy is a fine motor skill, and fine motor skills degrade under fatigue faster
+                  Tracking accuracy is a fine motor skill, and <SourceLink href="https://en.wikipedia.org/wiki/Muscle_fatigue">fine motor skills degrade under fatigue</SourceLink> faster
                   than most players notice. A 45-minute uninterrupted session often produces worse practice
                   data than three separate 10-minute sessions spread across the day, because the last third of
                   a long grind is frequently spent reinforcing tired, sloppy habits rather than clean ones.
@@ -2096,9 +2208,9 @@ export default function SniperModePage() {
                 </p>
                 <p style={{ margin: 0 }}>
                   <strong>Frequency:</strong> Three to five sessions per week produces steadier long-term gains
-                  than daily marathon grinding, largely because motor learning consolidates during rest, not
-                  just during practice. If you only have time for one thing before a ranked queue, the warm-up
-                  step alone still meaningfully reduces your early-game miss rate.
+                  than daily marathon grinding, largely because <SourceLink href="https://en.wikipedia.org/wiki/Memory_consolidation">motor memory consolidates</SourceLink> during
+                  rest, not just during practice. If you only have time for one thing before a ranked queue,
+                  the warm-up step alone still meaningfully reduces your early-game miss rate.
                 </p>
                 <p style={{ margin: 0 }}>
                   <strong>Tracking progress:</strong> Because this trainer saves your best score, best streak,
@@ -2107,6 +2219,144 @@ export default function SniperModePage() {
                   records panel every few sessions and look for the trend, not any single result.
                 </p>
               </div>
+            </section>
+
+            <section aria-labelledby="gear-heading" style={{ marginTop: '3rem' }}>
+              <h2
+                id="gear-heading"
+                style={{
+                  fontWeight: 800, fontSize: '1.8rem', marginBottom: '1.5rem',
+                  color: '#fff', borderBottom: '1px solid var(--border)', paddingBottom: '1rem',
+                }}
+              >
+                Gear and Setup: Getting the Most Out of Your Tracking Practice
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '2rem' }}>
+                <p style={{ margin: 0 }}>
+                  Technique and repetition do most of the heavy lifting in aim training, but hardware still sets
+                  the ceiling on how cleanly your intended movements translate into what actually happens on
+                  screen. A player with excellent tracking fundamentals can still look inconsistent on a mouse
+                  with an unreliable sensor, a pad that drags unevenly, or a desk that isn&apos;t stable enough
+                  to support fast lateral sweeps. None of this means you need premium equipment to improve —
+                  it means it&apos;s worth ruling out hardware as the source of a plateau before assuming the
+                  problem is purely mechanical skill.
+                </p>
+
+                <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.15rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                  Mouse Sensors: What Actually Matters
+                </h3>
+                <p style={{ margin: 0 }}>
+                  Modern optical sensors from the major manufacturers are, for practical purposes, all accurate
+                  enough for tracking-style aim training — sensor-level accuracy stopped being the bottleneck
+                  for the vast majority of players years ago. What still varies meaningfully between mice is{' '}
+                  <SourceLink href="https://en.wikipedia.org/wiki/Computer_mouse#Polling_rate">polling rate</SourceLink>,
+                  click latency, and physical shape. A 1000Hz polling rate reports your position to the computer
+                  every millisecond instead of every 8ms at the older 125Hz standard, which measurably smooths
+                  out fast tracking sweeps even though it rarely changes raw click-timing tests like a CPS or
+                  reaction benchmark. If your mouse supports multiple polling rates, 1000Hz is the safe default
+                  for tracking-heavy training.
+                </p>
+
+                <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.15rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                  DPI, In-Game Sensitivity, and Why the Split Matters
+                </h3>
+                <p style={{ margin: 0 }}>
+                  DPI (dots per inch) and in-game sensitivity multiply together to produce your effective
+                  sensitivity, or eDPI — and confusing the two is one of the most common setup mistakes among
+                  players who are otherwise training correctly. Running very high DPI with very low in-game
+                  sensitivity can introduce a small amount of positional error on cheaper sensors, while running
+                  very low DPI with very high in-game sensitivity can make fine tracking corrections feel coarse
+                  and imprecise. A practical middle ground most competitive players land on is 400–1600 DPI at
+                  the sensor level, with in-game sensitivity adjusted from there to hit your preferred eDPI.
+                  Whatever combination you land on, the important part for aim training specifically is
+                  consistency: change your DPI or sensitivity as rarely as possible once you start tracking
+                  your scores over time, since a sensitivity change resets your muscle memory almost as
+                  thoroughly as switching to a new mouse entirely.
+                </p>
+
+                <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.15rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                  Mousepad Size, Material, and Glide
+                </h3>
+                <p style={{ margin: 0 }}>
+                  Tracking a fast, erratic target on Hard or Impossible difficulty often calls for larger,
+                  sweeping arm movements rather than small wrist flicks, which is precisely where mousepad size
+                  starts to matter. A pad too small to accommodate your full sensitivity range forces awkward
+                  mid-movement lifts and re-positions, both of which interrupt the smooth closed-loop tracking
+                  motion this trainer is built to develop. Extended (XXL) cloth pads are the most common choice
+                  among players who train tracking specifically, since they combine a large surface area with
+                  predictable, consistent glide. Hard pads offer faster, lower-friction glide but can feel
+                  twitchy for slow, controlled tracking corrections — a worthwhile trade-off to test for
+                  yourself rather than assume based on price or popularity.
+                </p>
+
+                <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.15rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                  Grip Style and How It Changes Tracking Feel
+                </h3>
+                <p style={{ margin: 0 }}>
+                  The three common mouse grips — palm, claw, and fingertip — each distribute control across
+                  different muscle groups, and each has a slightly different relationship with tracking-style
+                  aim. Palm grip, where the whole hand rests on the mouse, tends to favor larger, arm-driven
+                  sweeps and is common among players who prioritize smooth tracking over rapid micro-flicks.
+                  Fingertip grip, where only the fingertips contact the mouse, allows for very fast small
+                  adjustments but can fatigue faster during long tracking-heavy sessions since more of the
+                  motion comes from smaller muscles. Claw grip sits between the two. None of the three is
+                  objectively correct for tracking specifically — what matters far more is picking one grip and
+                  staying consistent with it long enough for your nervous system to build reliable muscle
+                  memory around it, rather than switching grips every few sessions while trying to chase a
+                  slightly higher score.
+                </p>
+
+                <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.15rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                  Desk and Chair Stability
+                </h3>
+                <p style={{ margin: 0 }}>
+                  It is easy to overlook furniture as a variable in aim training, but a desk that flexes under
+                  fast arm movement or a chair that lets your torso drift mid-sweep both introduce noise your
+                  hand then has to unconsciously compensate for. Before investing in new peripherals to solve a
+                  tracking plateau, it is worth the five minutes it takes to check that your desk doesn&apos;t
+                  wobble under a firm push, that your chair height lets your forearm rest roughly parallel to
+                  the desk surface, and that your mousepad itself isn&apos;t sliding during aggressive sweeps.
+                  Many players who feel like their aim has hit a wall are, in reality, fighting an unstable
+                  physical setup rather than a skill ceiling.
+                </p>
+
+                <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.15rem', fontWeight: 700, marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+                  Reading Your Own Data Instead of Chasing a Single Score
+                </h3>
+                <p style={{ margin: 0 }}>
+                  This trainer already logs the numbers that matter most — score, accuracy, combo, and
+                  streak — but the real value comes from reading them as a trend rather than a single result.
+                  A single unusually high score, achieved once on a lucky run, tells you far less than a
+                  gradually rising accuracy percentage across ten sessions on the same difficulty and duration
+                  settings. If your accuracy is climbing but your score isn&apos;t, that usually means your
+                  combo consistency is improving faster than your raw hit rate — a genuinely good sign, since
+                  combo-driven score growth reflects the kind of sustained precision that transfers most
+                  directly to real matches. Conversely, if your raw score keeps climbing purely because you are
+                  playing longer, more forgiving durations, it is worth deliberately testing yourself on a
+                  shorter, higher-pressure duration occasionally to make sure your fundamentals are actually
+                  improving and not just your endurance.
+                </p>
+
+                <p style={{ margin: 0 }}>
+                  None of this hardware or setup advice is a substitute for repetition — it simply removes the
+                  friction that can quietly cap how much a given amount of practice actually improves your
+                  aim. Get the fundamentals of your setup right once, then let consistent, structured sessions
+                  on this trainer do the rest of the work.
+                </p>
+              </div>
+
+              <InfoBox
+                accent="var(--neon-green)" bg="rgba(34, 197, 94, 0.05)"
+                icon="⚙️" title="Quick Setup Checklist Before Your Next Session"
+                borderStyle="full"
+              >
+                Confirm your polling rate is set to 1000Hz if supported, verify your DPI and in-game
+                sensitivity haven&apos;t drifted since your last session, check that your mousepad has enough
+                room for a full sweep at your current sensitivity, and make sure your desk and chair are
+                stable under a firm push. Five minutes of setup verification can save weeks of confusing,
+                inconsistent practice data.
+              </InfoBox>
             </section>
 
             <section aria-labelledby="faq-heading" style={{ marginTop: '3rem' }}>
@@ -2167,7 +2417,7 @@ export default function SniperModePage() {
 
                 <AccordionItem id="faq-transfer" question="Does aim training transfer to real games?"
                   isOpen={openFaqId === 'faq-transfer'} onToggle={() => toggleFaq('faq-transfer')}>
-                  Studies on perceptual-motor learning confirm that deliberate, repetitive practice on isolated
+                  Studies on <SourceLink href="https://en.wikipedia.org/wiki/Perceptual-motor_learning">perceptual-motor learning</SourceLink> confirm that deliberate, repetitive practice on isolated
                   skills — like cursor tracking — transfers to related real-world tasks. The bouncing movement
                   in this trainer closely approximates enemy strafing patterns in FPS titles, making it a
                   high-fidelity training stimulus. Pair it with in-game practice for the fastest improvement.
@@ -2219,7 +2469,7 @@ export default function SniperModePage() {
 
                 <AccordionItem id="faq-refresh-rate" question="Does my monitor's refresh rate affect training quality?"
                   isOpen={openFaqId === 'faq-refresh-rate'} onToggle={() => toggleFaq('faq-refresh-rate')}>
-                  Yes. A higher refresh rate (120Hz, 144Hz, 240Hz) shows more intermediate frames of the
+                  Yes. A higher <SourceLink href="https://en.wikipedia.org/wiki/Refresh_rate">refresh rate</SourceLink> (120Hz, 144Hz, 240Hz) shows more intermediate frames of the
                   target&apos;s movement, which makes tracking feel smoother and lets you react a few
                   milliseconds sooner. A 60Hz display still works fine for building fundamentals, just with
                   slightly choppier visual feedback.
@@ -2291,10 +2541,11 @@ export default function SniperModePage() {
 
                 <AccordionItem id="faq-wrist-strain" question="Can aim training cause wrist strain, and how do I avoid it?"
                   isOpen={openFaqId === 'faq-wrist-strain'} onToggle={() => toggleFaq('faq-wrist-strain')}>
-                  Like any repetitive fine-motor activity, extended aim training can aggravate wrist or forearm
-                  strain if your grip is tense or your wrist is bent at an angle for long periods. Keep sessions
-                  short, take breaks between rounds, favour arm and elbow movement over wrist-only flicking, and
-                  stop immediately if you feel any tingling, numbness, or sharp discomfort.
+                  Like any repetitive fine-motor activity, extended aim training can aggravate <SourceLink href="https://www.ncbi.nlm.nih.gov/books/NBK441882/">repetitive strain
+                  conditions</SourceLink> in the wrist or forearm if your grip is tense or your wrist is bent at an angle
+                  for long periods. Keep sessions short, take breaks between rounds, favour arm and elbow
+                  movement over wrist-only flicking, and stop immediately if you feel any tingling, numbness,
+                  or sharp discomfort.
                 </AccordionItem>
 
                 <AccordionItem id="faq-controller-vs-mouse" question="Does this trainer work for controller aim as well as mouse?"
