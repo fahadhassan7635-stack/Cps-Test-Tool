@@ -446,6 +446,26 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
 ];
 
+// ── More Tools data ───────────────────────────────────────────────────────────
+interface ToolLink { label: string; href: string; icon: React.ReactNode; }
+
+const MORE_TOOLS: ToolLink[] = [
+  { label: 'CPS Test', href: '/cps-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Spacebar Counter', href: '/spacebar-counter', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="15" x2="18" y2="15"/></svg> },
+  { label: 'Typing Test', href: '/typing-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8M7 11h2m3 0h2m3 0h-1"/></svg> },
+  { label: 'Reaction Time', href: '/reaction-time', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+  { label: 'Scroll Test', href: '/scroll-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="9"/><path d="M9 11l3-3 3 3"/><path d="M9 13l3 3 3-3"/></svg> },
+  { label: 'Double Click', href: '/double-click', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/></svg> },
+  { label: 'Sniper Mode', href: '/sniper-mode', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/><circle cx="12" cy="12" r="8" opacity=".4"/></svg> },
+  { label: 'Mouse Accuracy', href: '/mouse-accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 2v10"/></svg> },
+  { label: 'Key Visualizer', href: '/key-visualizer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1m4 0h1m4 0h1M6 13h1m4 0h1m4 0h1"/></svg> },
+  { label: 'F1 Reaction', href: '/f1-reaction', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+  { label: 'Space Defense', href: '/space-defense', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { label: 'Accuracy Test', href: '/accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+  { label: 'CPS Rush', href: '/cps-rush', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 12v-4"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Voyager Game', href: '/voyager-game', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
+];
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function AimTrainerPage() {
   // Settings
@@ -1437,6 +1457,59 @@ export default function AimTrainerPage() {
           {(phase === 'paused') && <><Hint k="P / Esc" label="Resume" /><Hint k="R" label="Restart" /></>}
         </div>
 
+        {/* ── MORE TOOLS GRID ── */}
+        <section aria-label="More Tools" style={{ marginTop: '1rem', marginBottom: '2.5rem' }}>
+          <h2 style={{
+            fontWeight: 800, fontSize: '1.5rem', color: '#fff',
+            marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.3px',
+          }}>More Tools</h2>
+          <div className="more-tools-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(6, 1fr)',
+            gap: '1rem',
+          }}>
+            {MORE_TOOLS.map(({ label, href, icon }) => (
+              <a
+                key={href}
+                href={href}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  justifyContent: 'center', gap: '0.6rem',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  borderRadius: '14px',
+                  padding: '1.2rem 0.5rem',
+                  cursor: 'pointer', textDecoration: 'none',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = `rgba(${activeCfg.accentRgb},0.08)`;
+                  (e.currentTarget as HTMLElement).style.borderColor = `rgba(${activeCfg.accentRgb},0.35)`;
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={{
+                  width: '56px', height: '56px', borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.05)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: activeCfg.color, transition: 'color 0.3s ease',
+                }}>
+                  {icon}
+                </div>
+                <span style={{
+                  fontSize: '0.75rem', fontWeight: 700,
+                  color: '#cbd5e1', textAlign: 'center', lineHeight: 1.3,
+                }}>{label}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
         {/* ══════════════════════════════════════════════════════════
             SEO ARTICLE — 20+ H2 headings
         ══════════════════════════════════════════════════════════ */}
@@ -1584,6 +1657,203 @@ export default function AimTrainerPage() {
             </div>
           </SeoSection>
 
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>The Science of Reaction Time</h2>
+            <p style={pStyle}>
+              Reaction time is the gap between a stimulus appearing and your muscles actually responding to
+              it, and it is made up of several distinct stages: the eye detecting the target, the visual
+              signal traveling to the brain, the brain deciding on and issuing a motor command, and the
+              signal traveling back down to the hand. According to general <SourceLink href="https://en.wikipedia.org/wiki/Mental_chronometry">mental chronometry research</SourceLink>,
+              simple visual reaction time in healthy young adults typically falls in the 150–250 millisecond
+              range, with choice reaction time — picking the correct target among several — running noticeably
+              slower because the decision stage takes longer to resolve.
+            </p>
+            <p style={pStyle}>
+              This is why the trainer's grading system treats a sub-380ms average as an S-tier benchmark
+              rather than expecting sub-150ms scores: by the time you factor in target acquisition, aiming
+              correction, and the physical click itself on top of raw neural reaction time, 380ms represents
+              genuinely fast, well-trained performance rather than a theoretical floor. Reaction time also has
+              a hard biological limit — no amount of practice will get a healthy adult meaningfully below the
+              150ms mark, so gains from training come almost entirely from the surrounding stages: faster
+              target detection, cleaner aim correction, and more efficient motor commands, not from shaving
+              time off the nervous system's basic signal-transmission speed.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>How Muscle Memory and Motor Learning Actually Form</h2>
+            <p style={pStyle}>
+              What gamers casually call "muscle memory" is really a form of procedural learning that happens
+              in the brain, not the muscles themselves. Repeating a specific movement — like flicking to a
+              small target and clicking — strengthens the neural pathways responsible for that exact motion,
+              gradually shifting execution from a slow, consciously-monitored process to a fast, largely
+              automatic one. Broad overviews of <SourceLink href="https://en.wikipedia.org/wiki/Motor_learning">motor learning</SourceLink> describe
+              this shift as moving through cognitive, associative, and autonomous stages, with the autonomous
+              stage being where a movement finally feels "automatic" and requires little conscious attention.
+            </p>
+            <p style={pStyle}>
+              This has a practical implication for how you should structure aim training: motor learning is
+              driven by the specificity of the movement being repeated, which is exactly why matching your
+              real in-game sensitivity here matters so much. Practicing thousands of flicks at one sensitivity
+              and then switching to another for actual matches partially wastes that repetition, since the
+              precise combination of hand movement and cursor displacement your brain just optimized for no
+              longer applies. Short, frequent practice sessions spread across several days also tend to
+              consolidate motor skills more effectively than a single marathon session, since a meaningful
+              part of motor learning consolidation happens during rest and sleep rather than during the
+              practice itself.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>Hand-Eye Coordination and Visuomotor Tracking</h2>
+            <p style={pStyle}>
+              Hitting a moving target on Hard, Pro, or Impossible difficulty depends heavily on visuomotor
+              tracking — the continuous, real-time process of your visual system feeding position and
+              velocity information to the motor system that controls your hand. General material on <SourceLink href="https://en.wikipedia.org/wiki/Eye%E2%80%93hand_coordination">eye-hand coordination</SourceLink> describes
+              this as a closed feedback loop: the eyes track the target, the brain continuously updates its
+              prediction of where the target will be, and the hand adjusts its trajectory mid-movement based
+              on that updated prediction, rather than aiming once and committing blindly.
+            </p>
+            <p style={pStyle}>
+              This is also why the trainer's tip to "react to what you see, not what you predict" holds up
+              scientifically for slower targets but breaks down slightly at the highest speeds: against very
+              fast, erratic movement, some degree of short-horizon prediction becomes unavoidable simply
+              because the visual feedback loop cannot update fast enough to correct a pure reactive movement
+              in time. The practical skill worth training, then, is not eliminating prediction entirely but
+              learning to weight it correctly — trusting direct tracking on Easy and Normal targets, and
+              blending in light prediction only once a target's speed genuinely outpaces your visual
+              feedback loop on Pro and Impossible.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>Mouse Sensitivity, DPI, and Why Consistency Beats "Pro" Settings</h2>
+            <p style={pStyle}>
+              Mouse sensitivity determines how far your cursor travels relative to how far you physically
+              move the mouse, and it is a product of two separate settings: the mouse's own DPI (dots per
+              inch) and the in-game or in-tool sensitivity multiplier applied on top of it. Overviews of <SourceLink href="https://en.wikipedia.org/wiki/Dots_per_inch">DPI as a measurement concept</SourceLink> explain
+              that a higher DPI simply means the sensor reports more counts per inch of physical movement,
+              which is not inherently better or worse — it only changes how finely that raw movement gets
+              divided before the in-game multiplier is applied on top of it.
+            </p>
+            <p style={pStyle}>
+              Chasing a professional player's exact DPI and sensitivity number is one of the most common
+              mistakes newer players make, because the "right" sensitivity is really a function of your own
+              arm length, desk space, and preferred aiming style — a low-sensitivity player physically
+              sweeping their whole arm across a large mousepad is optimizing for a completely different
+              motor pattern than a high-sensitivity player making small wrist flicks. What matters far more
+              than the specific number is holding it constant: switching sensitivity frequently forces your
+              motor system to relearn the mapping between hand movement and cursor movement from scratch,
+              which directly undermines the muscle-memory consolidation described above.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>Monitor Refresh Rate, Input Lag, and Perceived Responsiveness</h2>
+            <p style={pStyle}>
+              A monitor's refresh rate, measured in Hertz, determines how many times per second the display
+              redraws its image. General references on <SourceLink href="https://en.wikipedia.org/wiki/Refresh_rate">display refresh rate</SourceLink> note
+              that a 60Hz panel redraws every 16.7ms, while a 144Hz panel redraws every 6.9ms and a 240Hz
+              panel every 4.2ms — meaning a higher refresh rate shows a moving target's updated position
+              sooner and more frequently, which shortens the time between the target actually moving and you
+              seeing that movement on screen.
+            </p>
+            <p style={pStyle}>
+              This does not change your underlying biological reaction time, but it does reduce one specific
+              source of delay in the full input-to-feedback chain, which is why competitive players often
+              report that high-refresh-rate monitors make tracking feel smoother even though their raw
+              reflexes have not changed. The gain is real but bounded: moving from 60Hz to 144Hz produces a
+              far larger practical improvement than moving from 144Hz to 240Hz, since the marginal reduction
+              in frame time shrinks quickly at the high end. A 60Hz display is still perfectly usable for
+              training and for tracking your own progress over time — differences of a few milliseconds in
+              display latency are dwarfed by the natural session-to-session variance in your own performance.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>Fatigue, Overtraining, and the Case for Shorter Sessions</h2>
+            <p style={pStyle}>
+              Aim performance degrades with both physical and mental fatigue, and the two compound each
+              other during a long training block. General discussion of <SourceLink href="https://en.wikipedia.org/wiki/Overtraining">overtraining</SourceLink> in
+              athletic contexts describes how pushing volume without adequate recovery leads to diminishing,
+              and eventually negative, returns — a pattern that shows up in aim training as slowly climbing
+              misclick rates and shrinking combo streaks late in a long session, even though the player feels
+              like they are "trying just as hard" as they were at the start.
+            </p>
+            <p style={pStyle}>
+              The practical takeaway is that a focused 15–20 minute block, broken into several short matches
+              with brief rests between them, generally produces better measurable results than a single
+              unbroken hour of grinding Impossible difficulty. Watching your own accuracy trend within a
+              session is a simple, personal way to find your fatigue point: once accuracy starts dropping two
+              or three matches in a row despite no change in difficulty, that is a reasonable signal to end
+              the session rather than push through with degraded technique that risks reinforcing bad habits
+              instead of good ones.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>Repetitive Strain Injury Prevention for Mouse and Keyboard Use</h2>
+            <p style={pStyle}>
+              Any repeated high-frequency clicking motion carries some risk of cumulative strain if done
+              without attention to posture, grip, or rest. General clinical overviews of <SourceLink href="https://www.ncbi.nlm.nih.gov/books/NBK441882/">repetitive strain conditions</SourceLink> describe
+              early warning signs — persistent tingling, numbness, or joint soreness — as signals to stop the
+              activity and rest rather than push through discomfort, since continuing to train through those
+              symptoms is what typically turns a minor strain into a longer-term injury.
+            </p>
+            <p style={pStyle}>
+              Keeping your wrist in a neutral, floating position rather than resting it against a hard desk
+              edge, using a claw or fingertip grip that minimizes unnecessary forearm tension, and taking a
+              short break every 20–30 minutes of active clicking are all low-effort habits that meaningfully
+              reduce strain risk over a long training program. Because this tool's difficulty tiers can push
+              click rates well above casual browsing speeds, especially on Pro and Impossible, treating longer
+              sessions with the same care you would give any other repetitive physical activity is a sensible
+              default rather than an overreaction.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>The Psychology Behind Combo Multipliers and Streaks</h2>
+            <p style={pStyle}>
+              The combo system's escalating multiplier — resetting instantly on any miss — is deliberately
+              designed around a well-studied behavioral principle: rewards that arrive on an uncertain,
+              streak-dependent schedule tend to produce stronger engagement and more careful behavior than
+              rewards that arrive predictably every time. General psychology references on <SourceLink href="https://en.wikipedia.org/wiki/Reinforcement">reinforcement schedules</SourceLink> describe
+              how variable and streak-based reward structures encourage sustained, careful effort precisely
+              because the player knows a single mistake wipes out the accumulated bonus.
+            </p>
+            <p style={pStyle}>
+              From a training perspective, this mechanic has a genuine side benefit beyond simply making the
+              game feel more exciting: because misclicks are punished so directly through combo loss, players
+              tend to naturally self-correct toward more controlled, deliberate clicking rather than wild,
+              rapid-fire flailing at every target on screen. Treating the multiplier as a built-in accuracy
+              coach — deliberately playing a notch more cautiously whenever your combo climbs past 10 or 20 —
+              is a simple way to use the scoring system itself as a technique-improvement tool rather than
+              just a scorekeeping gimmick.
+            </p>
+          </SeoSection>
+
+          <SeoSection accentColor={activeCfg.color}>
+            <h2 style={h2Style}>Esports Training Science and Structured Practice</h2>
+            <p style={pStyle}>
+              Organized esports programs increasingly borrow training structures from traditional sports
+              science, including periodized practice blocks, dedicated warm-up routines, and objective
+              performance benchmarking rather than relying purely on hours of unstructured match play.
+              Broader overviews of <SourceLink href="https://en.wikipedia.org/wiki/Esports">competitive esports</SourceLink> note
+              that as prize pools and professionalism have grown, so has the adoption of structured physical
+              and cognitive training methods borrowed from conventional athletics, including isolated
+              mechanical drills that mirror exactly what a tool like this aim trainer provides.
+            </p>
+            <p style={pStyle}>
+              The appeal of an isolated benchmark like this one is that it strips away the noisy, unpredictable
+              variables of an actual match — teammates, enemy decisions, map layout — leaving a single, clean
+              measurement of raw mechanical performance that can be tracked consistently across weeks or
+              months. Used alongside regular in-game play rather than as a replacement for it, a short daily
+              aim-training block gives you a controlled way to isolate whether a slump in your actual matches
+              stems from mechanical execution or from something else entirely, like decision-making or
+              positioning, which this kind of targeted, repeatable benchmarking can't measure on its own.
+            </p>
+          </SeoSection>
+
           <section aria-labelledby="faq-heading-main" style={{ marginTop: '1rem' }}>
             <h2 id="faq-heading-main" style={{ ...h2Style, marginBottom: '1.25rem' }}>Frequently Asked Questions</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
@@ -1661,6 +1931,12 @@ export default function AimTrainerPage() {
             grid-template-columns: repeat(4, 1fr) !important;
           }
         }
+        @media (max-width: 700px) {
+          .more-tools-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+        @media (max-width: 420px) {
+          .more-tools-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        }
       `}</style>
     </div>
   );
@@ -1701,6 +1977,35 @@ function SeoHero({ accentColor, accentRgb }: { accentColor: string; accentRgb: s
         session history — built to sharpen the click accuracy and reaction speed that competitive shooters demand.
       </p>
     </header>
+  );
+}
+
+function SourceLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer nofollow"
+      style={{
+        color: 'var(--neon-cyan, #2dd4bf)',
+        textDecoration: 'none',
+        borderBottom: '1px solid rgba(45,212,191,0.35)',
+        fontWeight: 600,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {children}
+      <svg
+        width="12" height="12" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+        aria-hidden="true"
+        style={{ display: 'inline-block', marginLeft: '3px', verticalAlign: 'middle', position: 'relative', top: '-2px' }}
+      >
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+    </a>
   );
 }
 
