@@ -8,7 +8,7 @@ import {
   useMemo,
   lazy,
 } from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2, ExternalLink } from 'lucide-react';
 
 // ─────────────────────────────────────────────
 // TYPES & CONSTANTS
@@ -52,6 +52,30 @@ const codeStyle: React.CSSProperties = {
   fontSize: '0.9em',
   color: 'var(--neon-cyan, #00f5ff)',
 };
+
+// ─────────────────────────────────────────────
+// ARTICLE RESEARCH LINK (external reference citation used inside SeoArticle)
+// ─────────────────────────────────────────────
+const ArticleLink = memo(({ href, children }: { href: string; children: React.ReactNode }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer nofollow"
+    style={{
+      color: 'var(--neon-cyan, #00f5ff)',
+      textDecoration: 'none',
+      fontWeight: 700,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '3px',
+      borderBottom: '1px dashed rgba(0,245,255,0.4)',
+    }}
+  >
+    {children}
+    <ExternalLink size={13} style={{ position: 'relative', top: '1px', flexShrink: 0 }} />
+  </a>
+));
+ArticleLink.displayName = 'ArticleLink';
 
 // ─────────────────────────────────────────────
 // GLOBAL CSS (extracted constant — no new string each render)
@@ -729,8 +753,11 @@ const SeoArticle = memo(() => (
       <p style={pStyle}>
         Uses rapid forearm muscle contractions to generate 10–14 CPS. Tense your forearm, hover your
         fingertip lightly over the button, and flex rapidly. The technique leverages fast-twitch muscle
-        fiber resonance. Warning: overuse causes forearm fatigue and potential tendon strain. Limit
-        sessions to under 30 seconds and always rest between attempts.
+        fiber resonance. Warning: overuse causes forearm fatigue and potential tendon strain — see the{' '}
+        <ArticleLink href="https://my.clevelandclinic.org/health/diseases/17424-repetitive-strain-injury">
+          Cleveland Clinic's overview of repetitive strain injury
+        </ArticleLink>{' '}
+        for prevention and symptom guidance. Limit sessions to under 30 seconds and always rest between attempts.
       </p>
       <h3 style={h3Style}>Butterfly Clicking</h3>
       <p style={pStyle}>
@@ -779,7 +806,11 @@ const SeoArticle = memo(() => (
         frequency since the server registers a hit for each valid click within range. Higher CPS means
         more knockback, higher effective DPS, and better combo maintenance. For sword combat, sustained
         10–14 CPS provides significant mechanical advantage. For speed bridging and clutch building,
-        consistent 8–12 CPS executed with accurate timing is most effective.
+        consistent 8–12 CPS executed with accurate timing is most effective. For the full technical
+        breakdown of how the attack cooldown meter and hit timing actually work in Java Edition, see the{' '}
+        <ArticleLink href="https://minecraft.wiki/w/Melee_attack">Minecraft Wiki's melee attack page</ArticleLink>.
+        Spend 10 minutes daily in this CPS test to build the speed and rhythm that carries over to real
+        PvP sessions on servers like <ArticleLink href="https://hypixel.net/">Hypixel</ArticleLink>.
       </p>
       <h3 style={h3Style}>Roblox Clicking</h3>
       <p style={pStyle}>
@@ -800,13 +831,16 @@ const SeoArticle = memo(() => (
         Rapid clicking at 7–10 CPS with the Classic, Frenzy, Ghost, or Sheriff effectively maximizes
         fire output during pistol rounds. The skill ceiling is maintaining headshot accuracy while
         sustaining that click rate — a combination that separates mechanically gifted players from
-        the average ranks.
+        the average ranks. Full agent kits, weapon stats, and patch notes live on the{' '}
+        <ArticleLink href="https://playvalorant.com/en-us/">official VALORANT site</ArticleLink>.
       </p>
       <h3 style={h3Style}>PUBG Single-Fire Mastery</h3>
       <p style={pStyle}>
         In PUBG, single-fire weapons like the M16A4, Mutant, and various DMRs (SKS, Mini14) have no in-game
         fire rate cap. A player achieving 8–12 CPS effectively transforms these into high-accuracy automatic
-        weapons with superior ballistic velocity and range compared to their full-auto counterparts.
+        weapons with superior ballistic velocity and range compared to their full-auto counterparts. Current
+        weapon balance patches and ballistics data are tracked on the{' '}
+        <ArticleLink href="https://pubg.com/en">official PUBG: BATTLEGROUNDS site</ArticleLink>.
       </p>
       <h3 style={h3Style}>Counter-Strike 2 (CS2)</h3>
       <p style={pStyle}>
@@ -833,7 +867,7 @@ const SeoArticle = memo(() => (
       <h2 style={h2Style}>How to Improve Reaction Time for FPS Games</h2>
       <ul style={ulStyle}>
         <li><strong>Monitor Refresh Rate:</strong> Upgrade to 144 Hz or 240 Hz+ to reduce frame latency by up to 6 ms compared to 60 Hz panels.</li>
-        <li><strong>Aim Trainers:</strong> Aim Lab, KovaaK's, and Aiming.Pro build muscle memory through structured scenario-based drills.</li>
+        <li><strong>Aim Trainers:</strong> Aim Lab, <ArticleLink href="https://www.kovaaks.com/kovaaks/main">KovaaK's</ArticleLink>, and Aiming.Pro build muscle memory through structured scenario-based drills.</li>
         <li><strong>Sleep and Recovery:</strong> A single night of poor sleep can slow reaction time by 15–20 ms, equivalent to dropping a hardware tier in latency.</li>
         <li><strong>Moderate Caffeine:</strong> 100–200 mg is clinically shown to improve reaction time by 10–15 ms. Avoid excessive intake which degrades fine motor control.</li>
         <li><strong>Warmup Routine:</strong> Use 1-second and 2-second CPS sprint tests before gaming sessions to activate fast-twitch fiber engagement.</li>
@@ -1461,11 +1495,12 @@ export default function CPSTestPage() {
           </>
         )}
 
-        {/* ── RESULT MODAL (inside click-area so it works in fullscreen) ── */}
+        {/* ── RESULT MODAL (position: fixed so it always centers on the viewport,
+             including when the click-area element is the fullscreen element) ── */}
         {phase === 'done' && finalRating && (
           <>
             <div style={{
-              position: 'absolute', inset: 0,
+              position: 'fixed', inset: 0,
               background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)',
               zIndex: 999, animation: 'fadeIn 0.3s ease-out forwards',
             }} />
@@ -1477,11 +1512,11 @@ export default function CPSTestPage() {
               aria-labelledby="modal-title"
               onClick={(e) => e.stopPropagation()}
               style={{
-                position: 'absolute', top: '50%', left: '50%',
+                position: 'fixed', top: '50%', left: '50%',
                 transform: 'translate(-50%, -50%)',
                 width: '95%',
                 maxWidth: '560px',
-                maxHeight: '90%',
+                maxHeight: '90vh',
                 overflowY: 'auto',
                 background: '#0d1117',
                 border: `2px solid ${finalRating.color}`,
@@ -1609,6 +1644,79 @@ export default function CPSTestPage() {
 
       {/* ── SESSION HISTORY ── */}
       {history.length > 0 && <SessionHistory history={history} />}
+
+      {/* ── MORE TOOLS GRID ── */}
+      <section aria-label="More Tools" style={{ marginTop: '3rem', marginBottom: '2.5rem' }}>
+        <h2 style={{
+          fontWeight: 800, fontSize: '1.5rem', color: '#fff',
+          marginBottom: '1.5rem', textAlign: 'center',
+          letterSpacing: '-0.3px',
+        }}>More Tools</h2>
+        <div
+          className="cps-games-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(6, 1fr)',
+            gap: '1rem',
+          }}
+        >
+          {[
+            { label: 'Typing Test',      href: '/typing-test',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8M7 11h2m3 0h2m3 0h-1"/></svg> },
+            { label: 'Reaction Time',    href: '/reaction-time',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+            { label: 'Aim Trainer',      href: '/aim-trainer',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg> },
+            { label: 'Spacebar Counter', href: '/spacebar',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="8" width="20" height="12" rx="2"/><path d="M7 17h10"/></svg> },
+            { label: 'Scroll Test',      href: '/scroll-test',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="10"/><line x1="12" y1="14" x2="12" y2="16"/><path d="M9 11l3-3 3 3"/><path d="M9 13l3 3 3-3"/></svg> },
+            { label: 'Double Click',     href: '/double-click',   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/></svg> },
+            { label: 'Sniper Mode',      href: '/sniper-mode',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/><circle cx="12" cy="12" r="8" opacity=".4"/></svg> },
+            { label: 'Mouse Accuracy',   href: '/mouse-accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 2v10"/></svg> },
+            { label: 'Key Visualizer',   href: '/key-visualizer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1m4 0h1m4 0h1M6 13h1m4 0h1m4 0h1"/></svg> },
+            { label: 'F1 Reaction',      href: '/f1-reaction',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+            { label: 'Space Defense',    href: '/space-defense',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+            { label: 'Voyager Game',     href: '/voyager-game',   icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
+            { label: 'CPS Rush',         href: '/cps-rush',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 12v-4"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+            { label: 'Accuracy Test',    href: '/accuracy',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+          ].map(({ label, href, icon }) => (
+            <a
+              key={href}
+              href={href}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', gap: '0.6rem',
+                background: '#141a2a',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: '14px',
+                padding: '1.2rem 0.5rem',
+                cursor: 'pointer', textDecoration: 'none',
+                color: 'var(--neon-green, #00ff88)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(0,255,136,0.07)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,255,136,0.3)';
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = '#141a2a';
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)';
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '12px',
+                background: 'rgba(255,255,255,0.05)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--neon-green, #00ff88)',
+              }}>
+                {icon}
+              </div>
+              <span style={{
+                fontSize: '0.75rem', fontWeight: 700,
+                color: '#cbd5e1', textAlign: 'center', lineHeight: 1.3,
+              }}>{label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
 
       {/* ── FAQ SECTION ── */}
       <FaqSection />
