@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://cps-test-tool.vercel.app/sitemap.xml

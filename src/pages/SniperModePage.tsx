@@ -49,6 +49,7 @@ import React, {
   memo,
 } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 /* ═══════════════════════════════════════════════════════════════
    TYPES
@@ -213,7 +214,7 @@ const LS_MUTE_KEY = 'sniper_aim_trainer_muted';
  *  Each entry links to a related keyboard/mouse benchmarking tool. */
 const MORE_TOOLS: ReadonlyArray<{ label: string; href: string; icon: React.ReactNode }> = [
   { label: 'CPS Test',        href: '/cps-test',       icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
-  { label: 'Spacebar Counter', href: '/spacebar-counter', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="6" y="15" width="12" height="3" rx="1"/></svg> },
+  { label: 'Spacebar Counter', href: '/spacebar', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><rect x="6" y="15" width="12" height="3" rx="1"/></svg> },
   { label: 'Typing Test',     href: '/typing-test',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8M7 11h2m3 0h2m3 0h-1"/></svg> },
   { label: 'Reaction Time',   href: '/reaction-time',  icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
   { label: 'Aim Trainer',     href: '/aim-trainer',    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg> },
@@ -362,6 +363,13 @@ function soundCrit(): void {
 function soundMiss(): void {
   playTone(120, 'sine', 0.30, 0, 0.12, 60);
   playNoise(0.08, 0, 0.06);
+}
+
+/** Sniper Shoot - clicky mechanical sound with deep bass */
+function soundShoot(): void {
+  playNoise(0.3, 0, 0.06);
+  playTone(400, 'square', 0.15, 0, 0.05, 150);
+  playTone(90, 'sine', 0.5, 0.01, 0.3, 30);
 }
 
 /** Combo unlock – ascending 3-note arpeggio, pitch scales with combo tier */
@@ -994,7 +1002,22 @@ export default function SniperModePage() {
   }, []);
 
   const areaRef          = useRef<HTMLDivElement>(null);
+  const scopeRef         = useRef<HTMLDivElement>(null);
+  const scopeInnerRef    = useRef<HTMLDivElement>(null);
   const targetElRef      = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const handleMove = (e: MouseEvent) => {
+      if (scopeRef.current && areaRef.current) {
+        const rect = areaRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        scopeRef.current.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    };
+    window.addEventListener('mousemove', handleMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMove);
+  }, []);
   const animRafRef       = useRef<number>(0);
   const timerIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownTORef   = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1536,9 +1559,19 @@ export default function SniperModePage() {
           100% { transform: translateX(250%); }
         }
 
-        /* Premium SVG crosshair cursor during play */
-        .arena-playing {
-          cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='7' stroke='%23ff2d55' stroke-width='1.5' fill='none'/%3E%3Cline x1='16' y1='2' x2='16' y2='10' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='16' y1='22' x2='16' y2='30' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='2' y1='16' x2='10' y2='16' stroke='%23ff2d55' stroke-width='1.5'/%3E%3Cline x1='22' y1='16' x2='30' y2='16' stroke='%23ff2d55' stroke-width='1.5'/%3E%3C/svg%3E") 16 16, crosshair;
+        /* Hide native cursor during play */
+        .arena-playing, .arena-playing * {
+          cursor: none !important;
+        }
+
+        @keyframes sniperRecoil {
+          0% { transform: translate(-50%, -50%); }
+          20% { transform: translate(-50%, calc(-50% - 30px)) rotate(-1deg); }
+          50% { transform: translate(-50%, calc(-50% + 5px)) rotate(0.5deg); }
+          100% { transform: translate(-50%, -50%) rotate(0); }
+        }
+        .recoil-active {
+          animation: sniperRecoil 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
         @media (max-width: 520px) {
@@ -1698,6 +1731,26 @@ export default function SniperModePage() {
           {/* ── Arena ── */}
           <div
             ref={areaRef}
+            onMouseDownCapture={(e) => {
+              if (isPlaying) {
+                soundShoot();
+                if (scopeInnerRef.current) {
+                  scopeInnerRef.current.classList.remove('recoil-active');
+                  void scopeInnerRef.current.offsetWidth;
+                  scopeInnerRef.current.classList.add('recoil-active');
+                }
+              }
+            }}
+            onTouchStartCapture={(e) => {
+              if (isPlaying) {
+                soundShoot();
+                if (scopeInnerRef.current) {
+                  scopeInnerRef.current.classList.remove('recoil-active');
+                  void scopeInnerRef.current.offsetWidth;
+                  scopeInnerRef.current.classList.add('recoil-active');
+                }
+              }
+            }}
             onClick={(e) => {
               if (isPlaying) handleMiss();
               else if (phase === 'idle' || phase === 'done') beginCountdown();
@@ -1728,6 +1781,28 @@ export default function SniperModePage() {
               touchAction: 'none', // prevent scroll interference on mobile
             }}
           >
+            {/* Global Hide Cursor Style */}
+            {typeof document !== 'undefined' && isPlaying && createPortal(
+              <style>{`* { cursor: none !important; }`}</style>,
+              document.head
+            )}
+            
+            {/* Custom Scope Cursor */}
+            <div ref={scopeRef} style={{
+              position: 'absolute',
+              top: 0, left: 0,
+              pointerEvents: 'none',
+              zIndex: 999999,
+              display: isPlaying ? 'block' : 'none'
+            }}>
+              <div ref={scopeInnerRef} style={{
+                width: '128px', height: '128px',
+                transform: 'translate(-50%, -50%)',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'%3E%3Ccircle cx='64' cy='64' r='60' stroke='%2300ff00' stroke-width='4' fill='none' opacity='0.8'/%3E%3Ccircle cx='64' cy='64' r='50' stroke='%2300ff00' stroke-width='1.5' fill='none' opacity='0.5'/%3E%3Cline x1='0' y1='64' x2='128' y2='64' stroke='%2300ff00' stroke-width='2' opacity='0.8'/%3E%3Cline x1='64' y1='0' x2='64' y2='128' stroke='%2300ff00' stroke-width='2' opacity='0.8'/%3E%3Ccircle cx='64' cy='64' r='3' fill='%2300ff00'/%3E%3Cline x1='60' y1='84' x2='68' y2='84' stroke='%2300ff00' stroke-width='1.5'/%3E%3Cline x1='56' y1='104' x2='72' y2='104' stroke='%2300ff00' stroke-width='1.5'/%3E%3Ctext x='74' y='88' fill='%2300ff00' font-family='sans-serif' font-size='10' font-weight='bold'%3E300%3C/text%3E%3Ctext x='74' y='108' fill='%2300ff00' font-family='sans-serif' font-size='10' font-weight='bold'%3E400%3C/text%3E%3C/svg%3E")`,
+                backgroundSize: 'contain'
+              }} />
+            </div>
+
             {/* Decorative crosshair guides */}
             {isPlaying && (
               <>
