@@ -561,18 +561,6 @@ const ResultModal = memo(function ResultModal({
     };
   }, [onClose]);
 
-  const stats = [
-    { v: `${accuracy}%`,      l: 'Accuracy',      c: 'var(--neon-green)'  },
-    { v: wpm,                  l: 'WPM',           c: 'var(--neon-cyan)'   },
-    { v: rawWpm,               l: 'Raw WPM',       c: 'var(--neon-cyan)'   },
-    { v: netWpm,               l: 'Net WPM',       c: 'var(--neon-yellow)' },
-    { v: cpm,                  l: 'CPM',           c: 'var(--neon-orange)' },
-    { v: correctChars,         l: 'Correct',       c: 'var(--neon-green)'  },
-    { v: errors,               l: 'Errors',        c: 'var(--neon-red)'    },
-    { v: formatTime(elapsed),  l: 'Elapsed',       c: 'var(--neon-cyan)'   },
-    { v: `${completion}%`,     l: 'Completion',    c: 'var(--neon-yellow)' },
-  ];
-
   return createPortal(
     <>
       {isPerfect && <ConfettiCanvas />}
@@ -706,7 +694,18 @@ const ResultModal = memo(function ResultModal({
             onClick={onRestart}
             style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}
           >Try Again</button>
+          <button
+            className="btn btn-secondary"
+            onClick={copyResults}
+            style={{ padding: '0.35rem 0.8rem', fontSize: '0.8rem' }}
+          >Copy Results</button>
         </div>
+
+        {(Object.keys(keyErrors).length > 0 || Object.keys(keyPresses).length > 0) && (
+          <KeyboardHeatmap keyErrors={keyErrors} keyPresses={keyPresses} />
+        )}
+
+        {accuracyLog.length > 1 && <AccuracyGraph data={accuracyLog} />}
       </div>
 
       <style>{`

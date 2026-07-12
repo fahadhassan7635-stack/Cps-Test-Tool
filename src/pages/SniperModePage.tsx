@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 /**
  * SniperModePage – Production Sniper Aim Trainer
@@ -1731,7 +1731,7 @@ export default function SniperModePage() {
           {/* ── Arena ── */}
           <div
             ref={areaRef}
-            onMouseDownCapture={(e) => {
+            onMouseDownCapture={() => {
               if (isPlaying) {
                 soundShoot();
                 if (scopeInnerRef.current) {
@@ -1741,7 +1741,7 @@ export default function SniperModePage() {
                 }
               }
             }}
-            onTouchStartCapture={(e) => {
+            onTouchStartCapture={() => {
               if (isPlaying) {
                 soundShoot();
                 if (scopeInnerRef.current) {
@@ -1751,7 +1751,7 @@ export default function SniperModePage() {
                 }
               }
             }}
-            onClick={(e) => {
+            onClick={() => {
               if (isPlaying) handleMiss();
               else if (phase === 'idle' || phase === 'done') beginCountdown();
             }}

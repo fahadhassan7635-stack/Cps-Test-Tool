@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
-  MousePointer2, Keyboard, Play, RotateCcw, Trophy, Zap, Activity,
-  Shield, Lightbulb, Target, Volume2, VolumeX, Maximize, Minimize,
+  MousePointer2, Keyboard, Play, RotateCcw, Trophy, Zap, Shield,
+  Volume2, VolumeX, Maximize, Minimize,
   Pause, Home, ChevronRight, HelpCircle, ChevronDown, ChevronUp, ExternalLink
 } from 'lucide-react';
 import confetti from 'canvas-confetti';

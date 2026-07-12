@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { 
-  Play, 
-  RotateCcw, 
-  ChevronUp, 
-  ChevronLeft, 
-  ChevronDown, 
-  ChevronRight, 
-  Target, 
-  Trophy, 
+import {
+  Play,
+  RotateCcw,
+  ChevronUp,
+  ChevronLeft,
+  ChevronDown,
+  ChevronRight,
+  Target,
+  Trophy,
   Zap,
   Activity,
   Timer,
@@ -18,10 +18,8 @@ import {
   Pause,
   Maximize,
   Minimize,
-  Shield,
   Star,
-  Flame,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 
 // ─── More Tools ───────────────────────────────────────────────────────────────
@@ -1332,8 +1330,8 @@ export default function SpaceDefensePage() {
                 fontSize: '0.75rem', fontWeight: 700,
                 color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.3,
               }}>{label}</span>
-            </a>
-          ))}
+              </a>
+            ))}
         </div>
       </section>
 

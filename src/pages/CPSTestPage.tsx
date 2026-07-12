@@ -3,10 +3,7 @@ import {
   useRef,
   useCallback,
   useEffect,
-  Suspense,
   memo,
-  useMemo,
-  lazy,
 } from 'react';
 import { Maximize2, Minimize2, ExternalLink } from 'lucide-react';
 
