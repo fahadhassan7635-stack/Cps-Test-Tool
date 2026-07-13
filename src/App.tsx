@@ -23,9 +23,10 @@ import ContactPage from './pages/ContactPage';
 
 import SpaceDefensePage from './pages/SpaceDefensePage';
 import VoyagerGame from './pages/VoyagerGame';
-import GamesPage from './pages/GamesPage'; 
-import F1ReactionPage from './pages/F1ReactionPage'; 
+import GamesPage from './pages/GamesPage';
+import F1ReactionPage from './pages/F1ReactionPage';
 import CpsRush from './pages/CpsRush';
+import SpaceWavesGame from './pages/SpaceWavesGame'; // ADD THIS
 
 export default function App() {
   return (
@@ -33,7 +34,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
-          
+
           <Route path="cps-test" element={<CPSTestPage />} />
           <Route path="typing-test" element={<TypingTestPage />} />
           <Route path="reaction-time" element={<ReactionTimePage />} />
@@ -47,24 +48,25 @@ export default function App() {
           <Route path="accuracy" element={<AccuracyTestPage />} />
           <Route path="space-defense" element={<SpaceDefensePage />} />
           <Route path="voyager-game" element={<VoyagerGame />} />
-          <Route path="f1-reaction" element={<F1ReactionPage />} /> 
-          <Route path="cps-rush" element={<CpsRush />} /> 
-          
+          <Route path="f1-reaction" element={<F1ReactionPage />} />
+          <Route path="cps-rush" element={<CpsRush />} />
+          <Route path="space-waves" element={<SpaceWavesGame />} /> {/* ADD THIS */}
+
           {/* Category Pages */}
           <Route path="mouse" element={<MousePage />} />
           <Route path="keyboard" element={<KeyboardPage />} />
           <Route path="aim" element={<AimPage />} />
           <Route path="games" element={<GamesPage />} />
-          
+
           <Route path="leaderboard" element={<LeaderboardPage />} />
           <Route path="hall-of-fame" element={<LeaderboardPage />} />
-          
+
           <Route path="blog" element={<BlogPage />} />
           <Route path="privacy-policy" element={<PrivacyPolicy />} />
           <Route path="terms" element={<TermsPage />} />
           <Route path="contact" element={<ContactPage />} />
         </Route>
-        
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
