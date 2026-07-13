@@ -2,30 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/logo.png" />
+
+    <!-- FIXED: favicon now points to the file that actually exists in /public -->
+    <link rel="icon" type="image/png" href="/cps-pfp.png" />
+    <link rel="apple-touch-icon" href="/cps-pfp.png" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
     <meta name="google-site-verification" content="OXaXBeuLS75aWFWP_fpIHL5NXIOiuhrNm6XBLhOtPIw" />
-    
-    <title>CPS Test Tool — Test Your Clicks Per Second Free</title>
-    <meta name="description" content="Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!" />
-    <meta name="keywords" content="CPS test, spacebar counter, spacebar test, typing speed test, reaction time test, aim trainer, keyboard test, mouse click speed, gaming tools" />
+
+    <title>CPS Test — Check Your Clicks Per Second (Free Online Tool)</title>
+    <meta name="description" content="Free CPS Test to measure your Clicks Per Second. Try jitter clicking, butterfly clicking & kohi click test modes, track your score, and compete on the leaderboard." />
+    <meta name="keywords" content="cps test, clicks per second test, click speed test, jitter click test, butterfly click test, kohi click test, spacebar counter, typing speed test, reaction time test, aim trainer, mouse click speed test" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="author" content="CPS Test Tool" />
     <meta name="theme-color" content="#00f5ff" />
-    
+
     <link rel="canonical" href="https://cps-test-tool.vercel.app/" />
 
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://cps-test-tool.vercel.app/" />
-    <meta property="og:title" content="CPS Test Tool — Test Your Clicks Per Second Free" />
-    <meta property="og:description" content="Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!" />
+    <meta property="og:site_name" content="CPS Test Tool" />
+    <meta property="og:title" content="CPS Test — Check Your Clicks Per Second (Free Online Tool)" />
+    <meta property="og:description" content="Free CPS Test to measure your Clicks Per Second. Try jitter clicking, butterfly clicking & kohi click test modes, track your score, and compete on the leaderboard." />
     <meta property="og:image" content="https://cps-test-tool.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CPS Test Tool — Test Your Clicks Per Second Free" />
-    <meta name="twitter:description" content="Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!" />
+    <meta name="twitter:title" content="CPS Test — Check Your Clicks Per Second (Free Online Tool)" />
+    <meta name="twitter:description" content="Free CPS Test to measure your Clicks Per Second. Try jitter clicking, butterfly clicking & kohi click test modes, track your score, and compete on the leaderboard." />
     <meta name="twitter:image" content="https://cps-test-tool.vercel.app/og-image.png" />
+
+    <!-- Performance: speed up first paint slightly -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <script type="application/ld+json">
     [
@@ -44,6 +58,8 @@
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
         "name": "CPS Test Tool",
+        "url": "https://cps-test-tool.vercel.app/",
+        "image": "https://cps-test-tool.vercel.app/og-image.png",
         "operatingSystem": "Windows, macOS, Linux, Android, iOS",
         "applicationCategory": "GameApplication",
         "offers": {
@@ -52,13 +68,32 @@
           "priceCurrency": "USD"
         },
         "description": "Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "CPS Test Tool",
+        "url": "https://cps-test-tool.vercel.app/",
+        "logo": "https://cps-test-tool.vercel.app/cps-pfp.png"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://cps-test-tool.vercel.app/"
+          }
+        ]
       }
     ]
     </script>
-    
+
   </head>
   <body>
-    
+
     <noscript>
       <h1>CPS Test Tool - Check Clicks Per Second Online</h1>
       <p>A Clicks Per Second (CPS) test is a free online tool designed to measure your mouse clicking speed over various time intervals, helping gamers improve their response rates and clicking styles like jitter clicking or butterfly clicking.</p>
@@ -66,7 +101,6 @@
       <p>Simply use our dashboard utility to tap on the click area as fast as possible to calculate your dynamic score instantly.</p>
     </noscript>
     <div id="root"></div>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
