@@ -40,6 +40,7 @@ const tools = [
   { to: '/space-defense', icon: '🚀', name: 'Space Defense', tag: 'Skill Game', accent: 'var(--neon-purple)' },
   { to: '/voyager-game', icon: '🌌', name: 'Voyager Game', tag: 'Endless', accent: 'var(--neon-cyan)' },
   { to: '/cps-rush', icon: '💥', name: 'CPS Rush', tag: 'Speed Rush', accent: 'var(--neon-red)' },
+  { to: '/space-waves', icon: '🌊', name: 'Space Waves', tag: 'Dodge Game', accent: 'var(--neon-cyan)' },
 ];
 
 const gearItems = [
@@ -284,6 +285,24 @@ const seoArticles = [
     faqs: [
       { q: 'Why is burst CPS important?', a: 'Think about a shotgun fight in Fortnite or a quick melee trade in Minecraft. You don\'t need to click for 10 seconds straight; you just need absolute maximum speed for exactly 1 second. This trains that exact scenario.' },
       { q: 'How do I stop my arm from hurting during this?', a: 'Relax your wrist. If you are jitter clicking, the vibration should come from your forearm, not your hand. If it hurts, stop. Take the 2-second break seriously to reset your tension.' },
+    ],
+  },
+  {
+    to: '/space-waves',
+    icon: '🌊',
+    color: 'var(--neon-cyan)',
+    title: 'Space Waves — Free Arcade Dodging Game to Sharpen Your Timing',
+    badge: 'DODGE',
+    content: [
+      'Want a fun way to stress-test a new mouse or keyboard? <strong>Space Waves</strong> is a one-button arcade dodging game: hold Space or your mouse button to climb, release to fall. Your glowing arrow flies forward automatically through a randomly generated course of walls, floating blocks, tunnels, and spinning hazards.',
+      'The controls are dead simple, but the timing gets brutal fast. Every run is freshly generated, so you can\'t just memorize a pattern — you actually have to read gaps, blocks, tunnels, and spinning hazards on the fly and react before they\'re fully on screen.',
+      'We track your progress percentage and attempt count on every run. Miss a section and you crash instantly, seeing exactly how far you made it. Clear the course and your attempts reset, so you can chase a cleaner run next time.',
+      '<strong>Quick tip:</strong> Tap, don\'t hold. Long holds send your arrow swinging way past where it needs to be. Short, deliberate taps give you way more control through tight gaps and tunnels.',
+    ],
+    faqs: [
+      { q: 'How do I control the arrow?', a: 'Hold Space or your mouse button to climb, release to fall. On mobile, press and hold anywhere on the game area. That\'s the entire control scheme.' },
+      { q: 'Is the course the same every time?', a: 'No. Every run generates a fresh mix of gaps, blocks, tunnels, and spinning hazards, so memorizing a specific run won\'t help — you have to read each obstacle as it comes.' },
+      { q: 'Does this actually help with other games?', a: 'Yes. The single-input, precise-timing skillset carries over well to auto-runners, rhythm platformers, and anything with tight dodge windows. It\'s also a solid way to feel out a new mouse or keyboard, since any input lag shows up immediately as a mistimed climb.' },
     ],
   },
 ];
