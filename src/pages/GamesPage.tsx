@@ -25,6 +25,14 @@ export default function GamesPage() {
       desc: 'The faster you click or smash the spacebar, the faster your speed and higher you bounce! Can you avoid obstacles and reach the final Cyber Gate?',
       color: '#06b6d4',
       badge: 'NEW REFLEX'
+    },
+    {
+      to: '/space-waves',
+      icon: '🌠',
+      title: 'Space Waves',
+      desc: 'Hold Space or click to soar, release to dive through a neon obstacle course. One wrong move sends you back to the start — how far can you push your reflexes?',
+      color: '#2dd4bf',
+      badge: 'SIDE-SCROLLER'
     }
   ];
 
