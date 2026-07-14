@@ -116,17 +116,17 @@ const DIFFICULTY_CONFIG: Record<DifficultyKey, DifficultyConfig> = {
   hard: {
     label: 'Hard', tag: 'HRD', color: '#f59e0b', glow: 'rgba(245,158,11,0.4)', accentRgb: '245,158,11',
     multiplier: 2.4, minSize: 64, maxSize: 86, lifetime: 900, spawnInterval: 10,
-    maxConcurrent: 1, moveChance: 0.55, minSpeed: 75, maxSpeed: 135,
+    maxConcurrent: 1, moveChance: 0.8, minSpeed: 150, maxSpeed: 250,
   },
   pro: {
     label: 'Pro', tag: 'PRO', color: '#f97316', glow: 'rgba(249,115,22,0.4)', accentRgb: '249,115,22',
     multiplier: 3.4, minSize: 64, maxSize: 86, lifetime: 620, spawnInterval: 10,
-    maxConcurrent: 1, moveChance: 0.8, minSpeed: 115, maxSpeed: 195,
+    maxConcurrent: 1, moveChance: 1.0, minSpeed: 300, maxSpeed: 450,
   },
   impossible: {
     label: 'Impossible', tag: 'IMP', color: '#e879f9', glow: 'rgba(232,121,249,0.4)', accentRgb: '232,121,249',
     multiplier: 4.6, minSize: 64, maxSize: 86, lifetime: 420, spawnInterval: 10,
-    maxConcurrent: 1, moveChance: 0.95, minSpeed: 165, maxSpeed: 265,
+    maxConcurrent: 1, moveChance: 1.0, minSpeed: 600, maxSpeed: 900,
   },
 };
 
