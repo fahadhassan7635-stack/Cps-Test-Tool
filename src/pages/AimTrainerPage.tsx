@@ -853,6 +853,10 @@ export default function AimTrainerPage() {
   const activeCfg = (phase === 'running' || phase === 'paused' || phase === 'countdown') ? configRef.current : DIFFICULTY_CONFIG[difficulty];
   const isActive = phase === 'running' || phase === 'paused' || phase === 'countdown';
   const gradeColors: Record<Grade, string> = { S: '#fbbf24', A: '#34d399', B: '#60a5fa', C: '#a78bfa', D: '#f97316', F: '#ef4444' };
+  const memoizedSeoArticle = useMemo(() => (
+          {memoizedSeoArticle}
+  ), [activeCfg.color, activeCfg.accentRgb, openFaqId]);
+
 
   return (
     <div style={{ minHeight: '100vh', color: '#e8e8f0', fontFamily: '"Inter", "SF Pro Display", system-ui, sans-serif', overflowX: 'hidden' }}>
