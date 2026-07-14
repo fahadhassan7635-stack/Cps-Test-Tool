@@ -116,17 +116,17 @@ const DIFFICULTY_CONFIG: Record<DifficultyKey, DifficultyConfig> = {
   hard: {
     label: 'Hard', tag: 'HRD', color: '#f59e0b', glow: 'rgba(245,158,11,0.4)', accentRgb: '245,158,11',
     multiplier: 2.4, minSize: 64, maxSize: 86, lifetime: 900, spawnInterval: 10,
-    maxConcurrent: 1, moveChance: 0.8, minSpeed: 150, maxSpeed: 250,
+    maxConcurrent: 1, moveChance: 0.55, minSpeed: 75, maxSpeed: 135,
   },
   pro: {
     label: 'Pro', tag: 'PRO', color: '#f97316', glow: 'rgba(249,115,22,0.4)', accentRgb: '249,115,22',
     multiplier: 3.4, minSize: 64, maxSize: 86, lifetime: 620, spawnInterval: 10,
-    maxConcurrent: 1, moveChance: 1.0, minSpeed: 300, maxSpeed: 450,
+    maxConcurrent: 1, moveChance: 0.8, minSpeed: 115, maxSpeed: 195,
   },
   impossible: {
     label: 'Impossible', tag: 'IMP', color: '#e879f9', glow: 'rgba(232,121,249,0.4)', accentRgb: '232,121,249',
     multiplier: 4.6, minSize: 64, maxSize: 86, lifetime: 420, spawnInterval: 10,
-    maxConcurrent: 1, moveChance: 1.0, minSpeed: 600, maxSpeed: 900,
+    maxConcurrent: 1, moveChance: 0.95, minSpeed: 165, maxSpeed: 265,
   },
 };
 
@@ -468,9 +468,8 @@ const MORE_TOOLS: ToolLink[] = [
   { label: 'Space Defense', href: '/space-defense', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
   { label: 'Accuracy Test', href: '/accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
   { label: 'CPS Rush', href: '/cps-rush', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 12v-4"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
-      { label: 'Voyager Game', href: '/voyager-game', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
-    { label: 'Space Waves', href: '/space-waves', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg> },
-  ];
+  { label: 'Voyager Game', href: '/voyager-game', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
+];
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function AimTrainerPage() {
@@ -853,10 +852,6 @@ export default function AimTrainerPage() {
   const activeCfg = (phase === 'running' || phase === 'paused' || phase === 'countdown') ? configRef.current : DIFFICULTY_CONFIG[difficulty];
   const isActive = phase === 'running' || phase === 'paused' || phase === 'countdown';
   const gradeColors: Record<Grade, string> = { S: '#fbbf24', A: '#34d399', B: '#60a5fa', C: '#a78bfa', D: '#f97316', F: '#ef4444' };
-  const memoizedSeoArticle = useMemo(() => (
-          {memoizedSeoArticle}
-  ), [activeCfg.color, activeCfg.accentRgb, openFaqId]);
-
 
   return (
     <div style={{ minHeight: '100vh', color: '#e8e8f0', fontFamily: '"Inter", "SF Pro Display", system-ui, sans-serif', overflowX: 'hidden' }}>
