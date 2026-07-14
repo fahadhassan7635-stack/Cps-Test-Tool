@@ -104,28 +104,23 @@ type GameAction =
 const DIFFICULTY_CONFIG: Record<DifficultyKey, DifficultyConfig> = {
   easy: {
     label: 'Easy', tag: 'EZ', color: '#34d399', glow: 'rgba(52,211,153,0.4)', accentRgb: '52,211,153',
-    multiplier: 1, minSize: 64, maxSize: 86, lifetime: 2000, spawnInterval: 80,
-    maxConcurrent: 1, moveChance: 0, minSpeed: 0, maxSpeed: 0,
+    multiplier: 1, minSize: 64, maxSize: 86, lifetime: 2000, spawnInterval: 40, maxConcurrent: 3, moveChance: 0, minSpeed: 0, maxSpeed: 0,
   },
   medium: {
     label: 'Normal', tag: 'NRM', color: '#60a5fa', glow: 'rgba(96,165,250,0.4)', accentRgb: '96,165,250',
-    multiplier: 1.6, minSize: 64, maxSize: 86, lifetime: 1300, spawnInterval: 65,
-    maxConcurrent: 2, moveChance: 0.25, minSpeed: 40, maxSpeed: 85,
+    multiplier: 1.6, minSize: 64, maxSize: 86, lifetime: 1300, spawnInterval: 30, maxConcurrent: 5, moveChance: 0.25, minSpeed: 40, maxSpeed: 85,
   },
   hard: {
     label: 'Hard', tag: 'HRD', color: '#f59e0b', glow: 'rgba(245,158,11,0.4)', accentRgb: '245,158,11',
-    multiplier: 2.4, minSize: 64, maxSize: 86, lifetime: 900, spawnInterval: 45,
-    maxConcurrent: 3, moveChance: 0.55, minSpeed: 75, maxSpeed: 135,
+    multiplier: 2.4, minSize: 64, maxSize: 86, lifetime: 900, spawnInterval: 20, maxConcurrent: 7, moveChance: 0.55, minSpeed: 75, maxSpeed: 135,
   },
   pro: {
     label: 'Pro', tag: 'PRO', color: '#f97316', glow: 'rgba(249,115,22,0.4)', accentRgb: '249,115,22',
-    multiplier: 3.4, minSize: 64, maxSize: 86, lifetime: 620, spawnInterval: 30,
-    maxConcurrent: 3, moveChance: 0.8, minSpeed: 115, maxSpeed: 195,
+    multiplier: 3.4, minSize: 64, maxSize: 86, lifetime: 620, spawnInterval: 10, maxConcurrent: 10, moveChance: 0.8, minSpeed: 115, maxSpeed: 195,
   },
   impossible: {
     label: 'Impossible', tag: 'IMP', color: '#e879f9', glow: 'rgba(232,121,249,0.4)', accentRgb: '232,121,249',
-    multiplier: 4.6, minSize: 64, maxSize: 86, lifetime: 420, spawnInterval: 18,
-    maxConcurrent: 4, moveChance: 0.95, minSpeed: 165, maxSpeed: 265,
+    multiplier: 4.6, minSize: 64, maxSize: 86, lifetime: 420, spawnInterval: 5, maxConcurrent: 15, moveChance: 0.95, minSpeed: 165, maxSpeed: 265,
   },
 };
 
