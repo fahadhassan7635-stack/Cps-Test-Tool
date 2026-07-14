@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
 
-    <!-- FIXED: favicon now points to the file that actually exists in /public -->
     <link rel="icon" type="image/png" href="/cps-pfp.png" />
     <link rel="apple-touch-icon" href="/cps-pfp.png" />
 
@@ -11,9 +10,12 @@
 
     <meta name="google-site-verification" content="OXaXBeuLS75aWFWP_fpIHL5NXIOiuhrNm6XBLhOtPIw" />
 
-    <title>CPS Test — Check Your Clicks Per Second (Free Online Tool)</title>
-    <meta name="description" content="Free CPS Test to measure your Clicks Per Second. Try jitter clicking, butterfly clicking & kohi click test modes, track your score, and compete on the leaderboard." />
-    <meta name="keywords" content="cps test, clicks per second test, click speed test, jitter click test, butterfly click test, kohi click test, spacebar counter, typing speed test, reaction time test, aim trainer, mouse click speed test" />
+    <title>CPS Test — Free Clicks Per Second Speed Tester | Jitter & Butterfly Click</title>
+
+    <meta name="description" content="Test your click speed instantly with the #1 free CPS Test tool. Measure Clicks Per Second, try jitter clicking, butterfly clicking & Kohi click test modes. Also includes Typing Speed, Reaction Time, Aim Trainer & more. No signup needed!" />
+
+    <meta name="keywords" content="cps test, clicks per second test, click speed test, jitter click test, butterfly click test, kohi click test, mouse click speed test, cps counter, click per second, how fast can you click, spacebar counter, typing speed test, wpm test, reaction time test, reflex test, aim trainer, fps skills, double click test, mouse accuracy test, scroll speed test, sniper mode, key visualizer, accuracy test, precision test, cps rush, space defense game, voyager game, space waves, click speed checker, fast clicking test, cps test 1 second, cps test 5 seconds, cps test 10 seconds, cps test 60 seconds, world record cps" />
+
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="author" content="CPS Test Tool" />
     <meta name="theme-color" content="#00f5ff" />
@@ -24,20 +26,28 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://cps-test-tool.vercel.app/" />
     <meta property="og:site_name" content="CPS Test Tool" />
-    <meta property="og:title" content="CPS Test — Check Your Clicks Per Second (Free Online Tool)" />
-    <meta property="og:description" content="Free CPS Test to measure your Clicks Per Second. Try jitter clicking, butterfly clicking & kohi click test modes, track your score, and compete on the leaderboard." />
+    <meta property="og:title" content="CPS Test — Free Clicks Per Second Speed Tester | Jitter & Butterfly Click" />
+    <meta property="og:description" content="Test your click speed instantly. Measure CPS, try jitter & butterfly clicking, train your aim, test reaction time & more. 16 free tools — no signup!" />
     <meta property="og:image" content="https://cps-test-tool.vercel.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="CPS Test Tool - 16 Free Mouse & Keyboard Speed Tools" />
     <meta property="og:locale" content="en_US" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="CPS Test — Check Your Clicks Per Second (Free Online Tool)" />
-    <meta name="twitter:description" content="Free CPS Test to measure your Clicks Per Second. Try jitter clicking, butterfly clicking & kohi click test modes, track your score, and compete on the leaderboard." />
+    <meta name="twitter:title" content="CPS Test — Free Clicks Per Second Speed Tester" />
+    <meta name="twitter:description" content="Test your click speed instantly. Measure CPS, try jitter & butterfly clicking. 16 free tools — no signup!" />
     <meta name="twitter:image" content="https://cps-test-tool.vercel.app/og-image.png" />
+    <meta name="twitter:image:alt" content="CPS Test Tool - Free Click Speed Tester" />
 
-    <!-- Performance: speed up first paint slightly -->
+    <!-- Mobile & PWA -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CPS Test" />
+
+    <!-- Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -48,11 +58,7 @@
         "@type": "WebSite",
         "name": "CPS Test Tool",
         "url": "https://cps-test-tool.vercel.app/",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": "https://cps-test-tool.vercel.app/?q={search_term_string}",
-          "query-input": "required name=search_term_string"
-        }
+        "description": "Free online CPS Test and gaming tools to measure your Clicks Per Second, typing speed, reaction time, aim accuracy and more. 16 free tools available."
       },
       {
         "@context": "https://schema.org",
@@ -62,19 +68,156 @@
         "image": "https://cps-test-tool.vercel.app/og-image.png",
         "operatingSystem": "Windows, macOS, Linux, Android, iOS",
         "applicationCategory": "GameApplication",
+        "applicationSubCategory": "Click Speed Tester",
+        "featureList": [
+          "CPS Test - Clicks Per Second Measurement",
+          "Typing Speed Test - WPM Test",
+          "Reaction Time Test - Reflex Test",
+          "Aim Trainer - FPS Skills",
+          "Spacebar Counter - Key Smash",
+          "Key Visualizer - Real-Time Key Display",
+          "Double Click Test - Mouse Test",
+          "Accuracy Test - Precision Test",
+          "Scroll Test - Scroll Speed",
+          "Mouse Accuracy - Tracking Test",
+          "Sniper Mode - Micro-Flicks",
+          "Space Defense - Skill Game",
+          "Voyager Game - Endless",
+          "CPS Rush - Speed Rush",
+          "Space Waves - Dodge Game"
+        ],
         "offers": {
           "@type": "Offer",
           "price": "0",
           "priceCurrency": "USD"
         },
-        "description": "Test your clicking speed with our free CPS Test tool. Find out your clicks per second, practice jitter or butterfly clicking, and beat the record!"
+        "description": "Test your clicking speed with our free CPS Test tool. 16 free tools including CPS Test, Typing Speed, Reaction Time, Aim Trainer, and arcade games. No signup needed!"
       },
       {
         "@context": "https://schema.org",
         "@type": "Organization",
         "name": "CPS Test Tool",
         "url": "https://cps-test-tool.vercel.app/",
-        "logo": "https://cps-test-tool.vercel.app/cps-pfp.png"
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://cps-test-tool.vercel.app/cps-pfp.png",
+          "width": 512,
+          "height": 512
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "All CPS Test Tools",
+        "description": "16 free mouse and keyboard speed testing tools",
+        "numberOfItems": 16,
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "CPS Test",
+            "description": "Measure your Clicks Per Second with jitter, butterfly and Kohi click test modes.",
+            "url": "https://cps-test-tool.vercel.app/cps-test"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Typing Speed Test",
+            "description": "Test your typing speed in WPM (Words Per Minute) with our free typing test.",
+            "url": "https://cps-test-tool.vercel.app/typing-test"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Reaction Time Test",
+            "description": "Measure your reflex speed and reaction time in milliseconds.",
+            "url": "https://cps-test-tool.vercel.app/reaction-time"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "Aim Trainer",
+            "description": "Improve your FPS aim skills with our free online aim trainer.",
+            "url": "https://cps-test-tool.vercel.app/aim-trainer"
+          },
+          {
+            "@type": "ListItem",
+            "position": 5,
+            "name": "Spacebar Counter",
+            "description": "Count your spacebar hits per second. Key smash speed tester.",
+            "url": "https://cps-test-tool.vercel.app/spacebar"
+          },
+          {
+            "@type": "ListItem",
+            "position": 6,
+            "name": "Key Visualizer",
+            "description": "Real-time key visualizer to see every keystroke displayed live.",
+            "url": "https://cps-test-tool.vercel.app/key-visualizer"
+          },
+          {
+            "@type": "ListItem",
+            "position": 7,
+            "name": "Double Click Test",
+            "description": "Test if your mouse double-clicks correctly and measure double click speed.",
+            "url": "https://cps-test-tool.vercel.app/double-click"
+          },
+          {
+            "@type": "ListItem",
+            "position": 8,
+            "name": "Accuracy Test",
+            "description": "Test your mouse clicking precision and accuracy score.",
+            "url": "https://cps-test-tool.vercel.app/accuracy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 9,
+            "name": "Scroll Test",
+            "description": "Measure your mouse scroll speed and scrolling performance.",
+            "url": "https://cps-test-tool.vercel.app/scroll-test"
+          },
+          {
+            "@type": "ListItem",
+            "position": 10,
+            "name": "Mouse Accuracy",
+            "description": "Improve mouse tracking accuracy with our free mouse accuracy trainer.",
+            "url": "https://cps-test-tool.vercel.app/mouse-accuracy"
+          },
+          {
+            "@type": "ListItem",
+            "position": 11,
+            "name": "Sniper Mode",
+            "description": "Train micro-flick shots and sniper precision for FPS games.",
+            "url": "https://cps-test-tool.vercel.app/sniper-mode"
+          },
+          {
+            "@type": "ListItem",
+            "position": 12,
+            "name": "Space Defense",
+            "description": "Skill-based arcade game to test your reflexes and click accuracy.",
+            "url": "https://cps-test-tool.vercel.app/space-defense"
+          },
+          {
+            "@type": "ListItem",
+            "position": 13,
+            "name": "Voyager Game",
+            "description": "Endless arcade game to test your reaction and clicking endurance.",
+            "url": "https://cps-test-tool.vercel.app/voyager-game"
+          },
+          {
+            "@type": "ListItem",
+            "position": 14,
+            "name": "CPS Rush",
+            "description": "High-speed clicking challenge game to push your CPS to the limit.",
+            "url": "https://cps-test-tool.vercel.app/cps-rush"
+          },
+          {
+            "@type": "ListItem",
+            "position": 15,
+            "name": "Space Waves",
+            "description": "Dodge game to test your reflexes and mouse movement speed.",
+            "url": "https://cps-test-tool.vercel.app/space-waves"
+          }
+        ]
       },
       {
         "@context": "https://schema.org",
@@ -87,6 +230,123 @@
             "item": "https://cps-test-tool.vercel.app/"
           }
         ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Test Your Click Speed (CPS Test)",
+        "description": "Step-by-step guide to measure your Clicks Per Second using our free CPS Test tool.",
+        "totalTime": "PT1M",
+        "tool": [
+          {
+            "@type": "HowToTool",
+            "name": "Mouse or Touchpad"
+          }
+        ],
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Open CPS Test",
+            "text": "Go to cps-test-tool.vercel.app and click on the CPS Test tool from the menu."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Select Time Interval",
+            "text": "Choose your test duration: 1 second, 5 seconds, 10 seconds, 30 seconds, or 60 seconds."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Start Clicking",
+            "text": "Click or tap the click area as fast as you can. The timer starts automatically on your first click."
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "See Your Score",
+            "text": "When the time is up, your CPS (Clicks Per Second) score is instantly displayed. Try to beat your record!"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is a CPS Test?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A CPS Test (Clicks Per Second Test) is a free online tool that measures how many times you can click your mouse per second. It is widely used by gamers to improve their click speed for games like Minecraft PvP."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the world record for CPS?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The world record for clicks per second is around 14-16 CPS using normal clicking. With jitter clicking or butterfly clicking techniques, some players have recorded 25+ CPS."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is jitter clicking?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Jitter clicking is a mouse clicking technique where you tense your arm and wrist muscles to vibrate your finger rapidly on the mouse button, allowing you to click much faster than normal — typically 10-15 CPS."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is butterfly clicking?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Butterfly clicking is a technique where you use two fingers alternately on one mouse button to achieve extremely fast click speeds, sometimes reaching 20-25+ CPS."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How can I improve my CPS score?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can improve your CPS by practicing regularly, learning jitter or butterfly clicking techniques, using a gaming mouse with fast response time, and doing daily click speed exercises on our CPS Test tool."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is the CPS Test free?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes! Our CPS Test and all 16 tools are completely free to use. No signup, no download, no payment required. Just open the website and start clicking."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I test CPS on mobile?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, our CPS Test tool works on mobile devices. You can tap the screen as fast as possible to measure your taps per second on smartphones and tablets."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What other tools does CPS Test Tool offer?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Besides the CPS Test, we offer 15 more free tools: Typing Speed Test (WPM), Reaction Time Test, Aim Trainer, Spacebar Counter, Key Visualizer, Double Click Test, Accuracy Test, Scroll Test, Mouse Accuracy, Sniper Mode, Space Defense, Voyager Game, CPS Rush, and Space Waves."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is a good CPS score?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "A good CPS score for regular clicking is 6-9 CPS. Above 10 CPS is considered fast. Professional gamers using jitter or butterfly clicking can reach 14-25+ CPS."
+            }
+          }
+        ]
       }
     ]
     </script>
@@ -95,11 +355,30 @@
   <body>
 
     <noscript>
-      <h1>CPS Test Tool - Check Clicks Per Second Online</h1>
-      <p>A Clicks Per Second (CPS) test is a free online tool designed to measure your mouse clicking speed over various time intervals, helping gamers improve their response rates and clicking styles like jitter clicking or butterfly clicking.</p>
-      <h2>How to test your Click Speed?</h2>
-      <p>Simply use our dashboard utility to tap on the click area as fast as possible to calculate your dynamic score instantly.</p>
+      <h1>CPS Test Tool — 16 Free Mouse & Keyboard Speed Tools</h1>
+      <p>A Clicks Per Second (CPS) test is a free online tool designed to measure your mouse clicking speed. We offer 16 free tools for gamers and keyboard warriors.</p>
+      <h2>Our 16 Free Tools</h2>
+      <ul>
+        <li><a href="/cps-test">CPS Test</a> — Measure Clicks Per Second</li>
+        <li><a href="/typing-test">Typing Speed Test</a> — WPM Test</li>
+        <li><a href="/reaction-time">Reaction Time Test</a> — Reflex Test</li>
+        <li><a href="/aim-trainer">Aim Trainer</a> — FPS Skills</li>
+        <li><a href="/spacebar">Spacebar Counter</a> — Key Smash</li>
+        <li><a href="/key-visualizer">Key Visualizer</a> — Real-Time</li>
+        <li><a href="/double-click">Double Click Test</a> — Mouse Test</li>
+        <li><a href="/accuracy">Accuracy Test</a> — Precision</li>
+        <li><a href="/scroll-test">Scroll Test</a> — Scroll Speed</li>
+        <li><a href="/mouse-accuracy">Mouse Accuracy</a> — Tracking</li>
+        <li><a href="/sniper-mode">Sniper Mode</a> — Micro-Flicks</li>
+        <li><a href="/space-defense">Space Defense</a> — Skill Game</li>
+        <li><a href="/voyager-game">Voyager Game</a> — Endless</li>
+        <li><a href="/cps-rush">CPS Rush</a> — Speed Rush</li>
+        <li><a href="/space-waves">Space Waves</a> — Dodge Game</li>
+      </ul>
+      <h2>How to Test Your Click Speed</h2>
+      <p>Open the CPS Test, click the click area as fast as possible, and your Clicks Per Second score is instantly calculated. Choose 1s, 5s, 10s, 30s or 60s intervals.</p>
     </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
