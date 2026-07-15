@@ -41,6 +41,7 @@ const tools = [
   { to: '/voyager-game', icon: '🌌', name: 'Voyager Game', tag: 'Endless', accent: 'var(--neon-cyan)' },
   { to: '/cps-rush', icon: '💥', name: 'CPS Rush', tag: 'Speed Rush', accent: 'var(--neon-red)' },
   { to: '/space-waves', icon: '🌊', name: 'Space Waves', tag: 'Dodge Game', accent: 'var(--neon-cyan)' },
+  { to: '/f1-reaction', icon: '🏎️', name: 'F1 Reaction Test', tag: 'Racing Reflex', accent: 'var(--neon-orange)' },
 ];
 
 const gearItems = [
@@ -303,6 +304,25 @@ const seoArticles = [
       { q: 'How do I control the arrow?', a: 'Hold Space or your mouse button to climb, release to fall. On mobile, press and hold anywhere on the game area. That\'s the entire control scheme.' },
       { q: 'Is the course the same every time?', a: 'No. Every run generates a fresh mix of gaps, blocks, tunnels, and spinning hazards, so memorizing a specific run won\'t help — you have to read each obstacle as it comes.' },
       { q: 'Does this actually help with other games?', a: 'Yes. The single-input, precise-timing skillset carries over well to auto-runners, rhythm platformers, and anything with tight dodge windows. It\'s also a solid way to feel out a new mouse or keyboard, since any input lag shows up immediately as a mistimed climb.' },
+    ],
+  },
+  {
+    to: '/f1-reaction',
+    icon: '🏎️',
+    color: 'var(--neon-orange)',
+    title: 'F1 Reaction Test — Simulate a Real Formula 1 Race Start',
+    badge: 'F1',
+    content: [
+      'In Formula 1, the difference between a perfect race start and a catastrophic wheel-spin is often less than <strong>50 milliseconds</strong>. Our <strong>F1 Reaction Test</strong> puts you in the cockpit: five red lights illuminate one by one, then go dark. Your job is to floor it the instant they vanish — just like a real F1 driver on the grid.',
+      'The reaction window is brutally tight. React before the lights go out and you get a <strong>false start</strong> — an automatic penalty in real racing. React more than 300ms after and you\'ve already lost two car lengths. The elite zone is <strong>150ms to 250ms</strong> after light-out, which is where actual F1 drivers consistently land.',
+      'The five-light sequence introduces a variable delay, so you can\'t count the rhythm and cheat. Your brain has to stay locked on the lights and fire the moment it processes darkness — which is harder than it sounds after a tense 3-second buildup.',
+      '<strong>Pro tip:</strong> Don\'t watch the lights go on — watch for them to go off. Experienced drivers actually focus their gaze on the off-state of the final light, which shaves around 20ms of visual processing time compared to tracking each light as it illuminates.',
+    ],
+    faqs: [
+      { q: 'What is a good F1 reaction time?', a: 'Real F1 drivers average between 150ms and 280ms. If you consistently land under 200ms without false-starting, your reflexes are genuinely at a competitive motorsport level. Under 150ms is essentially impossible without anticipating the lights.' },
+      { q: 'What counts as a false start?', a: 'If you click or press before the lights go out, it\'s a false start. In real F1, an automated sensor detects any throttle application before light-out and the driver receives a drive-through or time penalty. Our test just shows you the red FALSE START screen.' },
+      { q: 'Why is the delay random?', a: 'In real Grand Prix starts, the FIA randomizes the delay between the fifth light illuminating and the light-out signal. This prevents drivers from gaming the system by counting seconds. We replicate that same variable delay so every attempt is a genuine reflex test.' },
+      { q: 'How does this compare to the standard Reaction Time test?', a: 'The standard Reaction Time test uses a simple color-change cue. The F1 test adds psychological pressure: the slow build of five lights, the fear of false-starting, and a more realistic race-start context. Most people score 20–40ms slower here due to the added anticipation stress.' },
     ],
   },
 ];
