@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 const tools = [
   { to: '/reaction-time', icon: '⚡', title: 'Reaction Time Test', desc: 'Click when the screen turns green. Measure your average reaction time across 5 rounds.', color: 'var(--neon-orange)', tag: 'Most Popular' },
   { to: '/aim-trainer', icon: '🎯', title: 'Aim Trainer', desc: 'Click moving targets as fast as possible. Track your hits, misses, and accuracy.', color: 'var(--neon-red)', tag: '' },
-  { to: '/sniper-mode', icon: '🔭', title: 'Sniper Mode', desc: 'Track and hit a small moving target. Tests precision and tracking ability.', color: 'var(--neon-cyan)', tag: '' },
+  { to: '/3d-aim-trainer', icon: '🎯', title: '3D Aim Trainer', desc: 'Step into a first-person shooting range and sharpen your mouse accuracy. Track moving targets, improve your reaction speed, and dominate your aim game.', color: '#4fc3f7', tag: 'FPS Trainer' },
   { to: '/f1-reaction', icon: '🏎️', title: 'F1 Reaction Test', desc: 'Test your visual reflexes with the Formula 1 lights out sequence.', color: '#dc2626', tag: 'New' },
 ];
 
