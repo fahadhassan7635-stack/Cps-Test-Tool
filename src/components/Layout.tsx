@@ -40,7 +40,7 @@ export default function Layout() {
 
     { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
     { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
-    { to: '/sniper-mode', label: 'Sniper Mode', category: 'aim', icon: '🔭' },
+    { to: '/3d-aim-trainer', label: '3D Aim Trainer', category: 'aim', icon: '🎯' },
     { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
 
     { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
