@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { Maximize, Minimize } from 'lucide-react';
 
 const aimTrainerHTML = `<!DOCTYPE html>
 <html lang="en">
@@ -735,37 +736,447 @@ requestAnimationFrame(loop);
 </script>
 </body>
 </html>`;
+interface ToolLink { label: string; href: string; icon: JSX.Element; }
+
+const MORE_TOOLS: ToolLink[] = [
+  { label: 'CPS Test', href: '/cps-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Spacebar Counter', href: '/spacebar-counter', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="15" x2="18" y2="15"/></svg> },
+  { label: 'Aim Trainer', href: '/aim-trainer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> },
+  { label: 'Typing Test', href: '/typing-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8M7 11h2m3 0h2m3 0h-1"/></svg> },
+  { label: 'Reaction Time', href: '/reaction-time', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+  { label: 'Scroll Test', href: '/scroll-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="9"/><path d="M9 11l3-3 3 3"/><path d="M9 13l3 3 3-3"/></svg> },
+  { label: 'Double Click', href: '/double-click', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/></svg> },
+  { label: '3D Aim Trainer', href: '/3d-aim-trainer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/><circle cx="12" cy="12" r="8" opacity=".4"/></svg> },
+  { label: 'Mouse Accuracy', href: '/mouse-accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 2v10"/></svg> },
+  { label: 'Key Visualizer', href: '/key-visualizer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1m4 0h1m4 0h1M6 13h1m4 0h1m4 0h1"/></svg> },
+  { label: 'F1 Reaction', href: '/f1-reaction', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+  { label: 'Space Defense', href: '/space-defense', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { label: 'Accuracy Test', href: '/accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+  { label: 'CPS Rush', href: '/cps-rush', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 12v-4"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Voyager Game', href: '/voyager-game', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
+  { label: 'Space Waves', href: '/space-waves', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg> }
+];
 
 export default function SniperModePage() {
+  const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [iframeUrl, setIframeUrl] = useState<string>('');
 
   useEffect(() => {
     // Create a blob URL so pointer lock & audio work properly inside the iframe
     const blob = new Blob([aimTrainerHTML], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-
-    if (iframeRef.current) {
-      iframeRef.current.src = url;
-    }
+    setIframeUrl(url);
 
     return () => {
       URL.revokeObjectURL(url);
     };
   }, []);
 
+  const toggleFullscreen = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  }, []);
+
+  useEffect(() => {
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
+  }, []);
+
   return (
-    <div style={{ width: '100%', height: '100vh', overflow: 'hidden', background: '#0a0a0c' }}>
-      <iframe
-        ref={iframeRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          display: 'block',
-        }}
-        allow="pointer-lock"
-        title="3D Aim Trainer"
-      />
+    <div style={{ width: '100%', minHeight: '100vh' }}>
+      <div ref={containerRef} style={{ width: '100%', height: '100vh', position: 'relative', background: '#0a0a0c', overflow: 'hidden' }}>
+        <iframe
+          ref={iframeRef}
+          src={iframeUrl}
+          style={{
+            width: '100%',
+            height: '100%',
+            border: 'none',
+            display: 'block',
+          }}
+          allow="pointer-lock; fullscreen"
+          title="3D Aim Trainer"
+        />
+        <div style={{ position: 'absolute', top: '14px', right: '14px', display: 'flex', gap: '8px', zIndex: 100 }}>
+          <button onClick={toggleFullscreen} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} style={{ background: 'rgba(4,9,20,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px', color: '#9ca3af', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+          </button>
+        </div>
+      </div>
+
+      <section aria-label="More Tools" style={{ maxWidth: '1000px', margin: '4rem auto 0 auto', padding: '0 2rem' }}>
+        <h2 style={{
+          fontWeight: 800, fontSize: '1.5rem', color: '#fff',
+          marginBottom: '1.5rem', textAlign: 'center', letterSpacing: '-0.3px',
+        }}>More Tools</h2>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
+          gap: '1rem',
+        }}>
+          {MORE_TOOLS.map(({ label, href, icon }) => (
+            <a
+              key={href}
+              href={href}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', gap: '0.6rem',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '14px',
+                padding: '1.2rem 0.5rem',
+                cursor: 'pointer', textDecoration: 'none',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.background = `rgba(79,195,247,0.08)`;
+                (e.currentTarget as HTMLElement).style.borderColor = `rgba(79,195,247,0.35)`;
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)';
+                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)';
+                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{
+                width: '56px', height: '56px', borderRadius: '12px',
+                background: 'rgba(255,255,255,0.05)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#4fc3f7', transition: 'color 0.3s ease',
+              }}>
+                {icon}
+              </div>
+              <span style={{ color: '#d1d1de', fontSize: '0.8rem', fontWeight: 600, textAlign: 'center' }}>{label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+      
+      <article style={{ maxWidth: '1000px', margin: '0 auto', padding: '4rem 2rem', color: '#cbd5e1', fontFamily: 'system-ui, sans-serif', lineHeight: '1.6' }}>
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '2.5rem', color: '#fff', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>The Ultimate Guide to 3D Aim Training</h1>
+        
+        <div style={{ marginBottom: '4rem', fontSize: '1.1rem', color: '#9ca3af' }}>
+          <p style={{ marginBottom: '1.5rem' }}>
+            Welcome to the most comprehensive and deeply analytical guide on 3D Aim Training you will ever read. Aim training in a three-dimensional environment has revolutionized the way competitive gamers prepare for high-stakes matches in top-tier First-Person Shooters (FPS) like Valorant, Counter-Strike 2, Overwatch 2, and Apex Legends. Unlike simple 2D clicker games, a true 3D Aim Trainer immerses you in a simulated spatial environment that requires precise camera rotation, crosshair placement, and depth perception. The integration of 3D physics means that your mouse movements translate directly into angular rotations within the game engine, governed by complex calculations involving field of view (FOV), sensitivity, and dots per inch (DPI). Mastering this environment is not just about clicking fast; it is about building robust neural pathways that automate the process of target acquisition. According to studies in <a href="https://en.wikipedia.org/wiki/Motor_learning" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7', textDecoration: 'none' }}>motor learning</a>, the specificity of practice is paramount. When you train in 3D, you are engaging the exact same spatial awareness mechanisms that you rely on in actual gameplay.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            The journey to elite aiming is paved with thousands of repetitions, focusing on micro-corrections, tracking smoothness, and the raw speed of flick shots. Professional esports athletes dedicate countless hours to isolated mechanical practice. But why does this work so effectively? The answer lies in the cognitive concept of procedural memory. When you first start playing an FPS, aiming requires conscious thought. You have to actively decide how far to move your hand to reach a target on the screen. However, through structured practice in a controlled 3D aim trainer, this process is pushed into the subconscious. The brain forms strong synaptic connections that map specific physical hand movements to specific on-screen crosshair displacements. This is often colloquially referred to as "muscle memory," although the memory resides entirely in the brain, not the muscles themselves. A comprehensive overview of how <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4346284/" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7', textDecoration: 'none' }}>neuroplasticity</a> facilitates skill acquisition demonstrates that consistent, targeted repetition leads to structural changes in the brain that support rapid, automatic execution of complex motor tasks.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            One of the most critical factors in 3D aim training is ensuring that your training environment perfectly mirrors your primary game. This is where the concept of eDPI (effective Dots Per Inch) comes into play. eDPI is calculated by multiplying your mouse's hardware DPI by your in-game sensitivity multiplier. By maintaining a consistent eDPI across your aim trainer and your game, you ensure that the muscle memory you build is perfectly transferable. Furthermore, your Field of View (FOV) must also match. A higher FOV makes targets in the center of the screen appear smaller and move slower across the monitor, while a lower FOV makes them appear larger and move faster. If your FOV in the aim trainer is different from your game, your brain will struggle to calibrate the necessary hand movements. Many modern aim trainers, including this one, allow you to adjust your sensitivity and FOV to perfectly match popular titles, ensuring 1:1 translation of your mechanical skills.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            Beyond the software, hardware plays an undeniable role in aiming potential. A lightweight gaming mouse with a flawless optical sensor is essentially a prerequisite for high-level competitive play. Sensors like the PixArt 3360 and its derivatives provide true 1:1 tracking without hardware acceleration or angle snapping. This raw input is crucial because any artificial manipulation of your mouse movement by the hardware will disrupt the formation of accurate muscle memory. Additionally, the polling rate of the mouse—how often it reports its position to the computer—should be at least 1000Hz to minimize input lag. When combined with a high refresh rate monitor (144Hz, 240Hz, or even 360Hz), the latency between your physical movement and the visual feedback on the screen is reduced to milliseconds. This immediate feedback loop is essential for making the rapid micro-corrections required for elite tracking and flicking. You can learn more about the impact of latency on human performance in <a href="https://humanfactors.jmir.org/2021/1/e23735/" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7', textDecoration: 'none' }}>human-computer interaction studies</a>.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            Aiming can generally be broken down into three fundamental techniques: flicking, tracking, and crosshair placement. Flicking is the rapid, explosive movement of the crosshair to a target that appears suddenly. It relies heavily on ingrained spatial memory and fast twitch muscle fibers. Tracking, on the other hand, involves keeping the crosshair smoothly locked onto a moving target. This requires continuous visual processing and smooth, controlled arm and wrist movements. Tracking is heavily emphasized in games with longer "time-to-kill" (TTK) like Apex Legends or Overwatch 2. Crosshair placement is perhaps the most important yet most often overlooked aspect of aiming. It involves pre-aiming the crosshair at the exact location where an enemy is expected to appear, typically at head height. Good crosshair placement minimizes the need for drastic flicking, making aiming feel effortless. A comprehensive 3D aim trainer provides scenarios to isolate and practice each of these techniques individually.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            When constructing a routine, consistency is far more valuable than marathon sessions. Practicing for 30 minutes every single day yields significantly better results than practicing for three hours once a week. This is because motor learning and memory consolidation occur primarily during sleep. Short, focused training sessions followed by adequate rest allow the brain to process and solidify the neural pathways formed during practice. During your sessions, it is crucial to focus on accuracy before speed. The mantra "slow is smooth, and smooth is fast" applies perfectly to aim training. If you try to flick faster than your current skill level allows, you will build bad habits and reinforce inaccurate muscle memory. Focus on hitting the target with 90-95% accuracy. Once you can consistently hit targets at a certain speed with high accuracy, your speed will naturally increase over time without sacrificing precision.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            Another vital component of mechanical skill development is posture and ergonomics. How you sit at your desk, the height of your chair, and the positioning of your arm on the desk all heavily influence your aiming consistency. A common recommendation among professional players is to ensure that your elbow is resting comfortably on the desk or armrest, forming roughly a 90-degree angle. This provides a stable pivot point for large sweeping arm movements (used for turning and large tracking motions) while freeing up the wrist and fingers for precise micro-adjustments. Tension in your grip or forearm is the enemy of smooth aiming. Learning to maintain a relaxed grip on the mouse, even in high-pressure situations, prevents fatigue and allows for much more fluid and precise cursor control. Ergonomics not only improves performance but also prevents repetitive strain injuries (RSI), which are unfortunately common in esports.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            The evolution of aim trainers has been fascinating. What started as simple flash-based browser games has evolved into sophisticated standalone engines built in Unity or Unreal Engine, or in this case, a highly optimized WebGL environment. These modern trainers offer incredibly detailed statistics, tracking your reaction time, accuracy, over-flick percentage, and time-to-damage. Analyzing this data is crucial for identifying your weaknesses. Do you consistently overshoot targets to the right? You might need to adjust your grip or lower your sensitivity slightly. Do you struggle with targets moving vertically? You can isolate vertical tracking scenarios to build proficiency. The data-driven approach to mechanical improvement has elevated the average skill level in competitive shooters to unprecedented heights.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            But aim isn't everything. It's important to remember that mechanics exist to serve game sense. You can have the most precise aim in the world, but if you are consistently caught out of position or lack understanding of map control and timings, you will still lose engagements. Aim training should supplement your actual gameplay, not replace it. The ideal ratio varies, but many coaches recommend spending no more than 20-30% of your total gaming time on isolated aim training. The rest should be spent playing the game, applying your improved mechanics in real, dynamic situations where positioning, movement, and decision-making all interact simultaneously. This holistic approach ensures that you become a complete player, rather than just a highly accurate static turret.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            Cognitive fatigue is a real phenomenon that affects aiming performance. Because aiming requires intense visual focus and rapid decision-making, your central nervous system can become depleted after prolonged sessions. You might notice your reaction times slowing down or your tracking becoming jittery after a few hours of intense play. Recognizing the signs of cognitive fatigue and taking regular breaks is essential for maintaining peak performance. Techniques such as the 20-20-20 rule (every 20 minutes, look at something 20 feet away for 20 seconds) can help reduce eye strain, while physical stretching can relieve tension in your shoulders and wrists. Proper hydration, nutrition, and sleep are also foundational elements of cognitive performance. You cannot expect your brain to execute complex motor tasks at maximum efficiency if it is not properly fueled and rested.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            In conclusion, 3D aim training is a scientifically grounded method for improving your mechanical proficiency in first-person shooters. By understanding the principles of motor learning, optimizing your hardware and software environment, and adhering to a consistent, accuracy-focused practice routine, you can systematically elevate your aiming capabilities. Remember that improvement is not linear; there will be plateaus and even temporary regressions. However, with dedication and a data-driven approach to identifying and addressing your weaknesses, the neural pathways will inevitably strengthen, and those seemingly impossible flick shots will eventually become second nature. Now, dive into the trainer above, start building those repetitions, and watch as your hard work translates into tangible results on the scoreboard. Below you will find an extensive breakdown of every single aspect of aim training, divided into specific, actionable sections to guide you on your journey to becoming a mechanical god.
+          </p>
+          <p style={{ marginBottom: '1.5rem' }}>
+            To further understand the cognitive demands of gaming, refer to academic publications on <a href="https://www.frontiersin.org/articles/10.3389/fpsyg.2019.01824/full" target="_blank" rel="noopener noreferrer" style={{ color: '#4fc3f7', textDecoration: 'none' }}>esports psychology and cognitive performance</a>, which highlight the incredible mental processing speeds required at the highest levels of competitive play. The skills you are building here extend far beyond the virtual battlefield, enhancing your hand-eye coordination, reaction times, and spatial reasoning in profound ways. This is just the beginning. The following 35+ sections will tear down every mechanic, myth, and methodology in the world of aim training.
+          </p>
+        </div>
+        
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Introduction to 3D Aim Training</h2>
+          <p>Aim training in a 3D environment bridges the gap between 2D cursor control and actual in-game performance in first-person shooters. By simulating the 3D space, you train your brain to understand the relationship between mouse movement and camera rotation.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Why 3D Aim Training is Essential</h2>
+          <p>Unlike 2D aim trainers, a 3D environment accounts for FOV (Field of View) and camera projection. This ensures that the muscle memory you build directly translates to your favorite competitive shooters without any weird sensitivity scaling issues.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>The Physics of 3D Aiming</h2>
+          <p>3D aiming involves rotating a virtual camera around a pivot point (your character's head). Understanding how angular movement corresponds to physical mouse movement is the first step to mastering your aim.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Understanding Mouse Sensitivity</h2>
+          <p>Sensitivity is the multiplier applied to your physical mouse movement. In a 3D engine, this translates to degrees of rotation per mouse count. Finding a comfortable sensitivity is crucial for consistency.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>DPI vs. In-Game Sensitivity</h2>
+          <p>DPI (Dots Per Inch) is your hardware sensitivity, while in-game sensitivity is a software multiplier. A higher DPI with lower in-game sensitivity often results in smoother camera movement because of more frequent sensor updates.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Finding Your Perfect eDPI</h2>
+          <p>eDPI (Effective DPI) is calculated by multiplying your DPI by your in-game sensitivity. It allows players to compare their true sensitivity regardless of their hardware settings. Pro players usually hover around an eDPI of 200 to 400 in tactical shooters.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>The Role of Muscle Memory</h2>
+          <p>Muscle memory is technically motor learning in the brain. Through repetition, your brain optimizes the neural pathways to perform movements automatically, allowing you to focus on strategy rather than mechanics.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Flicking vs. Tracking</h2>
+          <p>Flicking is the act of rapidly snapping your crosshair to a target, while tracking is smoothly following a moving target. Most competitive games require a mastery of both, though some favor one over the other.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Mastering Flick Shots</h2>
+          <p>Good flicking relies on spatial awareness and motor memory. The goal is to make the initial flick as close to the target as possible, reducing the need for secondary micro-adjustments.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>The Art of Tracking Targets</h2>
+          <p>Tracking requires predicting target movement and maintaining a smooth, consistent hand motion. It relies heavily on visual focus and reactivity rather than pure muscle memory.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Crosshair Placement Fundamentals</h2>
+          <p>Good crosshair placement reduces the distance you need to flick. Always keep your crosshair at head height and anticipate where enemies might appear around corners.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Importance of Target Acquisition</h2>
+          <p>Target acquisition is the speed at which you visually process a target and begin your mouse movement. Improving this phase drastically lowers your overall time-to-kill.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Reducing Reaction Time</h2>
+          <p>While biological reaction time is largely fixed, you can improve your cognitive processing speed by reducing distractions, sleeping well, and practicing specific scenarios to make reactions more automatic.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Hand-Eye Coordination in 3D Space</h2>
+          <p>Aiming requires tight coordination between what you see and what your hand does. 3D trainers specifically challenge this coordination by introducing depth and perspective.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>The Impact of Monitor Refresh Rate</h2>
+          <p>A higher refresh rate (like 144Hz or 240Hz) updates the screen more frequently, giving you more recent visual information. This significantly aids in tracking fast-moving targets.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Input Lag and How to Minimize It</h2>
+          <p>Input lag is the delay between moving your mouse and seeing the result on screen. Minimize it by using exclusive fullscreen mode, disabling V-Sync, and using raw input.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Optimal Posture for Aiming</h2>
+          <p>A consistent posture ensures your arm rests on the desk the same way every time. This consistency is vital because changes in friction or arm angle can throw off your muscle memory.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Grip Styles: Palm, Claw, and Fingertip</h2>
+          <p>Different grips offer different advantages. Palm is stable, fingertip offers maximum vertical agility, and claw is a hybrid. Find the one that naturally suits your hand size and mouse shape.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Choosing the Right Mousepad</h2>
+          <p>Mousepads come in speed, control, and hybrid surfaces. A control pad offers more stopping power for precise flicks, while a speed pad allows for effortless tracking.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Mouse Weight and Aiming Performance</h2>
+          <p>Lightweight mice reduce the inertia required to start and stop movements, generally making flicks snappier and tracking less fatiguing over long sessions.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Warming Up Before Ranked Matches</h2>
+          <p>Always spend 10-15 minutes in a 3D aim trainer before jumping into competitive play. It wakes up your nervous system and gets your hand accustomed to the friction of your mousepad.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Structuring Your Aim Training Routine</h2>
+          <p>A good routine should include a mix of static clicking, dynamic clicking, and smooth tracking scenarios. Don't just practice what you are already good at.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Avoiding Aim Fatigue and Burnout</h2>
+          <p>Training for hours on end yields diminishing returns. Keep your sessions focused and limit them to 30-45 minutes to prevent physical and mental fatigue.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Overcoming Aim Plateaus</h2>
+          <p>If you stop improving, change your routine. Try altering your sensitivity slightly for a week to force your brain to actively process aiming rather than relying entirely on autopilot.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Analyzing Your Aiming Mistakes</h2>
+          <p>Are you consistently over-flicking or under-flicking? Recognizing these patterns allows you to actively correct them during your training sessions.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>The Psychology of Clutch Situations</h2>
+          <p>Under pressure, players tend to tense their arms, which ruins smooth aiming. Training helps make your aim so automatic that it holds up even when adrenaline spikes.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Breathing Techniques for Steady Aim</h2>
+          <p>Deep, rhythmic breathing keeps your heart rate down and prevents tension from building up in your shoulders and forearms, keeping your aim fluid.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Visual Focus and Target Tracking</h2>
+          <p>Focus your eyes on the target, not your crosshair. Your brain will naturally align the center of the screen with whatever you are looking at if you have practiced enough.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Peripheral Vision in FPS Games</h2>
+          <p>While you focus on a specific target, your peripheral vision is responsible for acquiring the next one. 3D trainers with multiple targets help widen your effective awareness.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Micro-Adjustments in Crosshair Movement</h2>
+          <p>When a flick isn't perfectly accurate, a micro-adjustment is required. This is usually done with the fingertips and is crucial for hitting small targets at long distances.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>The Importance of Consistency</h2>
+          <p>Aiming well once is easy; aiming well every day is hard. Consistency comes from maintaining the same hardware, posture, and practice schedule.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Translating Training to In-Game Performance</h2>
+          <p>Remember that aim is only one part of an FPS game. Positioning, game sense, and movement mechanics are just as important to ensure your aiming skills actually yield kills.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Common Aiming Bad Habits</h2>
+          <p>Tensing up, holding your breath, pressing the mouse button too hard, and relying on wrist movement for large turns are common habits that hold players back.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>How to Break Bad Aiming Habits</h2>
+          <p>Breaking a habit requires conscious effort. Slow down your practice, focus on relaxation, and prioritize perfect technique over high scores until the new habit forms.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Setting Realistic Aiming Goals</h2>
+          <p>Don't expect to become a pro in a week. Set small, incremental goals like increasing your accuracy by 2% or beating your high score on a specific scenario.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Tracking Your Aim Progress over Time</h2>
+          <p>Keep a log of your scores and accuracy. Looking back at your progress over months is the best way to stay motivated during training plateaus.</p>
+        </section>
+
+        <section style={{ marginBottom: '2.5rem' }}>
+          <h2>Conclusion: Becoming a Better Aimer</h2>
+          <p>Mastering 3D aim is a journey of thousands of repetitions. Stay disciplined, take care of your physical health, and use this trainer as a stepping stone to dominate in your favorite games.</p>
+        </section>
+        <section style={{ marginTop: '4rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '2rem', color: '#fff', textAlign: 'center' }}>Frequently Asked Questions</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>1. What is 3D aim training?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>3D aim training involves practicing mouse movements in a simulated three-dimensional space, mimicking the mechanics of modern First-Person Shooters (FPS) to improve accuracy, reaction time, and muscle memory.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>2. How is it different from 2D aim trainers?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>2D trainers focus on planar cursor movement (X/Y axes). 3D trainers incorporate field of view (FOV), depth perception, and angular camera rotation, making the practice directly transferable to real FPS games.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>3. Does aim training actually build muscle memory?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Yes, though technically it builds "procedural memory" in the brain. Repeated, specific movements strengthen neural pathways, making your flick shots and tracking automatic and subconscious.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>4. What is eDPI and why does it matter?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>eDPI stands for effective Dots Per Inch. It is calculated by multiplying your mouse's hardware DPI by your in-game sensitivity. Matching eDPI across games ensures your muscle memory remains consistent.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>5. How long should I practice aim training each day?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Consistency is key. Practicing for 15 to 30 minutes daily is highly effective. Marathon sessions often lead to cognitive fatigue and reinforce bad habits through sloppy mechanics.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>6. Should I focus on speed or accuracy?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Always focus on accuracy first (aiming for 90-95% hit rate). As you build clean procedural memory, your speed will naturally increase without sacrificing your mechanical foundation.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>7. What is tracking in FPS games?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Tracking is the ability to keep your crosshair locked onto a moving target. It requires smooth, continuous mouse movements and is crucial for games with longer time-to-kill like Apex Legends.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>8. What is a flick shot?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>A flick shot is a rapid, explosive movement of the crosshair to a target, relying almost entirely on ingrained muscle memory rather than conscious visual tracking.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>9. Do aim trainers improve game sense?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>No. Aim trainers isolate mechanical skill. Game sense—understanding positioning, timing, map layouts, and enemy behavior—can only be developed by actually playing the game.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>10. Why is my aim inconsistent?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Inconsistency can stem from cognitive fatigue, poor posture, lack of warmup, inconsistent hardware setup, or simply not playing enough to solidify your mechanical skills across different scenarios.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>11. Is a higher polling rate better for aiming?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Yes, up to a point. A polling rate of 1000Hz (reporting 1000 times per second) is considered the standard for competitive play, ensuring minimal input latency between your hand and the screen.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>12. What is mouse acceleration?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Mouse acceleration changes your cursor speed based on how fast you move the mouse. It is generally recommended to turn this OFF (e.g., "Enhance pointer precision" in Windows) to build consistent muscle memory.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>13. How does FOV affect my aim?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Field of View dictates how much of the game world is visible. Higher FOV makes targets appear smaller and slower, while lower FOV makes them larger and faster. Your aim trainer FOV should match your game's FOV.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>14. Should I change my sensitivity if I perform badly?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Frequently changing your sensitivity prevents muscle memory from forming. Pick a reasonable sensitivity used by professionals in your game and stick with it for at least a few weeks before adjusting.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>15. What grip style is best for aiming?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>There is no single "best" grip. Palm grip offers stability, fingertip grip offers precision micro-adjustments, and claw grip strikes a balance. Choose whatever feels most natural and pain-free.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>16. How important is a high refresh rate monitor?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Extremely important. Upgrading from 60Hz to 144Hz or 240Hz drastically reduces motion blur and input lag, making it significantly easier to track fast-moving targets visually.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>17. Will 3D aim training help me in Valorant?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Yes. While Valorant relies heavily on crosshair placement and positioning, 3D aim training sharpens your reaction time and micro-adjustments, which are vital for winning aim duels.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>18. What is crosshair placement?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Crosshair placement involves proactively aiming at the exact height and angle where an enemy's head is expected to appear. Good placement reduces the distance you need to flick.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>19. Can aiming cause physical injuries?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Yes, poor ergonomics, tense grip, and excessive marathon sessions can lead to Repetitive Strain Injuries (RSI) like carpal tunnel. Stretching and taking breaks is non-negotiable for longevity.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>20. Is arm aiming better than wrist aiming?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Generally, a combination is best. Use your arm for large sweeping movements (lower sensitivity) to protect your wrist from strain, and use your wrist/fingers for precise micro-adjustments.</p>
+            </details>
+            <details style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.07)', padding: '1rem' }}>
+              <summary style={{ fontSize: '1.1rem', fontWeight: 700, color: '#fff', cursor: 'pointer' }}>21. Do heavier mice make aiming harder?</summary>
+              <p style={{ marginTop: '1rem', color: '#9ca3af', lineHeight: '1.6' }}>Heavier mice have more inertia, making them harder to start and stop quickly. This is why the competitive standard has shifted dramatically towards lightweight mice (under 70 grams) for optimal flick speed and control.</p>
+            </details>
+          </div>
+        </section>
+      </article>
     </div>
   );
 }

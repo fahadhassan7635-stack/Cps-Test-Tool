@@ -341,9 +341,9 @@ function useParticleCanvas(areaRef: React.RefObject<HTMLDivElement | null>) {
 
 // ── SEO content data ──────────────────────────────────────────────────────────
 const SUPPORTED_GAMES = [
-  'Valorant', 'Counter-Strike 2', 'Call of Duty: Warzone', 'Apex Legends',
-  'Overwatch 2', 'Fortnite', 'PUBG: Battlegrounds', 'Rainbow Six Siege',
-  'Destiny 2', 'League of Legends',
+  'osu!', 'League of Legends', 'Dota 2', 'Diablo IV',
+  'Path of Exile', 'Enter the Gungeon', 'Hades', 'Hotline Miami',
+  'Brawl Stars', 'Vampire Survivors',
 ] as const;
 
 interface FaqEntry { id: string; question: string; answer: React.ReactNode; }
@@ -461,7 +461,7 @@ const MORE_TOOLS: ToolLink[] = [
   { label: 'Reaction Time', href: '/reaction-time', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
   { label: 'Scroll Test', href: '/scroll-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="9"/><path d="M9 11l3-3 3 3"/><path d="M9 13l3 3 3-3"/></svg> },
   { label: 'Double Click', href: '/double-click', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/></svg> },
-  { label: 'Sniper Mode', href: '/sniper-mode', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/><circle cx="12" cy="12" r="8" opacity=".4"/></svg> },
+  { label: '3D Aim Trainer', href: '/3d-aim-trainer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/><circle cx="12" cy="12" r="8" opacity=".4"/></svg> },
   { label: 'Mouse Accuracy', href: '/mouse-accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 2v10"/></svg> },
   { label: 'Key Visualizer', href: '/key-visualizer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1m4 0h1m4 0h1M6 13h1m4 0h1m4 0h1"/></svg> },
   { label: 'F1 Reaction', href: '/f1-reaction', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
@@ -507,7 +507,7 @@ export default function AimTrainerPage() {
   const [openFaqId, setOpenFaqId] = useState<string | null>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  // containerRef removed (unused)
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
@@ -782,16 +782,10 @@ export default function AimTrainerPage() {
     }
   }, [sfx, burst, spawnRipple, spawnFloatText, trackedTimeout, spawnTarget]);
 
-  const missClick = useCallback((e: React.MouseEvent) => {
+  const missClick = useCallback((_e: React.MouseEvent) => {
     if (phaseRef.current !== 'running') return;
     dispatch({ type: 'MISCLICK' });
     // sfx.miss() removed
-    if (areaRef.current) {
-      const rect = areaRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left, y = e.clientY - rect.top;
-      // spawnRipple removed
-      // spawnFloatText removed
-    }
   }, [sfx, spawnRipple, spawnFloatText]);
 
   const handleAreaClick = useCallback((e: React.MouseEvent) => {
@@ -1504,10 +1498,10 @@ export default function AimTrainerPage() {
           <SeoHero accentColor={activeCfg.color} accentRgb={activeCfg.accentRgb} />
 
           <SeoSection accentColor={activeCfg.color}>
-            <h2 style={h2Style}>How This Aim Trainer Works</h2>
+            <h2 style={h2Style}>How This 2D Aim Trainer Works</h2>
             <p style={pStyle}>
               Every match runs on a lightweight engine built for one job: spawn a target, measure how fast
-              and how precisely you click it, then repeat. A short countdown primes your reflexes, targets
+              and how precisely you click it in a 2D plane, then repeat. A short countdown primes your reflexes, targets
               appear one at a time or several at once depending on difficulty, and a live stats bar tracks
               score, accuracy, combo, and reaction time as you play — no page reload, no waiting between hits.
             </p>
@@ -1596,9 +1590,9 @@ export default function AimTrainerPage() {
           </SeoSection>
 
           <SeoSection accentColor={activeCfg.color}>
-            <h2 style={h2Style}>Games Where This Training Transfers</h2>
+            <h2 style={h2Style}>Games Where This 2D Training Transfers</h2>
             <p style={{ ...pStyle, marginBottom: '1.5rem' }}>
-              Precise, fast target acquisition matters in almost every competitive shooter and hero shooter.
+              Precise, fast 2D cursor control matters in almost every top-down competitive game, MOBA, ARPG, and rhythm game.
               Regular reps here carry over most directly to:
             </p>
             <ul style={{
@@ -1618,27 +1612,27 @@ export default function AimTrainerPage() {
           </SeoSection>
 
           <SeoSection accentColor={activeCfg.color}>
-            <h2 style={h2Style}>Best Aim Training Tips for FPS Players</h2>
+            <h2 style={h2Style}>Best 2D Aim Training Tips for MOBA and osu! Players</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '0.5rem' }}>
               <div>
                 <h3 style={h3Style}>Warm up before you grind Impossible</h3>
                 <p style={pStyle}>Start each session on Easy or Normal for a minute before pushing into harder tiers — cold reflexes make small, fast targets feel far worse than they are.</p>
               </div>
               <div>
-                <h3 style={h3Style}>React to what you see, not what you predict</h3>
-                <p style={pStyle}>Fast-moving targets tempt you to click where you think they're heading. Track the target itself; prediction is what causes consistent overshoot.</p>
+                <h3 style={h3Style}>Focus on cursor path efficiency</h3>
+                <p style={pStyle}>In 2D games, moving your cursor in straight lines between targets is crucial. Avoid curving your cursor path, as it increases travel time and causes overshooting.</p>
               </div>
               <div>
                 <h3 style={h3Style}>Protect your combo over chasing risky clicks</h3>
                 <p style={pStyle}>Since the multiplier resets on any miss, a controlled 20-hit streak at ×2.5 often out-scores several short bursts interrupted by misclicks.</p>
               </div>
               <div>
-                <h3 style={h3Style}>Match your real in-game sensitivity</h3>
-                <p style={pStyle}>Training at a sensitivity you don't actually play with builds muscle memory that won't transfer. Set it once, and keep it identical across both.</p>
+                <h3 style={h3Style}>Match your real desktop sensitivity</h3>
+                <p style={pStyle}>Training at a sensitivity you don't actually play with builds muscle memory that won't transfer. Keep your Windows pointer speed and mouse DPI identical to your game settings.</p>
               </div>
               <div>
                 <h3 style={h3Style}>Watch your accuracy trend, not just your score</h3>
-                <p style={pStyle}>Score rewards difficulty and combo as much as raw precision. Accuracy is the cleaner signal for whether your fundamentals are actually improving.</p>
+                <p style={pStyle}>Score rewards difficulty and combo as much as raw precision. Accuracy is the cleaner signal for whether your mouse control fundamentals are actually improving.</p>
               </div>
             </div>
           </SeoSection>
@@ -1670,7 +1664,7 @@ export default function AimTrainerPage() {
             <h2 style={h2Style}>How Muscle Memory and Motor Learning Actually Form</h2>
             <p style={pStyle}>
               What gamers casually call "muscle memory" is really a form of procedural learning that happens
-              in the brain, not the muscles themselves. Repeating a specific movement — like flicking to a
+              in the brain, not the muscles themselves. Repeating a specific movement — like gliding your cursor to a
               small target and clicking — strengthens the neural pathways responsible for that exact motion,
               gradually shifting execution from a slow, consciously-monitored process to a fast, largely
               automatic one. Broad overviews of <SourceLink href="https://en.wikipedia.org/wiki/Motor_learning">motor learning</SourceLink> describe
@@ -1680,8 +1674,8 @@ export default function AimTrainerPage() {
             <p style={pStyle}>
               This has a practical implication for how you should structure aim training: motor learning is
               driven by the specificity of the movement being repeated, which is exactly why matching your
-              real in-game sensitivity here matters so much. Practicing thousands of flicks at one sensitivity
-              and then switching to another for actual matches partially wastes that repetition, since the
+              real desktop sensitivity here matters so much. Practicing thousands of clicks at one sensitivity
+              and then switching to another for actual MOBA or ARPG matches partially wastes that repetition, since the
               precise combination of hand movement and cursor displacement your brain just optimized for no
               longer applies. Short, frequent practice sessions spread across several days also tend to
               consolidate motor skills more effectively than a single marathon session, since a meaningful
