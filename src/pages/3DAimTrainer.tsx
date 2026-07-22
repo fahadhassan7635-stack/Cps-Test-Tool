@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 
 const aimTrainerHTML = `<!DOCTYPE html>
@@ -348,8 +348,15 @@ const aimTrainerHTML = `<!DOCTYPE html>
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 function ensureAudio() {
-  if (!audioCtx) audioCtx = new AudioCtx();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') {
+      const p = audioCtx.resume();
+      if (p && p.catch) p.catch(e => console.warn("Audio resume blocked", e));
+    }
+  } catch (err) {
+    console.warn("Audio init failed", err);
+  }
 }
 function playGunshot() {
   if (!audioCtx) return;
@@ -408,11 +415,21 @@ function playDestroy() {
 const state = { running: false, paused: false, hits: 0, misses: 0, score: 0, startTime: 0, pauseAccum: 0, pauseStart: 0 };
 function resetState() { state.running=false; state.paused=false; state.hits=0; state.misses=0; state.score=0; state.startTime=0; state.pauseAccum=0; state.pauseStart=0; }
 const canvas = document.getElementById('canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = false;
-renderer.setClearColor(0x1a1a1e, 1);
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.shadowMap.enabled = false;
+  renderer.setClearColor(0x1a1a1e, 1);
+  canvas.addEventListener("webglcontextlost", (e) => { 
+    e.preventDefault(); 
+    if (state.running) pauseGame(); 
+  }, false);
+} catch (e) {
+  console.error("WebGL failed to init", e);
+  document.getElementById('start-screen').innerHTML = '<div style="color:#ff5252;padding:20px;text-align:center;max-width:400px;margin:0 auto;line-height:1.5;">WebGL is not supported or failed to initialize on your device. Please ensure hardware acceleration is enabled in your browser settings.</div>';
+}
 const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0x1a1a1e, 18, 38);
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 80);
@@ -430,7 +447,7 @@ function applyMouseMove(dx, dy) {
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);
 });
 (function buildRoom() {
   const wallMat = new THREE.MeshLambertMaterial({ color: 0x2e2e35 });
@@ -691,7 +708,14 @@ document.addEventListener('mousedown', (e) => {
   if (!pointerLocked || !state.running || state.paused) return;
   shoot();
 });
-function requestPointerLock() { canvas.requestPointerLock(); }
+function requestPointerLock() { 
+  try {
+    const p = canvas.requestPointerLock();
+    if (p && p.catch) p.catch(e => console.warn("Pointer lock error", e));
+  } catch(e) {
+    console.warn("Pointer lock unsupported", e);
+  }
+}
 function startGame() {
   ensureAudio(); resetState(); state.running = true; state.startTime = performance.now();
   if (activeTarget) { scene.remove(activeTarget); activeTarget = null; }
@@ -719,15 +743,22 @@ function resumeGame() {
 }
 function restartGame() { document.getElementById('pause-screen').classList.add('hidden'); startGame(); }
 let lastTime = performance.now();
+let animFrameId = null;
 function loop(now) {
-  requestAnimationFrame(loop);
-  const dt = Math.min((now - lastTime) / 1000, 0.05); lastTime = now;
-  if (state.running && !state.paused) {
-    if (!canShoot) { shootCooldown -= dt; if (shootCooldown <= 0) { canShoot = true; shootCooldown = 0; } }
-    updateTarget(dt); updateImpacts(dt); updateGunRecoil(dt); updateMuzzleFlash(dt); updateFPS(dt);
-    elTimer.textContent = formatTime(now - state.startTime - state.pauseAccum);
+  animFrameId = requestAnimationFrame(loop);
+  try {
+    const dt = Math.min((now - lastTime) / 1000, 0.05); lastTime = now;
+    if (state.running && !state.paused) {
+      if (!canShoot) { shootCooldown -= dt; if (shootCooldown <= 0) { canShoot = true; shootCooldown = 0; } }
+      updateTarget(dt); updateImpacts(dt); updateGunRecoil(dt); updateMuzzleFlash(dt); updateFPS(dt);
+      if (elTimer) elTimer.textContent = formatTime(now - state.startTime - state.pauseAccum);
+    }
+    if (renderer) renderer.render(scene, camera);
+  } catch (err) {
+    console.error("Game loop error:", err);
+    if (animFrameId) cancelAnimationFrame(animFrameId);
+    if (state.running) pauseGame();
   }
-  renderer.render(scene, camera);
 }
 document.getElementById('btn-start').addEventListener('click', startGame);
 document.getElementById('btn-resume').addEventListener('click', resumeGame);
@@ -736,7 +767,7 @@ requestAnimationFrame(loop);
 </script>
 </body>
 </html>`;
-interface ToolLink { label: string; href: string; icon: JSX.Element; }
+interface ToolLink { label: string; href: string; icon: React.ReactNode; }
 
 const MORE_TOOLS: ToolLink[] = [
   { label: 'CPS Test', href: '/cps-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
