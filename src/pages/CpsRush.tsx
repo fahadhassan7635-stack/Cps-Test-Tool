@@ -377,6 +377,10 @@ export default function CpsRush() {
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const [gameState, setGameState] = useState<GameState>('menu');
   const [inputMode, setInputMode] = useState<InputMode>('mouse');
+  const scoreRef = useRef(0);
+  const scoreDomRef = useRef<HTMLDivElement>(null);
+  const distanceRef = useRef(1000);
+  const distanceDomRef = useRef<HTMLSpanElement>(null);
   const [score, setScore] = useState(0);
   const [distanceToFinish, setDistanceToFinish] = useState(1000);
   const [cps, setCps] = useState(0);
@@ -428,9 +432,9 @@ export default function CpsRush() {
   const toggleFullscreen = useCallback(() => {
     audioRef.current.click();
     if (!document.fullscreenElement) {
-      gameContainerRef.current?.requestFullscreen?.();
+      gameContainerRef.current?.requestFullscreen?.().catch(() => {});
     } else {
-      document.exitFullscreen?.();
+      document.exitFullscreen?.().catch(() => {});
     }
   }, []);
 
@@ -442,6 +446,8 @@ export default function CpsRush() {
     clickTimestamps.current = [];
     isOnGroundRef.current = false;
     prevOnGroundRef.current = false;
+    scoreRef.current = 0;
+    if (scoreDomRef.current) scoreDomRef.current.innerText = '0';
     setScore(0);
     setCps(0);
 
@@ -461,7 +467,10 @@ export default function CpsRush() {
     p.push({ x: finalX, y: lastY - 60, width: 120, height: 160, color: '#ff00aa', isEnd: true });
     finishX.current = finalX;
     platforms.current = p;
-    setDistanceToFinish(Math.floor(finalX / 10));
+    const initialDist = Math.floor(finalX / 10);
+    distanceRef.current = initialDist;
+    if (distanceDomRef.current) distanceDomRef.current.innerText = initialDist.toString();
+    setDistanceToFinish(initialDist);
   }, []);
 
   // ── Countdown Logic ───────────────────────────────────────────────────────
@@ -617,6 +626,7 @@ export default function CpsRush() {
         ball.current.vy > 0
       ) {
         if (p.isEnd) {
+          setScore(scoreRef.current);
           setGameState('won');
           audioRef.current.win();
           confetti({ particleCount: 140, spread: 65, colors: ['#00f0ff', '#ff00aa'] });
@@ -635,8 +645,12 @@ export default function CpsRush() {
     }
     prevOnGroundRef.current = isOnGroundRef.current;
 
-    setScore(Math.floor(ball.current.x / 80));
-    setDistanceToFinish(Math.max(0, Math.floor((finishX.current - ball.current.x) / 5)));
+    const newScore = Math.floor(ball.current.x / 80);
+    const newDist = Math.max(0, Math.floor((finishX.current - ball.current.x) / 5));
+    scoreRef.current = newScore;
+    distanceRef.current = newDist;
+    if (scoreDomRef.current) scoreDomRef.current.innerText = newScore.toString();
+    if (distanceDomRef.current) distanceDomRef.current.innerText = newDist.toString();
 
     if (ball.current.y > CANVAS_HEIGHT + 150) {
       initGame();
@@ -728,11 +742,11 @@ export default function CpsRush() {
               </div>
               <div style={{ background: 'rgba(4,9,20,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(219,39,119,0.3)', borderRadius: '14px', width: '85px', padding: '8px 0', textAlign: 'center' }}>
                 <div style={{ fontSize: '10px', fontWeight: 800, color: '#db2777' }}>Score</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>{score}</div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }} ref={scoreDomRef}>{score}</div>
               </div>
               <div style={{ background: 'rgba(4,9,20,0.75)', backdropFilter: 'blur(8px)', border: '1px solid rgba(236,72,153,0.3)', borderRadius: '14px', minWidth: '95px', padding: '8px 6px', textAlign: 'center' }}>
                 <div style={{ fontSize: '10px', fontWeight: 800, color: '#ec4899' }}>Finish</div>
-                <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>{distanceToFinish}<span style={{ fontSize: '15px', color: '#cbcbcb', marginLeft: '1px' }}>m</span></div>
+                <div style={{ fontSize: '24px', fontWeight: 800, color: '#fff', marginTop: '2px' }}><span ref={distanceDomRef}>{distanceToFinish}</span><span style={{ fontSize: '15px', color: '#cbcbcb', marginLeft: '1px' }}>m</span></div>
               </div>
             </div>
 

@@ -15,7 +15,7 @@ import BlogPage from './pages/BlogPage';
 import DoubleClickPage from './pages/DoubleClickPage';
 import ScrollTestPage from './pages/ScrollTestPage';
 import MouseAccuracyPage from './pages/MouseAccuracyPage';
-import SniperModePage from './pages/3DAimTrainer';
+import ThreeDAimTrainerPage from './pages/3DAimTrainer';
 import AccuracyTestPage from './pages/AccuracyTestPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsPage from './pages/TermsPage';
@@ -44,7 +44,7 @@ export default function App() {
           <Route path="double-click" element={<DoubleClickPage />} />
           <Route path="scroll-test" element={<ScrollTestPage />} />
           <Route path="mouse-accuracy" element={<MouseAccuracyPage />} />
-          <Route path="3d-aim-trainer" element={<SniperModePage />} />
+          <Route path="3d-aim-trainer" element={<ThreeDAimTrainerPage />} />
           <Route path="accuracy" element={<AccuracyTestPage />} />
           <Route path="space-defense" element={<SpaceDefensePage />} />
           <Route path="voyager-game" element={<VoyagerGame />} />

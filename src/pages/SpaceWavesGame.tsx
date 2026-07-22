@@ -210,6 +210,9 @@ export default function SpaceWavesGame() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameContainerRef = useRef<HTMLDivElement>(null);
   const [gameState, setGameState] = useState<GameState>('START');
+  const progressRef = useRef(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const progressTextRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [attempts, setAttempts] = useState(1);
   const [countdownText, setCountdownText] = useState<string | null>(null);
@@ -254,9 +257,9 @@ export default function SpaceWavesGame() {
   const toggleFullscreen = useCallback(() => {
     playClickSoundRef.current?.();
     if (!document.fullscreenElement) {
-      gameContainerRef.current?.requestFullscreen?.();
+      gameContainerRef.current?.requestFullscreen?.().catch(() => {});
     } else {
-      document.exitFullscreen?.();
+      document.exitFullscreen?.().catch(() => {});
     }
   }, []);
 
@@ -356,7 +359,10 @@ export default function SpaceWavesGame() {
     trailRef.current = [];
     particlesRef.current = [];
     generateLevel();
+    progressRef.current = 0;
     setProgress(0);
+    if (progressBarRef.current) progressBarRef.current.style.width = '0%';
+    if (progressTextRef.current) progressTextRef.current.innerText = '0%';
   };
 
   const createExplosion = (x: number, y: number) => {
@@ -423,6 +429,7 @@ export default function SpaceWavesGame() {
     if (gameStateRef.current !== 'PLAYING') return;
     keysRef.current.space = false;
     keysRef.current.mouse = false;
+    setProgress(progressRef.current);
     setGameState('PAUSED');
     gameStateRef.current = 'PAUSED';
   };
@@ -533,7 +540,10 @@ export default function SpaceWavesGame() {
       player.x += PLAYER_SPEED_X;
       player.y += isInputActive ? -PLAYER_SPEED_Y : PLAYER_SPEED_Y;
 
-      setProgress(Math.min(100, Math.max(0, (player.x / LEVEL_LENGTH) * 100)));
+      const newProgress = Math.min(100, Math.max(0, (player.x / LEVEL_LENGTH) * 100));
+      progressRef.current = newProgress;
+      if (progressBarRef.current) progressBarRef.current.style.width = `${newProgress}%`;
+      if (progressTextRef.current) progressTextRef.current.innerText = `${newProgress.toFixed(0)}%`;
 
       trailRef.current.push({ x: player.x, y: player.y, alpha: 1 });
       if (trailRef.current.length > 50) trailRef.current.shift();
@@ -580,12 +590,14 @@ export default function SpaceWavesGame() {
       if (hasCollided) {
         createExplosion(player.x, player.y);
         playBeep(120, 300, 'sawtooth');
+        setProgress(progressRef.current);
         setGameState('GAMEOVER');
         gameStateRef.current = 'GAMEOVER';
       }
 
       if (player.x >= LEVEL_LENGTH) {
         playBeep(660, 150, 'triangle');
+        setProgress(100);
         setGameState('VICTORY');
         gameStateRef.current = 'VICTORY';
       }
@@ -628,14 +640,12 @@ export default function SpaceWavesGame() {
       const player = playerRef.current;
       const cameraX = Math.max(0, player.x - PLAYER_X_OFFSET);
 
-      ctx.fillStyle = '#ffffff';
       starsRef.current.forEach(star => {
         const starX = (star.x - cameraX * star.speed) % CANVAS_WIDTH;
         const drawX = starX < 0 ? starX + CANVAS_WIDTH : starX;
-        ctx.globalAlpha = star.speed;
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.speed})`;
         ctx.fillRect(drawX, star.y, star.size, star.size);
       });
-      ctx.globalAlpha = 1.0;
 
       ctx.save();
       ctx.translate(-cameraX, 0);
@@ -643,33 +653,28 @@ export default function SpaceWavesGame() {
       ctx.strokeStyle = '#0d1522';
       ctx.lineWidth = 1;
       const gridOffset = cameraX % 100;
+      ctx.beginPath();
       for (let i = -100; i < CANVAS_WIDTH + 100; i += 100) {
-        ctx.beginPath();
         ctx.moveTo(cameraX + i - gridOffset, 0);
         ctx.lineTo(cameraX + i - gridOffset, CANVAS_HEIGHT);
-        ctx.stroke();
       }
       for (let i = 0; i < CANVAS_HEIGHT; i += 100) {
-        ctx.beginPath();
         ctx.moveTo(cameraX, i);
         ctx.lineTo(cameraX + CANVAS_WIDTH, i);
-        ctx.stroke();
       }
+      ctx.stroke();
 
       obstaclesRef.current.forEach(obs => {
         if (obs.x + obs.w > cameraX && obs.x < cameraX + CANVAS_WIDTH) {
-          ctx.save();
-          ctx.shadowColor = '#22d3ee';
-          ctx.shadowBlur = 20;
+          ctx.fillStyle = 'rgba(34, 211, 238, 0.15)';
+          ctx.fillRect(obs.x - 6, obs.y - 6, obs.w + 12, obs.h + 12);
           ctx.fillStyle = '#0e7490';
           ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-          ctx.shadowBlur = 0;
           ctx.strokeStyle = '#67e8f9';
           ctx.lineWidth = 2;
           ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
           ctx.strokeStyle = 'rgba(103, 232, 249, 0.35)';
           ctx.strokeRect(obs.x + 4, obs.y + 4, obs.w - 8, obs.h - 8);
-          ctx.restore();
         }
       });
 
@@ -694,11 +699,8 @@ export default function SpaceWavesGame() {
           }
           ctx.closePath();
 
-          ctx.shadowColor = '#f43f5e';
-          ctx.shadowBlur = 18;
           ctx.fillStyle = '#0a0a12';
           ctx.fill();
-          ctx.shadowBlur = 0;
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2;
           ctx.stroke();
@@ -949,7 +951,7 @@ export default function SpaceWavesGame() {
             </div>
             <div className="sw-hud-box">
               <div className="sw-hud-label">PROGRESS</div>
-              <div className="sw-hud-value">{progress.toFixed(0)}%</div>
+              <div className="sw-hud-value" ref={progressTextRef}>{progress.toFixed(0)}%</div>
             </div>
           </div>
 
@@ -1064,6 +1066,7 @@ export default function SpaceWavesGame() {
         <div className="mt-4 w-full max-w-[800px]">
           <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-cyan-500/20">
             <div
+              ref={progressBarRef}
               className="h-full bg-gradient-to-r from-cyan-600 to-cyan-300 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(34,211,238,0.6)]"
               style={{ width: `${progress}%` }}
             />

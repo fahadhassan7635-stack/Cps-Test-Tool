@@ -978,7 +978,7 @@ export default function CPSTestPage() {
         console.error(`Error attempting to enable fullscreen: ${err.message}`);
       });
     } else {
-      document.exitFullscreen?.().then(() => setIsFullscreen(false));
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
     }
   }, []);
 
