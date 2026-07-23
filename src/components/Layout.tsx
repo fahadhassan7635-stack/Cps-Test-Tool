@@ -9,6 +9,45 @@ interface ToolItem {
   category: 'mouse' | 'keyboard' | 'aim' | 'games' | 'misc';
 }
 
+// ---------------------------------------------------------------------------
+// Static data — defined at module scope so they are never re-allocated on
+// re-renders. They don't depend on any props or state.
+// ---------------------------------------------------------------------------
+const NAV_ITEMS = [
+  { to: '/', label: 'Home', exact: true },
+  { to: '/keyboard', label: 'Keyboard' },
+  { to: '/mouse', label: 'Mouse' },
+  { to: '/aim', label: 'Aim & Reaction' },
+  { to: '/hall-of-fame', label: 'Hall of Fame' },
+  { to: '/games', label: 'Games' },
+  { to: '/blog', label: 'Blog' },
+];
+
+const TOOLS_LIST: (ToolItem & { icon: string })[] = [
+  { to: '/cps-test', label: 'CPS Test', category: 'mouse', icon: '⚡' },
+  { to: '/double-click', label: 'Double Click Test', category: 'mouse', icon: '🖱️' },
+  { to: '/scroll-test', label: 'Scroll Wheel Test', category: 'mouse', icon: '📜' },
+  { to: '/mouse-accuracy', label: 'Mouse Accuracy', category: 'mouse', icon: '🎯' },
+  { to: '/cps-rush', label: 'CPS Rush', category: 'mouse', icon: '🔥' },
+
+  { to: '/typing-test', label: 'Typing Speed Test', category: 'keyboard', icon: '⌨️' },
+  { to: '/key-visualizer', label: 'Key Visual', category: 'keyboard', icon: '🖥️' },
+  { to: '/spacebar', label: 'Spacebar Counter', category: 'keyboard', icon: '➖' },
+  { to: '/accuracy', label: 'Accuracy Test', category: 'keyboard', icon: '✔️' },
+
+  { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
+  { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
+  { to: '/3d-aim-trainer', label: '3D Aim Trainer', category: 'aim', icon: '🎯' },
+  { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
+
+  { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
+  { to: '/voyager-game', label: 'Voyager Game', category: 'games', icon: '🛸' },
+  { to: '/space-waves', label: 'Space Waves', category: 'games', icon: '🌊' },
+
+  { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
+  { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
+];
+
 export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -16,44 +55,9 @@ export default function Layout() {
   const [hoveredTool, setHoveredTool] = useState<{ label: string; top: number; left: number } | null>(null);
   const location = useLocation();
 
-  const navItems = [
-    { to: '/', label: 'Home', exact: true },
-    { to: '/keyboard', label: 'Keyboard' },
-    { to: '/mouse', label: 'Mouse' },
-    { to: '/aim', label: 'Aim & Reaction' },
-    { to: '/hall-of-fame', label: 'Hall of Fame' },
-    { to: '/games', label: 'Games' },
-    { to: '/blog', label: 'Blog' },
-  ];
-
-  const toolsList: (ToolItem & { icon: string })[] = [
-    { to: '/cps-test', label: 'CPS Test', category: 'mouse', icon: '⚡' },
-    { to: '/double-click', label: 'Double Click Test', category: 'mouse', icon: '🖱️' },
-    { to: '/scroll-test', label: 'Scroll Wheel Test', category: 'mouse', icon: '📜' },
-    { to: '/mouse-accuracy', label: 'Mouse Accuracy', category: 'mouse', icon: '🎯' },
-    { to: '/cps-rush', label: 'CPS Rush', category: 'mouse', icon: '🔥' },
-
-    { to: '/typing-test', label: 'Typing Speed Test', category: 'keyboard', icon: '⌨️' },
-    { to: '/key-visualizer', label: 'Key Visual', category: 'keyboard', icon: '🖥️' },
-    { to: '/spacebar', label: 'Spacebar Counter', category: 'keyboard', icon: '➖' },
-    { to: '/accuracy', label: 'Accuracy Test', category: 'keyboard', icon: '✔️' },
-
-    { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
-    { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
-    { to: '/3d-aim-trainer', label: '3D Aim Trainer', category: 'aim', icon: '🎯' },
-    { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
-
-    { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
-    { to: '/voyager-game', label: 'Voyager Game', category: 'games', icon: '🛸' },
-    { to: '/space-waves', label: 'Space Waves', category: 'games', icon: '🌊' },
-
-    { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
-    { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
-  ];
-
   const filteredTools = useMemo(() => {
-    if (selectedCategory === 'all') return toolsList;
-    return toolsList.filter(tool => tool.category === selectedCategory);
+    if (selectedCategory === 'all') return TOOLS_LIST;
+    return TOOLS_LIST.filter(tool => tool.category === selectedCategory);
   }, [selectedCategory]);
 
   return (
@@ -95,7 +99,7 @@ export default function Layout() {
 
         {/* Desktop Navigation */}
         <ul style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', listStyle: 'none', margin: 0, padding: 0 }} className="desktop-nav">
-          {navItems.map(item => (
+          {NAV_ITEMS.map(item => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
@@ -147,7 +151,7 @@ export default function Layout() {
           maxHeight: 'calc(100vh - 64px)', overflowY: 'auto',
           boxSizing: 'border-box'
         }}>
-          {navItems.map(item => (
+          {NAV_ITEMS.map(item => (
             <NavLink
               key={item.to} to={item.to} end={item.exact}
               onClick={() => setMenuOpen(false)}
@@ -483,96 +487,7 @@ export default function Layout() {
         </div>
       </footer>
 
-      {/* STYLES */}
-      <style>{`
-        html, body {
-          margin: 0;
-          padding: 0;
-        }
-
-        * { box-sizing: border-box; }
-
-        .top-nav { padding: 0 2rem; }
-        .main-content { padding: 2rem; }
-        .main-footer { padding: 3rem 2rem 1.5rem; }
-        .mobile-menu-overlay { padding: 1rem 2rem; }
-
-        .footer-grid { grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; }
-
-        .top-nav-link:hover {
-          color: var(--neon-cyan, #00f5ff) !important;
-          background: rgba(0,245,255,0.1) !important;
-          text-shadow: 0 0 8px rgba(0,245,255,0.6);
-        }
-
-        .mobile-nav-link:hover {
-          color: var(--neon-cyan, #00f5ff) !important;
-          background: rgba(0,245,255,0.1) !important;
-        }
-
-        .footer-link { color: #8892b0; text-decoration: none; font-size: 0.9rem; transition: color 0.2s, text-shadow 0.2s; }
-        .footer-link:hover { color: var(--neon-cyan, #00f5ff); text-shadow: 0 0 8px rgba(0,245,255,0.5); }
-
-        .footer-bottom-link { color: #64748b; text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-        .footer-bottom-link:hover { color: var(--neon-cyan, #00f5ff); }
-
-        .social-btn { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; color: #8892b0; text-decoration: none; font-size: 1.1rem; transition: all 0.2s; }
-        .social-btn:hover { background: rgba(0,245,255,0.12); color: var(--neon-cyan, #00f5ff); box-shadow: 0 0 10px rgba(0,245,255,0.4); }
-
-        .sidebar-toggle-wrap {
-          position: relative;
-          display: inline-flex;
-        }
-
-        .sidebar-toggle-tooltip {
-          position: absolute;
-          left: calc(100% + 10px);
-          top: 50%;
-          transform: translateY(-50%) translateX(-6px);
-          background: rgba(0,245,255,0.12);
-          border: 1px solid rgba(0,245,255,0.4);
-          color: #00f5ff;
-          font-size: 0.75rem;
-          font-weight: 600;
-          padding: 6px 10px;
-          border-radius: 6px;
-          white-space: nowrap;
-          box-shadow: 0 2px 10px rgba(0,245,255,0.25);
-          text-shadow: 0 0 6px rgba(0,245,255,0.6);
-          opacity: 0;
-          visibility: hidden;
-          pointer-events: none;
-          transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
-          z-index: 50;
-        }
-
-        .sidebar-toggle-wrap:hover .sidebar-toggle-tooltip {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(-50%) translateX(0);
-          transition-delay: 0.35s;
-        }
-
-        @media (max-width: 1024px) {
-          .desktop-nav { display: none !important; }
-          .hamburger-btn { display: flex !important; }
-          .sidebar-pannel { display: none !important; }
-          .footer-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 768px) {
-          .top-nav { padding: 0 1rem !important; }
-          .main-content { padding: 1rem !important; }
-          .main-footer { padding: 2rem 1rem 1rem !important; }
-          .mobile-menu-overlay { padding: 1rem !important; }
-          .footer-grid { grid-template-columns: 1fr; }
-        }
-
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
-      `}</style>
+      {/* Layout styles are in src/index.css — no inline style needed */}
     </div>
   );
 }
