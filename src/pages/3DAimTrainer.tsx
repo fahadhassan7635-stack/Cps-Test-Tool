@@ -737,7 +737,7 @@ function pauseGame() {
 function resumeGame() {
   if (!state.running || !state.paused) return;
   state.paused = false; state.pauseAccum += performance.now() - state.pauseStart;
-  document.getElementById('pause-screen').classList.remove('hidden');
+  document.getElementById('pause-screen').classList.add('hidden');
   requestPointerLock();
   if (!activeTarget) spawnTarget();
 }
@@ -1568,5 +1568,10 @@ export default function SniperModePage() {
     </div>
   );
 }
+
+
+
+
+
 
 
