@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 
-const mouseIcon = '/cps-pfp.png';
+const mouseIcon = '/gun-pfp.png';
 
 interface ToolItem {
   to: string;
@@ -79,20 +79,21 @@ export default function Layout() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
             <div style={{
-              width: '44px', height: '44px',
+              width: '32px', height: '32px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent',
             }}>
-              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} />
+              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'screen', transform: 'scale(1)' }} />
             </div>
             <span style={{
               fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em',
               textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
             }}>
-              CPS<span style={{
+              Fixed<span style={{
                 color: 'var(--neon-cyan)',
-                textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)'
-              }}>Test</span> Tools
+                textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)',
+                marginLeft: '6px'
+              }}>Aim</span>
             </span>
           </Link>
         </div>
@@ -396,16 +397,17 @@ export default function Layout() {
           <div style={{ paddingRight: '2rem' }}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', marginBottom: '1rem' }}>
               <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
-                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(0,245,255,0.7)) drop-shadow(0 0 12px rgba(0,245,255,0.4))' }} />
+                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'screen', transform: 'scale(1.2)' }} />
               </div>
               <span style={{
                 fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)',
                 textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
               }}>
-                CPS<span style={{
+                Fixed<span style={{
                   color: 'var(--neon-cyan, #00f5ff)',
-                  textShadow: '0 0 8px var(--neon-cyan, #00f5ff), 0 0 20px var(--neon-cyan, #00f5ff)'
-                }}>Test</span> Tools
+                  textShadow: '0 0 8px var(--neon-cyan, #00f5ff), 0 0 20px var(--neon-cyan, #00f5ff)',
+                  marginLeft: '6px'
+                }}>Aim</span>
               </span>
             </Link>
             <p style={{ color: '#8892b0', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>The ultimate free platform for gamers and typists to test, train, and compete. No signup required.</p>
@@ -477,7 +479,7 @@ export default function Layout() {
         </div>
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>© Best CPS Test Tools — All rights reserved.</p>
+          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>© Fixed Aim - All rights reserved.</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link to="/privacy-policy" className="footer-bottom-link">Privacy Policy</Link>
             <Link to="/terms" className="footer-bottom-link">Terms of Service</Link>

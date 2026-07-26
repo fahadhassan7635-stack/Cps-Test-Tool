@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 // ─── More Tools ───────────────────────────────────────────────────────────────
 interface ToolLink { label: string; href: string; icon: React.ReactNode; }
@@ -645,7 +645,7 @@ export default function DoubleClickPage() {
           Diagnosing Mouse Double-Clicking Hardware Issues
         </h3>
         <p style={{ marginBottom: '1.5rem' }}>
-          Are you registering unexpected double clicks when pressing your mouse button only once? This web tester serves as an excellent diagnostic tool for mouse degradation. Over time, traditional copper mechanical leaf-spring switches (like Omron switches) oxidize or lose structural tension, causing a phenomenon called <em>switch chatter</em>. If you record abnormally low intervals like <strong>5ms to 30ms</strong> without meaning to click twice, your peripheral is likely experiencing hardware malfunction or requires an adjusted de-bounce filter.
+          Are you registering unexpected double clicks when pressing your mouse button only once? This web tester serves as an excellent diagnostic tool for mouse degradation. Over time, traditional copper <a href="https://en.wikipedia.org/wiki/Microswitch" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>mechanical leaf-spring switches <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> (like Omron switches) oxidize or lose structural tension, causing a phenomenon called <em>switch chatter</em>. If you record abnormally low intervals like <strong>5ms to 30ms</strong> without meaning to click twice, your peripheral is likely experiencing hardware malfunction or requires an adjusted de-bounce filter.
         </p>
 
         <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '2.5rem' }}>
@@ -765,7 +765,7 @@ export default function DoubleClickPage() {
           Gaming Mouse Recommendations
         </h2>
         <p style={{ marginBottom: '1.5rem' }}>
-          For the fastest and most consistent double-click performance, look for mice featuring optical switches such as the <strong>Razer HyperSpeed Optical</strong>, <strong>SteelSeries OmniPoint</strong>, or <strong>Logitech HERO</strong> sensor models. Popular competitive choices include the Logitech G Pro X Superlight 2, Razer DeathAdder V3, and Zowie EC series. Ensure your mouse has a polling rate of at least 500 Hz (1000 Hz preferred) and a configurable debounce time below 4 ms.
+          For the fastest and most consistent double-click performance, look for mice featuring optical switches such as the <strong>Razer HyperSpeed Optical</strong>, <strong>SteelSeries OmniPoint</strong>, or <strong>Logitech HERO</strong> sensor models. Popular competitive choices include the Logitech G Pro X Superlight 2, Razer DeathAdder V3, and Zowie EC series. Ensure your mouse has a <a href="https://en.wikipedia.org/wiki/Polling_(computer_science)" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>polling rate <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> of at least 500 Hz (1000 Hz preferred) and a configurable debounce time below 4 ms.
         </p>
 
         <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '2.5rem' }}>
@@ -784,7 +784,7 @@ export default function DoubleClickPage() {
           Double-Click Speed by Age Group
         </h2>
         <p style={{ marginBottom: '1.5rem' }}>
-          Reaction speed and fine motor coordination generally peak in the late teens to mid-20s and decline gradually afterward. Studies on general reflex timing suggest younger adults average tighter double-click intervals, often in the 180–240 ms range, while adults over 50 commonly average 250–320 ms. This is a broad trend, not a rule — regular practice, ergonomic mouse grip, and quality hardware can offset much of the age-related slowdown, and many older users who click frequently for work stay well within the Normal range. If you are teaching a parent or grandparent to use a computer, using the Easy difficulty setting (600 ms) first can build confidence before increasing the challenge, and gradually stepping up to Normal once several sessions in a row feel comfortable.
+          Reaction speed and fine motor coordination generally peak in the late teens to mid-20s and decline gradually afterward. Studies on general reflex timing suggest younger adults average tighter double-click intervals, often in the 180–240 ms range, while adults over 50 commonly average 250–320 ms. This is a broad trend, not a rule — regular practice, <a href="https://en.wikipedia.org/wiki/Ergonomics" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>ergonomic mouse grip <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>, and quality hardware can offset much of the age-related slowdown, and many older users who click frequently for work stay well within the Normal range. If you are teaching a parent or grandparent to use a computer, using the Easy difficulty setting (600 ms) first can build confidence before increasing the challenge, and gradually stepping up to Normal once several sessions in a row feel comfortable.
         </p>
 
         <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '2.5rem' }}>
@@ -852,7 +852,7 @@ export default function DoubleClickPage() {
           History of the Double Click
         </h2>
         <p style={{ marginBottom: '1.5rem' }}>
-          The double-click was introduced by <strong>Larry Tesler</strong> and colleagues at Xerox PARC in the late 1970s as part of the graphical user interface paradigm. When Apple's Lisa and Macintosh computers popularized the GUI in the early 1980s, double-clicking became the standard method for opening files and launching applications. Microsoft adopted the convention in Windows 1.0 (1985). Today, despite touchscreens reducing its prevalence, the double-click remains a fundamental desktop interaction pattern used by billions daily.
+          The double-click was introduced by <strong>Larry Tesler</strong> and colleagues at Xerox PARC in the late 1970s as part of the <a href="https://en.wikipedia.org/wiki/Graphical_user_interface" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>graphical user interface paradigm <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>. When Apple's Lisa and Macintosh computers popularized the GUI in the early 1980s, double-clicking became the standard method for opening files and launching applications. Microsoft adopted the convention in Windows 1.0 (1985). Today, despite touchscreens reducing its prevalence, the double-click remains a fundamental desktop interaction pattern used by billions daily.
         </p>
 
         <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '2.5rem' }}>
@@ -893,7 +893,7 @@ export default function DoubleClickPage() {
           <li style={{ marginBottom: '0.6rem' }}><strong>Debounce:</strong> A software or firmware delay inserted after a click to prevent a single physical press from being read as multiple electrical signals.</li>
           <li style={{ marginBottom: '0.6rem' }}><strong>Polling rate:</strong> How often a mouse reports its state to the computer, measured in Hz. Higher polling rates reduce the delay between a physical click and the signal reaching your PC.</li>
           <li style={{ marginBottom: '0.6rem' }}><strong>Actuation force:</strong> The amount of physical pressure required to trigger a switch. Lighter actuation generally allows for faster repeated clicking.</li>
-          <li style={{ marginBottom: '0.6rem' }}><strong>Latency:</strong> The total delay between a physical action and its effect appearing on screen, combining hardware, USB transmission, and software processing time.</li>
+          <li style={{ marginBottom: '0.6rem' }}><strong>Latency:</strong> The total <a href="https://en.wikipedia.org/wiki/Input_lag" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>input latency <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> between a physical action and its effect appearing on screen, combining hardware, USB transmission, and software processing time.</li>
           <li style={{ marginBottom: '0.6rem' }}><strong>Threshold:</strong> The maximum interval, in milliseconds, that the operating system or this test will accept between two clicks for them to count as a double-click.</li>
           <li style={{ marginBottom: '0.6rem' }}><strong>Standard deviation:</strong> A statistical measure of how spread out your recorded intervals are; a lower value means more consistent timing between attempts.</li>
         </ul>
@@ -906,68 +906,88 @@ export default function DoubleClickPage() {
         </p>
 
         {/* ── Expanded FAQ ─────────────────────────────────────────────── */}
-        <div style={{ marginTop: '2.5rem', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
-          <h2 style={{ color: 'var(--neon-cyan)', fontSize: '1.25rem', fontWeight: '700', marginBottom: '1.25rem', marginTop: '0' }}>
-            Frequently Asked Questions (FAQs)
+        <section aria-label="Frequently Asked Questions" style={{ marginBottom: '3rem', marginTop: '2.5rem' }}>
+          <h2 style={{
+            fontWeight: 800, fontSize: '1.75rem', color: '#fff',
+            marginTop: 0, marginBottom: '1.5rem',
+            borderBottom: '1px solid #1f2937', paddingBottom: '1rem',
+            display: 'flex', alignItems: 'center', gap: '10px',
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" 
+    strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--neon-cyan, #00f5ff)', flexShrink: 0 }} 
+    aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Frequently Asked Questions
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {FAQ_ITEMS.map(({ q, a }, i) => {
+    
+          <div role="list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {FAQ_ITEMS.map((faq, i) => {
               const isOpen = openFaq === i;
               return (
                 <div
                   key={i}
+                  role="listitem"
                   style={{
-                    background:   'var(--bg-card)',
-                    border:       `1px solid ${isOpen ? 'var(--neon-cyan)' : 'var(--border)'}`,
+                    border: `1px solid ${isOpen ? 'rgba(0,245,255,0.4)' : '#1f2937'}`,
                     borderRadius: '10px',
-                    overflow:     'hidden',
-                    transition:   'border-color 0.15s ease',
+                    overflow: 'hidden',
+                    transition: 'border-color 0.2s',
                   }}
                 >
                   <button
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
                     aria-expanded={isOpen}
+                    aria-controls={`faq-answer-${i}`}
+                    id={`faq-question-${i}`}
+                    onClick={() => setOpenFaq(isOpen ? null : i)}
                     style={{
-                      width:          '100%',
-                      display:        'flex',
-                      alignItems:     'center',
+                      width: '100%',
+                      textAlign: 'left',
+                      background: isOpen ? 'rgba(0,245,255,0.05)' : 'transparent',
+                      border: 'none',
+                      padding: '14px 18px',
+                      cursor: 'pointer',
+                      display: 'flex',
                       justifyContent: 'space-between',
-                      gap:            '1rem',
-                      padding:        '1rem 1.25rem',
-                      background:     'transparent',
-                      border:         'none',
-                      cursor:         'pointer',
-                      textAlign:      'left',
-                      color:          '#fff',
-                      fontSize:       '0.95rem',
-                      fontWeight:     '600',
+                      alignItems: 'center',
+                      gap: '12px',
+                      color: '#fff',
+                      fontWeight: 700,
+                      fontSize: '0.95rem',
                     }}
                   >
-                    <span>{q}</span>
-                    <span
-                      style={{
-                        flexShrink: 0,
-                        display:    'inline-flex',
-                        transform:  isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.2s ease',
-                        color:      isOpen ? 'var(--neon-cyan)' : 'var(--text-muted)',
-                      }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                    <span>{faq.q}</span>
+                    {isOpen ? (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan, #00f5ff)" 
+    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden="true">
+                        <polyline points="18 15 12 9 6 15" />
                       </svg>
-                    </span>
+                    ) : (
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" 
+    strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    )}
                   </button>
                   {isOpen && (
-                    <div style={{ padding: '0 1.25rem 1.1rem 1.25rem' }}>
-                      <p style={{ margin: '0', color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.6' }}>{a}</p>
+                    <div
+                      id={`faq-answer-${i}`}
+                      role="region"
+                      aria-labelledby={`faq-question-${i}`}
+                      style={{ padding: '0 18px 16px', backgroundColor: 'rgba(0,245,255,0.03)' }}
+                    >
+                      <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.7', margin: 0 }}>
+                        {faq.a}
+                      </p>
                     </div>
                   )}
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
 
       </section>
       {/* ================= SEO ARTICLE SECTION END ================= */}

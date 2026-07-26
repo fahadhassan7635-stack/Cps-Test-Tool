@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, memo } from 'react';
 
 // ─── Word Lists ───────────────────────────────────────────────────────────────
 const WORD_LISTS = {
@@ -1622,7 +1622,7 @@ export default function TypingTestPage() {
                 What Is a Typing Speed Test?
               </h2>
               <p style={{ marginBottom: '1rem' }}>
-                A <strong>typing speed test</strong> is a standardized evaluation that measures how quickly and
+                A <strong>typing speed test</strong> is a <a href="https://en.wikipedia.org/wiki/Words_per_minute" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>standardized evaluation <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> that measures how quickly and
                 accurately you can transcribe text using a keyboard. Unlike casual typing, a structured test
                 isolates your raw throughput under controlled conditions, giving you a reproducible performance
                 benchmark you can track over time.
@@ -1691,7 +1691,7 @@ export default function TypingTestPage() {
                 </li>
                 <li style={{ marginBottom: '0.5rem' }}>
                   <strong style={{ color: 'var(--neon-red, #ff2d55)' }}>120+ WPM — Blazing Fast:</strong>{' '}
-                  Elite territory. Professional court reporters and competitive typists regularly exceed 120 WPM.
+                  Elite territory. Professional court reporters and <a href="https://www.guinnessworldrecords.com/world-records/fastest-typist" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>competitive typists <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> regularly exceed 120 WPM.
                 </li>
               </ul>
             </section>
@@ -1729,7 +1729,7 @@ export default function TypingTestPage() {
                 4. Consistent Short Sessions Beat Marathon Practice
               </h3>
               <p style={{ marginBottom: '1.5rem' }}>
-                Research on skill acquisition consistently shows that fifteen to thirty minutes of focused daily
+                Research on <a href="https://en.wikipedia.org/wiki/Motor_learning" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>skill acquisition <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> consistently shows that fifteen to thirty minutes of focused daily
                 practice produces more durable improvements than occasional two-hour sessions. The brain
                 consolidates muscle memory during rest periods between practice sessions.
               </p>
@@ -1742,7 +1742,7 @@ export default function TypingTestPage() {
               </h2>
               <p style={{ marginBottom: '1rem' }}>
                 <strong>Touch typing</strong> is the technique of typing using all ten fingers without looking
-                at the keyboard, relying entirely on muscle memory. It is the single most impactful skill you
+                at the keyboard, relying entirely on <a href="https://en.wikipedia.org/wiki/Muscle_memory" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>muscle memory <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>. It is the single most impactful skill you
                 can develop to break through speed plateaus.
               </p>
               <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
@@ -1763,7 +1763,7 @@ export default function TypingTestPage() {
                 </li>
                 <li style={{ marginBottom: '0.6rem' }}>
                   <strong>Maintain Neutral Posture:</strong> Sit with your back straight, elbows at
-                  approximately ninety degrees, and wrists hovering slightly above the keyboard. Poor ergonomics
+                  approximately ninety degrees, and wrists hovering slightly above the keyboard. Poor <a href="https://www.osha.gov/ergonomics" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>ergonomics <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>
                   causes fatigue that caps your speed and can damage joints over time.
                 </li>
               </ul>
@@ -1809,6 +1809,33 @@ export default function TypingTestPage() {
                 science, and fiction; on number sequences that simulate data-entry scenarios; and on symbol
                 patterns that mirror code punctuation and special character requirements.
               </p>
+            </section>
+
+            {/* Useful Resources */}
+            <section>
+              <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '0.75rem', color: 'var(--neon-cyan)', marginTop: '2rem' }}>
+                Useful Typing Resources
+              </h2>
+              <p style={{ marginBottom: '1rem' }}>
+                Looking to practice more or learn touch typing from scratch? Check out these excellent free resources:
+              </p>
+              <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <a href="https://www.typingclub.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-green)', textDecoration: 'none', fontWeight: '600' }}>TypingClub</a> — Comprehensive touch typing courses for all skill levels.
+                </li>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <a href="https://monkeytype.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-green)', textDecoration: 'none', fontWeight: '600' }}>Monkeytype</a> — Highly customizable minimalistic typing test.
+                </li>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <a href="https://www.keybr.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-green)', textDecoration: 'none', fontWeight: '600' }}>Keybr</a> — Algorithm-based typing practice focusing on weak keys.
+                </li>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <a href="https://10fastfingers.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-green)', textDecoration: 'none', fontWeight: '600' }}>10FastFingers</a> — Competitive typing tests and multiplayer typing races.
+                </li>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <a href="https://play.typeracer.com/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-green)', textDecoration: 'none', fontWeight: '600' }}>TypeRacer</a> — A gamified typing competition where you race cars by typing.
+                </li>
+              </ul>
             </section>
 
             {/* FAQ */}

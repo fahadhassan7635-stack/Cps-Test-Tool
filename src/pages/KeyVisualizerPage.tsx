@@ -1115,6 +1115,32 @@ const ArticleSection = lazy(() =>
             <code style={codeStyle}>keyup</code> event failed to fire.
           </p>
 
+          {/* ── Keyboard Test Types ── */}
+          <h2 id="ghosting-test" style={h2Style}>Keyboard Ghosting Test</h2>
+          <p style={pStyle}>
+            Keyboard ghosting occurs when a keyboard fails to register multiple simultaneous keypresses. This is a common hardware limitation in older membrane keyboards. You can use a visualizer to perform a ghosting test by pressing multiple keys at once and observing which inputs are dropped. According to <a href="https://en.wikipedia.org/wiki/Rollover_(key)#Ghosting" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>hardware interface research <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>, anti-ghosting matrices are designed to prevent false keystrokes during complex gaming combinations.
+          </p>
+
+          <h2 id="rollover-test" style={h2Style}>N-Key Rollover (NKRO) Test</h2>
+          <p style={pStyle}>
+            An N-Key Rollover test verifies the maximum number of keys that can be correctly registered simultaneously. While standard USB keyboards often cap at 6-Key Rollover (6KRO), premium mechanical models support full NKRO. Validating NKRO is crucial for competitive gaming where simultaneous inputs are required, as detailed in <a href="https://en.wikipedia.org/wiki/Rollover_(key)" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>rollover testing methodologies <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>.
+          </p>
+
+          <h2 id="latency-test" style={h2Style}>Keyboard Latency &amp; Polling Rate Test</h2>
+          <p style={pStyle}>
+            A keyboard latency test measures the delay between a physical keystroke and its digital registration. High polling rates (1000Hz or above) reduce this delay to just 1 millisecond. Testing latency is vital for rhythm games and esports, where <a href="https://en.wikipedia.org/wiki/Input_lag" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>input lag studies <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> indicate that even slight delays can negatively impact human reaction times.
+          </p>
+
+          <h2 id="chattering-test" style={h2Style}>Keyboard Chattering (Double-Typing) Test</h2>
+          <p style={pStyle}>
+            Keyboard chattering is a mechanical defect where a single keypress registers multiple times due to switch degradation or dust. A visualizer instantly highlights chattering in its event log. According to <a href="https://en.wikipedia.org/wiki/Switch#Contact_bounce" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>switch degradation analysis <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>, contact bounce (or chatter) can often be mitigated via software debounce algorithms or hardware cleaning.
+          </p>
+
+          <h2 id="mechanical-switch-test" style={h2Style}>Mechanical Switch Actuation Test</h2>
+          <p style={pStyle}>
+            Testing mechanical switches involves evaluating the actuation force and travel distance. Different switches (linear, tactile, clicky) offer varying feedback profiles. Assessing how these switches translate to real-time visual output helps users find the optimal balance for typing comfort, supported by <a href="https://en.wikipedia.org/wiki/Computer_keyboard#Types_and_standards" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>mechanical switch ergonomics <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> research.
+          </p>
+
           {/* ── Browser compat ── */}
           <h2 id="browser-compat" style={h2Style}>Browser Compatibility</h2>
           <ul style={ulStyle}>

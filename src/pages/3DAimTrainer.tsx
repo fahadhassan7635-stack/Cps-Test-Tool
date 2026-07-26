@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+﻿import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 
 const aimTrainerHTML = `<!DOCTYPE html>
