@@ -406,20 +406,81 @@ export default function HomePage() {
           The ultimate free platform to test your clicking speed, typing WPM, reaction time, aim precision, and more. 14 professional tools. No signup. No downloads. Just pure performance data.
         </p>
 
-        <div className="fade-in-up d3" style={{
-          display: 'flex', justifyContent: 'center', gap: '3rem',
-          flexWrap: 'wrap', marginBottom: '2.5rem',
-        }}>
-          {[
-            { value: '247K+', label: 'Players Tested' },
-            { value: '14', label: 'Free Tools' },
-            { value: '4.9★', label: 'Avg Rating' },
-          ].map(s => (
-            <div key={s.label} style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--neon-cyan)' }}>{s.value}</div>
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{s.label}</div>
-            </div>
-          ))}
+        <div className="fade-in-up d3" style={{ marginBottom: '2.5rem' }}>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', textAlign: 'center' }}>
+            🔥 Most Popular Tools
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <Link to="/3d-aim-trainer" style={{ 
+              background: 'rgba(0,245,255,0.05)', 
+              border: '1px solid rgba(0,245,255,0.2)', 
+              borderRadius: '8px', 
+              padding: '0.75rem 1.25rem', 
+              color: 'var(--text-primary)', 
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--neon-cyan)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.1)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.2)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.05)';
+            }}>
+              🎮 3D Aim Trainer
+            </Link>
+            <Link to="/spacebar" style={{ 
+              background: 'rgba(0,245,255,0.05)', 
+              border: '1px solid rgba(0,245,255,0.2)', 
+              borderRadius: '8px', 
+              padding: '0.75rem 1.25rem', 
+              color: 'var(--text-primary)', 
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--neon-cyan)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.1)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.2)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.05)';
+            }}>
+              ▭ Spacebar Counter
+            </Link>
+            <Link to="/aim-trainer" style={{ 
+              background: 'rgba(0,245,255,0.05)', 
+              border: '1px solid rgba(0,245,255,0.2)', 
+              borderRadius: '8px', 
+              padding: '0.75rem 1.25rem', 
+              color: 'var(--text-primary)', 
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'var(--neon-cyan)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.1)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.2)';
+              (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.05)';
+            }}>
+              🎯 2D Aim Trainer
+            </Link>
+          </div>
         </div>
 
         <div className="fade-in-up d4" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -429,6 +490,42 @@ export default function HomePage() {
           <Link to="/typing-test" className="btn btn-secondary" style={{ fontSize: '1rem', padding: '0.85rem 2rem' }}>
             ⌨️ Typing Speed Test
           </Link>
+        </div>
+
+        <div className="fade-in-up d5" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+          <button 
+            onClick={() => {
+              const element = document.getElementById('all-tools');
+              if (element) {
+                const y = element.getBoundingClientRect().top + window.pageYOffset - 80;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+              }
+            }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              fontSize: '0.95rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              transition: 'all 0.2s ease',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = 'var(--neon-cyan)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = 'var(--text-secondary)';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            View All 16 Tools <span style={{ fontSize: '1.2em' }}>→</span>
+          </button>
         </div>
       </section>
 
@@ -544,7 +641,7 @@ export default function HomePage() {
       </section>
 
       {/* Quick Launch */}
-      <section style={{ marginBottom: '4rem' }}>
+      <section id="all-tools" style={{ marginBottom: '4rem' }}>
         <div className="section-label">Quick Launch</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Jump In Instantly</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>No setup required. Click a tool and start testing in under 3 seconds.</p>
@@ -672,8 +769,8 @@ export default function HomePage() {
           </div>
 
           <div>
-            <div className="section-label">Daily</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>Today's Challenge</h2>
+            <div className="section-label">Challenge</div>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>Can You Beat the World Record?</h2>
 
             <div style={{
               background: 'linear-gradient(135deg, rgba(0,245,255,0.05), rgba(0,255,136,0.05))',
@@ -684,20 +781,20 @@ export default function HomePage() {
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
                 padding: '0.3rem 0.75rem',
-                background: 'rgba(255,107,0,0.15)', border: '1px solid rgba(255,107,0,0.3)',
+                background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)',
                 borderRadius: '50px', fontSize: '0.8rem', fontWeight: '700',
-                color: 'var(--neon-orange)', marginBottom: '1rem',
-              }}>🔥 Day 47 Streak</div>
+                color: '#FFD700', marginBottom: '1rem',
+              }}>🏆 World Record Challenge</div>
 
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.75rem' }}>Speed Demon Mode</h3>
+              <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.75rem' }}>Beat the Best</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-                Achieve 10+ CPS for 5 seconds straight using only left-click. One attempt per day. Top 50 scores make the wall of fame.
+                Think you have what it takes? Test your clicking speed and see how close you can get to one of the highest reported CPS performances.
               </p>
 
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
                 {[
-                  { icon: '🏅', label: 'Badge', value: 'Speed Demon' },
-                  { icon: '⭐', label: 'Points', value: '+500' },
+                  { icon: '🎯', label: 'Target', value: '10+ CPS' },
+                  { icon: '⏱️', label: 'Duration', value: '5 Seconds' },
                 ].map(r => (
                   <div key={r.label} style={{
                     display: 'flex', alignItems: 'center', gap: '0.5rem',
