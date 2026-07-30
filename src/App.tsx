@@ -34,43 +34,173 @@ const SpaceWavesGame      = lazy(() => import('./pages/SpaceWavesGame'));
 
 import SEO from './components/SEO';
 
-const PAGE_META: Record<string, { title: string; desc: string; isWeb?: boolean }> = {
-  '/': { title: 'FixedAim - The Ultimate CPS & Aim Training Platform', desc: 'The ultimate free platform to test your clicking speed, typing WPM, reaction time, aim precision, and more.', isWeb: true },
-  'cps-test': { title: 'CPS Test - Click Speed Test Online', desc: 'Test your clicking speed with our free CPS test tool.', isWeb: true },
-  'typing-test': { title: 'Typing Speed Test - WPM Test Online', desc: 'Find your true WPM without creating an account.', isWeb: true },
-  'reaction-time': { title: 'Reaction Time Test', desc: 'How fast are your reflexes? Test your reaction time.', isWeb: true },
-  'aim-trainer': { title: 'Aim Trainer - FPS Warmup', desc: 'Train your reflexes and sharpen your aim with our browser aim trainer.', isWeb: true },
-  'key-visualizer': { title: 'Key Visualizer', desc: 'Live on-screen display of your keyboard inputs.', isWeb: true },
-  'spacebar': { title: 'Spacebar Counter', desc: 'Test your spacebar tapping speed.', isWeb: true },
-  'double-click': { title: 'Double Click Test', desc: 'Check your mouse for dying switches and double click issues.', isWeb: true },
-  'scroll-test': { title: 'Scroll Speed Test', desc: 'Check your mouse wheel scrolling speed.', isWeb: true },
-  'mouse-accuracy': { title: 'Mouse Accuracy Test', desc: 'Find your perfect DPI and track your mouse path efficiency.', isWeb: true },
-  '3d-aim-trainer': { title: '3D Aim Trainer', desc: 'Master your FPS mechanics in a true spatial environment.', isWeb: true },
-  'accuracy': { title: 'Keyboard Accuracy Test', desc: 'Stop making typos and track your keyboard accuracy.', isWeb: true },
-  'space-defense': { title: 'Space Defense Game', desc: 'Can you click fast under pressure?', isWeb: true },
-  'voyager-game': { title: 'Voyager Game', desc: 'The ultimate evasion warm-up game.', isWeb: true },
-  'f1-reaction': { title: 'F1 Reaction Test', desc: 'Simulate a real Formula 1 race start.', isWeb: true },
-  'cps-rush': { title: 'CPS Rush', desc: 'Pure burst speed CPS test in short rounds.', isWeb: true },
-  'space-waves': { title: 'Space Waves', desc: 'Arcade dodging game to sharpen your timing.', isWeb: true },
-  'mouse': { title: 'Mouse Tools', desc: 'Tools to test and improve your mouse skills.', isWeb: false },
-  'keyboard': { title: 'Keyboard Tools', desc: 'Tools to test and improve your keyboard skills.', isWeb: false },
-  'aim': { title: 'Aim & Reaction Tools', desc: 'Tools to test and improve your aim and reaction time.', isWeb: false },
-  'games': { title: 'Skill Games', desc: 'Play skill games to improve your reaction and clicking speed.', isWeb: false },
-  'leaderboard': { title: 'Leaderboard', desc: 'Global leaderboard for CPS and WPM scores.', isWeb: false },
-  'hall-of-fame': { title: 'Hall of Fame', desc: 'Global leaderboard and hall of fame.', isWeb: false },
-  'blog': { title: 'Blog', desc: 'Read the latest updates and articles from FixedAim.', isWeb: false },
-  'privacy-policy': { title: 'Privacy Policy', desc: 'Privacy Policy for FixedAim.', isWeb: false },
-  'terms': { title: 'Terms of Service', desc: 'Terms of Service for FixedAim.', isWeb: false },
-  'contact': { title: 'Contact Us', desc: 'Get in touch with the FixedAim team.', isWeb: false },
+// CHANGED: centralised URL constant — update once if the domain ever changes
+const SITE_URL = 'https://fixedaim.com';
+
+type AppCategory =
+  | 'GameApplication'
+  | 'UtilitiesApplication'
+  | 'EducationalApplication';
+
+interface PageMeta {
+  title: string;
+  desc: string;
+  applicationCategory?: AppCategory;
+}
+
+// CHANGED: all titles are now SEO-friendly with "| FixedAim" suffix and descriptive keywords.
+// CHANGED: all descriptions are 140–160 characters with action-oriented copy.
+const PAGE_META: Record<string, PageMeta> = {
+  '/': {
+    title: 'FixedAim - Free CPS Test, Aim Trainer & Typing Speed Test Online',
+    desc:  'The ultimate free platform to test clicking speed, typing WPM, reaction time, and aim precision. No signup needed. Play, test, and improve instantly.',
+  },
+
+  // ── Tools ──────────────────────────────────────────────────────────────────
+  'cps-test': {
+    title: 'CPS Test - Free Click Speed Test Online | FixedAim',
+    desc:  'Test your CPS (Clicks Per Second) for free. Measure click speed with 1s–100s timer modes, compare your scores, and challenge yourself to click faster.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  'typing-test': {
+    title: 'Typing Speed Test - Free WPM Test Online | FixedAim',
+    desc:  'Find your true typing speed in words per minute with our free WPM test. No account needed. Track accuracy, speed, and improve your typing skills instantly.',
+    applicationCategory: 'EducationalApplication',
+  },
+  'reaction-time': {
+    title: 'Reaction Time Test - Human Reflex Speed Test | FixedAim',
+    desc:  'How fast are your reflexes? Measure your reaction time in milliseconds, average across multiple attempts, and see how you compare to the human average.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  'aim-trainer': {
+    title: 'Aim Trainer - Free Browser FPS Aim Practice | FixedAim',
+    desc:  'Sharpen your FPS aim in the browser — no download needed. Choose Easy, Medium, Hard, or Flick mode. Track accuracy, combos, and personal records instantly.',
+    applicationCategory: 'GameApplication',
+  },
+  'key-visualizer': {
+    title: 'Key Visualizer - Live Keystroke Display Online | FixedAim',
+    desc:  'See every keystroke visualised in real time. Perfect for streamers, typists, and keyboard enthusiasts. Tracks modifier keys, holds, and key press frequency.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  'spacebar': {
+    title: 'Spacebar Counter - Space Click Speed Test | FixedAim',
+    desc:  'Test how fast you can tap the spacebar. Choose your timer, spam the space key, and see your CPS score. Simple, free, and instant — no signup required.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  'double-click': {
+    title: 'Double Click Test - Mouse Switch Health Checker | FixedAim',
+    desc:  'Diagnose double-click issues from worn mouse switches. Detects accidental double clicks in real time and shows click intervals so you can spot problems fast.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  'scroll-test': {
+    title: 'Scroll Speed Test - Mouse Wheel Speed Checker | FixedAim',
+    desc:  'Measure how fast your mouse wheel scrolls. Check scroll lines per second, test your scroll speed, and see if your mouse wheel is performing at its best.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  'mouse-accuracy': {
+    title: 'Mouse Accuracy Test - DPI & Tracking Precision Test | FixedAim',
+    desc:  'Test your mouse tracking accuracy and find your ideal DPI. Get a path efficiency score, detect cursor tremor, and fine-tune your sensitivity for peak precision.',
+    applicationCategory: 'UtilitiesApplication',
+  },
+  '3d-aim-trainer': {
+    title: '3D Aim Trainer - Browser FPS Practice in 3D | FixedAim',
+    desc:  'Practice flicking, tracking, and precision in a true 3D spatial environment — no download required. The most realistic browser aim trainer available for free.',
+    applicationCategory: 'GameApplication',
+  },
+  'accuracy': {
+    title: 'Keyboard Accuracy Test - Stop Typos & Track Errors | FixedAim',
+    desc:  'Find which keys you mistype the most. Track your per-key error rate, see your accuracy percentage, and target problem keys to eliminate typos for good.',
+    applicationCategory: 'EducationalApplication',
+  },
+
+  // ── Games ─────────────────────────────────────────────────────────────────
+  'space-defense': {
+    title: 'Space Defense Game - Click Fast Under Pressure | FixedAim',
+    desc:  'Defend your base from incoming threats in this free browser clicking game. Wave-based difficulty ramps up fast — can you keep up and protect your space station?',
+    applicationCategory: 'GameApplication',
+  },
+  'voyager-game': {
+    title: 'Voyager Game - Endless Mouse Evasion Arcade | FixedAim',
+    desc:  'Dodge obstacles in this endless mouse-controlled evasion game. Difficulty scales continuously — great as a pre-game warm-up to sharpen your mouse precision.',
+    applicationCategory: 'GameApplication',
+  },
+  'f1-reaction': {
+    title: 'F1 Reaction Test - Formula 1 Race Start Simulator | FixedAim',
+    desc:  'Simulate an authentic F1 lights-out race start. Measure your reaction time in milliseconds like a real Formula 1 driver — and watch out for jump starts!',
+    applicationCategory: 'GameApplication',
+  },
+  'cps-rush': {
+    title: 'CPS Rush - Burst Click Speed Game | FixedAim',
+    desc:  'Short, intense clicking rounds to push your peak burst CPS to the limit. Race against the clock, beat your personal best, and see how fast you can truly click.',
+    applicationCategory: 'GameApplication',
+  },
+  'space-waves': {
+    title: 'Space Waves - Arcade Dodge & Timing Game | FixedAim',
+    desc:  'A side-scrolling arcade dodge game with procedural obstacles and parallax space backgrounds. Sharpen your timing, test your reflexes, and beat your high score.',
+    applicationCategory: 'GameApplication',
+  },
+
+  // ── Category / Static pages — no applicationCategory → no WebApplication schema ──
+  'mouse': {
+    title: 'Mouse Tools - CPS, Accuracy & Scroll Tests | FixedAim',
+    desc:  'Browse all free mouse testing tools on FixedAim: CPS test, double click test, scroll speed test, mouse accuracy, and more. No signup — just open and test.',
+  },
+  'keyboard': {
+    title: 'Keyboard Tools - Typing, Accuracy & Key Tests | FixedAim',
+    desc:  'Browse all free keyboard testing tools on FixedAim: typing speed test, key visualizer, spacebar counter, accuracy test, and more. Start testing instantly.',
+  },
+  'aim': {
+    title: 'Aim & Reaction Tools - Browser Trainers | FixedAim',
+    desc:  'Browse all free aim and reaction tools on FixedAim: aim trainer, 3D aim trainer, reaction time test, F1 reaction test, and more. Train in your browser for free.',
+  },
+  'games': {
+    title: 'Skill Games - Free Browser Arcade Games | FixedAim',
+    desc:  'Play free browser skill games on FixedAim: Space Defense, Voyager, CPS Rush, Space Waves, and more. Sharpen your reflexes and clicking speed while having fun.',
+  },
+  'leaderboard': {
+    title: 'Leaderboard - Top CPS & WPM Scores | FixedAim',
+    desc:  'See the highest CPS and WPM scores from players around the world. Can you make it onto the FixedAim global leaderboard? Test your skills and submit your score.',
+  },
+  'hall-of-fame': {
+    title: 'Hall of Fame - All-Time Best Scores | FixedAim',
+    desc:  'The all-time best CPS, WPM, and reaction scores from the FixedAim community. See the records, challenge them, and earn your place in the hall of fame.',
+  },
+  'blog': {
+    title: 'Blog - Tips, Guides & Updates | FixedAim',
+    desc:  'Read the latest tips, improvement guides, and platform updates from the FixedAim team. Learn how to click faster, type better, and improve your gaming reflexes.',
+  },
+  'privacy-policy': {
+    title: 'Privacy Policy | FixedAim',
+    desc:  'Read the FixedAim Privacy Policy to understand how we collect, use, and protect your data. We are committed to keeping your information safe and transparent.',
+  },
+  'terms': {
+    title: 'Terms of Service | FixedAim',
+    desc:  'Read the FixedAim Terms of Service. By using our free tools and games you agree to these terms. Fair use, no spam, no abuse — simple rules for everyone.',
+  },
+  'contact': {
+    title: 'Contact Us - Get in Touch with FixedAim | FixedAim',
+    desc:  'Have a question, suggestion, or found a bug? Get in touch with the FixedAim team. We read every message and aim to respond as quickly as possible.',
+  },
 };
 
+// CHANGED: url now uses the SITE_URL constant instead of a hardcoded string literal.
+// Trailing slash kept on homepage to match canonical.
 function RouteWithSEO({ path, children }: { path: string, children: React.ReactNode }) {
-  const meta = PAGE_META[path] || { title: 'FixedAim', desc: 'Test your skills', isWeb: false };
-  const url = path === '/' ? 'https://fixedaim.com/' : `https://fixedaim.com/${path}`;
-  
+  const meta = PAGE_META[path] || {
+    title: 'FixedAim - Free Browser Skill Testing Platform',
+    desc:  'Test your clicking speed, typing speed, reaction time, aim precision, and more for free.',
+  };
+  const url  = path === '/' ? `${SITE_URL}/` : `${SITE_URL}/${path}`;
+
   return (
     <>
-      <SEO title={meta.title} description={meta.desc} url={url} isWebApplication={meta.isWeb} />
+      <SEO
+        title={meta.title}
+        description={meta.desc}
+        url={url}
+        isWebApplication={!!meta.applicationCategory}
+        applicationCategory={meta.applicationCategory}
+      />
       {children}
     </>
   );
@@ -110,22 +240,22 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
 
-            <Route path="cps-test"      element={<RouteWithSEO path="cps-test"><CPSTestPage /></RouteWithSEO>} />
-            <Route path="typing-test"   element={<RouteWithSEO path="typing-test"><TypingTestPage /></RouteWithSEO>} />
-            <Route path="reaction-time" element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
-            <Route path="aim-trainer"   element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
+            <Route path="cps-test"       element={<RouteWithSEO path="cps-test"><CPSTestPage /></RouteWithSEO>} />
+            <Route path="typing-test"    element={<RouteWithSEO path="typing-test"><TypingTestPage /></RouteWithSEO>} />
+            <Route path="reaction-time"  element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
+            <Route path="aim-trainer"    element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
             <Route path="key-visualizer" element={<RouteWithSEO path="key-visualizer"><KeyVisualizerPage /></RouteWithSEO>} />
-            <Route path="spacebar"      element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
-            <Route path="double-click"  element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
-            <Route path="scroll-test"   element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
+            <Route path="spacebar"       element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
+            <Route path="double-click"   element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
+            <Route path="scroll-test"    element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
             <Route path="mouse-accuracy" element={<RouteWithSEO path="mouse-accuracy"><MouseAccuracyPage /></RouteWithSEO>} />
             <Route path="3d-aim-trainer" element={<RouteWithSEO path="3d-aim-trainer"><ThreeDAimTrainerPage /></RouteWithSEO>} />
-            <Route path="accuracy"      element={<RouteWithSEO path="accuracy"><AccuracyTestPage /></RouteWithSEO>} />
-            <Route path="space-defense" element={<RouteWithSEO path="space-defense"><SpaceDefensePage /></RouteWithSEO>} />
-            <Route path="voyager-game"  element={<RouteWithSEO path="voyager-game"><VoyagerGame /></RouteWithSEO>} />
-            <Route path="f1-reaction"   element={<RouteWithSEO path="f1-reaction"><F1ReactionPage /></RouteWithSEO>} />
-            <Route path="cps-rush"      element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
-            <Route path="space-waves"   element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
+            <Route path="accuracy"       element={<RouteWithSEO path="accuracy"><AccuracyTestPage /></RouteWithSEO>} />
+            <Route path="space-defense"  element={<RouteWithSEO path="space-defense"><SpaceDefensePage /></RouteWithSEO>} />
+            <Route path="voyager-game"   element={<RouteWithSEO path="voyager-game"><VoyagerGame /></RouteWithSEO>} />
+            <Route path="f1-reaction"    element={<RouteWithSEO path="f1-reaction"><F1ReactionPage /></RouteWithSEO>} />
+            <Route path="cps-rush"       element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
+            <Route path="space-waves"    element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
 
             {/* Category Pages */}
             <Route path="mouse"    element={<RouteWithSEO path="mouse"><MousePage /></RouteWithSEO>} />
