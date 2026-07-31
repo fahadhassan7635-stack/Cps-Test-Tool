@@ -1,23 +1,31 @@
-import {
+import React, {
   useState,
   useRef,
   useCallback,
   useEffect,
   memo,
 } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { Maximize2, Minimize2, ExternalLink } from 'lucide-react';
 
 // ─────────────────────────────────────────────
 // TYPES & CONSTANTS
 // ─────────────────────────────────────────────
-const DURATIONS = [1, 2, 5, 10, 15, 30, 60];
 type Phase = 'idle' | 'running' | 'done';
+type ClickMode = 'left' | 'right';
 interface ClickEvent { time: number; }
+interface RippleItem { id: number; x: number; y: number; color: string; }
+interface HistoryItem { cps: number; clicks: number; duration: number; }
+interface GraphPoint { t: number; cps: number; }
+interface TooltipData { x: number; y: number; t: number; rtCps: number; avgCps: number; }
+interface RatingResult { label: string; emoji: string; color: string; stars: number; desc: string; }
+
+const DURATIONS: number[] = [1, 2, 5, 10, 15, 30, 60];
 
 // ─────────────────────────────────────────────
 // STYLE CONSTANTS (stable references — no object churn per render)
 // ─────────────────────────────────────────────
-const h2Style: React.CSSProperties = {
+const h2Style: CSSProperties = {
   color: 'var(--neon-green, #00ff88)',
   fontSize: '1.5rem',
   fontWeight: '700',
@@ -25,23 +33,23 @@ const h2Style: React.CSSProperties = {
   borderBottom: '1px solid rgba(255,255,255,0.07)',
   paddingBottom: '0.5rem',
 };
-const h3Style: React.CSSProperties = {
+const h3Style: CSSProperties = {
   color: 'var(--neon-orange, #ff9f43)',
   fontSize: '1.15rem',
   fontWeight: '700',
   margin: '1.5rem 0 0.5rem',
 };
-const pStyle: React.CSSProperties = {
+const pStyle: CSSProperties = {
   marginBottom: '1.25rem',
   color: '#9ca3af',
 };
-const ulStyle: React.CSSProperties = {
+const ulStyle: CSSProperties = {
   marginBottom: '1.5rem',
   paddingLeft: '1.5rem',
   color: '#9ca3af',
   lineHeight: '1.9',
 };
-const codeStyle: React.CSSProperties = {
+const codeStyle: CSSProperties = {
   background: 'rgba(0,245,255,0.1)',
   padding: '1px 6px',
   borderRadius: '4px',
@@ -53,7 +61,7 @@ const codeStyle: React.CSSProperties = {
 // ─────────────────────────────────────────────
 // ARTICLE RESEARCH LINK (external reference citation used inside SeoArticle)
 // ─────────────────────────────────────────────
-const ArticleLink = memo(({ href, children }: { href: string; children: React.ReactNode }) => (
+const ArticleLink = memo(({ href, children }: { href: string; children: ReactNode }) => (
   <a
     href={href}
     target="_blank"
@@ -93,8 +101,9 @@ const GLOBAL_STYLES = `
     to   { opacity:1; transform:translateY(0); }
   }
   @keyframes rippleAnim {
-    0%   { transform:translate(-50%,-50%) scale(0); opacity:1; border-width: 3px; }
-    100% { transform:translate(-50%,-50%) scale(15); opacity:0; border-width: 1px; }
+    0%   { transform:translate(-50%,-50%) scale(0);    opacity:0.45; }
+    50%  { transform:translate(-50%,-50%) scale(0.8);  opacity:0.22; }
+    100% { transform:translate(-50%,-50%) scale(1.2);  opacity:0;    }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -131,7 +140,7 @@ const GLOBAL_STYLES = `
 // ─────────────────────────────────────────────
 // RATING HELPER (outside component — stable)
 // ─────────────────────────────────────────────
-function getRating(c: number) {
+function getRating(c: number): RatingResult {
   if (c >= 12) return { label: 'Machine',  emoji: '🤖', color: 'var(--neon-red,    #ff3838)', stars: 5, desc: '"Unbelievable processing! Your fingers execute inputs with cybernetic efficiency. Absolute dominance!"' };
   if (c >= 9)  return { label: 'Cheetah',  emoji: '🐆', color: 'var(--neon-orange, #ff9f43)', stars: 4, desc: '"Your fingers snap at blistering speed just like the speedie cat runs. Hail to the king of clicking!"' };
   if (c >= 7)  return { label: 'Fox',      emoji: '🦊', color: 'var(--neon-cyan,   #00d2d3)', stars: 3, desc: '"Sharp, quick, and tactical. You navigate the trigger points with impressive agility and cunning wit."' };
@@ -144,119 +153,184 @@ function getRating(c: number) {
 // ─────────────────────────────────────────────
 const FAQ_DATA = [
   {
-    q: 'What is a CPS Test?',
-    a: 'A CPS Test (Clicks Per Second Test) measures how many times you can click a mouse button within a set time period. It is used by gamers, hardware testers, and competitive players to benchmark their clicking speed and reflex ability.',
+    q: "What is the best free CPS Test online?",
+    a: "FixedAim's CPS Test at fixedaim.com/cps-test is a free, no-download click speed test that supports left click and right click modes, custom durations from 1 to 300 seconds, a live real-time CPS graph, session history, and anti-cheat detection. It works on PC, Mac, mobile, and tablet.",
   },
   {
-    q: 'What is a good CPS score?',
-    a: 'For casual users, 5–7 CPS is normal. Competitive gamers typically reach 8–12 CPS. Professional Minecraft PvP players using Butterfly or Jitter techniques can achieve 14–20+ CPS.',
+    q: "How do I test my click speed online?",
+    a: "Visit fixedaim.com/cps-test, select a test duration (default is 5 seconds), then click the large click area to start. Click as fast as possible until the timer runs out. Your CPS score, total clicks, peak CPS, and performance rank are shown instantly when the test ends.",
   },
   {
-    q: 'How do I improve my CPS?',
-    a: 'Practice daily using 1–5 second burst tests. Adopt a claw or fingertip grip, use a lightweight mouse, ensure your polling rate is 1000 Hz, and progressively learn Jitter or Butterfly Clicking techniques.',
+    q: "What is CPS in gaming?",
+    a: "CPS stands for Clicks Per Second — the number of times you can click your mouse button in one second. In gaming, especially Minecraft PvP, higher CPS gives more hit registrations and better combat performance. Most gamers aim for 6–12 CPS depending on their game and playstyle.",
   },
   {
-    q: 'Does CPS matter in gaming?',
-    a: 'Yes — especially in Minecraft PvP, PUBG single-fire modes, Fortnite building, and MOBA micro. Higher CPS directly translates to more hits per second, faster item use, and quicker ability rotations.',
+    q: "Is this click speed test accurate?",
+    a: "Yes. The CPS Test uses the browser's performance.now() API for sub-millisecond click timestamping, a 50ms polling interval for live updates, and a dedicated click counter that is immune to auto-clicker memory pruning. Results reflect genuine hardware and biological performance.",
   },
   {
-    q: 'Can CPS be trained over time?',
-    a: 'Absolutely. With consistent daily practice of 5–10 minutes, most users can improve by 2–4 CPS within 3–4 weeks. Finger mobility exercises and interval sprint sessions accelerate progress.',
+    q: "What is a CPS Test?",
+    a: "A CPS Test (Clicks Per Second Test) measures how many times you can click a mouse button within a set time period. It is used by gamers, hardware testers, and competitive players to benchmark their clicking speed and reflex ability.",
   },
   {
-    q: 'Is Butterfly Clicking cheating in Minecraft?',
-    a: 'On most competitive servers, yes. Butterfly Clicking is banned because it exceeds biological single-finger limits. Always verify the specific server rules before using this technique.',
+    q: "What is a good CPS score?",
+    a: "For casual users, 5–7 CPS is normal. Competitive gamers typically reach 8–12 CPS. Professional Minecraft PvP players using Butterfly or Jitter techniques can achieve 14–20+ CPS.",
   },
   {
-    q: 'Is Drag Clicking allowed on servers?',
-    a: 'Drag Clicking is banned on virtually all competitive servers because it produces 25–50+ CPS through mechanical friction rather than genuine human clicking. It is also considered hardware exploitation.',
+    q: "How do I improve my CPS?",
+    a: "Practice daily using 1–5 second burst tests. Adopt a claw or fingertip grip, use a lightweight mouse, ensure your polling rate is 1000 Hz, and progressively learn Jitter or Butterfly Clicking techniques.",
   },
   {
-    q: 'What mouse is best for high CPS?',
-    a: 'Ultralight mice with optical switches (like Razer Viper V3 Pro, Logitech G Pro X Superlight 2, or Glorious Model O 2) are ideal. Look for mice under 80 g with switches rated for 50 M+ clicks and low actuation force.',
+    q: "Does CPS matter in gaming?",
+    a: "Yes — especially in Minecraft PvP, PUBG single-fire modes, Fortnite building, and MOBA micro. Higher CPS directly translates to more hits per second, faster item use, and quicker ability rotations.",
   },
   {
-    q: 'Does DPI affect CPS?',
-    a: 'No. DPI controls cursor movement sensitivity and has no effect on clicking speed. CPS is determined purely by your finger biomechanics and mouse switch actuation speed.',
+    q: "Can CPS be trained over time?",
+    a: "Absolutely. With consistent daily practice of 5–10 minutes, most users can improve by 2–4 CPS within 3–4 weeks. Finger mobility exercises and interval sprint sessions accelerate progress.",
   },
   {
-    q: 'Can mobile users take the CPS Test?',
-    a: 'Yes. The test supports touch input on mobile and tablet devices. Tap the click zone to start. Note that mobile CPS is typically lower (2–5 CPS) due to touchscreen response latency.',
+    q: "Is Butterfly Clicking cheating in Minecraft?",
+    a: "Some competitive servers restrict or ban Butterfly Clicking because it can exceed typical single-finger click rates. Always check the specific server rules before using this technique.",
   },
   {
-    q: 'What games need high CPS the most?',
-    a: 'Minecraft 1.8 PvP, PUBG: Battlegrounds (semi-auto weapons), Roblox combat games, Fortnite building, and any game with manual-fire mechanics. MOBA games also benefit from fast clicking for last-hits and micro.',
+    q: "Is Drag Clicking allowed on servers?",
+    a: "Drag Clicking is banned on virtually all competitive servers because it produces 25–50+ CPS through mechanical friction rather than genuine human clicking. It is also considered hardware exploitation.",
   },
   {
-    q: 'What is Jitter Clicking?',
-    a: 'Jitter Clicking is a technique where you rapidly tense and relax your forearm muscles to generate vibrations that translate into fast mouse clicks, typically producing 10–14 CPS. Overuse can cause forearm strain.',
+    q: "What mouse is best for high CPS?",
+    a: "Ultralight mice with optical switches (like Razer Viper V3 Pro, Logitech G Pro X Superlight 2, or Glorious Model O 2) are ideal. Look for mice under 80 g with switches rated for 50 M+ clicks and low actuation force.",
   },
   {
-    q: 'Can high CPS damage your hand?',
-    a: 'Yes. Aggressive clicking techniques stress forearm tendons and wrist joints, potentially causing Repetitive Strain Injury (RSI). Take regular breaks, stretch, and stop immediately if you feel any pain.',
+    q: "Does DPI affect CPS?",
+    a: "No. DPI controls cursor movement sensitivity and has no effect on clicking speed. CPS is determined purely by your finger biomechanics and mouse switch actuation speed.",
   },
   {
-    q: 'What is the world record CPS?',
-    a: 'The verified human world record for single-finger clicking in a standardized 5-second test is approximately 14–16 CPS. Drag-clicking records exceed 40 CPS but are mechanically assisted and not accepted as genuine human performance.',
+    q: "Can mobile users take the CPS Test?",
+    a: "Yes. The test supports touch input on mobile and tablet devices. Tap the click zone to start. Note that mobile CPS is typically lower (2–5 CPS) due to touchscreen response latency.",
   },
   {
-    q: 'Is this CPS Test accurate?',
-    a: 'Yes. The tool uses performance.now() for sub-millisecond event timing, a 50 ms polling loop for live CPS updates, and a separate total-click counter immune to the memory pruning used to handle auto-clickers.',
+    q: "What games need high CPS the most?",
+    a: "Minecraft 1.8 PvP, PUBG: Battlegrounds (semi-auto weapons), Roblox combat games, Fortnite building, and any game with manual-fire mechanics. MOBA games also benefit from fast clicking for last-hits and micro.",
   },
   {
-    q: 'What is the difference between CPS and APM?',
-    a: 'CPS measures raw mouse click speed. APM (Actions Per Minute) is a broader metric used in strategy games that includes all mouse clicks, keyboard inputs, and ability activations. High CPS contributes to high APM.',
+    q: "What is Jitter Clicking?",
+    a: "Jitter Clicking is a technique where you rapidly tense and relax your forearm muscles to generate vibrations that translate into fast mouse clicks, typically producing 10–14 CPS. Overuse can cause forearm strain.",
   },
   {
-    q: 'How does the anti-cheat system work?',
-    a: 'The system analyzes click intervals for biological impossibility, entropy of timing patterns, mouse movement activity, tab/window visibility events, and untrusted synthetic event flags to detect macros and auto-clickers.',
+    q: "Can high CPS damage your hand?",
+    a: "Yes. Aggressive clicking techniques stress forearm tendons and wrist joints, potentially causing Repetitive Strain Injury (RSI). Take regular breaks, stretch, and stop immediately if you feel any pain.",
   },
   {
-    q: 'What is the best test duration for benchmarking?',
-    a: 'The 5-second test is the industry standard. Use 1-second tests for peak burst measurement, 10-second tests for consistency evaluation, and 30-second tests for stamina and fatigue-curve analysis.',
+    q: "What is the world record CPS?",
+    a: "Unofficial community records suggest top single-finger clicking speeds of around 14–16 CPS in 5-second tests. Drag-clicking figures exceed 40 CPS but are mechanically assisted and not widely recognized as standard human performance.",
   },
   {
-    q: 'Does mouse weight affect CPS?',
-    a: 'Yes. Lighter mice (under 80 g) require less energy and generate less counter-vibration during fast clicking. Ultralight mice can improve sustainable CPS by 1–3 points over heavier alternatives.',
+    q: "Is this CPS Test accurate?",
+    a: "Yes. The tool uses performance.now() for sub-millisecond event timing, a 50 ms polling loop for live CPS updates, and a separate total-click counter immune to the memory pruning used to handle auto-clickers.",
   },
   {
-    q: 'Can I use a trackpad for the CPS Test?',
-    a: 'Yes, but trackpad CPS is significantly lower (2–4 CPS typical) because trackpad surfaces have higher physical resistance and slower mechanical feedback compared to dedicated mouse buttons.',
+    q: "What is the difference between CPS and APM?",
+    a: "CPS measures raw mouse click speed. APM (Actions Per Minute) is a broader metric used in strategy games that includes all mouse clicks, keyboard inputs, and ability activations. High CPS contributes to high APM.",
+  },
+  {
+    q: "How does the anti-cheat system work?",
+    a: "The system analyzes click intervals for biological impossibility, entropy of timing patterns, mouse movement activity, tab/window visibility events, and untrusted synthetic event flags to detect macros and auto-clickers.",
+  },
+  {
+    q: "What is the best test duration for benchmarking?",
+    a: "The 5-second test is the industry standard. Use 1-second tests for peak burst measurement, 10-second tests for consistency evaluation, and 30-second tests for stamina and fatigue-curve analysis.",
+  },
+  {
+    q: "Does mouse weight affect CPS?",
+    a: "Yes. Lighter mice (under 80 g) require less energy and generate less counter-vibration during fast clicking. Ultralight mice can improve sustainable CPS by 1–3 points over heavier alternatives.",
+  },
+  {
+    q: "Can I use a trackpad for the CPS Test?",
+    a: "Yes, but trackpad CPS is significantly lower (2–4 CPS typical) because trackpad surfaces have higher physical resistance and slower mechanical feedback compared to dedicated mouse buttons.",
+  },
+  {
+    q: "What is a Right Click CPS Test?",
+    a: "A Right Click CPS Test measures how many times you can right-click your mouse button within a set time period. It uses the same precision timing as the left-click test but registers only right mouse button inputs, making it ideal for benchmarking your ring or middle finger speed independently.",
+  },
+  {
+    q: "Is right click CPS faster or slower than left click CPS?",
+    a: "For most users, right click CPS is 1–3 points lower than left click CPS. The right mouse button is typically operated by the ring or middle finger, which has less fast-twitch muscle fiber density and weaker independent motor control compared to the index finger used for left clicking.",
+  },
+  {
+    q: "Why does right click speed matter in gaming?",
+    a: "Right click speed is critical in games where the right button controls abilities, ADS (Aim Down Sights), block actions, or context menus. In Minecraft, right-clicking places blocks and uses items — faster right-click CPS means faster bridging, item use, and ability cycling. In many RPGs and MOBAs, right click governs movement commands and attack targeting.",
+  },
+  {
+    q: "Does right clicking carry any injury risk?",
+    a: "Yes. Rapid right clicking engages the ring finger extensor tendons which are generally weaker and less conditioned than the index finger. Prolonged high-speed right clicking can cause lateral forearm strain. Limit right click sprint sessions to under 30 seconds and stretch between attempts.",
+  },
+  {
+    q: "How do I switch between Left Click and Right Click test modes?",
+    a: "Use the Left / Right mode toggle in the control bar above the click area. Switching modes resets the current test. In Right Click mode, the browser context menu is disabled inside the click area so your right clicks are counted accurately without interruption.",
+  },
+  {
+    q: "What is a good right click CPS score?",
+    a: "A score of 4–6 right CPS is average for casual users. Competitive players typically achieve 6–9 right CPS. Scores above 10 right CPS are considered elite and require deliberate daily practice targeting ring finger independence and speed.",
+  },
+  {
+    q: "Can I train my right click speed separately?",
+    a: "Yes. Use the Right Click mode in short daily sessions — 5 to 10 repeats of 5-second tests with 30-second rest periods. This builds independent ring finger fast-twitch endurance without cross-contaminating your left click muscle memory.",
   },
 ];
 
 // ─────────────────────────────────────────────
 // JSON-LD SCHEMA DATA (stable constant)
 // ─────────────────────────────────────────────
-const JSON_LD_SCHEMAS = [
+const JSON_LD_SCHEMAS: object[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'CPS Test - Click Speed Test Online',
+    name: 'CPS Test — Free Click Speed Test Online | FixedAim',
+    alternateName: ['Click Speed Test', 'Clicks Per Second Test', 'Mouse Click Test', 'Right Click Test'],
     description:
-      'Free CPS Test tool to measure clicks per second. Includes multiple durations, live stats, session history, anti-cheat, and sound effects.',
+      'Free CPS Test — measure your clicks per second with left click and right click modes. Instant results, live graph, session history, anti-cheat detection. No download required. Play on PC, mobile, and tablet.',
     applicationCategory: 'GameApplication',
     operatingSystem: 'All',
     browserRequirements: 'Requires JavaScript',
-    url: 'https://yourdomain.com/cps-test',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    url: 'https://fixedaim.com/cps-test',
+    sameAs: ['https://fixedaim.com/cps-test'],
+    inLanguage: 'en',
+    isAccessibleForFree: true,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
     featureList: [
-      'Multiple test durations',
-      'Custom duration',
+      'Left Click CPS Test',
+      'Right Click CPS Test',
+      'Real-time CPS Graph',
+      'Multiple test durations (1s to 300s)',
+      'Custom duration input',
       'Live CPS counter',
       'Anti-cheat detection',
-      'Session history',
-      'Sound effects',
-      'Mobile friendly',
+      'Session history table',
+      'Sound effects toggle',
+      'Mobile and tablet friendly',
+      'No download or registration required',
     ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': 'https://fixedaim.com/cps-test',
+    name: 'CPS Test — Free Click Speed Test Online',
+    description: 'Test your clicks per second for free. Supports left click, right click, custom durations, live CPS graph, and session history. Works on PC, mobile, and tablet.',
+    url: 'https://fixedaim.com/cps-test',
+    inLanguage: 'en',
+    isPartOf: { '@type': 'WebSite', name: 'FixedAim', url: 'https://fixedaim.com' },
+    about: { '@type': 'Thing', name: 'CPS Test', description: 'A tool that measures mouse clicks per second (CPS) for gaming performance benchmarking.' },
+    keywords: 'CPS test, click speed test, clicks per second, right click test, mouse click test, CPS checker, click counter, gaming mouse test',
+    mainEntity: { '@type': 'SoftwareApplication', name: 'CPS Test', url: 'https://fixedaim.com/cps-test' },
   },
   {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',        item: 'https://yourdomain.com' },
-      { '@type': 'ListItem', position: 2, name: 'Mouse Tools', item: 'https://yourdomain.com/mouse-tools' },
-      { '@type': 'ListItem', position: 3, name: 'CPS Test',    item: 'https://yourdomain.com/cps-test' },
+      { '@type': 'ListItem', position: 1, name: 'Home',        item: 'https://fixedaim.com' },
+      { '@type': 'ListItem', position: 2, name: 'Mouse Tools', item: 'https://fixedaim.com/mouse-tools' },
+      { '@type': 'ListItem', position: 3, name: 'CPS Test',    item: 'https://fixedaim.com/cps-test' },
     ],
   },
   {
@@ -271,8 +345,8 @@ const JSON_LD_SCHEMAS = [
   {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: 'How to Take a CPS Test',
-    description: 'Step-by-step guide to measuring your clicks per second online.',
+    name: 'How to Do a CPS Test — Measure Clicks Per Second Online',
+    description: 'Step-by-step guide to measuring your left and right click speed in clicks per second (CPS) online for free.',
     step: [
       { '@type': 'HowToStep', name: 'Select Duration',   text: 'Choose a test duration from 1 to 60 seconds, or enter a custom value up to 300 seconds.' },
       { '@type': 'HowToStep', name: 'Start the Test',    text: 'Click the large click area to begin the countdown timer.' },
@@ -281,21 +355,7 @@ const JSON_LD_SCHEMAS = [
       { '@type': 'HowToStep', name: 'Try Again',         text: 'Click Try Again to immediately start a new test and compare your scores in the session history.' },
     ],
   },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'SoftwareApplication',
-    name: 'CPS Test',
-    operatingSystem: 'Web Browser',
-    applicationCategory: 'UtilitiesApplication',
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.8',
-      ratingCount: '2847',
-      bestRating: '5',
-      worstRating: '1',
-    },
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  },
+
 ];
 
 // ─────────────────────────────────────────────
@@ -400,7 +460,7 @@ SectionSkeleton.displayName = 'SectionSkeleton';
 // ─────────────────────────────────────────────
 // SESSION HISTORY (memoised heavy component)
 // ─────────────────────────────────────────────
-const SessionHistory = memo(({ history }: { history: { cps: number; clicks: number; duration: number }[] }) => (
+const SessionHistory = memo(({ history }: { history: HistoryItem[] }) => (
   <section
     style={{
       background: 'var(--bg-card,#1e2235)',
@@ -564,21 +624,23 @@ const SeoArticle = memo(() => (
           letterSpacing: '-0.5px',
         }}
       >
-        The Ultimate Guide to CPS Testing &amp; Click Speed Mastery
+        CPS Test Guide: How to Measure &amp; Improve Your Click Speed
       </h2>
 
       <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
-        A <strong>CPS Test</strong> (Clicks Per Second Test) is the gold-standard online benchmarking tool
-        for gamers, eSports athletes, hardware reviewers, and anyone who wants to understand the true
-        mechanical limits of their mouse and fingers. This comprehensive guide covers everything from the
-        science of clicking to professional training routines used by top-ranked competitive players.
+        A <strong>CPS Test</strong> (Clicks Per Second Test) is a free online tool that measures how many
+        times you can click your mouse per second. Whether you're a gamer benchmarking your <strong>click speed</strong>,
+        a Minecraft PvP player trying to improve your <strong>clicks per second</strong>, or simply curious
+        about your mouse performance, this <strong>click speed test</strong> gives you precise, real-time results
+        with no download required. This guide covers everything from how CPS is calculated to training
+        routines that can measurably improve your score.
       </p>
 
       {/* ── 1 ── */}
-      <h2 style={h2Style}>What is a CPS Test?</h2>
+      <h2 style={h2Style}>What is a CPS Test? (Click Speed Test Explained)</h2>
       <p style={pStyle}>
-        A CPS Test measures the number of mouse clicks you can register within a defined time window,
-        expressed as <strong>Clicks Per Second</strong>. The test starts the moment you first click the
+        A <strong>CPS Test</strong> — short for <strong>Click Speed Test</strong> or <strong>Clicks Per Second Test</strong> — measures how many mouse clicks you can register within a defined time window,
+        expressed as <strong>Clicks Per Second (CPS)</strong>. The test starts the moment you first click the
         target area and runs for your chosen duration — anywhere from one second to several minutes. At the
         end, your total clicks are divided by the elapsed seconds to produce a final CPS score, benchmarked
         against human performance tiers. Unlike simple click counters, a precision CPS tool uses the
@@ -759,8 +821,8 @@ const SeoArticle = memo(() => (
       <h3 style={h3Style}>Butterfly Clicking</h3>
       <p style={pStyle}>
         Uses two fingers — index and middle — alternating rapid taps on the left mouse button. Can reach
-        15–20 CPS in trained players. Banned on many competitive servers as it exceeds human single-finger
-        biological limits. Safe for practice but check server rules before competitive use.
+        15–20 CPS in trained players. Some competitive servers restrict or ban Butterfly Clicking due to its
+        high click rate. Safe for personal practice but always verify server rules before competitive use.
       </p>
       <h3 style={h3Style}>Drag Clicking</h3>
       <p style={pStyle}>
@@ -907,27 +969,24 @@ const SeoArticle = memo(() => (
       {/* ── 18 ── */}
       <h2 style={h2Style}>Professional Players and Their CPS</h2>
       <p style={pStyle}>
-        Top-ranked competitive gamers typically achieve 10–13 CPS in actual Minecraft PvP combat under
-        tournament conditions. Professional CS2 and Valorant players sustain 7–9 CPS focused on burst-fire
-        accuracy rather than maximum speed. The consensus in competitive circles is that accuracy and
+        Many competitive players report achieving 10–13 CPS in Minecraft PvP combat. Experienced CS2 and
+        Valorant players often sustain 7–9 CPS with a focus on burst-fire accuracy rather than maximum speed. The consensus in competitive circles is that accuracy and
         consistency at your maximum <em>sustainable</em> CPS significantly outperforms raw speed with
         degraded aim. No professional player sacrifices accuracy for an extra 1–2 CPS.
       </p>
       <p style={pStyle}>
-        Notable streamers and competitive players who have publicly shared their CPS data typically fall
-        into the 9–13 CPS range for Minecraft PvP and 7–9 CPS for FPS titles. The outliers who claim
-        20+ CPS in gameplay are almost always using Butterfly or Drag clicking techniques, which are
-        banned in most competitive formats.
+        Some streamers and competitive players who have shared their CPS publicly report figures in the
+        9–13 CPS range for Minecraft PvP and 7–9 CPS for FPS titles. Players reporting 20+ CPS in
+        gameplay are often using Butterfly or Drag clicking techniques, which many competitive formats restrict.
       </p>
 
       {/* ── 19 ── */}
       <h2 style={h2Style}>The World Record CPS</h2>
       <p style={pStyle}>
-        The verified human world record for single-finger clicking in a standardized 5-second test is
-        approximately 14–16 CPS under fair, observed conditions. Various unverified claims exceed 20 CPS
-        using standard clicking. Drag-clicking records technically exceed 40 CPS, but these are
-        mechanically assisted through surface friction exploitation and are not recognized as genuine
-        human performance in any competitive context.
+        Unofficial community records suggest top single-finger clicking speeds of around 14–16 CPS in
+        standardized 5-second tests. Some unverified claims report over 20 CPS with standard clicking.
+        Drag-clicking figures technically exceed 40 CPS, but these are mechanically assisted through
+        surface friction and are generally not recognized as standard human performance in competitive contexts.
       </p>
       <p style={pStyle}>
         Achieving 14+ CPS with normal clicking requires exceptional fast-twitch muscle fiber density,
@@ -958,19 +1017,539 @@ const SeoArticle = memo(() => (
         relaxation in your forearm and hand muscles. Practice in short daily sessions of 5–10 minutes,
         and ensure you take frequent breaks to prevent physical fatigue or repetitive strain injuries.
       </p>
+
+      {/* ── RIGHT CLICK SECTION ── */}
+      <hr style={{ border: 0, borderTop: '1px solid rgba(255,159,67,0.2)', margin: '3rem 0' }} />
+
+      <h2 style={{ ...h2Style, color: 'var(--neon-orange, #ff9f43)', fontSize: '2rem', letterSpacing: '-0.5px' }}>
+        Right Click CPS Test — Complete Guide
+      </h2>
+      <p style={{ ...pStyle, fontSize: '1rem', color: '#d1d5db' }}>
+        The <strong>Right Click CPS Test</strong> is a specialized benchmark that measures how many times
+        you can actuate your mouse's right button per second. While left click speed dominates competitive
+        gaming discussion, right click performance is a frequently overlooked skill with direct impact in
+        Minecraft survival, strategy games, RPGs, and any title where the right button drives core
+        gameplay mechanics.
+      </p>
+
+      {/* ── RC-1 ── */}
+      <h2 style={h2Style}>What is a Right Click Test?</h2>
+      <p style={pStyle}>
+        A Right Click Test works identically to a standard CPS test — it starts a countdown timer on your
+        first right click, counts every subsequent right mouse button press inside the click zone, and
+        calculates your final score in Clicks Per Second. The key difference is that the browser's default
+        context menu is suppressed during the test so that menu popups never interrupt your clicking
+        rhythm or steal focus from the measurement window. Every right click registers cleanly as a data
+        point in the same high-resolution timing system used for left-click benchmarks.
+      </p>
+      <p style={pStyle}>
+        Right click tests reveal an independent performance dimension that combined mouse tests miss.
+        A player can have an elite left-click CPS of 12 while their right-click CPS sits at 5, exposing
+        a genuine mechanical weakness. Identifying and training this gap produces measurable improvement
+        in any game where both buttons are used under time pressure.
+      </p>
+
+      {/* ── RC-2 ── */}
+      <h2 style={h2Style}>Left Click vs Right Click — Key Differences</h2>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '1rem',
+          margin: '1rem 0 2rem',
+        }}
+      >
+        {[
+          {
+            title: '🖱️ Left Click',
+            color: '#00f5ff',
+            points: [
+              'Index finger — strongest, fastest digit',
+              'Avg CPS: 6–10 for most users',
+              'Primary attack, confirm, select',
+              'Higher fast-twitch fiber density',
+              'Better trained via daily use',
+            ],
+          },
+          {
+            title: '🖱️ Right Click',
+            color: '#ff9f43',
+            points: [
+              'Ring / middle finger — weaker, less independent',
+              'Avg CPS: 4–8 for most users',
+              'ADS, block, place, context actions',
+              'Lower endurance under rapid fire',
+              'Often undertrained — high improvement ceiling',
+            ],
+          },
+        ].map(col => (
+          <div
+            key={col.title}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              border: `1px solid ${col.color}30`,
+            }}
+          >
+            <div style={{ fontWeight: '800', color: col.color, fontSize: '1rem', marginBottom: '0.75rem' }}>{col.title}</div>
+            <ul style={{ ...ulStyle, marginBottom: 0, paddingLeft: '1.25rem' }}>
+              {col.points.map(p => <li key={p}>{p}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* ── RC-3 ── */}
+      <h2 style={h2Style}>Why Right Click Speed Matters in Gaming</h2>
+
+      <h3 style={h3Style}>Minecraft — Placing & Using Items</h3>
+      <p style={pStyle}>
+        In Minecraft survival and creative modes, right-clicking places blocks, opens inventories, uses
+        food, fires bows, and activates most interactive objects. Speed bridging — one of the most
+        demanding movement techniques in competitive Minecraft — requires sustained rapid right clicking
+        combined with precise directional movement. Players who can sustain 8–12 right CPS execute
+        bridges measurably faster than those capped at 5 CPS, directly impacting escape routes, tower
+        rushes, and aerial construction under pressure.
+      </p>
+
+      <h3 style={h3Style}>Minecraft PvP — Shield & Sword Combo</h3>
+      <p style={pStyle}>
+        In Minecraft 1.9+ combat, the shield is raised with right click. Advanced PvP players alternate
+        rapidly between sword attacks (left click) and shield raises (right click) to block incoming
+        damage while maintaining offensive pressure. This simultaneous two-button technique requires
+        independent control of both index and ring fingers at competitive click rates — a dual-hand skill
+        that right click training directly develops.
+      </p>
+
+      <h3 style={h3Style}>Strategy Games & MOBAs</h3>
+      <p style={pStyle}>
+        In real-time strategy games and MOBAs, right click issues move commands, attack-move orders, and
+        unit targeting. High APM players issue hundreds of right-click commands per minute. Any latency
+        between intended and executed right clicks degrades micro control, last-hit timing, and unit
+        responsiveness. Dedicated right click CPS training directly improves the physical click rate
+        ceiling that your APM is ultimately constrained by.
+      </p>
+
+      <h3 style={h3Style}>FPS Games — ADS and Scope</h3>
+      <p style={pStyle}>
+        In virtually every first-person shooter, right click activates Aim Down Sights, zoom scopes, or
+        alternate fire modes. Fast ADS entry and exit is a critical mechanical skill — the difference
+        between a smooth transition into a aimed shot and a slow, hesitant engagement often comes down
+        to right-click actuation speed and consistency. Right click CPS testing gives you a precise
+        baseline for this specific mechanical skill.
+      </p>
+
+      {/* ── RC-4 ── */}
+      <h2 style={h2Style}>Average Right Click CPS by Skill Level</h2>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))',
+          gap: '1rem',
+          margin: '1rem 0 2rem',
+        }}
+      >
+        {[
+          { range: '1–3 RPC',  label: '🐌 Beginner',    color: '#8395a7' },
+          { range: '4–5 RPC',  label: '🐢 Casual',       color: '#10ac84' },
+          { range: '6–7 RPC',  label: '🦊 Intermediate', color: '#00d2d3' },
+          { range: '8–10 RPC', label: '🐆 Advanced',      color: '#ff9f43' },
+          { range: '11+ RPC',  label: '🤖 Elite',         color: '#ff3838' },
+        ].map(t => (
+          <div
+            key={t.range}
+            style={{
+              background: 'rgba(0,0,0,0.3)',
+              borderRadius: '10px',
+              padding: '1rem',
+              border: `1px solid ${t.color}40`,
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: '1.1rem', fontWeight: '800', color: t.color }}>{t.range}</div>
+            <div style={{ fontSize: '0.85rem', color: '#9ca3af', marginTop: '4px' }}>{t.label}</div>
+          </div>
+        ))}
+      </div>
+      <p style={pStyle}>
+        RPC (Right-clicks Per Second) scores typically run 1–3 points lower than an individual's left-click
+        CPS because the right button finger has less independent motor training. Players who close this
+        gap through deliberate practice gain a genuine mechanical edge in games that require both buttons
+        simultaneously.
+      </p>
+
+      {/* ── RC-5 ── */}
+      <h2 style={h2Style}>How to Improve Right Click CPS</h2>
+      <ul style={ulStyle}>
+        <li>
+          <strong>Isolated Ring Finger Drills:</strong> Practice tapping your ring finger independently
+          on a desk surface without involving adjacent fingers. 3 sets of 30 seconds daily builds
+          independent neuromuscular control that is the primary limiter for most users.
+        </li>
+        <li>
+          <strong>Right Click Sprint Intervals:</strong> Run 10 × 1-second maximum-effort right click
+          tests with 30-second rest periods between each. This progressive overload method builds
+          fast-twitch burst capacity in the ring finger's extensor muscles over 2–4 weeks.
+        </li>
+        <li>
+          <strong>Alternating Dual-Button Drills:</strong> Practice alternating left and right clicks
+          in rhythm — left, right, left, right — at increasing tempo. This builds the independent
+          bilateral finger coordination critical for Minecraft shield-sword combat and strategy game micro.
+        </li>
+        <li>
+          <strong>Grip Adjustment:</strong> A claw or fingertip grip naturally positions the ring finger
+          closer to the right button's optimal actuation point with less travel distance, enabling faster
+          repeat clicks than a full palm grip.
+        </li>
+        <li>
+          <strong>Mouse Button Force:</strong> If your mouse's right button requires noticeably more
+          actuation force than the left, consider a mouse with matched optical switches (e.g. Razer
+          optical) where both buttons have identical sub-1ms actuation characteristics.
+        </li>
+        <li>
+          <strong>Warm Up Before Testing:</strong> Cold ring finger tendons actuate measurably slower.
+          Perform 60 seconds of gentle ring finger taps before any serious right click testing session.
+        </li>
+      </ul>
+
+      {/* ── RC-6 ── */}
+      <h2 style={h2Style}>Right Click Finger Anatomy & Biomechanics</h2>
+      <p style={pStyle}>
+        The right mouse button is most commonly operated by the ring finger (fourth digit) in both palm
+        and claw grips. The ring finger is mechanically coupled to the middle finger through shared
+        extensor digitorum tendons, which limits its independent range of motion compared to the index
+        finger. This anatomical constraint is the primary reason right click CPS is biologically capped
+        lower than left click CPS for the majority of people — it is a hardware limitation of human
+        hand anatomy, not a training deficiency.
+      </p>
+      <p style={pStyle}>
+        Some players use their middle finger for right-click operations, particularly in fingertip grip
+        styles. Middle finger right-clicking can achieve higher CPS because the middle finger has greater
+        independent extensor tendon control than the ring finger. If your right-click CPS is plateauing
+        despite consistent training, experimenting with a middle-finger grip shift may unlock a
+        meaningful performance improvement.
+      </p>
+
+      {/* ── RC-7 ── */}
+      <h2 style={h2Style}>Right Click Test Best Practices</h2>
+      <ul style={ulStyle}>
+        <li><strong>Use the 5-second test</strong> as your baseline benchmark — it is the same industry-standard duration used for left click comparisons.</li>
+        <li><strong>Test both buttons separately</strong> on the same day to calculate your Left/Right CPS ratio. A ratio above 0.85 indicates strong bilateral balance.</li>
+        <li><strong>Track your session history</strong> across multiple days to identify improvement trends and fatigue patterns in your right-click endurance.</li>
+        <li><strong>Stop immediately if you feel forearm pain.</strong> The ring finger's extensor tendons are more susceptible to overuse strain than the index finger. Never click through discomfort.</li>
+        <li><strong>Test in quiet environments</strong> and avoid distractions — right click CPS is more sensitive to focus lapses than left click CPS due to the lower baseline motor control of the ring finger.</li>
+      </ul>
+
+      {/* ── RC-8 ── */}
+      <h2 style={h2Style}>Right Click Speed in Specific Games</h2>
+      <ul style={ulStyle}>
+        <li><strong>Minecraft Survival / Creative:</strong> 6–10 right CPS optimal for speed bridging and item placement</li>
+        <li><strong>Minecraft 1.9+ PvP:</strong> 5–8 right CPS for shield cycling combined with 10–14 left CPS sword attacks</li>
+        <li><strong>Fortnite:</strong> Right click switches weapon zoom; 5–7 RPS ensures instant scope-in without input delay</li>
+        <li><strong>League of Legends:</strong> Right click issues move and attack-move orders; 8–12 RPS contributes directly to APM</li>
+        <li><strong>Starcraft II:</strong> Right click controls unit movement and attack commands; professional players exceed 15 RPS during high-intensity micro</li>
+        <li><strong>PUBG / Warzone ADS:</strong> Right click hold-to-ADS; fast initial actuation (not sustained CPS) is the critical metric</li>
+        <li><strong>Diablo / Path of Exile:</strong> Right click frequently bound to movement or primary skill; sustained 6–9 RPS is comfortable for extended play sessions</li>
+      </ul>
     </article>
   </>
 ));
 SeoArticle.displayName = 'SeoArticle';
 
+
+// ─────────────────────────────────────────────
+// REAL-TIME CPS GRAPH (SVG-based, zero deps)
+// ─────────────────────────────────────────────
+const CpsGraph = memo(({ data, duration, clickMode, phase }: { data: GraphPoint[]; duration: number; clickMode: ClickMode; phase: Phase }) => {
+  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
+
+  const W = 900, H = 180;
+  const PAD = { top: 20, right: 20, bottom: 32, left: 44 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
+  const lineColor  = clickMode === 'right' ? '#ff9f43' : '#00f5ff';
+  const fillColor  = clickMode === 'right' ? 'rgba(255,159,67,0.10)' : 'rgba(0,245,255,0.08)';
+  const avgColor   = clickMode === 'right' ? '#b06aff' : '#b06aff';
+  const dotColor   = clickMode === 'right' ? '#ff9f43' : '#00ff88';
+  const gridColor  = 'rgba(255,255,255,0.05)';
+  const labelColor = '#6b7280';
+
+  const maxCps = Math.max(10, ...data.map(d => d.cps));
+  const yMax   = Math.ceil(maxCps / 5) * 5;
+
+  const xScale = (t: number): number => PAD.left + (t / duration) * innerW;
+  const yScale = (c: number): number => PAD.top + innerH - (c / yMax) * innerH;
+
+  // Average CPS line data
+  const avgCps = data.length > 0
+    ? data.reduce((s, d) => s + d.cps, 0) / data.length
+    : 0;
+
+  // Build polyline points for real-time line
+  const points = data.map(d => `${xScale(d.t)},${yScale(d.cps)}`).join(' ');
+
+  // Build fill path
+  let fillPath = '';
+  if (data.length > 1) {
+    const first = data[0];
+    const last  = data[data.length - 1];
+    fillPath =
+      `M${xScale(first.t)},${yScale(0)} ` +
+      data.map(d => `L${xScale(d.t)},${yScale(d.cps)}`).join(' ') +
+      ` L${xScale(last.t)},${yScale(0)} Z`;
+  }
+
+  // Y-axis ticks
+  const yTicks = [];
+  const yStep = yMax <= 10 ? 2 : yMax <= 20 ? 5 : 10;
+  for (let v = 0; v <= yMax; v += yStep) yTicks.push(v);
+
+  // X-axis ticks
+  const xTicks = [];
+  const xStep = duration <= 5 ? 1 : duration <= 15 ? 5 : duration <= 60 ? 10 : 30;
+  for (let t = 0; t <= duration; t += xStep) xTicks.push(t);
+
+  const last = data[data.length - 1];
+
+  // Mouse move → find nearest data point → show tooltip
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (data.length === 0) return;
+    if (!svgContainerRef.current) return;
+    const rect = svgContainerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    // Convert to SVG coordinate space (viewBox 900px mapped to actual width)
+    const scaleX = W / rect.width;
+    const svgMouseX = mouseX * scaleX;
+
+    // Find closest data point by x position
+    let closest = data[0];
+    let minDist = Infinity;
+    for (const d of data) {
+      const dist = Math.abs(xScale(d.t) - svgMouseX);
+      if (dist < minDist) { minDist = dist; closest = d; }
+    }
+
+    // Tooltip screen position — clamp so it doesn't overflow
+    const tooltipX = Math.min(mouseX, rect.width - 180);
+    const tooltipY = e.clientY - rect.top - 80;
+
+    setTooltip({
+      x: tooltipX,
+      y: tooltipY,
+      t: closest.t,
+      rtCps: closest.cps,
+      avgCps: parseFloat(avgCps.toFixed(3)),
+    });
+  };
+
+  const handleMouseLeave = () => setTooltip(null);
+
+  return (
+    <section style={{
+      background: 'var(--bg-card, #1e2235)',
+      border: `1px solid ${clickMode === 'right' ? 'rgba(255,159,67,0.3)' : 'rgba(0,245,255,0.2)'}`,
+      borderRadius: '16px',
+      overflow: 'hidden',
+      marginBottom: '1.5rem',
+    }} aria-label="Real-time CPS Graph">
+
+      {/* Header */}
+      <div style={{
+        padding: '0.75rem 1.25rem',
+        borderBottom: '1px solid var(--border, #2a3047)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <span style={{ fontWeight: '700', fontSize: '0.85rem', color: lineColor, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          📈 CPS Graph
+          {phase === 'running' && (
+            <span style={{
+              fontSize: '0.65rem', fontWeight: '700', padding: '2px 7px',
+              borderRadius: '20px', background: 'rgba(0,255,136,0.15)',
+              color: '#00ff88', border: '1px solid rgba(0,255,136,0.35)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>● LIVE</span>
+          )}
+          {phase === 'done' && (
+            <span style={{
+              fontSize: '0.65rem', fontWeight: '700', padding: '2px 7px',
+              borderRadius: '20px', background: 'rgba(255,159,67,0.12)',
+              color: '#ff9f43', border: '1px solid rgba(255,159,67,0.3)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>FINAL</span>
+          )}
+          {phase === 'idle' && (
+            <span style={{
+              fontSize: '0.65rem', fontWeight: '700', padding: '2px 7px',
+              borderRadius: '20px', background: 'rgba(255,255,255,0.06)',
+              color: '#8395a7', border: '1px solid rgba(255,255,255,0.1)',
+              letterSpacing: '0.06em', textTransform: 'uppercase',
+            }}>LAST RUN</span>
+          )}
+        </span>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', color: '#9ca3af' }}>
+            <span style={{ display: 'inline-block', width: '20px', height: '3px', background: lineColor, borderRadius: '2px' }} />
+            Real-time CPS
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '0.75rem', color: '#9ca3af' }}>
+            <span style={{ display: 'inline-block', width: '20px', height: '2px', background: avgColor, borderRadius: '2px', opacity: 0.8 }} />
+            Average CPS
+          </span>
+          {last && (
+            <span style={{ fontWeight: '800', fontSize: '1rem', color: dotColor, fontVariantNumeric: 'tabular-nums' }}>
+              {last.cps} CPS
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* SVG Chart */}
+      <div
+        ref={svgContainerRef}
+        style={{ padding: '0.5rem 0.5rem 0', overflowX: 'auto', position: 'relative', cursor: 'crosshair' }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          width="100%"
+          style={{ display: 'block', minWidth: '280px' }}
+          aria-hidden="true"
+        >
+          {/* Y grid lines */}
+          {yTicks.map(v => (
+            <g key={v}>
+              <line
+                x1={PAD.left} y1={yScale(v)}
+                x2={PAD.left + innerW} y2={yScale(v)}
+                stroke={gridColor} strokeWidth="1"
+              />
+              <text x={PAD.left - 7} y={yScale(v) + 4}
+                textAnchor="end" fontSize="11" fill={labelColor}
+              >{v}</text>
+            </g>
+          ))}
+
+          {/* X axis labels */}
+          {xTicks.map(t => (
+            <text key={t}
+              x={xScale(t)} y={H - 8}
+              textAnchor="middle" fontSize="11" fill={labelColor}
+            >{t}s</text>
+          ))}
+
+          {/* Fill area */}
+          {fillPath && <path d={fillPath} fill={fillColor} />}
+
+          {/* Average CPS dashed line */}
+          {data.length > 1 && (
+            <line
+              x1={xScale(data[0].t)} y1={yScale(avgCps)}
+              x2={xScale(data[data.length - 1].t)} y2={yScale(avgCps)}
+              stroke={avgColor} strokeWidth="1.8"
+              strokeDasharray="5,4" opacity="0.75"
+            />
+          )}
+
+          {/* Real-time line */}
+          {data.length > 1 && (
+            <polyline
+              points={points}
+              fill="none"
+              stroke={lineColor}
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            />
+          )}
+
+          {/* Hover vertical line */}
+          {tooltip && (
+            <line
+              x1={xScale(tooltip.t)} y1={PAD.top}
+              x2={xScale(tooltip.t)} y2={PAD.top + innerH}
+              stroke="rgba(255,255,255,0.2)" strokeWidth="1"
+              strokeDasharray="3,3"
+            />
+          )}
+
+          {/* Hover dot on real-time line */}
+          {tooltip && (() => {
+            const pt = data.find(d => d.t === tooltip.t) || data[data.length - 1];
+            return (
+              <>
+                <circle cx={xScale(pt.t)} cy={yScale(pt.cps)} r="5" fill={lineColor} />
+                <circle cx={xScale(pt.t)} cy={yScale(pt.cps)} r="9"
+                  fill="none" stroke={lineColor} strokeWidth="1.5" opacity="0.35" />
+                {/* Dot on average line */}
+                <circle cx={xScale(pt.t)} cy={yScale(avgCps)} r="4" fill={avgColor} opacity="0.8" />
+              </>
+            );
+          })()}
+
+          {/* Live dot (when no hover) */}
+          {!tooltip && last && (
+            <>
+              <circle cx={xScale(last.t)} cy={yScale(last.cps)} r="5" fill={dotColor} />
+              <circle cx={xScale(last.t)} cy={yScale(last.cps)} r="9"
+                fill="none" stroke={dotColor} strokeWidth="1.5" opacity="0.4" />
+            </>
+          )}
+
+          {/* Axis borders */}
+          <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + innerH}
+            stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+          <line x1={PAD.left} y1={PAD.top + innerH} x2={PAD.left + innerW} y2={PAD.top + innerH}
+            stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+        </svg>
+
+        {/* Tooltip */}
+        {tooltip && (
+          <div style={{
+            position: 'absolute',
+            left: tooltip.x,
+            top: Math.max(4, tooltip.y),
+            background: '#0d1117',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '10px',
+            padding: '8px 12px',
+            pointerEvents: 'none',
+            zIndex: 10,
+            minWidth: '170px',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+          }}>
+            <div style={{ fontSize: '0.8rem', fontWeight: '800', color: '#fff', marginBottom: '6px', fontVariantNumeric: 'tabular-nums' }}>
+              {tooltip.t}s
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: '#e2e8f0', marginBottom: '4px' }}>
+              <span style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '3px', background: lineColor, flexShrink: 0 }} />
+              Real-time CPS: <strong style={{ color: '#fff', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>{tooltip.rtCps}</strong>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.8rem', color: '#e2e8f0' }}>
+              <span style={{ display: 'inline-block', width: '12px', height: '12px', borderRadius: '3px', background: avgColor, flexShrink: 0 }} />
+              Average CPS: <strong style={{ color: '#fff', marginLeft: 'auto', fontVariantNumeric: 'tabular-nums' }}>{tooltip.avgCps}</strong>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+});
+CpsGraph.displayName = 'CpsGraph';
+
 // ─────────────────────────────────────────────
 // MAIN PAGE COMPONENT
 // ─────────────────────────────────────────────
 export default function CPSTestPage() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
   const areaRef = useRef<HTMLDivElement>(null);
 
-  const toggleFullscreen = useCallback(() => {
+  const toggleFullscreen = useCallback((): void => {
     if (!document.fullscreenElement) {
       const el = areaRef.current;
       if (!el) return;
@@ -990,44 +1569,51 @@ export default function CPSTestPage() {
     return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
-  const [duration, setDuration] = useState(5);
+  const [duration, setDuration] = useState<number>(5);
   const [customTime, setCustomTime] = useState<string>(''); 
   const [phase, setPhase] = useState<Phase>('idle');
-  const [clicks, setClicks] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(5);
-  const [cps, setCps] = useState(0);
-  const [maxCps, setMaxCps] = useState(0);
-  const [history, setHistory] = useState<{ cps: number; clicks: number; duration: number }[]>([]);
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([]);
+  const [clicks, setClicks] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(5);
+  const [cps, setCps] = useState<number>(0);
+  const [maxCps, setMaxCps] = useState<number>(0);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [ripples, setRipples] = useState<RippleItem[]>([]);
+  const [graphData, setGraphData] = useState<GraphPoint[]>([]);
+  const graphRef = useRef<GraphPoint[]>([]);
+
+  // 🖱️ Click Mode: 'left' or 'right'
+  const [clickMode, setClickMode] = useState<ClickMode>('left');
+  const clickModeRef = useRef<ClickMode>('left');
 
   // 🛡️ Anti-Cheat Security Layer States & Refs
-  const [isBot, setIsBot] = useState(false);
+  const [isBot, setIsBot] = useState<boolean>(false);
   const botTriggers = useRef<number>(0);
 
   // 🔊 Audio configuration state and references
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const soundEnabledRef = useRef(soundEnabled);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const soundEnabledRef = useRef<boolean>(soundEnabled);
   const audioContextRef = useRef<AudioContext | null>(null);
 
   const startTime = useRef<number>(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const clickEvents = useRef<ClickEvent[]>([]);
-  const rippleId = useRef(0);
+  const rippleId = useRef<number>(0);
   const phaseRef = useRef<Phase>('idle');
-  const durationRef = useRef(duration);
-  const lastEndTimeRef = useRef<number>(0); // Cooldown tracker to prevent accidental modal closes
+  const durationRef = useRef<number>(duration);
+  const lastEndTimeRef = useRef<number>(0);
   
   // ⚡ CRITICAL BUG FIX: Track the absolute total clicks of the test in a mutable ref.
   const totalClicksRef = useRef<number>(0);
 
   useEffect(() => { durationRef.current = duration; }, [duration]);
   useEffect(() => { soundEnabledRef.current = soundEnabled; }, [soundEnabled]);
+  useEffect(() => { clickModeRef.current = clickMode; }, [clickMode]);
 
   // Audio Initializer to resume or create browser AudioContext
-  const initAudio = () => {
+  const initAudio = (): void => {
     if (typeof window === 'undefined') return;
     if (!audioContextRef.current) {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
       if (AudioContextClass) {
         audioContextRef.current = new AudioContextClass();
       }
@@ -1038,7 +1624,7 @@ export default function CPSTestPage() {
   };
 
   // SOUND GENERATION: Web Audio API Oscillator synthesizer for lightweight, local zero-asset sounds
-  const playSound = (type: 'click' | 'complete') => {
+  const playSound = (type: 'click' | 'complete'): void => {
     if (!soundEnabledRef.current || !audioContextRef.current) return;
     
     const ctx = audioContextRef.current;
@@ -1049,8 +1635,7 @@ export default function CPSTestPage() {
     const now = ctx.currentTime;
 
     if (type === 'click') {
-      // Coin collect chime sound (B5 -> E6)
-      const playTone = (freq: number, startDelay: number, durationSec: number) => {
+      const playTone = (freq: number, startDelay: number, durationSec: number): void => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         
@@ -1068,11 +1653,10 @@ export default function CPSTestPage() {
         osc.stop(now + startDelay + durationSec);
       };
 
-      playTone(987.77, 0, 0.06);     // B5
-      playTone(1318.51, 0.05, 0.15); // E6
+      playTone(987.77, 0, 0.06);
+      playTone(1318.51, 0.05, 0.15);
     } else if (type === 'complete') {
-      // Retro success chime (C5 -> E5 -> G5 -> C6)
-      const playTone = (freq: number, startDelay: number, durationSec: number) => {
+      const playTone = (freq: number, startDelay: number, durationSec: number): void => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         
@@ -1090,31 +1674,28 @@ export default function CPSTestPage() {
         osc.stop(now + startDelay + durationSec);
       };
 
-      playTone(523.25, 0, 0.15);    // C5
-      playTone(659.25, 0.08, 0.15); // E5
-      playTone(783.99, 0.16, 0.15); // G5
-      playTone(1046.50, 0.24, 0.30); // C6
+      playTone(523.25, 0, 0.15);
+      playTone(659.25, 0.08, 0.15);
+      playTone(783.99, 0.16, 0.15);
+      playTone(1046.50, 0.24, 0.30);
     }
   };
 
-  const recordClick = () => {
+  const recordClick = (): void => {
     const now = performance.now();
     
-    // SECURITY/CRASH FIX: Keep only clicks within the last 1.2 seconds in memory.
     clickEvents.current = clickEvents.current.filter(e => now - e.time < 1200);
 
     if (clickEvents.current.length > 0) {
       const lastClickTime = clickEvents.current[clickEvents.current.length - 1].time;
       const interval = now - lastClickTime;
 
-      // 🛑 Anti-Cheat Rule: Human finger interval microsecond constraint check (chatter-proof)
       if (interval < 15) {
         botTriggers.current += 1;
       } else {
         botTriggers.current = Math.max(0, botTriggers.current - 1);
       }
 
-      // If 15 consecutive suspicious intervals are executed AND average CPS is extremely high, trip the system wire
       const elapsed = (performance.now() - startTime.current) / 1000;
       const currentAvgCps = elapsed > 0.5 ? (totalClicksRef.current / elapsed) : 0;
       if (botTriggers.current >= 15 && currentAvgCps > 30) {
@@ -1132,7 +1713,7 @@ export default function CPSTestPage() {
     }
 
     clickEvents.current.push({ time: now });
-    totalClicksRef.current += 1; // Increment total clicks ref
+    totalClicksRef.current += 1;
     setClicks(prev => prev + 1);
   };
 
@@ -1144,23 +1725,20 @@ export default function CPSTestPage() {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    const dur = durationRef.current;
-    
-    // BUG FIX FIXED: Using totalClicksRef.current
-    const totalClicks = totalClicksRef.current;
+    const dur: number = durationRef.current;
+    const totalClicks: number = totalClicksRef.current;
     const finalCps = parseFloat((totalClicks / dur).toFixed(2));
     
     setCps(finalCps);
     setClicks(totalClicks);
     setPhase('done');
     setTimeLeft(0);
-    lastEndTimeRef.current = Date.now(); // Mark time test ended for close button cooldown
+    lastEndTimeRef.current = Date.now();
     
-    playSound('complete'); // Play retro success chime on test complete
+    playSound('complete');
     
-    // Only commit to session history array if client validation is authentic
     if (botTriggers.current < 15) {
-      setHistory(prev => [{ cps: finalCps, clicks: totalClicks, duration: dur }, ...prev.slice(0, 9)]);
+      setHistory((prev: HistoryItem[]) => [{ cps: finalCps, clicks: totalClicks, duration: dur }, ...prev.slice(0, 9)]);
     }
   }, []);
 
@@ -1178,8 +1756,11 @@ export default function CPSTestPage() {
     botTriggers.current = 0;
     clickEvents.current = [];
     totalClicksRef.current = 0;
+    graphRef.current = [];
+    setGraphData([]);
     startTime.current = performance.now();
 
+    let tickCount: number = 0;
     timerRef.current = setInterval(() => {
       const elapsed = (performance.now() - startTime.current) / 1000;
       const remaining = Math.max(0, dur - elapsed);
@@ -1191,12 +1772,19 @@ export default function CPSTestPage() {
       setCps(liveCps);
       setMaxCps(prev => Math.max(prev, liveCps));
 
+      // Push a graph point every 4 ticks (~200ms)
+      tickCount++;
+      if (tickCount % 4 === 0) {
+        const point: GraphPoint = { t: parseFloat(elapsed.toFixed(1)), cps: liveCps };
+        graphRef.current = [...graphRef.current, point];
+        setGraphData(graphRef.current);
+      }
+
       if (remaining <= 0) endTest();
     }, 50);
   }, [endTest]);
 
   const resetTest = useCallback(() => {
-    // UX/BUG FIX: Cooldown of 800ms to prevent instant pop-up closing on in-flight clicks
     if (phaseRef.current === 'done' && Date.now() - lastEndTimeRef.current < 800) {
       return;
     }
@@ -1215,11 +1803,11 @@ export default function CPSTestPage() {
     totalClicksRef.current = 0;
     setTimeLeft(durationRef.current);
     clickEvents.current = [];
+    // NOTE: graph data intentionally NOT cleared here — persists until next test starts
   }, []);
 
-  const handleCustomTimeSet = () => {
+  const handleCustomTimeSet = (): void => {
     const time = parseInt(customTime);
-    // SECURITY/CRASH FIX: Validate input value. Limit custom time to a maximum of 300 seconds (5 minutes)
     if (isNaN(time) || time <= 0) {
       return;
     }
@@ -1231,32 +1819,60 @@ export default function CPSTestPage() {
     setCustomTime(validatedTime.toString());
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (e.detail === 0) return; // Prevent simulated programmatic clicks
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+    if (e.detail === 0) return;
+    // In right-click mode, left clicks do nothing (right-click handler takes over)
+    if (clickModeRef.current === 'right') return;
 
-    initAudio(); // Initialize / Resume AudioContext on click to unlock browser media policies
+    initAudio();
 
     if (phaseRef.current === 'idle') { startTest(); return; }
     if (phaseRef.current !== 'running') return;
 
     recordClick();
-    playSound('click'); // Play click tone on valid speed click
+    playSound('click');
 
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     const id = ++rippleId.current;
 
-    // SECURITY/CRASH FIX: Limit maximum concurrent ripples in state to 15.
     setRipples(prev => {
-      const next = [...prev, { id, x, y }];
+      const next: RippleItem[] = [...prev, { id, x, y, color: '#00f5ff' }];
       if (next.length > 15) {
         return next.slice(next.length - 15);
       }
       return next;
     });
 
-    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 600);
+    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 660);
+  };
+
+  // RIGHT CLICK handler — prevents context menu and records click in right mode
+  const handleRightClick = (e: React.MouseEvent<HTMLDivElement>): void => {
+    e.preventDefault(); // Always block context menu on the click area
+    if (clickModeRef.current !== 'right') return;
+
+    initAudio();
+
+    if (phaseRef.current === 'idle') { startTest(); return; }
+    if (phaseRef.current !== 'running') return;
+
+    recordClick();
+    playSound('click');
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = ++rippleId.current;
+
+    setRipples(prev => {
+      const next: RippleItem[] = [...prev, { id, x, y, color: '#ff9f43' }];
+      if (next.length > 15) return next.slice(next.length - 15);
+      return next;
+    });
+
+    setTimeout(() => setRipples(prev => prev.filter(r => r.id !== id)), 660);
   };
 
   useEffect(() => {
@@ -1270,12 +1886,11 @@ export default function CPSTestPage() {
 
   useEffect(() => () => { if (timerRef.current) clearInterval(timerRef.current); }, []);
 
-  const progress = phase === 'running' ? ((duration - timeLeft) / duration) * 100 : phase === 'done' ? 100 : 0;
+  const progress: number = phase === 'running' ? ((duration - timeLeft) / duration) * 100 : phase === 'done' ? 100 : 0;
   
-  // ⚡ STALE-FREE STATE CALCULATION FIX: 
-  const finalCpsValue = phase === 'done' ? parseFloat((clicks / duration).toFixed(2)) : cps;
+  const finalCpsValue: number = phase === 'done' ? parseFloat((clicks / duration).toFixed(2)) : cps;
   
-  const finalRating = phase === 'done' ? (isBot ? {
+  const finalRating: (RatingResult & { stars: number }) | null = phase === 'done' ? (isBot ? {
     label: 'Bot Detected',
     emoji: '🚫',
     color: 'var(--neon-red, #ff3838)',
@@ -1285,24 +1900,14 @@ export default function CPSTestPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* PRO SEO Schema Markup (JSON-LD) for Rich Search Snippets */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(JSON_LD_SCHEMAS)
-        }}
-      />
-
       {/* Global style injections */}
       <style dangerouslySetInnerHTML={{ __html: GLOBAL_STYLES }} />
 
-      {/* Breadcrumb Navigation removed */}
-
       {/* ── HEADER ── */}
       <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>Mouse Utility</div>
-        <h1 className="tool-title" style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0.5rem 0 0.2rem', color: '#fff' }}>CPS Test (Clicks Per Second)</h1>
-        <p className="tool-subtitle" style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '1rem', margin: '0' }}>Speed click test online: Measure clicks per second and test your reflexes.</p>
+        <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>Click Speed Test · CPS Counter · Mouse Test</div>
+        <h1 className="tool-title" style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0.5rem 0 0.2rem', color: '#fff' }}>CPS Test — Free Click Speed Test Online</h1>
+        <p className="tool-subtitle" style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '1rem', margin: '0' }}>Measure your <strong style={{color:'#fff'}}>clicks per second</strong> with left &amp; right click modes — live graph, session history, anti-cheat. Free, instant, no download.</p>
       </header>
 
       {/* ── DURATION SELECTOR & CONTROLS ── */}
@@ -1349,7 +1954,7 @@ export default function CPSTestPage() {
             id="custom-sec-input"
             type="number" 
             value={customTime}
-            onChange={(e) => setCustomTime(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomTime(e.target.value)}
             disabled={phase === 'running'}
             placeholder="sec"
             min="1"
@@ -1375,7 +1980,7 @@ export default function CPSTestPage() {
         {/* Audio Toggle Control Button */}
         <button
           onClick={() => {
-            initAudio(); // Unlocks the audio context on user gesture
+            initAudio();
             setSoundEnabled(prev => !prev);
           }}
           aria-label={soundEnabled ? "Mute sound effects" : "Unmute sound effects"}
@@ -1392,6 +1997,48 @@ export default function CPSTestPage() {
         >
           <span>{soundEnabled ? '🔊 Sound: On' : '🔇 Sound: Off'}</span>
         </button>
+
+        {/* ── CLICK MODE TOGGLE ── */}
+        <div
+          style={{
+            display: 'flex', alignItems: 'center',
+            background: 'var(--bg-card, #1e2235)',
+            border: '1px solid var(--border, #2a3047)',
+            borderRadius: '8px', overflow: 'hidden',
+            height: '34px',
+          }}
+        >
+          {[
+            { mode: 'left' as ClickMode,  label: '🖱️ Left',  activeColor: 'rgba(0,255,136,0.15)', activeBorder: '#00ff88', activeText: '#00ff88' },
+            { mode: 'right' as ClickMode, label: '🖱️ Right', activeColor: 'rgba(255,159,67,0.15)', activeBorder: '#ff9f43', activeText: '#ff9f43' },
+          ].map(({ mode, label, activeColor, activeText }: { mode: ClickMode; label: string; activeColor: string; activeText: string }) => (
+            <button
+              key={mode}
+              onClick={() => {
+                if (phase === 'running') return;
+                setClickMode(mode);
+                clickModeRef.current = mode;
+                resetTest();
+              }}
+              disabled={phase === 'running'}
+              title={mode === 'right' ? 'Right Click Test Mode' : 'Left Click Test Mode'}
+              style={{
+                padding: '0 0.9rem',
+                height: '100%',
+                border: 'none',
+                background: clickMode === mode ? activeColor : 'transparent',
+                color: clickMode === mode ? activeText : 'var(--text-muted, #8395a7)',
+                fontWeight: '700', fontSize: '0.8rem',
+                cursor: phase === 'running' ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s',
+                borderRight: mode === 'left' ? '1px solid var(--border, #2a3047)' : 'none',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </nav>
 
       {/* ── STATS CARDS ── */}
@@ -1421,7 +2068,8 @@ export default function CPSTestPage() {
         tabIndex={0}
         aria-label="Click area to start CPS test"
         onClick={handleClick}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e as any); }}
+        onContextMenu={handleRightClick}
+        onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e as unknown as React.MouseEvent<HTMLDivElement>); }}
         style={{
           position: 'relative', overflow: 'hidden', width: '100%', minHeight: '220px',
           height: isFullscreen ? '100vh' : undefined,
@@ -1459,17 +2107,25 @@ export default function CPSTestPage() {
           {isFullscreen ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
         </button>
 
-        {ripples.map(r => (
-          <span key={r.id} style={{
-            position: 'absolute', left: r.x, top: r.y, width: '16px', height: '16px',
-            borderRadius: '50%',
-            border: '2px solid var(--neon-cyan, #00f5ff)',
-            background: 'rgba(0, 245, 255, 0.03)',
-            boxShadow: '0 0 15px rgba(0, 245, 255, 0.2), inset 0 0 10px rgba(0, 245, 255, 0.1)',
-            transform: 'translate(-50%, -50%) scale(0)',
-            animation: 'rippleAnim 0.8s cubic-bezier(0.1, 0.8, 0.2, 1) forwards', pointerEvents: 'none',
-          }} />
-        ))}
+        {ripples.map(r => {
+          const rc = r.color || '#00f5ff';
+          return (
+            <span key={r.id} style={{
+              position: 'absolute',
+              left: r.x,
+              top: r.y,
+              width: '300px',
+              height: '300px',
+              borderRadius: '50%',
+              background: rc,
+              opacity: 0,
+              transform: 'translate(-50%, -50%) scale(0)',
+              animation: 'rippleAnim 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) forwards',
+              pointerEvents: 'none',
+              willChange: 'transform, opacity',
+            }} />
+          );
+        })}
 
         {phase === 'idle' && (
           <>
@@ -1492,8 +2148,7 @@ export default function CPSTestPage() {
           </>
         )}
 
-        {/* ── RESULT MODAL (position: fixed so it always centers on the viewport,
-             including when the click-area element is the fullscreen element) ── */}
+        {/* ── RESULT MODAL ── */}
         {phase === 'done' && finalRating && (
           <>
             <div style={{
@@ -1507,7 +2162,7 @@ export default function CPSTestPage() {
               role="dialog"
               aria-modal="true"
               aria-labelledby="modal-title"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
               style={{
                 position: 'fixed', top: '50%', left: '50%',
                 transform: 'translate(-50%, -50%)',
@@ -1525,7 +2180,7 @@ export default function CPSTestPage() {
                 boxShadow: `0 0 40px ${finalRating.color}25`,
               }}
             >
-              {/* Close button with 800ms cooldown protection */}
+              {/* Close button */}
               <button
                 onClick={resetTest}
                 aria-label="Close modal"
@@ -1612,7 +2267,7 @@ export default function CPSTestPage() {
       {phase === 'running' && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem', animation: 'fadeIn 0.3s ease-in' }}>
           <button
-            onClick={(e) => { e.stopPropagation(); resetTest(); }}
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); resetTest(); }}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.5rem',
               background: '#1e2235', border: '1px solid #2a3047',
@@ -1638,6 +2293,10 @@ export default function CPSTestPage() {
         </div>
       )}
 
+      {/* ── REAL-TIME GRAPH ── */}
+      {graphData.length > 0 && (
+        <CpsGraph data={graphData} duration={duration} clickMode={clickMode} phase={phase} />
+      )}
 
       {/* ── SESSION HISTORY ── */}
       {history.length > 0 && <SessionHistory history={history} />}
@@ -1688,15 +2347,15 @@ export default function CPSTestPage() {
                 color: 'var(--neon-green, #00ff88)',
                 transition: 'all 0.2s ease',
               }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLElement).style.background = 'rgba(0,255,136,0.07)';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,255,136,0.3)';
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(0,255,136,0.07)';
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(0,255,136,0.3)';
+                (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(-2px)';
               }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLElement).style.background = '#141a2a';
-                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)';
-                (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                (e.currentTarget as HTMLAnchorElement).style.background = '#141a2a';
+                (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.06)';
+                (e.currentTarget as HTMLAnchorElement).style.transform = 'translateY(0)';
               }}
             >
               <div style={{
