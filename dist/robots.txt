@@ -1,13 +1,12 @@
-# robots.txt for fixedaim.com
-# Generated for Fixed Aim — Free CPS Test & Gaming Tools
+# robots.txt — fixedaim.com
+# https://fixedaim.com/sitemap.xml
 
 # ==========================================
-# ALLOW ALL MAJOR SEARCH ENGINE CRAWLERS
+# GOOGLE
 # ==========================================
 
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 2
 
 User-agent: Googlebot-Image
 Allow: /
@@ -15,25 +14,43 @@ Allow: /
 User-agent: Googlebot-Video
 Allow: /
 
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+# ==========================================
+# OTHER MAJOR SEARCH ENGINES
+# ==========================================
+
 User-agent: Bingbot
 Allow: /
-Crawl-delay: 3
 
 User-agent: Slurp
 Allow: /
-Crawl-delay: 5
 
 User-agent: DuckDuckBot
 Allow: /
-Crawl-delay: 3
 
 User-agent: Baiduspider
 Allow: /
-Crawl-delay: 5
 
 User-agent: YandexBot
 Allow: /
-Crawl-delay: 5
+
+User-agent: Applebot
+Allow: /
+
+# ==========================================
+# SOCIAL MEDIA CRAWLERS
+# ==========================================
 
 User-agent: facebookexternalhit
 Allow: /
@@ -47,39 +64,18 @@ Allow: /
 User-agent: WhatsApp
 Allow: /
 
+User-agent: Discordbot
+Allow: /
+
+User-agent: TelegramBot
+Allow: /
+
+User-agent: Pinterestbot
+Allow: /
+
 # ==========================================
-# BLOCK BAD BOTS & SCRAPERS
+# AI CRAWLERS — BLOCKED
 # ==========================================
-
-User-agent: AhrefsBot
-Disallow: /
-
-User-agent: SemrushBot
-Disallow: /
-
-User-agent: MJ12bot
-Disallow: /
-
-User-agent: DotBot
-Disallow: /
-
-User-agent: BLEXBot
-Disallow: /
-
-User-agent: SeznamBot
-Disallow: /
-
-User-agent: PetalBot
-Disallow: /
-
-User-agent: AspiegelBot
-Disallow: /
-
-User-agent: DataForSeoBot
-Disallow: /
-
-User-agent: Bytespider
-Disallow: /
 
 User-agent: GPTBot
 Disallow: /
@@ -99,17 +95,73 @@ Disallow: /
 User-agent: cohere-ai
 Disallow: /
 
-User-agent: GoogleOther
-Disallow: /
-
-User-agent: Google-Extended
-Disallow: /
-
 User-agent: PerplexityBot
 Disallow: /
 
 User-agent: YouBot
 Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: DiffBot
+Disallow: /
+
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: Omgilibot
+Disallow: /
+
+User-agent: Timpibot
+Disallow: /
+
+# ==========================================
+# SEO TOOL BOTS — BLOCKED
+# ==========================================
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: AspiegelBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: SeznamBot
+Disallow: /
+
+User-agent: SEOkicks
+Disallow: /
+
+User-agent: Exabot
+Disallow: /
+
+User-agent: meanpathbot
+Disallow: /
+
+User-agent: MojeekBot
+Disallow: /
+
+# ==========================================
+# ARCHIVE BOTS — BLOCKED
+# ==========================================
 
 User-agent: ia_archiver
 Disallow: /
@@ -117,33 +169,23 @@ Disallow: /
 User-agent: archive.org_bot
 Disallow: /
 
+User-agent: Wayback
+Disallow: /
+
 # ==========================================
-# GLOBAL RULES (all other bots)
+# GLOBAL RULES
 # ==========================================
 
 User-agent: *
 Allow: /
-
-# Block private/internal paths
 Disallow: /api/
-Disallow: /_next/
-Disallow: /src/
-Disallow: /node_modules/
-Disallow: /.git/
-Disallow: /.env
 Disallow: /admin/
 Disallow: /dashboard/
 Disallow: /private/
-
-# Block query string spam
-Disallow: /*?ref=
-Disallow: /*?utm_
-Disallow: /*?fbclid=
-Disallow: /*?gclid=
-Disallow: /*?source=
-Disallow: /*?campaign=
-
-Crawl-delay: 5
+Disallow: /.git/
+Disallow: /.env
+Disallow: /.env.local
+Disallow: /.env.production
 
 # ==========================================
 # SITEMAP
