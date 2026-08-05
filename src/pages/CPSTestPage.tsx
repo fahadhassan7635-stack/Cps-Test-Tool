@@ -285,10 +285,10 @@ const JSON_LD_SCHEMAS: object[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'CPS Test — Free Click Speed Test, CPS Counter & Kohi Click Test | FixedAim',
-    alternateName: ['Click Speed Test', 'Clicks Per Second Test', 'CPS Counter', 'CPS Tester', 'Click Test', 'Kohi Click Test', 'Mouse Click Test', 'Right Click Test', 'Jitter Click Test', 'Butterfly Click Test', 'Click Speed Checker', 'CPS Test Unblocked'],
+    name: 'CPS Test — Free Click Speed Test Online | FixedAim',
+    alternateName: ['Click Speed Test', 'Clicks Per Second Test', 'Mouse Click Test', 'Right Click Test'],
     description:
-      'Free CPS Test & Click Speed Test — measure clicks per second (CPS) with left click, right click, jitter click, and butterfly click modes. Kohi click test inspired. Live CPS graph, session history, anti-cheat. Works on PC, mobile & tablet. No download.',
+      'Free CPS Test — measure your clicks per second with left click and right click modes. Instant results, live graph, session history, anti-cheat detection. No download required. Play on PC, mobile, and tablet.',
     applicationCategory: 'GameApplication',
     operatingSystem: 'All',
     browserRequirements: 'Requires JavaScript',
@@ -315,13 +315,13 @@ const JSON_LD_SCHEMAS: object[] = [
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     '@id': 'https://fixedaim.com/cps-test',
-    name: 'CPS Test — Free Click Speed Test, CPS Counter & Kohi Click Test Online',
-    description: 'Free CPS Test & click speed test — measure clicks per second (CPS), test jitter click, right click, butterfly click speed. Kohi click test style. Live graph, anti-cheat, session history. Works on PC, mobile & tablet.',
+    name: 'CPS Test — Free Click Speed Test Online',
+    description: 'Test your clicks per second for free. Supports left click, right click, custom durations, live CPS graph, and session history. Works on PC, mobile, and tablet.',
     url: 'https://fixedaim.com/cps-test',
     inLanguage: 'en',
     isPartOf: { '@type': 'WebSite', name: 'FixedAim', url: 'https://fixedaim.com' },
     about: { '@type': 'Thing', name: 'CPS Test', description: 'A tool that measures mouse clicks per second (CPS) for gaming performance benchmarking.' },
-    keywords: 'CPS test, click speed test, clicks per second, CPS counter, click test, kohi click test, jitter click test, butterfly click test, drag click test, right click test, mouse click test, CPS checker, click counter, click speed checker, how fast can i click, clicks per second test, cps tester, gaming mouse test, minecraft pvp cps, cps test unblocked',
+    keywords: 'CPS test, click speed test, clicks per second, right click test, mouse click test, CPS checker, click counter, gaming mouse test',
     mainEntity: { '@type': 'SoftwareApplication', name: 'CPS Test', url: 'https://fixedaim.com/cps-test' },
   },
   {
@@ -624,29 +624,23 @@ const SeoArticle = memo(() => (
           letterSpacing: '-0.5px',
         }}
       >
-        CPS Test Guide: Click Speed Test, Kohi Click Test &amp; How to Improve Clicks Per Second
+        CPS Test Guide: How to Measure &amp; Improve Your Click Speed
       </h2>
 
       <p style={{ marginBottom: '2rem', fontSize: '1rem', color: '#d1d5db' }}>
-        A <strong>CPS Test</strong> — also called a <strong>Click Speed Test</strong>, <strong>CPS Counter</strong>,
-        or <strong>Clicks Per Second Test</strong> — is a free online tool that measures how many times you can
-        click your mouse per second. Whether you are a Minecraft PvP player training your <strong>Kohi click test</strong>
-        score, an FPS gamer benchmarking <strong>jitter click</strong> or <strong>butterfly click</strong> speed,
-        or simply curious how fast you can click, this <strong>CPS tester</strong> gives you precise real-time
-        results with no download required. This guide covers everything from how CPS is calculated to
-        the techniques — jitter clicking, drag clicking, butterfly clicking — that top players use to
-        maximize their <strong>clicks per second</strong>.
+        A <strong>CPS Test</strong> (Clicks Per Second Test) is a free online tool that measures how many
+        times you can click your mouse per second. Whether you're a gamer benchmarking your <strong>click speed</strong>,
+        a Minecraft PvP player trying to improve your <strong>clicks per second</strong>, or simply curious
+        about your mouse performance, this <strong>click speed test</strong> gives you precise, real-time results
+        with no download required. This guide covers everything from how CPS is calculated to training
+        routines that can measurably improve your score.
       </p>
 
       {/* ── 1 ── */}
-      <h2 style={h2Style}>What is a CPS Test? — Click Speed Test, CPS Counter &amp; Kohi Click Test Explained</h2>
+      <h2 style={h2Style}>What is a CPS Test? (Click Speed Test Explained)</h2>
       <p style={pStyle}>
-        A <strong>CPS Test</strong> — also known as a <strong>Click Speed Test</strong>, <strong>CPS Counter</strong>,
-        <strong>Click Test</strong>, or <strong>Clicks Per Second Test</strong> — measures how many mouse clicks
-        you can register within a defined time window, expressed as <strong>Clicks Per Second (CPS)</strong>.
-        Our tool is modeled after the original <strong>Kohi Click Test</strong> format — the community standard
-        for Minecraft PvP click speed benchmarking — and expands it with right click mode, live CPS graph,
-        and anti-cheat detection. The test starts the moment you first click the
+        A <strong>CPS Test</strong> — short for <strong>Click Speed Test</strong> or <strong>Clicks Per Second Test</strong> — measures how many mouse clicks you can register within a defined time window,
+        expressed as <strong>Clicks Per Second (CPS)</strong>. The test starts the moment you first click the
         target area and runs for your chosen duration — anywhere from one second to several minutes. At the
         end, your total clicks are divided by the elapsed seconds to produce a final CPS score, benchmarked
         against human performance tiers. Unlike simple click counters, a precision CPS tool uses the
@@ -807,7 +801,7 @@ const SeoArticle = memo(() => (
       </p>
 
       {/* ── 10 ── */}
-      <h2 style={h2Style}>Clicking Techniques Explained — Jitter Click, Butterfly Click, Drag Click &amp; More</h2>
+      <h2 style={h2Style}>Clicking Techniques Explained</h2>
       <h3 style={h3Style}>Normal Clicking</h3>
       <p style={pStyle}>
         Standard single-finger clicking with natural rhythm. Reliable, sustainable, and the baseline
@@ -822,11 +816,7 @@ const SeoArticle = memo(() => (
         <ArticleLink href="https://my.clevelandclinic.org/health/diseases/17424-repetitive-strain-injury">
           Cleveland Clinic's overview of repetitive strain injury
         </ArticleLink>{' '}
-        for prevention and symptom guidance. The{' '}
-        <ArticleLink href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3289511/">
-          NIH's research on repetitive hand motion and tendon health
-        </ArticleLink>{' '}
-        also provides useful clinical context. Limit sessions to under 30 seconds and always rest between attempts.
+        for prevention and symptom guidance. Limit sessions to under 30 seconds and always rest between attempts.
       </p>
       <h3 style={h3Style}>Butterfly Clicking</h3>
       <p style={pStyle}>
@@ -875,50 +865,12 @@ const SeoArticle = memo(() => (
         frequency since the server registers a hit for each valid click within range. Higher CPS means
         more knockback, higher effective DPS, and better combo maintenance. For sword combat, sustained
         10–14 CPS provides significant mechanical advantage. For speed bridging and clutch building,
-        consistent 8–12 CPS executed with accurate timing is most effective. The{' '}
-        <ArticleLink href="https://www.mcrpg.com/kohi-click-test/">Kohi Click Test</ArticleLink>{' '}
-        — originally featured on the Kohi Minecraft server — became the gold standard benchmark for PvP
-        clicking speed and directly inspired modern CPS testing tools. For the full technical
+        consistent 8–12 CPS executed with accurate timing is most effective. For the full technical
         breakdown of how the attack cooldown meter and hit timing actually work in Java Edition, see the{' '}
         <ArticleLink href="https://minecraft.wiki/w/Melee_attack">Minecraft Wiki's melee attack page</ArticleLink>.
         Spend 10 minutes daily in this CPS test to build the speed and rhythm that carries over to real
-        PvP sessions on servers like <ArticleLink href="https://hypixel.net/">Hypixel</ArticleLink>{' '}
-        or practice on{' '}
-        <ArticleLink href="https://www.lunarclient.com/tools/kohi-click-test">Lunar Client's Kohi test</ArticleLink>.
+        PvP sessions on servers like <ArticleLink href="https://hypixel.net/">Hypixel</ArticleLink>.
       </p>
-      <h3 style={h3Style}>Popular Minecraft PvP Servers to Practice CPS</h3>
-      <p style={pStyle}>
-        Once you have benchmarked your CPS, these competitive Minecraft PvP servers provide real in-game
-        environments where your click speed translates directly into performance outcomes:
-      </p>
-      <ul style={ulStyle}>
-        <li>
-          <strong><ArticleLink href="https://donutsmp.net/">DonutSMP</ArticleLink></strong>{' '}
-          (IP: donutsmp.net) — Dr Donut's hardcore survival PvP server. Economy-driven combat where
-          sustained high CPS determines who survives fights over loot and territory.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://mcpvp.com/">McPvP / McTiers</ArticleLink></strong>{' '}
-          — Dream and DrDonut's competitive MCPVP platform with ranked matches across 30+ countries.
-          The closest Minecraft has come to a structured esports infrastructure.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://minemen.club/">Minemen Club</ArticleLink></strong>{' '}
-          (IP: minemen.club) — The gold standard for PvP practice. Nodebuff, Boxing, Sumo, and
-          Bridging modes with leaderboards make it the most used server for CPS training in real combat.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://na.badlion.net/">Badlion Network</ArticleLink></strong>{' '}
-          (IP: na.badlion.net) — ArenaPvP, UHC, and Survival Games with strict anti-cheat.
-          A trusted competitive environment where genuine click speed matters.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://www.pika-network.net/">PikaNetwork</ArticleLink></strong>{' '}
-          (IP: play.pika-network.net) — Java and Bedrock compatible, with KitPvP and Practice PvP
-          modes offering sharp hit detection across all skill levels.
-        </li>
-      </ul>
-
       <h3 style={h3Style}>Roblox Clicking</h3>
       <p style={pStyle}>
         Many Roblox combat games, particularly those using custom combat systems in the Roblox engine,
@@ -971,12 +923,10 @@ const SeoArticle = memo(() => (
       </p>
 
       {/* ── 14 ── */}
-      <h2 style={h2Style}>How to Improve Reaction Time &amp; Click Speed for FPS &amp; Minecraft PvP</h2>
+      <h2 style={h2Style}>How to Improve Reaction Time for FPS Games</h2>
       <ul style={ulStyle}>
         <li><strong>Monitor Refresh Rate:</strong> Upgrade to 144 Hz or 240 Hz+ to reduce frame latency by up to 6 ms compared to 60 Hz panels.</li>
-        <li><strong>Aim Trainers:</strong> Dedicated aim training software builds mouse muscle memory through structured scenario-based drills, directly improving the accuracy and targeting speed that complements high CPS in competitive play. See{' '}
-          <ArticleLink href="https://pubmed.ncbi.nlm.nih.gov/32169741/">this PubMed study on motor skill training and muscle memory</ArticleLink>{' '}
-          for the science behind why repetitive practice drills produce measurable performance gains.</li>
+        <li><strong>Aim Trainers:</strong> Aim Lab, <ArticleLink href="https://www.kovaaks.com/kovaaks/main">KovaaK's</ArticleLink>, and Aiming.Pro build muscle memory through structured scenario-based drills.</li>
         <li><strong>Sleep and Recovery:</strong> A single night of poor sleep can slow reaction time by 15–20 ms, equivalent to dropping a hardware tier in latency.</li>
         <li><strong>Moderate Caffeine:</strong> 100–200 mg is clinically shown to improve reaction time by 10–15 ms. Avoid excessive intake which degrades fine motor control.</li>
         <li><strong>Warmup Routine:</strong> Use 1-second and 2-second CPS sprint tests before gaming sessions to activate fast-twitch fiber engagement.</li>
@@ -1031,7 +981,7 @@ const SeoArticle = memo(() => (
       </p>
 
       {/* ── 19 ── */}
-      <h2 style={h2Style}>CPS World Record — Fastest Clicks Per Second Ever Recorded</h2>
+      <h2 style={h2Style}>The World Record CPS</h2>
       <p style={pStyle}>
         Unofficial community records suggest top single-finger clicking speeds of around 14–16 CPS in
         standardized 5-second tests. Some unverified claims report over 20 CPS with standard clicking.
@@ -1067,96 +1017,6 @@ const SeoArticle = memo(() => (
         relaxation in your forearm and hand muscles. Practice in short daily sessions of 5–10 minutes,
         and ensure you take frequent breaks to prevent physical fatigue or repetitive strain injuries.
       </p>
-
-      {/* ── RELATED TOOLS & RESEARCH LINKS ── */}
-      <h2 style={h2Style}>Related CPS Tools &amp; Authoritative Resources</h2>
-      <p style={pStyle}>
-        The following tools and references are widely used by the competitive gaming community to train,
-        benchmark, and study mouse click speed and gaming performance.
-      </p>
-      <ul style={ulStyle}>
-        <li>
-          <strong><ArticleLink href="https://www.mcrpg.com/kohi-click-test/">Kohi Click Test (MCRPG)</ArticleLink></strong>{' '}
-          — The original Minecraft PvP click speed benchmark, named after the legendary Kohi server.
-          Widely considered the community standard for Minecraft CPS testing.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://www.lunarclient.com/tools/kohi-click-test">Lunar Client Kohi Test</ArticleLink></strong>{' '}
-          — Lunar Client's official recreation of the Kohi Click Test, maintained by one of the largest
-          Minecraft client platforms with millions of active users.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://pubmed.ncbi.nlm.nih.gov/32169741/">PubMed — Motor Skill Training &amp; Muscle Memory</ArticleLink></strong>{' '}
-          — Peer-reviewed research on how structured repetitive practice builds lasting motor skill improvements,
-          directly relevant to why daily CPS training produces measurable click speed gains over time.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6721426/">NIH — Fast-Twitch Muscle Fiber Performance</ArticleLink></strong>{' '}
-          — Clinical research on fast-twitch muscle fiber recruitment and speed, explaining the
-          biological basis for why some players naturally achieve higher CPS and how training
-          can improve fast-twitch fiber engagement over time.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://hypixel.net/">Hypixel</ArticleLink></strong>{' '}
-          — The world's largest Minecraft server network where CPS directly impacts PvP performance.
-          Sky Wars, Bed Wars, and UHC modes all benefit from optimized click speed.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://donutsmp.net/">DonutSMP</ArticleLink></strong>{' '}
-          — Dr Donut's official hardcore survival PvP server (IP: donutsmp.net). One of the most
-          popular competitive Minecraft servers in 2025 with up to 35,000 player slots, known for
-          intense economy-driven PvP where click speed is a genuine survival advantage.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://mcpvp.com/">McPvP / McTiers</ArticleLink></strong>{' '}
-          — The competitive MCPVP platform co-acquired by Dream and DrDonut in 2025 to build
-          structured Minecraft PvP esports. Features ranked matches and server listings across
-          30+ countries.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://minemen.club/">Minemen Club</ArticleLink></strong>{' '}
-          — One of the most popular practice PvP servers, offering Nodebuff, Boxing, Sumo, UHC,
-          Skywars, and Bridging modes with active leaderboards. Widely used by players specifically
-          training their CPS and combo mechanics.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://na.badlion.net/">Badlion Network</ArticleLink></strong>{' '}
-          — A dedicated competitive PvP network featuring ArenaPvP, UHC, and Survival Games.
-          Known for its GCheat anti-cheat system and hosting some of the largest UHC matches
-          (up to 750 players) in Minecraft history.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://www.pika-network.net/">PikaNetwork</ArticleLink></strong>{' '}
-          — One of the fastest-growing Minecraft networks of 2025 supporting both Java and Bedrock
-          editions. Features KitPvP, Practice PvP, and OP Factions with sharp hit detection —
-          an ideal environment for testing real-world CPS performance.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://minecraft.wiki/w/Melee_attack">Minecraft Wiki — Melee Attack</ArticleLink></strong>{' '}
-          — Official documentation on Minecraft's attack cooldown system, hit registration, and
-          the mechanics that determine how CPS translates to in-game combat advantage.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://my.clevelandclinic.org/health/diseases/17424-repetitive-strain-injury">Cleveland Clinic — Repetitive Strain Injury</ArticleLink></strong>{' '}
-          — Clinical overview of RSI causes, symptoms, and prevention. Essential reading for any
-          player practicing high-intensity clicking techniques like Jitter or Butterfly clicking.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3289511/">NIH — Repetitive Hand Motion Research</ArticleLink></strong>{' '}
-          — Peer-reviewed research on repetitive hand and finger motion, tendon health, and injury
-          prevention relevant to sustained high-speed mouse clicking.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://playvalorant.com/en-us/">Valorant (Official)</ArticleLink></strong>{' '}
-          — Official site for weapon stats, agent kits, and patch notes. Click speed directly
-          impacts pistol round DPS and tap-fire rifle accuracy in competitive Valorant.
-        </li>
-        <li>
-          <strong><ArticleLink href="https://pubg.com/en">PUBG: Battlegrounds (Official)</ArticleLink></strong>{' '}
-          — Official source for weapon ballistics and patch notes. Single-fire weapons in PUBG
-          have no server-side fire rate cap, making CPS a direct performance multiplier.
-        </li>
-      </ul>
 
       {/* ── RIGHT CLICK SECTION ── */}
       <hr style={{ border: 0, borderTop: '1px solid rgba(255,159,67,0.2)', margin: '3rem 0' }} />
@@ -2045,9 +1905,9 @@ export default function CPSTestPage() {
 
       {/* ── HEADER ── */}
       <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>CPS Test · Click Speed Test · Kohi Click Test · Mouse Click Counter</div>
-        <h1 className="tool-title" style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0.5rem 0 0.2rem', color: '#fff' }}>CPS Test — Free Click Speed Test &amp; CPS Counter Online</h1>
-        <p className="tool-subtitle" style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '1rem', margin: '0' }}>Free <strong style={{color:'#fff'}}>CPS Test</strong> — measure your <strong style={{color:'#fff'}}>clicks per second</strong> with left &amp; right click modes. Kohi click test, jitter click test, drag click test, butterfly click — all in one <strong style={{color:'#fff'}}>click speed tester</strong>. No download required.</p>
+        <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>Click Speed Test · CPS Counter · Mouse Test</div>
+        <h1 className="tool-title" style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0.5rem 0 0.2rem', color: '#fff' }}>CPS Test — Free Click Speed Test Online</h1>
+        <p className="tool-subtitle" style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '1rem', margin: '0' }}>Measure your <strong style={{color:'#fff'}}>clicks per second</strong> with left &amp; right click modes — live graph, session history, anti-cheat. Free, instant, no download.</p>
       </header>
 
       {/* ── DURATION SELECTOR & CONTROLS ── */}
