@@ -2,8 +2,9 @@ import { useEffect } from 'react';
 
 const SITE_URL = 'https://fixedaim.com';
 const SITE_NAME = 'FixedAim';
-const SITE_LOGO = `${SITE_URL}/gun-pfp-192.png`;   // ✅ fixed: was /logo.png (404)
-const TWITTER_HANDLE = '';                           // ✅ fixed: set your @handle or leave empty
+const SITE_LOGO = `${SITE_URL}/gun-pfp-192.png`;        // ✅ fixed: was /logo.png (404)
+const DEFAULT_OG_IMAGE = `${SITE_URL}/gun-pfp-192.png`; // ✅ fallback OG image for all pages
+const TWITTER_HANDLE = '';                               // ✅ fixed: set your @handle or leave empty
 
 
 
@@ -98,14 +99,14 @@ export default function SEO({
     setMetaProperty('og:title', title);
     setMetaProperty('og:description', description);
     setMetaProperty('og:url', url);
-    if (ogImage) setMetaProperty('og:image', ogImage);
+    setMetaProperty('og:image', ogImage ?? DEFAULT_OG_IMAGE); // ✅ always set, fallback to default
 
     /* ── Twitter / X Card ── */
-    setMetaName('twitter:card', ogImage ? 'summary_large_image' : 'summary');
+    setMetaName('twitter:card', 'summary_large_image'); // ✅ always large image since we always have one
     if (TWITTER_HANDLE) setMetaName('twitter:site', TWITTER_HANDLE); // ✅ fixed: only set if handle exists
     setMetaName('twitter:title', title);
     setMetaName('twitter:description', description);
-    if (ogImage) setMetaName('twitter:image', ogImage);
+    setMetaName('twitter:image', ogImage ?? DEFAULT_OG_IMAGE); // ✅ always set, fallback to default
 
     /* ── Article meta ── */
     if (article) {
@@ -179,12 +180,10 @@ export default function SEO({
       inLanguage: 'en',
       isPartOf: { '@id': `${SITE_URL}/#website` },
       publisher: { '@id': `${SITE_URL}/#organization` },
-      ...(ogImage && {
-        image: {
-          '@type': 'ImageObject',
-          url: ogImage,
-        },
-      }),
+      image: {
+        '@type': 'ImageObject',
+        url: ogImage ?? DEFAULT_OG_IMAGE, // ✅ always set, fallback to default
+      },
     };
 
     /* 4a. Article enrichment */
