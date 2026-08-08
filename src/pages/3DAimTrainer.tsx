@@ -297,6 +297,91 @@ const aimTrainerHTML = `<!DOCTYPE html>
     transition: opacity 0.04s;
   }
   #muzzle-overlay.flash { opacity: 1; }
+  /* ── Challenge Mode ── */
+  .mode-tabs { display: flex; gap: 10px; margin-bottom: 22px; }
+  .mode-tab {
+    flex: 1; padding: 10px 0; border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.55);
+    transition: all 0.15s;
+  }
+  .mode-tab.active {
+    background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%);
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 18px rgba(79,195,247,0.28);
+  }
+  #challenge-options { display: none; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 22px; }
+  #challenge-options.visible { display: flex; }
+  .dur-grid { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .dur-btn {
+    padding: 8px 18px; border-radius: 8px; cursor: pointer;
+    font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.65);
+    transition: all 0.15s;
+  }
+  .dur-btn.selected {
+    background: rgba(79,195,247,0.18); color: #4fc3f7; border-color: #4fc3f7;
+  }
+  #timer-panel.challenge-mode #timer-label { color: #ff9800; }
+  #timer-panel.challenge-mode #timer-value { color: #ff9800; }
+  #timer-panel.challenge-mode.urgent #timer-value { color: #ff4444; animation: pulse-red 0.5s ease-in-out infinite; }
+  @keyframes pulse-red { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+  /* ── Result Popup ── */
+  #result-popup {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 200; pointer-events: auto;
+    background: rgba(0,0,0,0.72); backdrop-filter: blur(14px);
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  #result-popup.visible { opacity: 1; }
+  #result-popup.hidden { display: none; }
+  .rp-card {
+    background: #0d1117; border: 1px solid rgba(79,195,247,0.35);
+    border-radius: 20px; padding: 2rem 2.2rem;
+    width: min(480px, 90vw); text-align: center;
+    box-shadow: 0 0 60px rgba(79,195,247,0.12);
+    transform: scale(0.9); transition: transform 0.28s cubic-bezier(.34,1.56,.64,1);
+  }
+  #result-popup.visible .rp-card { transform: scale(1); }
+  .rp-badge {
+    display: inline-block; padding: 4px 14px; border-radius: 20px;
+    font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase;
+    background: rgba(79,195,247,0.15); color: #4fc3f7; margin-bottom: 10px;
+  }
+  .rp-title { font-size: 28px; font-weight: 900; color: #fff; margin-bottom: 6px; letter-spacing: -0.5px; }
+  .rp-sub { font-size: 12px; color: rgba(255,255,255,0.35); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 24px; }
+  .rp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+  .rp-stat {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 14px 10px;
+  }
+  .rp-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-bottom: 6px; }
+  .rp-stat-val { font-size: 26px; font-weight: 800; }
+  .rp-stat-val.hits { color: #69f0ae; }
+  .rp-stat-val.misses { color: #ff5252; }
+  .rp-stat-val.score { color: #4fc3f7; }
+  .rp-stat-val.acc { color: #ffb300; }
+  .rp-btns { display: flex; gap: 10px; }
+  .rp-btn-primary {
+    flex: 1; padding: 13px 0; border-radius: 8px;
+    background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%);
+    color: #fff; border: none; font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    transition: opacity 0.15s, transform 0.12s;
+    box-shadow: 0 4px 18px rgba(79,195,247,0.25);
+  }
+  .rp-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .rp-btn-secondary {
+    flex: 1; padding: 13px 0; border-radius: 8px;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7);
+    border: 1px solid rgba(255,255,255,0.1); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .rp-btn-secondary:hover { background: rgba(255,255,255,0.12); }
 </style>
 </head>
 <body>
@@ -321,7 +406,21 @@ const aimTrainerHTML = `<!DOCTYPE html>
   <div class="logo">Aim Trainer Pro</div>
   <div class="title">SHARPEN YOUR <span>AIM</span></div>
   <div class="subtitle">First-Person Precision Training</div>
-  <div class="info-grid">
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="tab-infinite">∞ Infinite</button>
+    <button class="mode-tab" id="tab-challenge">⏱ Challenge</button>
+  </div>
+  <div id="challenge-options">
+    <div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Select Duration</div>
+    <div class="dur-grid">
+      <button class="dur-btn selected" data-dur="10">10s</button>
+      <button class="dur-btn" data-dur="20">20s</button>
+      <button class="dur-btn" data-dur="30">30s</button>
+      <button class="dur-btn" data-dur="60">60s</button>
+      <button class="dur-btn" data-dur="100">100s</button>
+    </div>
+  </div>
+  <div class="info-grid" id="info-grid-infinite">
     <div class="info-card"><div class="ic-label">Mode</div><div class="ic-val" style="font-size:13px;color:#fff;">Infinite</div></div>
     <div class="info-card"><div class="ic-label">Targets</div><div class="ic-val">∞</div></div>
     <div class="info-card"><div class="ic-label">Spawn</div><div class="ic-val" style="font-size:13px;">50ms</div></div>
@@ -329,6 +428,23 @@ const aimTrainerHTML = `<!DOCTYPE html>
   </div>
   <button class="btn-primary" id="btn-start">▶ Start Training</button>
   <div class="hint">ESC to pause · Left click to shoot</div>
+</div>
+<div id="result-popup" class="hidden">
+  <div class="rp-card">
+    <div class="rp-badge">Challenge Complete</div>
+    <div class="rp-title" id="rp-title">Great Shot!</div>
+    <div class="rp-sub" id="rp-sub">30 Second Challenge</div>
+    <div class="rp-grid">
+      <div class="rp-stat"><div class="rp-stat-label">Hits</div><div class="rp-stat-val hits" id="rp-hits">0</div></div>
+      <div class="rp-stat"><div class="rp-stat-label">Misses</div><div class="rp-stat-val misses" id="rp-misses">0</div></div>
+      <div class="rp-stat"><div class="rp-stat-label">Score</div><div class="rp-stat-val score" id="rp-score">0</div></div>
+      <div class="rp-stat"><div class="rp-stat-label">Accuracy</div><div class="rp-stat-val acc" id="rp-acc">-</div></div>
+    </div>
+    <div class="rp-btns">
+      <button class="rp-btn-primary" id="rp-play-again">▶ Play Again</button>
+      <button class="rp-btn-secondary" id="rp-menu">↩ Menu</button>
+    </div>
+  </div>
 </div>
 <div class="screen hidden" id="pause-screen">
   <div class="logo">Paused</div>
@@ -341,6 +457,7 @@ const aimTrainerHTML = `<!DOCTYPE html>
   </div>
   <button class="btn-primary" id="btn-resume">▶ Resume</button>
   <button class="btn-secondary" id="btn-restart">Restart</button>
+  <button class="btn-secondary" id="btn-pause-menu" style="margin-top: 14px;">↩ Menu</button>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -414,6 +531,10 @@ function playDestroy() {
 }
 const state = { running: false, paused: false, hits: 0, misses: 0, score: 0, startTime: 0, pauseAccum: 0, pauseStart: 0 };
 function resetState() { state.running=false; state.paused=false; state.hits=0; state.misses=0; state.score=0; state.startTime=0; state.pauseAccum=0; state.pauseStart=0; }
+// ── Challenge Mode State ──
+const challenge = { active: false, duration: 10, remaining: 10 };
+let selectedDuration = 10;
+let isChallengeMode = false;
 const canvas = document.getElementById('canvas');
 let renderer;
 try {
@@ -663,6 +784,8 @@ function updateMuzzleFlash(dt) {
 const elScore=document.getElementById('s-score'), elHits=document.getElementById('s-hits');
 const elMisses=document.getElementById('s-misses'), elAcc=document.getElementById('s-acc');
 const elTimer=document.getElementById('timer-value'), elFps=document.getElementById('fps');
+const timerPanel=document.getElementById('timer-panel');
+const timerLabel=document.getElementById('timer-label');
 function updateHUD() {
   elScore.textContent = state.score; elHits.textContent = state.hits; elMisses.textContent = state.misses;
   const total = state.hits + state.misses;
@@ -673,6 +796,35 @@ function updateHUD() {
   document.getElementById('p-acc').textContent = total === 0 ? '-' : Math.round((state.hits / total) * 100) + '%';
 }
 function formatTime(ms) { const s=Math.floor(ms/1000), m=Math.floor(s/60); return m+':'+String(s%60).padStart(2,'0'); }
+function formatCountdown(sec) { const m=Math.floor(sec/60); return m > 0 ? m+':'+String(Math.ceil(sec%60)).padStart(2,'0') : Math.ceil(sec).toString(); }
+function getRank(hits, acc) {
+  if (acc >= 80 && hits >= 15) return '🎯 Sharpshooter!';
+  if (acc >= 60 && hits >= 10) return '✅ Good Aim!';
+  if (hits === 0) return '😬 Keep Practicing';
+  return '💪 Not Bad!';
+}
+function showResultPopup() {
+  if (activeTarget) { scene.remove(activeTarget); activeTarget = null; }
+  clearTimeout(spawnTimeout); spawnLocked = false;
+  const total = state.hits + state.misses;
+  const acc = total === 0 ? 0 : Math.round((state.hits / total) * 100);
+  document.getElementById('rp-hits').textContent = state.hits;
+  document.getElementById('rp-misses').textContent = state.misses;
+  document.getElementById('rp-score').textContent = state.score;
+  document.getElementById('rp-acc').textContent = total === 0 ? '-' : acc + '%';
+  document.getElementById('rp-sub').textContent = selectedDuration + ' Second Challenge';
+  document.getElementById('rp-title').textContent = getRank(state.hits, acc);
+  const popup = document.getElementById('result-popup');
+  popup.classList.remove('hidden');
+  requestAnimationFrame(() => popup.classList.add('visible'));
+  timerPanel.classList.remove('challenge-mode','urgent');
+  timerLabel.textContent = 'Session Time';
+}
+function hideResultPopup() {
+  const popup = document.getElementById('result-popup');
+  popup.classList.remove('visible');
+  setTimeout(() => popup.classList.add('hidden'), 260);
+}
 function showHitMarker() {
   const hm=document.getElementById('hitmarker');
   hm.classList.remove('flash'); void hm.offsetWidth; hm.classList.add('flash');
@@ -723,6 +875,19 @@ function startGame() {
   gunGroup.position.copy(gunRestPos); gunGroup.rotation.set(0, 0.04, 0);
   euler.set(0, 0, 0); camera.quaternion.setFromEuler(euler);
   updateHUD();
+  hideResultPopup();
+  // Challenge mode setup
+  if (isChallengeMode) {
+    challenge.active = true; challenge.duration = selectedDuration; challenge.remaining = selectedDuration;
+    timerPanel.classList.add('challenge-mode');
+    timerPanel.classList.remove('urgent');
+    timerLabel.textContent = 'Time Left';
+    elTimer.textContent = formatCountdown(selectedDuration);
+  } else {
+    challenge.active = false;
+    timerPanel.classList.remove('challenge-mode','urgent');
+    timerLabel.textContent = 'Session Time';
+  }
   document.getElementById('start-screen').classList.add('hidden');
   document.getElementById('pause-screen').classList.add('hidden');
   document.getElementById('hud').classList.add('active');
@@ -742,6 +907,12 @@ function resumeGame() {
   if (!activeTarget) spawnTarget();
 }
 function restartGame() { document.getElementById('pause-screen').classList.add('hidden'); startGame(); }
+function endChallenge() {
+  state.running = false; challenge.active = false;
+  if (document.pointerLockElement) document.exitPointerLock();
+  document.getElementById('hud').classList.remove('active');
+  showResultPopup();
+}
 let lastTime = performance.now();
 let animFrameId = null;
 function loop(now) {
@@ -751,7 +922,17 @@ function loop(now) {
     if (state.running && !state.paused) {
       if (!canShoot) { shootCooldown -= dt; if (shootCooldown <= 0) { canShoot = true; shootCooldown = 0; } }
       updateTarget(dt); updateImpacts(dt); updateGunRecoil(dt); updateMuzzleFlash(dt); updateFPS(dt);
-      if (elTimer) elTimer.textContent = formatTime(now - state.startTime - state.pauseAccum);
+      if (challenge.active) {
+        challenge.remaining -= dt;
+        if (challenge.remaining <= 0) { challenge.remaining = 0; endChallenge(); }
+        else {
+          if (elTimer) elTimer.textContent = formatCountdown(challenge.remaining);
+          if (challenge.remaining <= 5) timerPanel.classList.add('urgent');
+          else timerPanel.classList.remove('urgent');
+        }
+      } else {
+        if (elTimer) elTimer.textContent = formatTime(now - state.startTime - state.pauseAccum);
+      }
     }
     if (renderer) renderer.render(scene, camera);
   } catch (err) {
@@ -763,6 +944,47 @@ function loop(now) {
 document.getElementById('btn-start').addEventListener('click', startGame);
 document.getElementById('btn-resume').addEventListener('click', resumeGame);
 document.getElementById('btn-restart').addEventListener('click', restartGame);
+document.getElementById('btn-pause-menu').addEventListener('click', () => {
+  document.getElementById('pause-screen').classList.add('hidden');
+  document.getElementById('start-screen').classList.remove('hidden');
+  document.getElementById('hud').classList.remove('active');
+  resetState();
+  if (activeTarget) { scene.remove(activeTarget); activeTarget = null; }
+  clearTimeout(spawnTimeout); spawnLocked = false;
+});
+// Mode tab switching
+document.getElementById('tab-infinite').addEventListener('click', () => {
+  isChallengeMode = false;
+  document.getElementById('tab-infinite').classList.add('active');
+  document.getElementById('tab-challenge').classList.remove('active');
+  document.getElementById('challenge-options').classList.remove('visible');
+  document.getElementById('info-grid-infinite').style.display = '';
+});
+document.getElementById('tab-challenge').addEventListener('click', () => {
+  isChallengeMode = true;
+  document.getElementById('tab-challenge').classList.add('active');
+  document.getElementById('tab-infinite').classList.remove('active');
+  document.getElementById('challenge-options').classList.add('visible');
+  document.getElementById('info-grid-infinite').style.display = 'none';
+});
+// Duration buttons
+document.querySelectorAll('.dur-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dur-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedDuration = parseInt(btn.dataset.dur, 10);
+  });
+});
+// Result popup buttons
+document.getElementById('rp-play-again').addEventListener('click', () => {
+  hideResultPopup();
+  setTimeout(startGame, 270);
+});
+document.getElementById('rp-menu').addEventListener('click', () => {
+  hideResultPopup();
+  document.getElementById('start-screen').classList.remove('hidden');
+  document.getElementById('hud').classList.remove('active');
+});
 requestAnimationFrame(loop);
 </script>
 </body>
