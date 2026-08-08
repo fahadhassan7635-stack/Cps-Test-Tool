@@ -793,7 +793,7 @@ function SEOHead() {
       el.href = href;
     };
 
-    const BASE = 'https://typingpro.app';
+    const BASE = 'https://fixedaim.com';
     const URL  = `${BASE}/keyboard-accuracy-test`;
     const IMG  = `${BASE}/og-accuracy-test.png`;
 
@@ -803,7 +803,7 @@ function SEOHead() {
     setLink('canonical', URL);
 
     // OG
-    setMeta('og:title',       'Free Keyboard Accuracy Test — TypingPro', true);
+    setMeta('og:title',       'Free Keyboard Accuracy Test | FixedAim', true);
     setMeta('og:description', 'Measure typing precision with WPM, CPM, heatmap, and accuracy graph.', true);
     setMeta('og:image', IMG, true);
     setMeta('og:url', URL, true);
@@ -811,7 +811,7 @@ function SEOHead() {
 
     // Twitter
     setMeta('twitter:card',        'summary_large_image');
-    setMeta('twitter:title',       'Free Keyboard Accuracy Test — TypingPro');
+    setMeta('twitter:title',       'Free Keyboard Accuracy Test | FixedAim');
     setMeta('twitter:description', 'Live WPM, CPM, heatmap, and accuracy graph. Test your typing precision now!');
     setMeta('twitter:image', IMG);
 
@@ -820,7 +820,7 @@ function SEOHead() {
       {
         '@context': 'https://schema.org',
         '@type': 'WebSite',
-        name: 'TypingPro',
+        name: 'FixedAim',
         url: BASE,
         potentialAction: {
           '@type': 'SearchAction',

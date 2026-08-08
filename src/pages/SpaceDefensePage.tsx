@@ -68,14 +68,14 @@ if (typeof document !== 'undefined') {
   setMeta('property', 'og:title', 'Space Defense – Free Browser Space Shooter Game');
   setMeta('property', 'og:description', 'Defend Earth from meteor showers in this fast-paced browser space shooter. Test your CPS, reaction time, and accuracy. Free to play, no download needed.');
   setMeta('property', 'og:type', 'website');
-  setMeta('property', 'og:url', 'https://yourdomain.com/space-defense');
-  setMeta('property', 'og:image', 'https://yourdomain.com/og-space-defense.png');
+  setMeta('property', 'og:url', 'https://fixedaim.com/space-defense');
+  setMeta('property', 'og:image', 'https://fixedaim.com/og-space-defense.png');
   setMeta('property', 'og:site_name', 'Space Defense Game');
   setMeta('name', 'twitter:card', 'summary_large_image');
   setMeta('name', 'twitter:title', 'Space Defense – Free Browser Space Shooter Game');
   setMeta('name', 'twitter:description', 'Destroy meteors, survive boss battles, collect power-ups. Free browser game.');
-  setMeta('name', 'twitter:image', 'https://yourdomain.com/og-space-defense.png');
-  setLink('canonical', 'https://yourdomain.com/space-defense');
+  setMeta('name', 'twitter:image', 'https://fixedaim.com/og-space-defense.png');
+  setLink('canonical', 'https://fixedaim.com/space-defense');
 
   const injectSchema = (id: string, data: object) => {
     let el = document.getElementById(id);
@@ -87,14 +87,14 @@ if (typeof document !== 'undefined') {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Space Defense',
-    url: 'https://yourdomain.com/space-defense',
+    url: 'https://fixedaim.com/space-defense',
     description: 'A free browser-based space shooter game where players defend Earth from meteor showers, fight boss meteors, collect power-ups, and improve their CPS and reaction time.',
     applicationCategory: 'Game',
     operatingSystem: 'Any',
     browserRequirements: 'Requires HTML5 Canvas support',
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     featureList: ['Boss Battles', 'Power-Ups', 'Combo System', 'Difficulty Levels', 'High Score Tracking', 'Fullscreen Mode'],
-    screenshot: 'https://yourdomain.com/og-space-defense.png',
+    screenshot: 'https://fixedaim.com/og-space-defense.png',
     aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.8', ratingCount: '1240' }
   });
 
@@ -102,17 +102,17 @@ if (typeof document !== 'undefined') {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: 'Space Defense Game',
-    url: 'https://yourdomain.com',
-    potentialAction: { '@type': 'SearchAction', target: 'https://yourdomain.com/?q={search_term_string}', 'query-input': 'required name=search_term_string' }
+    url: 'https://fixedaim.com',
+    potentialAction: { '@type': 'SearchAction', target: 'https://fixedaim.com/?q={search_term_string}', 'query-input': 'required name=search_term_string' }
   });
 
   injectSchema('schema-breadcrumb', {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://yourdomain.com' },
-      { '@type': 'ListItem', position: 2, name: 'Games', item: 'https://yourdomain.com/games' },
-      { '@type': 'ListItem', position: 3, name: 'Space Defense', item: 'https://yourdomain.com/space-defense' }
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://fixedaim.com' },
+      { '@type': 'ListItem', position: 2, name: 'Games', item: 'https://fixedaim.com/games' },
+      { '@type': 'ListItem', position: 3, name: 'Space Defense', item: 'https://fixedaim.com/space-defense' }
     ]
   });
 

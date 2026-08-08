@@ -2,11 +2,9 @@ import { useEffect } from 'react';
 
 const SITE_URL = 'https://fixedaim.com';
 const SITE_NAME = 'FixedAim';
-const SITE_LOGO = `${SITE_URL}/gun-pfp-192.png`;        // ✅ fixed: was /logo.png (404)
-const DEFAULT_OG_IMAGE = `${SITE_URL}/gun-pfp-192.png`; // ✅ fallback OG image for all pages
-const TWITTER_HANDLE = '';                               // ✅ fixed: set your @handle or leave empty
-
-
+const SITE_LOGO = `${SITE_URL}/gun-pfp-192.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/gun-pfp-192.png`;
+const TWITTER_HANDLE = '';
 
 interface FAQItem {
   question: string;
@@ -14,7 +12,7 @@ interface FAQItem {
 }
 
 interface ArticleMeta {
-  publishedTime: string;       // ISO 8601, e.g. "2024-06-01T00:00:00Z"
+  publishedTime: string;
   modifiedTime?: string;
   authorName?: string;
   authorUrl?: string;
@@ -26,20 +24,11 @@ interface SEOProps {
   description: string;
   url: string;
   isWebApplication?: boolean;
-  /** Schema.org applicationCategory — only used when isWebApplication is true */
-  applicationCategory?:
-    | 'GameApplication'
-    | 'UtilitiesApplication'
-    | 'EducationalApplication';
-  /** Pass breadcrumb segments after Home, e.g. [{ name: 'Tools', url: '/tools' }, { name: 'Aim Trainer', url: '/tools/aim-trainer' }] */
+  applicationCategory?: 'GameApplication' | 'UtilitiesApplication' | 'EducationalApplication';
   breadcrumbs?: { name: string; url: string }[];
-  /** Renders FAQPage schema — great for tool pages with help sections */
   faqs?: FAQItem[];
-  /** Renders Article schema — use for blog/guide pages */
   article?: ArticleMeta;
-  /** Canonical URL override (defaults to `url`) */
   canonical?: string;
-  /** Open Graph image URL */
   ogImage?: string;
 }
 
@@ -48,7 +37,7 @@ export default function SEO({
   description,
   url,
   isWebApplication = false,
-  applicationCategory,
+  applicationCategory = 'UtilitiesApplication',
   breadcrumbs = [],
   faqs,
   article,
@@ -99,14 +88,14 @@ export default function SEO({
     setMetaProperty('og:title', title);
     setMetaProperty('og:description', description);
     setMetaProperty('og:url', url);
-    setMetaProperty('og:image', ogImage ?? DEFAULT_OG_IMAGE); // ✅ always set, fallback to default
+    setMetaProperty('og:image', ogImage ?? DEFAULT_OG_IMAGE);
 
     /* ── Twitter / X Card ── */
-    setMetaName('twitter:card', 'summary_large_image'); // ✅ always large image since we always have one
-    if (TWITTER_HANDLE) setMetaName('twitter:site', TWITTER_HANDLE); // ✅ fixed: only set if handle exists
+    setMetaName('twitter:card', 'summary_large_image');
+    if (TWITTER_HANDLE) setMetaName('twitter:site', TWITTER_HANDLE);
     setMetaName('twitter:title', title);
     setMetaName('twitter:description', description);
-    setMetaName('twitter:image', ogImage ?? DEFAULT_OG_IMAGE); // ✅ always set, fallback to default
+    setMetaName('twitter:image', ogImage ?? DEFAULT_OG_IMAGE);
 
     /* ── Article meta ── */
     if (article) {
@@ -119,7 +108,7 @@ export default function SEO({
     ════════════════════════════ */
     const schemas: object[] = [];
 
-    /* 1. Organization — sitewide authority signal */
+    /* 1. Organization */
     schemas.push({
       '@context': 'https://schema.org',
       '@type': 'Organization',
@@ -128,13 +117,9 @@ export default function SEO({
       url: SITE_URL,
       logo: {
         '@type': 'ImageObject',
-        url: SITE_LOGO,           // ✅ now points to gun-pfp-192.png (exists, 192x192)
+        url: SITE_LOGO,
       },
-      sameAs: [
-        // Add your social profile URLs here, e.g.:
-        // "https://twitter.com/fixedaim",
-        // "https://youtube.com/@fixedaim",
-      ],
+      sameAs: [],
     });
 
     /* 2. WebSite */
@@ -156,7 +141,7 @@ export default function SEO({
         name: title,
         url,
         description,
-        applicationCategory: applicationCategory ?? 'UtilitiesApplication',
+        applicationCategory: applicationCategory,
         operatingSystem: 'WebBrowser',
         inLanguage: 'en',
         isAccessibleForFree: true,
@@ -182,7 +167,7 @@ export default function SEO({
       publisher: { '@id': `${SITE_URL}/#organization` },
       image: {
         '@type': 'ImageObject',
-        url: ogImage ?? DEFAULT_OG_IMAGE, // ✅ always set, fallback to default
+        url: ogImage ?? DEFAULT_OG_IMAGE,
       },
     };
 
@@ -219,7 +204,6 @@ export default function SEO({
       })),
     ];
 
-    // Auto-add current page if not already the last breadcrumb and not home
     const lastItem = breadcrumbItems[breadcrumbItems.length - 1];
     if (lastItem.item !== url && url !== `${SITE_URL}/`) {
       breadcrumbItems.push({

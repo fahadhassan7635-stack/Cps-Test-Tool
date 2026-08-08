@@ -35,7 +35,7 @@ const PLAYER_SPEED_Y = 6;
 const PLAYER_SIZE = 12;
 const LEVEL_LENGTH = 15000;
 const COUNTDOWN_STEP_MS = 700;
-const SITE_URL = 'https://yourdomain.com/space-waves';
+const SITE_URL = 'https://fixedaim.com/space-waves';
 
 type GameState = 'START' | 'COUNTDOWN' | 'PLAYING' | 'PAUSED' | 'GAMEOVER' | 'VICTORY';
 

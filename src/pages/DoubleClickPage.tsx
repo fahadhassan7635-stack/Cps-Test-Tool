@@ -136,7 +136,7 @@ const buildSchemas = () => [
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
     name: 'Double Click Test',
-    url: 'https://www.clickspeedtest.io/double-click-test',
+    url: 'https://fixedaim.com/double-click',
     description: 'Test how fast you can double-click your mouse. Measure your double-click interval in milliseconds and diagnose mouse hardware issues.',
     applicationCategory: 'UtilityApplication',
     operatingSystem: 'All',
@@ -146,11 +146,11 @@ const buildSchemas = () => [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'Click Speed Test',
-    url: 'https://www.clickspeedtest.io',
+    name: 'FixedAim',
+    url: 'https://fixedaim.com',
     potentialAction: {
       '@type': 'SearchAction',
-      target: 'https://www.clickspeedtest.io/?q={search_term_string}',
+      target: 'https://fixedaim.com/?q={search_term_string}',
       'query-input': 'required name=search_term_string',
     },
   },
@@ -158,8 +158,8 @@ const buildSchemas = () => [
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',              item: 'https://www.clickspeedtest.io' },
-      { '@type': 'ListItem', position: 2, name: 'Double Click Test', item: 'https://www.clickspeedtest.io/double-click-test' },
+      { '@type': 'ListItem', position: 1, name: 'Home',              item: 'https://fixedaim.com' },
+      { '@type': 'ListItem', position: 2, name: 'Double Click Test', item: 'https://fixedaim.com/double-click' },
     ],
   },
   {
@@ -200,15 +200,15 @@ function useSEOHead() {
     setMeta('meta[name="theme-color"]',         'name',     'theme-color',         '#00f5ff');
     setMeta('meta[property="og:title"]',        'property', 'og:title',            'Double Click Test — Measure Your Double-Click Speed in ms');
     setMeta('meta[property="og:description"]',  'property', 'og:description',      'Test your double-click interval in milliseconds. Diagnose mouse hardware problems, compare difficulty levels, and track your stats.');
-    setMeta('meta[property="og:image"]',        'property', 'og:image',            'https://www.clickspeedtest.io/og-double-click.png');
-    setMeta('meta[property="og:url"]',          'property', 'og:url',              'https://www.clickspeedtest.io/double-click-test');
+    setMeta('meta[property="og:image"]',        'property', 'og:image',            'https://fixedaim.com/og-double-click.png');
+    setMeta('meta[property="og:url"]',          'property', 'og:url',              'https://fixedaim.com/double-click');
     setMeta('meta[property="og:type"]',         'property', 'og:type',             'website');
     setMeta('meta[name="twitter:card"]',        'name',     'twitter:card',        'summary_large_image');
     setMeta('meta[name="twitter:title"]',       'name',     'twitter:title',       'Double Click Test — Measure Your Double-Click Speed in ms');
     setMeta('meta[name="twitter:description"]', 'name',     'twitter:description', 'Free browser tool to measure your double-click speed. No download required.');
-    setMeta('meta[name="twitter:image"]',       'name',     'twitter:image',       'https://www.clickspeedtest.io/og-double-click.png');
+    setMeta('meta[name="twitter:image"]',       'name',     'twitter:image',       'https://fixedaim.com/og-double-click.png');
 
-    setLink('canonical',      'https://www.clickspeedtest.io/double-click-test');
+    setLink('canonical',      'https://fixedaim.com/double-click');
     setLink('icon',           '/favicon.ico');
     setLink('apple-touch-icon', '/apple-touch-icon.png');
 

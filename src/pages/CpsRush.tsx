@@ -15,7 +15,7 @@ const MAX_JUMP_BOOST = 8;
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 440;
 const BALL_RADIUS = 12;
-const SITE_URL = 'https://cpsrush.com';
+const SITE_URL = 'https://fixedaim.com';
 const OG_IMAGE = `${SITE_URL}/og-image.png`;
 
 // ─── More Tools ──────────────────────────────────────────────────────────────

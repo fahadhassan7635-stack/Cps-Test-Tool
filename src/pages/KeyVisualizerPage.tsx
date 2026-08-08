@@ -44,7 +44,7 @@ const MORE_TOOLS: ToolLink[] = [
 export const ROBOTS_TXT_CONTENT = `User-agent: *
 Allow: /
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://fixedaim.com/sitemap.xml
 `;
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -97,11 +97,11 @@ const TOC_SECTIONS: ReadonlyArray<Readonly<{ id: string; label: string }>> = Obj
 const PAGE_META = Object.freeze({
   title:      'Key Visualizer — Real-Time Keyboard Key Display Tool',
   description:'Free online Key Visualizer: watch every keystroke light up in real time. Test keyboard ghosting, N-Key Rollover, key history, and usage stats — all locally in your browser.',
-  canonical:  'https://yourdomain.com/key-visualizer',
+  canonical:  'https://fixedaim.com/key-visualizer',
   keywords:   'key visualizer, keyboard visualizer, keyboard tester, real-time key display, ghosting test, NKRO test, key press visualizer, typing tool, keyboard diagnostics',
-  ogImage:    'https://yourdomain.com/og/key-visualizer.png',
+  ogImage:    'https://fixedaim.com/og/key-visualizer.png',
   themeColor: '#00f5ff',
-  author:     'YourSiteName',
+  author:     'FixedAim',
   appName:    'Key Visualizer',
 });
 
@@ -895,8 +895,8 @@ const BreadcrumbSchema = Object.freeze({
   '@context': 'https://schema.org',
   '@type':    'BreadcrumbList',
   'itemListElement': Object.freeze([
-    Object.freeze({ '@type': 'ListItem', 'position': 1, 'name': 'Home',           'item': 'https://yourdomain.com/'               }),
-    Object.freeze({ '@type': 'ListItem', 'position': 2, 'name': 'Keyboard Tools', 'item': 'https://yourdomain.com/keyboard-tools' }),
+    Object.freeze({ '@type': 'ListItem', 'position': 1, 'name': 'Home',           'item': 'https://fixedaim.com/'               }),
+    Object.freeze({ '@type': 'ListItem', 'position': 2, 'name': 'Keyboard', 'item': 'https://fixedaim.com/keyboard-tools' }),
     Object.freeze({ '@type': 'ListItem', 'position': 3, 'name': 'Key Visualizer', 'item': PAGE_META.canonical                     }),
   ]),
 });

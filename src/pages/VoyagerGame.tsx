@@ -1939,7 +1939,7 @@ function SeoHead() {
     setMeta('og:title', 'Voyager Space Game — Spacebar CPS Test', true);
     setMeta('og:type', 'website', true);
     setMeta('twitter:card', 'summary_large_image');
-    setLink('canonical', 'https://yourdomain.com/games/voyager');
+    setLink('canonical', 'https://fixedaim.com/games/voyager');
 
     const existing = document.getElementById('voyager-jsonld');
     if (existing) existing.remove();

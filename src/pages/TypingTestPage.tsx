@@ -214,7 +214,7 @@ const JSON_LD_DATA = {
       name: 'Typing Speed Test',
       applicationCategory: 'UtilitiesApplication',
       operatingSystem: 'Web Browser',
-      description: 'Free online typing speed test. Measure your WPM, accuracy, and improve your typing skills with multiple difficulty levels and modes.',
+      description: 'Free online typing speed test for IELTS, job applications, and daily practice. Measure your WPM and accuracy with multiple difficulty levels, paragraph modes, numbers, symbols, and live statistics. Ideal for IELTS Academic Writing preparation.',
       offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
       aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', reviewCount: '2847' },
     },
@@ -225,9 +225,9 @@ const JSON_LD_DATA = {
       breadcrumb: {
         '@type': 'BreadcrumbList',
         itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://example.com' },
-          { '@type': 'ListItem', position: 2, name: 'Tools', item: 'https://example.com/tools' },
-          { '@type': 'ListItem', position: 3, name: 'Typing Speed Test', item: 'https://example.com/tools/typing-speed-test' },
+          { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://fixedaim.com' },
+          { '@type': 'ListItem', position: 2, name: 'Keyboard', item: 'https://fixedaim.com/keyboard' },
+          { '@type': 'ListItem', position: 3, name: 'Typing Speed Test', item: 'https://fixedaim.com/keyboard/typing-speed-test' },
         ],
       },
     },
@@ -447,6 +447,26 @@ const FAQ_ITEMS = [
   {
     q: 'What is the historical origin of WPM as a metric?',
     a: 'Words per minute became a standardized metric in the late nineteenth century alongside the rise of typewriters and stenography, when businesses needed an objective way to compare clerical candidates. The five-character word convention was adopted to keep the measurement consistent regardless of the text used.',
+  },
+  {
+    q: 'Is this typing test good for IELTS preparation?',
+    a: 'Yes. IELTS Academic Writing Task 1 and Task 2 require candidates to write clearly under time pressure. Practicing with this typing test improves your words-per-minute speed and accuracy, so you can focus on content and grammar rather than slow typing during the real exam.',
+  },
+  {
+    q: 'What typing speed do I need for IELTS?',
+    a: 'For IELTS Academic Writing Task 2, you need to write at least 250 words in 40 minutes. A typing speed of 25 to 30 WPM is the minimum comfortable threshold, but aiming for 40 to 50 WPM gives you more time to plan, review, and edit your essay.',
+  },
+  {
+    q: 'Can I use this test to practice typing for IELTS Academic Writing?',
+    a: 'Absolutely. The Paragraph and Story modes on this test use long-form academic-style sentences, closely mirroring the kind of text you must produce in IELTS Writing Task 1 and Task 2. Regular practice builds both speed and the finger-memory needed for sustained academic writing.',
+  },
+  {
+    q: 'How does typing speed affect IELTS computer-delivered test scores?',
+    a: 'In the computer-delivered IELTS, slow typists spend more cognitive effort on the mechanical act of typing, leaving less mental bandwidth for structuring arguments and checking grammar. Improving your WPM directly reduces this bottleneck and allows you to write more developed, higher-scoring responses.',
+  },
+  {
+    q: 'What is a good WPM score for the IELTS computer-based test?',
+    a: 'A WPM of at least 40 is recommended for comfortable performance in the IELTS computer-based test. At that speed, a 250-word Task 2 response takes roughly six minutes to type, leaving ample time for planning and proofreading within the 40-minute window.',
   },
 ];
 

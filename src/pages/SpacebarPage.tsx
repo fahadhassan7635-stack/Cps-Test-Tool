@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SpacebarPage.tsx
  * - Full SEO: meta, OG, Twitter, JSON-LD, breadcrumb, FAQ
  * - Real spacebar animation (spring physics)
@@ -23,10 +23,7 @@ const DURATIONS = [5, 10, 15, 30, 60] as const;
 const MAX_CUSTOM_SECONDS = 300;
 const MIN_CUSTOM_SECONDS = 1;
 const MAX_HISTORY = 10;
-const SITE_URL  = 'https://www.example.com';
-const SITE_NAME = 'KeyboardTest.io';
-const PAGE_URL  = `${SITE_URL}/spacebar-counter`;
-const OG_IMAGE  = `${SITE_URL}/og-spacebar-counter.png`;
+import SEO from '../components/SEO';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface HistoryItem { count: number; sps: number; duration: number; }
@@ -166,71 +163,6 @@ const FAQ_ITEMS = [
     a: 'Not always. While the underlying concept is identical, different spacebar counter and KPS test implementations vary in how strictly they filter e.repeat auto-repeat events, which clock source they use for timing, and whether they attach listeners globally or to a specific element. A poorly built click counter that fails to filter auto-repeat can report inflated scores for the exact same physical performance. For consistent tracking over time, it is best to stick to one trusted spacebar counter tool rather than comparing raw numbers across multiple sites.',
   },
 ] as const;
-
-// ─── JSON-LD Schemas ──────────────────────────────────────────────────────────
-const buildJsonLd = (): string => {
-  const schemas = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: SITE_NAME,
-      url: SITE_URL,
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
-        'query-input': 'required name=search_term_string',
-      },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: 'Spacebar Counter – CPS Test',
-      url: PAGE_URL,
-      description: 'Free online spacebar speed test. Measure your spacebar clicks per second (CPS) with real-time ratings, session history, and audio feedback.',
-      applicationCategory: 'GameApplication',
-      operatingSystem: 'Any',
-      browserRequirements: 'Requires a modern browser with JavaScript enabled.',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-      creator: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-      featureList: [
-        'Real-time CPS measurement',
-        'Multiple timer durations',
-        'Custom duration support',
-        'Session history tracking',
-        'Audio click feedback',
-        'Speed rating system',
-      ],
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home',            item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Keyboard Tools',  item: `${SITE_URL}/keyboard-tools` },
-        { '@type': 'ListItem', position: 3, name: 'Spacebar Counter', item: PAGE_URL },
-      ],
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
-        '@type': 'Question',
-        name: q,
-        acceptedAnswer: { '@type': 'Answer', text: a },
-      })),
-    },
-  ];
-  return JSON.stringify(schemas);
-};
-
-const JSON_LD_DATA = buildJsonLd();
 
 // ─── Shared static styles (module-level, avoids re-creating per render) ──────
 const GLOBAL_STYLES = `
@@ -697,77 +629,6 @@ const ResultModal = memo(({
 ResultModal.displayName = 'ResultModal';
 
 
-// ─── SEO Head Tags ────────────────────────────────────────────────────────────
-function SeoHead() {
-  useEffect(() => {
-    const tags: Array<{ tag: string; attrs: Record<string, string> }> = [
-      { tag: 'meta', attrs: { name: 'description',    content: 'Free Spacebar Counter & CPS Test — measure your spacebar speed test score in clicks per second. Track CPS, ratings & history with our keyboard test tool.' } },
-      { tag: 'meta', attrs: { name: 'robots',         content: 'index,follow,max-image-preview:large' } },
-      { tag: 'meta', attrs: { name: 'theme-color',    content: '#00f5ff' } },
-      { tag: 'link', attrs: { rel: 'canonical',       href: PAGE_URL } },
-      { tag: 'link', attrs: { rel: 'icon',            href: '/favicon.ico',        sizes: 'any' } },
-      { tag: 'link', attrs: { rel: 'icon',            href: '/favicon-32x32.png',  type: 'image/png', sizes: '32x32' } },
-      { tag: 'link', attrs: { rel: 'icon',            href: '/favicon-16x16.png',  type: 'image/png', sizes: '16x16' } },
-      { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
-      { tag: 'link', attrs: { rel: 'manifest',        href: '/manifest.webmanifest' } },
-      { tag: 'link', attrs: { rel: 'mask-icon',       href: '/safari-pinned-tab.svg', color: '#00f5ff' } },
-      { tag: 'meta', attrs: { property: 'og:type',        content: 'website' } },
-      { tag: 'meta', attrs: { property: 'og:url',         content: PAGE_URL } },
-      { tag: 'meta', attrs: { property: 'og:site_name',   content: SITE_NAME } },
-      { tag: 'meta', attrs: { property: 'og:title',       content: 'Spacebar Counter — Free Spacebar Speed Test & CPS Test' } },
-      { tag: 'meta', attrs: { property: 'og:description', content: 'Test your spacebar speed for free! Measure CPS in 5s, 10s, 15s, 30s or 60s. Track history, get ratings & improve your keyboard test score.' } },
-      { tag: 'meta', attrs: { property: 'og:image',       content: OG_IMAGE } },
-      { tag: 'meta', attrs: { name: 'twitter:card',        content: 'summary_large_image' } },
-      { tag: 'meta', attrs: { name: 'twitter:title',       content: 'Spacebar Counter — Free Spacebar Speed Test & CPS Test' } },
-      { tag: 'meta', attrs: { name: 'twitter:description', content: 'Test your spacebar speed for free! Measure CPS in 5–60 second rounds. Real-time ratings, history & audio feedback.' } },
-      { tag: 'meta', attrs: { name: 'twitter:image',       content: OG_IMAGE } },
-    ];
-
-    const inserted: HTMLElement[] = [];
-
-    for (const { tag, attrs } of tags) {
-      const selector =
-        tag === 'meta' && attrs.name     ? `meta[name="${attrs.name}"]`     :
-        tag === 'meta' && attrs.property ? `meta[property="${attrs.property}"]` :
-        tag === 'link' && attrs.rel      ? `link[rel="${attrs.rel}"]`        :
-        null;
-
-      if (selector) {
-        const existing = document.head.querySelector(selector);
-        if (existing) {
-          for (const [k, v] of Object.entries(attrs)) existing.setAttribute(k, v);
-          continue;
-        }
-      }
-
-      const el = document.createElement(tag) as HTMLElement;
-      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-      document.head.appendChild(el);
-      inserted.push(el);
-    }
-
-    const prevTitle = document.title;
-    document.title = 'Spacebar Counter — Free Spacebar Speed Test & CPS Test';
-    return () => {
-      inserted.forEach(el => { if (document.head.contains(el)) document.head.removeChild(el); });
-      document.title = prevTitle;
-    };
-  }, []);
-
-  return null;
-}
-
-// ─── JSON-LD Injector ─────────────────────────────────────────────────────────
-function JsonLd({ data }: { data: string }) {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = data;
-    document.head.appendChild(script);
-    return () => { if (document.head.contains(script)) document.head.removeChild(script); };
-  }, [data]);
-  return null;
-}
 
 // ─── External citation link (matches in-article inline source style) ────────
 const SourceLink = memo(({ href, children }: { href: string; children: React.ReactNode }) => (
@@ -1486,8 +1347,7 @@ export default function SpacebarPage() {
 
   return (
     <>
-      <SeoHead />
-      <JsonLd data={JSON_LD_DATA} />
+      <SEO title="Spacebar Counter - Free Spacebar Speed Test & KPS Test | FixedAim" description="Test your spacebar speed for free! Measure KPS in 5s, 10s, 15s, 30s or 60s. Track history, get ratings & improve your keyboard test score." url="https://fixedaim.com/spacebar" isWebApplication={true} applicationCategory="GameApplication" faqs={FAQ_ITEMS} breadcrumbs={[{name: 'Home', url: 'https://fixedaim.com/'}, {name: 'Keyboard', url: 'https://fixedaim.com/keyboard'}, {name: 'Spacebar Counter', url: 'https://fixedaim.com/spacebar'}]} />
 
       <main
         style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}
