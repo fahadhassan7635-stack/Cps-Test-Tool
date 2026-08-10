@@ -206,8 +206,8 @@ const SEOHead: React.FC = () => {
     setMeta({ name: 'theme-color', content: '#00f0ff' });
     setMeta({ name: 'viewport', content: 'width=device-width, initial-scale=1' });
 
-    // Canonical
-    setLink({ rel: 'canonical', href: SITE_URL });
+    // Canonical — use the correct page path, not just the domain root
+    setLink({ rel: 'canonical', href: `${SITE_URL}/cps-rush` });
 
     // Favicon
     setLink({ rel: 'icon', type: 'image/svg+xml', href: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%2300f0ff'/><circle cx='16' cy='16' r='8' fill='%23030712'/></svg>" });

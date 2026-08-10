@@ -95,7 +95,7 @@ function SEOHead() {
       canonical.setAttribute('rel', 'canonical');
       document.head.appendChild(canonical);
     }
-    canonical.setAttribute('href', window.location.origin + window.location.pathname);
+    canonical.setAttribute('href', 'https://fixedaim.com/reaction-time');
 
     let appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
     if (!appleIcon) {

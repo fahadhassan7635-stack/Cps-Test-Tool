@@ -1,0 +1,631 @@
+import { useState, useRef, useCallback, useEffect, memo } from 'react';
+
+// ─── More Tools ───────────────────────────────────────────────────────────────
+interface ToolLink { label: string; href: string; icon: React.ReactNode; }
+
+const MORE_TOOLS: ToolLink[] = [
+  { label: 'CPS Test', href: '/cps-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Spacebar Counter', href: '/spacebar', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="6" y1="15" x2="18" y2="15"/></svg> },
+  { label: 'Aim Trainer', href: '/aim-trainer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> },
+  { label: 'Typing Test', href: '/typing-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 15h8M7 11h2m3 0h2m3 0h-1"/></svg> },
+  { label: 'Reaction Time', href: '/reaction-time', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+  { label: 'Scroll Test', href: '/scroll-test', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="9"/><path d="M9 11l3-3 3 3"/><path d="M9 13l3 3 3-3"/></svg> },
+  { label: 'Double Click', href: '/double-click', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><line x1="12" y1="6" x2="12" y2="10"/></svg> },
+  { label: '3D Aim Trainer', href: '/3d-aim-trainer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><circle cx="12" cy="12" r="3"/><path d="M3 12h3m12 0h3M12 3v3m0 12v3"/><circle cx="12" cy="12" r="8" opacity=".4"/></svg> },
+  { label: 'Mouse Accuracy', href: '/mouse-accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 2v10"/></svg> },
+  { label: 'Key Visualizer', href: '/key-visualizer', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h1m4 0h1m4 0h1M6 13h1m4 0h1m4 0h1"/></svg> },
+  { label: 'F1 Reaction', href: '/f1-reaction', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> },
+  { label: 'Space Defense', href: '/space-defense', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+  { label: 'Accuracy Test', href: '/accuracy', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> },
+  { label: 'CPS Rush', href: '/cps-rush', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2a7 7 0 0 1 7 7v6a7 7 0 0 1-14 0V9a7 7 0 0 1 7-7z"/><path d="M12 12v-4"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg> },
+  { label: 'Voyager Game', href: '/voyager-game', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
+  { label: 'Space Waves', href: '/space-waves', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M2 12h4l3-9 5 18 3-9h5"/></svg> },
+];
+
+type ButtonId = 'left' | 'right' | 'middle' | 'back' | 'forward' | 'dpi';
+type ButtonStatus = 'idle' | 'down' | 'tested';
+type ScrollDir = 'up' | 'down' | null;
+
+interface LogEntry {
+  id: number;
+  label: string;
+  time: string;
+}
+
+const BUTTON_LABELS: Record<ButtonId, string> = {
+  left: 'Left Click',
+  right: 'Right Click',
+  middle: 'Middle Click',
+  back: 'Back Button',
+  forward: 'Forward Button',
+  dpi: 'DPI / Sensitivity Button',
+};
+
+const initialCounts: Record<ButtonId, number> = { left: 0, right: 0, middle: 0, back: 0, forward: 0, dpi: 0 };
+const initialStatus: Record<ButtonId, ButtonStatus> = { left: 'idle', right: 'idle', middle: 'idle', back: 'idle', forward: 'idle', dpi: 'idle' };
+
+function nowStamp(): string {
+  return new Date().toLocaleTimeString(undefined, { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' }) +
+    '.' + String(new Date().getMilliseconds()).padStart(3, '0');
+}
+
+function useSoundEngine(enabled: boolean) {
+  const ctxRef = useRef<AudioContext | null>(null);
+  const getCtx = useCallback(() => {
+    if (!ctxRef.current || ctxRef.current.state === 'closed') {
+      ctxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    return ctxRef.current;
+  }, []);
+
+  const playTone = useCallback((freq: number, type: OscillatorType, dur: number, gain: number) => {
+    if (!enabled) return;
+    try {
+      const ctx = getCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = type;
+      const now = ctx.currentTime;
+      osc.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(gain, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      osc.start(now); osc.stop(now + dur);
+    } catch {}
+  }, [enabled, getCtx]);
+
+  const TONES: Record<ButtonId, number> = { left: 700, right: 500, middle: 600, back: 420, forward: 460, dpi: 900 };
+
+  return {
+    button: (id: ButtonId) => playTone(TONES[id], 'sine', 0.08, 0.22),
+    scroll: (dir: ScrollDir) => playTone(dir === 'up' ? 820 : 380, 'square', 0.05, 0.12),
+  };
+}
+
+function Breadcrumb() {
+  const items: [string, string | null][] = [
+    ['Home', '/'], ['Tools', '/tools'], ['Mouse Button Test', null],
+  ];
+  return (
+    <nav aria-label="Breadcrumb" style={{ marginBottom: '1rem' }}>
+      <ol style={{ display: 'flex', gap: '0.5rem', listStyle: 'none', margin: 0, padding: 0, flexWrap: 'wrap', fontSize: '0.8rem', color: 'var(--text-muted,#888)' }}>
+        {items.map(([label, href], i) => (
+          <li key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {href
+              ? <a href={href} style={{ color: 'var(--neon-cyan,#00f5ff)', textDecoration: 'none' }}>{label}</a>
+              : <span aria-current="page" style={{ color: '#fff' }}>{label}</span>}
+            {i < items.length - 1 && <span aria-hidden="true" style={{ color: 'rgba(255,255,255,0.3)' }}>›</span>}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
+
+function SEOHead() {
+  useEffect(() => {
+    document.title = 'Mouse Button Test — Check Left, Right, Middle & Scroll Clicks Online';
+    const setMeta = (sel: string, attr: string, val: string) => {
+      let el = document.querySelector(sel) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
+      el.setAttribute(attr, val);
+    };
+    const desc = 'Test every button on your mouse — left click, right click, middle click, scroll wheel, and back/forward side buttons — instantly in your browser.';
+    setMeta('meta[name="description"]', 'content', desc);
+    setMeta('meta[property="og:title"]', 'content', 'Mouse Button Test');
+    setMeta('meta[property="og:description"]', 'content', desc);
+  }, []);
+  return null;
+}
+
+export default function MouseButtonTestPage() {
+  const [status, setStatus] = useState<Record<ButtonId, ButtonStatus>>(initialStatus);
+  const [counts, setCounts] = useState<Record<ButtonId, number>>(initialCounts);
+  const [scrollDir, setScrollDir] = useState<ScrollDir>(null);
+  const [scrollCounts, setScrollCounts] = useState({ up: 0, down: 0 });
+  const [dblClickGap, setDblClickGap] = useState<number | null>(null);
+  const [log, setLog] = useState<LogEntry[]>([]);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  const sfx = useSoundEngine(soundEnabled);
+
+  const logIdRef = useRef(0);
+  const lastClickRef = useRef<number>(0);
+  const scrollResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const padRef = useRef<HTMLDivElement>(null);
+
+  const pushLog = useCallback((label: string) => {
+    const id = ++logIdRef.current;
+    setLog(prev => [{ id, label, time: nowStamp() }, ...prev].slice(0, 12));
+  }, []);
+
+  const markButton = useCallback((id: ButtonId, label: string) => {
+    setStatus(prev => ({ ...prev, [id]: 'down' }));
+    setCounts(prev => ({ ...prev, [id]: prev[id] + 1 }));
+    pushLog(label);
+    sfx.button(id);
+    setTimeout(() => setStatus(prev => (prev[id] === 'down' ? { ...prev, [id]: 'tested' } : prev)), 260);
+  }, [pushLog, sfx]);
+
+  const onPadMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    const now = Date.now();
+    if (e.button === 0) {
+      const gap = now - lastClickRef.current;
+      if (gap < 500 && lastClickRef.current !== 0) setDblClickGap(gap);
+      lastClickRef.current = now;
+      markButton('left', 'Left click');
+    } else if (e.button === 1) {
+      markButton('middle', 'Middle click');
+    } else if (e.button === 2) {
+      markButton('right', 'Right click');
+    } else if (e.button === 3) {
+      markButton('back', 'Back button');
+    } else if (e.button === 4) {
+      markButton('forward', 'Forward button');
+    } else if (e.button >= 5) {
+      // Extra hardware buttons (DPI/sensitivity switch on many gaming mice) sometimes
+      // surface here depending on driver/OS. Best-effort detection.
+      markButton('dpi', 'DPI / Sensitivity button');
+    }
+  }, [markButton]);
+
+  const onPadContextMenu = useCallback((e: React.MouseEvent) => { e.preventDefault(); }, []);
+
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    const dir: ScrollDir = e.deltaY > 0 ? 'down' : 'up';
+    setScrollDir(dir);
+    setScrollCounts(prev => ({ ...prev, [dir]: prev[dir] + 1 }));
+    pushLog(`Scroll ${dir}`);
+    sfx.scroll(dir);
+    if (scrollResetRef.current) clearTimeout(scrollResetRef.current);
+    scrollResetRef.current = setTimeout(() => setScrollDir(null), 350);
+  }, [pushLog, sfx]);
+
+  useEffect(() => {
+    const el = padRef.current;
+    if (!el) return;
+    const preventNav = (e: MouseEvent) => { if (e.button === 3 || e.button === 4) e.preventDefault(); };
+    // React's synthetic onWheel is attached as a passive listener, so preventDefault()
+    // inside it is silently ignored and the page still scrolls underneath the pad.
+    // A native listener with { passive: false } is required to actually lock scrolling.
+    el.addEventListener('mouseup', preventNav);
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      el.removeEventListener('mouseup', preventNav);
+      el.removeEventListener('wheel', handleWheel);
+    };
+  }, [handleWheel]);
+
+  const reset = useCallback(() => {
+    setStatus(initialStatus); setCounts(initialCounts);
+    setScrollDir(null); setScrollCounts({ up: 0, down: 0 });
+    setDblClickGap(null); setLog([]); lastClickRef.current = 0;
+  }, []);
+
+  const totalClicks = Object.values(counts).reduce((a, b) => a + b, 0);
+  const buttonsTested = (Object.keys(status) as ButtonId[]).filter(k => status[k] !== 'idle').length;
+
+  const dotColor = (id: ButtonId) => status[id] === 'down' ? '#fbbf24' : status[id] === 'tested' ? '#10b981' : 'rgba(255,255,255,0.12)';
+  const glow = (id: ButtonId) => status[id] === 'down' ? '0 0 16px #fbbf24' : status[id] === 'tested' ? '0 0 12px #10b981' : 'none';
+
+  // Fill/glow for the SVG mouse diagram regions — same idle/down/tested language as the dots above
+  const regionFill = (id: ButtonId) =>
+    status[id] === 'down' ? '#fbbf24' : status[id] === 'tested' ? '#10b981' : '#e5e7eb';
+  const regionFilter = (id: ButtonId) =>
+    status[id] === 'down' ? 'drop-shadow(0 0 10px #fbbf24)' : status[id] === 'tested' ? 'drop-shadow(0 0 8px #10b981)' : 'none';
+  const wheelFill = scrollDir ? '#fbbf24' : status.middle !== 'idle' ? regionFill('middle') : '#3f3f46';
+  const wheelFilter = scrollDir ? 'drop-shadow(0 0 10px #fbbf24)' : regionFilter('middle');
+
+  return (
+    <>
+      <SEOHead />
+      <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        <Breadcrumb />
+
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <div className="section-label">Mouse Tool</div>
+          <h1 className="tool-title">Mouse Button Test</h1>
+          <p className="tool-subtitle">Click inside the pad below with each button on your mouse, and scroll the wheel, to confirm they register correctly.</p>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.75rem' }}>
+          <button
+            onClick={() => setSoundEnabled(v => !v)}
+            aria-pressed={soundEnabled}
+            aria-label={soundEnabled ? 'Disable click sounds' : 'Enable click sounds'}
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '0.35rem 0.65rem', color: '#fff', cursor: 'pointer', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+          >
+            {soundEnabled ? '🔊' : '🔇'} {soundEnabled ? 'Sound On' : 'Sound Off'}
+          </button>
+        </div>
+
+        {/* Live stat row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '0.75rem', marginBottom: '1rem' }}>
+          {[
+            { label: 'Buttons Tested', value: `${buttonsTested}/6`, color: 'var(--neon-cyan,#00f5ff)' },
+            { label: 'Total Clicks', value: totalClicks, color: 'var(--neon-purple,#a855f7)' },
+            { label: 'Scroll Events', value: scrollCounts.up + scrollCounts.down, color: '#f97316' },
+            { label: 'Double-Click Gap', value: dblClickGap !== null ? `${dblClickGap}ms` : '—', color: '#10b981' },
+          ].map(s => (
+            <div key={s.label} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', padding: '0.75rem', textAlign: 'center' }}>
+              <div style={{ fontSize: '1.4rem', fontWeight: 900, color: s.color, fontVariantNumeric: 'tabular-nums' }}>{s.value}</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: '0.15rem' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+          {/* Test pad */}
+          <div
+            ref={padRef}
+            onMouseDown={onPadMouseDown}
+            onContextMenu={onPadContextMenu}
+            role="application"
+            aria-label="Mouse test pad. Click and scroll here to test your mouse buttons."
+            style={{
+              position: 'relative', height: '380px', borderRadius: '16px',
+              background: 'var(--bg-card)', border: '2px dashed var(--border)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+              gap: '0.35rem', cursor: 'crosshair', userSelect: 'none', WebkitUserSelect: 'none', padding: '0.75rem',
+              touchAction: 'none', overscrollBehavior: 'contain',
+            }}
+          >
+            <div style={{ position: 'relative', width: '190px', height: '290px' }}>
+              <svg
+                width="190" height="290" viewBox="0 0 200 320"
+                style={{ pointerEvents: 'none', overflow: 'visible', display: 'block' }}
+                aria-hidden="true"
+              >
+              {/* Left click button */}
+              <path
+                d="M20,85 C20,42 55,14 96,12 L96,150 L20,150 Z"
+                fill={regionFill('left')} stroke="#1f2937" strokeWidth="2"
+                style={{ filter: regionFilter('left'), transition: 'fill 0.15s ease, filter 0.15s ease' }}
+              />
+              {/* Right click button */}
+              <path
+                d="M180,85 C180,42 145,14 104,12 L104,150 L180,150 Z"
+                fill={regionFill('right')} stroke="#1f2937" strokeWidth="2"
+                style={{ filter: regionFilter('right'), transition: 'fill 0.15s ease, filter 0.15s ease' }}
+              />
+              {/* Palm rest / body */}
+              <path
+                d="M20,150 L180,150 L180,255 C180,300 145,315 100,315 C55,315 20,300 20,255 Z"
+                fill="#d4d4d8" stroke="#1f2937" strokeWidth="2"
+              />
+              {/* Back button (side) */}
+              <rect
+                x="4" y="165" width="20" height="34" rx="8"
+                fill={regionFill('back')} stroke="#1f2937" strokeWidth="2"
+                style={{ filter: regionFilter('back'), transition: 'fill 0.15s ease, filter 0.15s ease' }}
+              />
+              {/* Forward button (side) */}
+              <rect
+                x="4" y="207" width="20" height="34" rx="8"
+                fill={regionFill('forward')} stroke="#1f2937" strokeWidth="2"
+                style={{ filter: regionFilter('forward'), transition: 'fill 0.15s ease, filter 0.15s ease' }}
+              />
+              {/* Scroll wheel housing */}
+              <rect x="86" y="18" width="28" height="100" rx="14" fill="#18181b" stroke="#1f2937" strokeWidth="2" />
+              <rect
+                x="90" y="26" width="20" height="84" rx="10"
+                fill={wheelFill} style={{ filter: wheelFilter, transition: 'fill 0.15s ease, filter 0.15s ease' }}
+              />
+              {/* Scroll direction arrows */}
+              <path d="M100,30 L94,40 L106,40 Z" fill={scrollDir === 'up' ? '#1f2937' : 'rgba(255,255,255,0.35)'} />
+              <path d="M100,106 L94,96 L106,96 Z" fill={scrollDir === 'down' ? '#1f2937' : 'rgba(255,255,255,0.35)'} />
+              {/* DPI / sensitivity button, sitting between the wheel and the palm rest.
+                  Purely visual here — the actual click target is the HTML button overlaid on top,
+                  which is far more reliable to hit than a pointer-events override on a nested SVG shape. */}
+              <rect
+                x="88" y="123" width="24" height="22" rx="6"
+                fill={regionFill('dpi')} stroke="#1f2937" strokeWidth="2"
+                style={{ filter: regionFilter('dpi'), transition: 'fill 0.15s ease, filter 0.15s ease' }}
+              />
+              </svg>
+              {/* Real HTML button overlaid exactly on the DPI square above — reliable click/tap target */}
+              <button
+                onPointerDown={e => { e.stopPropagation(); e.preventDefault(); markButton('dpi', 'DPI / Sensitivity button'); }}
+                onContextMenu={e => e.preventDefault()}
+                aria-label="Test DPI or sensitivity button"
+                title="Test DPI / sensitivity button"
+                style={{
+                  position: 'absolute',
+                  left: `${(88 / 200) * 100}%`,
+                  top: `${(123 / 320) * 100}%`,
+                  width: `${(24 / 200) * 100}%`,
+                  height: `${(22 / 320) * 100}%`,
+                  background: 'transparent', border: 'none', padding: 0, margin: 0,
+                  cursor: 'pointer', touchAction: 'none',
+                }}
+              />
+            </div>
+            <span style={{ fontWeight: 800, color: '#fff', fontSize: '0.95rem', marginTop: '0.25rem' }}>Click & Scroll Anywhere Here</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', maxWidth: '260px' }}>
+              The matching part lights up the moment you press it. Scrolling stays locked inside this box.
+            </span>
+          </div>
+
+          {/* Button status diagram */}
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', justifyContent: 'center' }}>
+            {(Object.keys(BUTTON_LABELS) as ButtonId[]).map(id => (
+              <div key={id}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span aria-hidden="true" style={{
+                    width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0,
+                    background: dotColor(id), boxShadow: glow(id), transition: 'background 0.15s ease, box-shadow 0.15s ease',
+                  }} />
+                  <span style={{ flex: 1, fontSize: '0.85rem', color: '#fff' }}>{BUTTON_LABELS[id]}</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontVariantNumeric: 'tabular-nums' }}>
+                    {status[id] === 'idle' ? 'not tested' : `${counts[id]}×`}
+                  </span>
+                </div>
+                {id === 'dpi' && (
+                  <p style={{ margin: '0.2rem 0 0 1.65rem', fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                    Some mice never send this as a normal click — press your DPI button anywhere in the pad, or tap the small square on the diagram directly to confirm it.
+                  </p>
+                )}
+              </div>
+            ))}
+            <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: '0.3rem', paddingTop: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <span aria-hidden="true" style={{
+                width: '12px', height: '12px', borderRadius: '50%', flexShrink: 0,
+                background: scrollDir ? '#fbbf24' : 'rgba(255,255,255,0.12)',
+                boxShadow: scrollDir ? '0 0 16px #fbbf24' : 'none', transition: 'all 0.15s ease',
+              }} />
+              <span style={{ flex: 1, fontSize: '0.85rem', color: '#fff' }}>Scroll Wheel</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                ↑{scrollCounts.up} / ↓{scrollCounts.down}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+          <button className="btn btn-secondary" onClick={reset}>↺ Reset Test</button>
+        </div>
+
+        {/* Event log */}
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.25rem' }}>
+          <h3 style={{ margin: '0 0 0.75rem', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Event Log</h3>
+          {log.length === 0 ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: 0 }}>No events yet — click or scroll in the pad above.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', maxHeight: '200px', overflowY: 'auto' }}>
+              {log.map(entry => (
+                <div key={entry.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#ddd', fontFamily: 'monospace' }}>
+                  <span>{entry.label}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{entry.time}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── MORE TOOLS GRID ── */}
+        <section aria-label="More Tools" style={{ marginBottom: '3.5rem', marginTop: '1rem' }}>
+          <h2 style={{
+            fontWeight: 800, fontSize: '1.5rem', color: '#fff',
+            marginBottom: '1.5rem', textAlign: 'center',
+            letterSpacing: '-0.3px',
+          }}>More Tools</h2>
+          <div
+            className="cps-games-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+              gap: '1rem',
+            }}
+          >
+            {MORE_TOOLS.map(({ label, href, icon }) => (
+              <a
+                key={href}
+                href={href}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  justifyContent: 'center', gap: '0.6rem',
+                  background: 'var(--bg-card)',
+                  border: '1px solid var(--border)',
+                  borderRadius: '14px',
+                  padding: '1.2rem 0.5rem',
+                  cursor: 'pointer', textDecoration: 'none',
+                  color: 'var(--neon-cyan)',
+                  transition: 'all 0.2s ease',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.07)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,245,255,0.3)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.background = 'var(--bg-card)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                }}
+              >
+                <div style={{
+                  width: '56px', height: '56px', borderRadius: '12px',
+                  background: 'rgba(255,255,255,0.05)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'var(--neon-cyan)',
+                }}>
+                  {icon}
+                </div>
+                <span style={{
+                  fontSize: '0.75rem', fontWeight: 700,
+                  color: 'var(--text-secondary)', textAlign: 'center', lineHeight: 1.3,
+                }}>{label}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* SEO Article + FAQ */}
+        <div style={{ marginTop: '2rem', color: 'var(--text-secondary)', fontSize: '0.92rem', lineHeight: '1.8' }}>
+          <article>
+            <h2 style={{ fontWeight: 800, fontSize: '1.6rem', color: 'var(--neon-cyan,#00f5ff)', marginTop: 0, marginBottom: '0.75rem' }}>What is a Mouse Button Test?</h2>
+            <p style={{ marginBottom: '1.25rem' }}>A <strong>Mouse Button Test</strong> checks whether every physical control on your mouse — left click, right click, middle click, scroll wheel, side buttons, and DPI/sensitivity switch — actually reaches your browser and registers as the input it's supposed to. Instead of guessing whether a click "felt" right, this tool logs the exact event the moment it happens, so you can confirm hardware behavior instead of relying on impression.</p>
+            <p style={{ marginBottom: '1.25rem' }}>This is especially useful after dropping a mouse, before selling or buying a used one, or when a button has started to feel inconsistent — tests like this catch problems days or weeks before they become obvious during normal use.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>How the Test Works</h2>
+            <p style={{ marginBottom: '1.25rem' }}>The pad listens directly for browser-level input events rather than simulating anything: <code>mousedown</code> for left, right, and middle clicks, the extended button codes for back and forward, and <code>wheel</code> events for scrolling. The moment an event fires, the matching part of the diagram lights up amber, then settles to green once confirmed — so a press that never arrives simply never lights up, which is itself useful information.</p>
+            <p style={{ marginBottom: '1.25rem' }}>Right-click and middle-click are intercepted so the browser's own context menu or auto-scroll icon doesn't interrupt the test, and scrolling is locked to the pad itself so the page underneath doesn't move while you test the wheel.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Common Mouse Button Problems</h2>
+            <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.25rem' }}>
+              {[
+                ['Double-click chatter', 'A single physical press registers as two clicks. This is almost always worn microswitch contacts inside the button, not a software issue.'],
+                ['Unresponsive or "dead" clicks', 'A press that sometimes does nothing at all — often intermittent, worse in cold weather or after long idle periods.'],
+                ['Ghost scrolling', 'The wheel reports movement in one direction when scrolled the other way, or skips notches, usually from a worn encoder wheel.'],
+                ['Side buttons not detected', 'Back/forward buttons are frequently intercepted by the operating system or browser for page navigation before a website ever sees them.'],
+                ['DPI button silence', 'Many DPI/sensitivity buttons are handled entirely inside the mouse\'s own firmware or driver software and were never designed to send a browser-visible event.'],
+              ].map(([t, d]) => (
+                <li key={t as string} style={{ marginBottom: '0.6rem' }}><strong>{t}</strong> — {d}</li>
+              ))}
+            </ul>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Fixing a Double-Clicking Mouse</h2>
+            <p style={{ marginBottom: '1.25rem' }}>If the left-click counter in this test increases by two for a single press, the <a href="https://en.wikipedia.org/wiki/Microswitch" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: 500 }}>microswitch <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'text-bottom',marginLeft:'0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> underneath that button has likely worn out — a common failure after a couple of years of regular use. Software debounce settings in some mouse utilities can mask it temporarily, but the permanent fix is replacing the switch or the mouse. Confirm the pattern is consistent (test it 15–20 times) before concluding it's hardware rather than a one-off.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Why Side Buttons Sometimes Don't Show Up</h2>
+            <p style={{ marginBottom: '1.25rem' }}>Back and forward side buttons are historically mapped to browser navigation, so on some systems the browser consumes the event before a webpage can read it. If those buttons never light up here despite clearly working elsewhere (like navigating back in a browser tab), the hardware is fine — the event just isn't being exposed to the page.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Mouse Polling Rate and Input Latency</h2>
+            <p style={{ marginBottom: '1.25rem' }}>Your mouse's <a href="https://en.wikipedia.org/wiki/Polling_(computer_science)" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: 500 }}>polling rate <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'text-bottom',marginLeft:'0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> determines how often it reports its state to the computer per second, measured in Hz. A standard 125 Hz mouse reports every 8 ms, while a 1000 Hz gaming mouse reports every 1 ms. For competitive gaming or precision testing, higher polling rates reduce perceived input lag and make cursor movement feel smoother and more accurate. Many modern gaming mice offer 2000 Hz or even 4000 Hz polling for near-zero latency.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Mechanical vs Optical Mouse Switches Explained</h2>
+            <p style={{ marginBottom: '1.25rem' }}>Traditional mice use <a href="https://en.wikipedia.org/wiki/Microswitch" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: 500 }}>mechanical microswitches <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'text-bottom',marginLeft:'0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> (most commonly Omron D2FC) that rely on two metal contacts touching. Over time, these contacts oxidize and bounce, creating the double-click chatter issue. Optical switches, used in newer gaming mice, replace the metal contact with a light beam — there's no physical bounce, so they are immune to chatter and are rated for 100 million+ clicks versus 20–50 million for mechanical options.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Understanding DPI and Mouse Sensitivity</h2>
+            <p style={{ marginBottom: '1.25rem' }}>DPI (Dots Per Inch) measures how sensitive your mouse is to physical movement. A 400 DPI setting means moving the mouse one inch moves the cursor 400 pixels. Most professional esports players prefer lower DPI (400–800) combined with high in-game sensitivity for greater control. The <a href="https://en.wikipedia.org/wiki/Dots_per_inch" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: 500 }}>DPI standard <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'text-bottom',marginLeft:'0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> varies per game genre: FPS games favor 400–1600 DPI, while MOBA or RTS games may benefit from higher settings for fast multi-target selection.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Mouse Ergonomics and Grip Styles</h2>
+            <p style={{ marginBottom: '1.25rem' }}>How you hold your mouse significantly affects click accuracy and fatigue. The three main grip styles are: <strong>Palm grip</strong> (whole hand rests on mouse — comfortable for long sessions), <strong>Claw grip</strong> (fingertips and palm base contact — faster clicking), and <strong>Fingertip grip</strong> (only fingertips touch — most precise, least fatigue for small mice). <a href="https://www.osha.gov/ergonomics" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: 500 }}>Ergonomics guidelines <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'text-bottom',marginLeft:'0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> recommend keeping your wrist neutral and elbow at 90° to reduce repetitive strain injury risk.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Scroll Wheel Technology and Encoder Wear</h2>
+            <p style={{ marginBottom: '1.25rem' }}>The scroll wheel inside your mouse uses a <a href="https://en.wikipedia.org/wiki/Rotary_encoder" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: 500 }}>rotary encoder <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign:'text-bottom',marginLeft:'0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a> — either a mechanical notched wheel or an optical disc — to detect rotation direction and steps. Over time, mechanical encoders wear and can produce "ghost scrolling" (scrolling in the wrong direction) or skipped notches. Gaming mice with optical encoders are much more resistant to this type of degradation. Use the scroll test zone above to verify your encoder produces the correct up/down signals consistently.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>How to Diagnose Mouse Hardware vs Software Issues</h2>
+            <p style={{ marginBottom: '1.25rem' }}>When a mouse button misbehaves, distinguishing hardware failure from a software/driver issue is the first diagnostic step. If the problem appears in this browser test (completely software-independent), it is almost certainly hardware. If the button works here but fails in a specific application, a driver, firmware, or application configuration is likely the cause. Try: updating mouse firmware through the manufacturer's companion software, uninstalling and reinstalling mouse drivers, testing on a different USB port or computer, and checking for OS accessibility settings that may intercept clicks.</p>
+
+            <h2 style={{ fontWeight: 800, fontSize: '1.4rem', color: '#fff', marginTop: '2rem', marginBottom: '0.75rem' }}>Mouse Button Debouncing: What It Is and Why It Matters</h2>
+            <p style={{ marginBottom: '1.25rem' }}>Debouncing is a technique used in mouse firmware to filter out the rapid electrical on/off bouncing that occurs naturally when a mechanical switch makes or breaks contact. Without debouncing, a single press could register dozens of clicks in milliseconds. Most mice apply a debounce delay of 4–10 ms. If the debounce time is too short (due to firmware bugs or aging components), chatter escapes the filter. Some gaming mice allow you to configure the debounce time in their companion software — increasing it reduces chatter but adds a small amount of input latency.</p>
+          </article>
+
+          {/* ── Accordion FAQ ── */}
+          <MouseFaqSection />
+        </div>
+      </div>
+    </>
+  );
+}
+
+const MOUSE_ACCURACY_FAQ = [
+  { q: 'Why does my left click count go up by two per press?', a: 'That\'s double-click chatter — a worn microswitch registering one physical press as two clicks. It\'s a hardware issue, not something a browser test can fix, but this tool confirms it\'s happening.' },
+  { q: 'My side buttons work in other apps but don\'t light up here — why?', a: 'Browsers and operating systems often reserve back/forward mouse buttons for page navigation and never pass the raw event to the website. The buttons are working; the browser is just intercepting them first.' },
+  { q: 'Why doesn\'t my DPI button do anything in the test?', a: 'Most DPI/sensitivity buttons are handled entirely by the mouse\'s own firmware or companion software, so no event ever reaches the browser. Tap the small square directly on the diagram to confirm the visual/sound feedback works, even if the hardware press itself isn\'t detectable.' },
+  { q: 'Why did the page scroll before, even when scrolling inside the pad?', a: 'Wheel events are passive by default in most frameworks, so calling preventDefault() on them silently fails unless a non-passive listener is attached. This tool now locks scrolling to the pad specifically to avoid that.' },
+  { q: 'Is my mouse broken if a button never lights up here?', a: 'Not necessarily — some buttons (like DPI switches) legitimately never reach the browser. But if left, right, middle, or scroll never register despite repeated tries, that\'s a strong signal of a hardware or driver problem.' },
+  { q: 'Does this test store any of my data?', a: 'No — clicks and scroll counts exist only in memory while the page is open and reset the moment you refresh or click "Reset Test."' },
+  { q: 'Can I use this on a touchpad or trackball?', a: 'Left, right, and middle click detection works the same way regardless of the pointing device. Scroll and side-button behavior varies more by device and driver.' },
+  { q: 'What is mouse polling rate and does it affect this test?', a: 'Polling rate is how often your mouse sends position/button data to the PC (e.g., 1000 Hz = every 1 ms). It doesn\'t significantly affect this test\'s button detection, but a higher rate reduces click-to-response latency in real-world gaming scenarios.' },
+  { q: 'How do optical switches differ from mechanical switches?', a: 'Optical switches use an infrared light beam instead of physical metal contacts. They cannot chatter because there\'s no physical bounce, are rated for 100 million+ clicks, and have near-zero actuation delay — making them ideal for gaming mice that prioritize reliability and speed.' },
+  { q: 'What DPI should I use for gaming?', a: 'Most professional FPS players use 400–800 DPI combined with higher in-game sensitivity. MOBA and strategy game players often prefer 800–1600 DPI for faster multi-target selection. The best DPI is whichever feels most precise and comfortable for your hand size and mousepad dimensions.' },
+  { q: 'What grip style is best for click accuracy?', a: 'Claw and fingertip grips typically allow faster, more precise clicking because your fingers are arched and positioned for rapid actuation. Palm grip is more comfortable for long sessions. Experiment with all three to find what works best for your hand size and playstyle.' },
+  { q: 'How can I fix ghost scrolling on my mouse?', a: 'Ghost scrolling (scrolling in the wrong direction or skipping notches) is almost always a worn rotary encoder. You can try cleaning the encoder with compressed air or isopropyl alcohol. If that doesn\'t fix it, the encoder may need to be replaced, or the mouse retired.' },
+  { q: 'Is this test free and does it need any installation?', a: 'Yes — completely free, no account, no installation. It runs entirely in your browser using standard web APIs.' },
+  { q: 'Why does my scroll wheel skip steps in one direction?', a: 'Skipped steps usually point to worn encoder contacts or debris inside the scroll wheel housing. Blow compressed air into the wheel gap and test again. If it persists, the encoder needs replacement.' },
+  { q: 'Can a firmware update fix double-click chatter?', a: 'Sometimes, yes — manufacturers occasionally patch the debounce threshold in firmware updates to compensate for aging switches. Check your mouse manufacturer\'s support page for the latest firmware. However, if the switch is physically worn out, a firmware fix is only a temporary workaround.' },
+];
+
+const MouseFaqSection = memo(function MouseFaqSection() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  return (
+    <section aria-label="Frequently Asked Questions" style={{ marginBottom: '3rem', marginTop: '2.5rem' }}>
+      <h2 style={{
+        fontWeight: 800, fontSize: '1.75rem', color: '#fff',
+        marginTop: 0, marginBottom: '1.5rem',
+        borderBottom: '1px solid #1f2937', paddingBottom: '1rem',
+        display: 'flex', alignItems: 'center', gap: '10px',
+      }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--neon-cyan, #00f5ff)', flexShrink: 0 }}
+          aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+        Frequently Asked Questions
+      </h2>
+
+      <div role="list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {MOUSE_ACCURACY_FAQ.map((faq, i) => {
+          const isOpen = openFaq === i;
+          return (
+            <div
+              key={i}
+              role="listitem"
+              style={{
+                border: `1px solid ${isOpen ? 'rgba(0,245,255,0.4)' : '#1f2937'}`,
+                borderRadius: '10px',
+                overflow: 'hidden',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              <button
+                aria-expanded={isOpen}
+                aria-controls={`ma-faq-answer-${i}`}
+                id={`ma-faq-question-${i}`}
+                onClick={() => setOpenFaq(isOpen ? null : i)}
+                style={{
+                  width: '100%',
+                  textAlign: 'left',
+                  background: isOpen ? 'rgba(0,245,255,0.05)' : 'transparent',
+                  border: 'none',
+                  padding: '14px 18px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: '12px',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                }}
+              >
+                <span>{faq.q}</span>
+                {isOpen ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan, #00f5ff)"
+                    strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden="true">
+                    <polyline points="18 15 12 9 6 15" />
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                )}
+              </button>
+              {isOpen && (
+                <div
+                  id={`ma-faq-answer-${i}`}
+                  role="region"
+                  aria-labelledby={`ma-faq-question-${i}`}
+                  style={{ padding: '0 18px 16px', backgroundColor: 'rgba(0,245,255,0.03)' }}
+                >
+                  <p style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.7', margin: 0 }}>
+                    {faq.a}
+                  </p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+});

@@ -1,4 +1,4 @@
-﻿import React, {
+import React, {
   useState,
   useEffect,
   useRef,
@@ -1927,11 +1927,6 @@ function SeoHead() {
       if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
       el.content = content;
     };
-    const setLink = (rel: string, href: string) => {
-      let el = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
-      if (!el) { el = document.createElement('link'); el.rel = rel; document.head.appendChild(el); }
-      el.href = href;
-    };
     setMeta('description', 'Play Voyager — the ultimate browser spacebar CPS test game.');
     setMeta('robots', 'index, follow');
     setMeta('theme-color', '#00f5ff');
@@ -1939,7 +1934,8 @@ function SeoHead() {
     setMeta('og:title', 'Voyager Space Game — Spacebar CPS Test', true);
     setMeta('og:type', 'website', true);
     setMeta('twitter:card', 'summary_large_image');
-    setLink('canonical', 'https://fixedaim.com/games/voyager');
+    // Canonical is managed by App.tsx RouteWithSEO — do not override here.
+
 
     const existing = document.getElementById('voyager-jsonld');
     if (existing) existing.remove();
