@@ -4,9 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "postinstall": "npx puppeteer browsers install chrome",
     "dev": "vite",
-    "build": "vite build && node prerender.js",
+    "build": "node build.cjs",
     "preview": "vite preview"
   },
 
