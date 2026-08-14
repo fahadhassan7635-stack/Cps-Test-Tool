@@ -3,6 +3,17 @@
   <head>
     <meta charset="UTF-8" />
 
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XMQNDZ4FHM"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XMQNDZ4FHM', {
+        send_page_view: false
+      });
+    </script>
+
     <!-- Favicons & PWA -->
     <link rel="icon" type="image/png" href="/gun-pfp-192.png" sizes="192x192" />
     <link rel="icon" type="image/png" href="/gun-pfp.png" sizes="48x48" />
@@ -32,7 +43,7 @@
     <meta name="apple-mobile-web-app-title" content="FixedAim" />
 
     <!-- Fallback metadata -->
-    <title>FixedAim — Free CPS Test, Aim Trainer & Gaming Tools</title>
+    <title>FixedAim — Free CPS Test, Aim Trainer &amp; Gaming Tools</title>
     <meta
       name="description"
       content="Free CPS Test, Aim Trainer, Typing Speed Test, Reaction Time and gaming tools. No signup required."
@@ -46,7 +57,6 @@
       crossorigin
     />
   </head>
-
   <body>
     <noscript>
       <p>
@@ -54,9 +64,7 @@
         keyboard tools.
       </p>
     </noscript>
-
     <div id="root"></div>
-
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
