@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
+import { usePageTracking } from './hooks/usePageTracking';
 
 // ---------------------------------------------------------------------------
 // Lazy-loaded page components — each page is its own JS chunk loaded on demand
@@ -232,49 +233,60 @@ function PageLoader() {
   );
 }
 
+// ---------------------------------------------------------------------------
+// AppRoutes — inner component so usePageTracking can access Router context
+// ---------------------------------------------------------------------------
+function AppRoutes() {
+  usePageTracking(); // ← GA4: fires page_view on every route change
+
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
+
+          <Route path="cps-test"       element={<RouteWithSEO path="cps-test"><CPSTestPage /></RouteWithSEO>} />
+          <Route path="typing-test"    element={<RouteWithSEO path="typing-test"><TypingTestPage /></RouteWithSEO>} />
+          <Route path="reaction-time"  element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
+          <Route path="aim-trainer"    element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
+          <Route path="key-visualizer" element={<RouteWithSEO path="key-visualizer"><KeyVisualizerPage /></RouteWithSEO>} />
+          <Route path="spacebar"       element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
+          <Route path="double-click"   element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
+          <Route path="scroll-test"    element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
+          <Route path="mouse-accuracy" element={<RouteWithSEO path="mouse-accuracy"><MouseAccuracyPage /></RouteWithSEO>} />
+          <Route path="3d-aim-trainer" element={<RouteWithSEO path="3d-aim-trainer"><ThreeDAimTrainerPage /></RouteWithSEO>} />
+          <Route path="accuracy"       element={<RouteWithSEO path="accuracy"><AccuracyTestPage /></RouteWithSEO>} />
+          <Route path="space-defense"  element={<RouteWithSEO path="space-defense"><SpaceDefensePage /></RouteWithSEO>} />
+          <Route path="voyager-game"   element={<RouteWithSEO path="voyager-game"><VoyagerGame /></RouteWithSEO>} />
+          <Route path="f1-reaction"    element={<RouteWithSEO path="f1-reaction"><F1ReactionPage /></RouteWithSEO>} />
+          <Route path="cps-rush"       element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
+          <Route path="space-waves"    element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
+
+          {/* Category Pages */}
+          <Route path="mouse"    element={<RouteWithSEO path="mouse"><MousePage /></RouteWithSEO>} />
+          <Route path="keyboard" element={<RouteWithSEO path="keyboard"><KeyboardPage /></RouteWithSEO>} />
+          <Route path="aim"      element={<RouteWithSEO path="aim"><AimPage /></RouteWithSEO>} />
+          <Route path="games"    element={<RouteWithSEO path="games"><GamesPage /></RouteWithSEO>} />
+
+          <Route path="leaderboard"  element={<RouteWithSEO path="leaderboard"><LeaderboardPage /></RouteWithSEO>} />
+          <Route path="hall-of-fame" element={<RouteWithSEO path="hall-of-fame"><LeaderboardPage /></RouteWithSEO>} />
+
+          <Route path="blog"           element={<RouteWithSEO path="blog"><BlogPage /></RouteWithSEO>} />
+          <Route path="privacy-policy" element={<RouteWithSEO path="privacy-policy"><PrivacyPolicy /></RouteWithSEO>} />
+          <Route path="terms"          element={<RouteWithSEO path="terms"><TermsPage /></RouteWithSEO>} />
+          <Route path="contact"        element={<RouteWithSEO path="contact"><ContactPage /></RouteWithSEO>} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
-
-            <Route path="cps-test"       element={<RouteWithSEO path="cps-test"><CPSTestPage /></RouteWithSEO>} />
-            <Route path="typing-test"    element={<RouteWithSEO path="typing-test"><TypingTestPage /></RouteWithSEO>} />
-            <Route path="reaction-time"  element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
-            <Route path="aim-trainer"    element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
-            <Route path="key-visualizer" element={<RouteWithSEO path="key-visualizer"><KeyVisualizerPage /></RouteWithSEO>} />
-            <Route path="spacebar"       element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
-            <Route path="double-click"   element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
-            <Route path="scroll-test"    element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
-            <Route path="mouse-accuracy" element={<RouteWithSEO path="mouse-accuracy"><MouseAccuracyPage /></RouteWithSEO>} />
-            <Route path="3d-aim-trainer" element={<RouteWithSEO path="3d-aim-trainer"><ThreeDAimTrainerPage /></RouteWithSEO>} />
-            <Route path="accuracy"       element={<RouteWithSEO path="accuracy"><AccuracyTestPage /></RouteWithSEO>} />
-            <Route path="space-defense"  element={<RouteWithSEO path="space-defense"><SpaceDefensePage /></RouteWithSEO>} />
-            <Route path="voyager-game"   element={<RouteWithSEO path="voyager-game"><VoyagerGame /></RouteWithSEO>} />
-            <Route path="f1-reaction"    element={<RouteWithSEO path="f1-reaction"><F1ReactionPage /></RouteWithSEO>} />
-            <Route path="cps-rush"       element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
-            <Route path="space-waves"    element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
-
-            {/* Category Pages */}
-            <Route path="mouse"    element={<RouteWithSEO path="mouse"><MousePage /></RouteWithSEO>} />
-            <Route path="keyboard" element={<RouteWithSEO path="keyboard"><KeyboardPage /></RouteWithSEO>} />
-            <Route path="aim"      element={<RouteWithSEO path="aim"><AimPage /></RouteWithSEO>} />
-            <Route path="games"    element={<RouteWithSEO path="games"><GamesPage /></RouteWithSEO>} />
-
-            <Route path="leaderboard"  element={<RouteWithSEO path="leaderboard"><LeaderboardPage /></RouteWithSEO>} />
-            <Route path="hall-of-fame" element={<RouteWithSEO path="hall-of-fame"><LeaderboardPage /></RouteWithSEO>} />
-
-            <Route path="blog"           element={<RouteWithSEO path="blog"><BlogPage /></RouteWithSEO>} />
-            <Route path="privacy-policy" element={<RouteWithSEO path="privacy-policy"><PrivacyPolicy /></RouteWithSEO>} />
-            <Route path="terms"          element={<RouteWithSEO path="terms"><TermsPage /></RouteWithSEO>} />
-            <Route path="contact"        element={<RouteWithSEO path="contact"><ContactPage /></RouteWithSEO>} />
-          </Route>
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+      <AppRoutes />
     </BrowserRouter>
   );
 }

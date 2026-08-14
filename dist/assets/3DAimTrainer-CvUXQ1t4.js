@@ -1,4 +1,4 @@
-import{j as e}from"./index-BnK8HbCy.js";import{b as o}from"./vendor-router-DqPzEVhT.js";import{M as g,a as h}from"./minimize-5wtu3niT.js";import"./createLucideIcon-Bzm-evPl.js";const u=`<!DOCTYPE html>
+import{j as e}from"./index-XPV8mCgL.js";import{b as o}from"./vendor-router-DqPzEVhT.js";import{M as g,a as h}from"./minimize-5wtu3niT.js";import"./createLucideIcon-Bzm-evPl.js";const u=`<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
