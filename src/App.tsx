@@ -1,37 +1,36 @@
-import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { usePageTracking } from './hooks/usePageTracking';
 
 // ---------------------------------------------------------------------------
-// Lazy-loaded page components — each page is its own JS chunk loaded on demand
+// Page components — imported statically to avoid hydration flicker (double load)
 // ---------------------------------------------------------------------------
-const HomePage            = lazy(() => import('./pages/HomePage'));
-const CPSTestPage         = lazy(() => import('./pages/CPSTestPage'));
-const TypingTestPage      = lazy(() => import('./pages/TypingTestPage'));
-const ReactionTimePage    = lazy(() => import('./pages/ReactionTimePage'));
-const AimTrainerPage      = lazy(() => import('./pages/AimTrainerPage'));
-const KeyVisualizerPage   = lazy(() => import('./pages/KeyVisualizerPage'));
-const SpacebarPage        = lazy(() => import('./pages/SpacebarPage'));
-const MousePage           = lazy(() => import('./pages/MousePage'));
-const KeyboardPage        = lazy(() => import('./pages/KeyboardPage'));
-const AimPage             = lazy(() => import('./pages/AimPage'));
-const LeaderboardPage     = lazy(() => import('./pages/LeaderboardPage'));
-const BlogPage            = lazy(() => import('./pages/BlogPage'));
-const DoubleClickPage     = lazy(() => import('./pages/DoubleClickPage'));
-const ScrollTestPage      = lazy(() => import('./pages/ScrollTestPage'));
-const MouseAccuracyPage   = lazy(() => import('./pages/MouseAccuracyPage'));
-const ThreeDAimTrainerPage = lazy(() => import('./pages/3DAimTrainer'));
-const AccuracyTestPage    = lazy(() => import('./pages/AccuracyTestPage'));
-const PrivacyPolicy       = lazy(() => import('./pages/PrivacyPolicy'));
-const TermsPage           = lazy(() => import('./pages/TermsPage'));
-const ContactPage         = lazy(() => import('./pages/ContactPage'));
-const SpaceDefensePage    = lazy(() => import('./pages/SpaceDefensePage'));
-const VoyagerGame         = lazy(() => import('./pages/VoyagerGame'));
-const GamesPage           = lazy(() => import('./pages/GamesPage'));
-const F1ReactionPage      = lazy(() => import('./pages/F1ReactionPage'));
-const CpsRush             = lazy(() => import('./pages/CpsRush'));
-const SpaceWavesGame      = lazy(() => import('./pages/SpaceWavesGame'));
+import HomePage from './pages/HomePage';
+import CPSTestPage from './pages/CPSTestPage';
+import TypingTestPage from './pages/TypingTestPage';
+import ReactionTimePage from './pages/ReactionTimePage';
+import AimTrainerPage from './pages/AimTrainerPage';
+import KeyVisualizerPage from './pages/KeyVisualizerPage';
+import SpacebarPage from './pages/SpacebarPage';
+import MousePage from './pages/MousePage';
+import KeyboardPage from './pages/KeyboardPage';
+import AimPage from './pages/AimPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import BlogPage from './pages/BlogPage';
+import DoubleClickPage from './pages/DoubleClickPage';
+import ScrollTestPage from './pages/ScrollTestPage';
+import MouseAccuracyPage from './pages/MouseAccuracyPage';
+import ThreeDAimTrainerPage from './pages/3DAimTrainer';
+import AccuracyTestPage from './pages/AccuracyTestPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsPage from './pages/TermsPage';
+import ContactPage from './pages/ContactPage';
+import SpaceDefensePage from './pages/SpaceDefensePage';
+import VoyagerGame from './pages/VoyagerGame';
+import GamesPage from './pages/GamesPage';
+import F1ReactionPage from './pages/F1ReactionPage';
+import CpsRush from './pages/CpsRush';
+import SpaceWavesGame from './pages/SpaceWavesGame';
 
 import SEO from './components/SEO';
 
@@ -207,31 +206,6 @@ function RouteWithSEO({ path, children }: { path: string, children: React.ReactN
   );
 }
 
-// Minimal loading screen that matches the site's dark neon aesthetic
-function PageLoader() {
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '60vh',
-      flexDirection: 'column',
-      gap: '1rem',
-    }}>
-      <div style={{
-        width: '40px',
-        height: '40px',
-        border: '3px solid rgba(0,245,255,0.2)',
-        borderTop: '3px solid #00f5ff',
-        borderRadius: '50%',
-        animation: 'spin 0.8s linear infinite',
-      }} />
-      <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', letterSpacing: '0.1em' }}>
-        LOADING…
-      </span>
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // AppRoutes — inner component so usePageTracking can access Router context
@@ -240,46 +214,44 @@ function AppRoutes() {
   usePageTracking(); // ← GA4: fires page_view on every route change
 
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
 
-          <Route path="cps-test"       element={<RouteWithSEO path="cps-test"><CPSTestPage /></RouteWithSEO>} />
-          <Route path="typing-test"    element={<RouteWithSEO path="typing-test"><TypingTestPage /></RouteWithSEO>} />
-          <Route path="reaction-time"  element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
-          <Route path="aim-trainer"    element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
-          <Route path="key-visualizer" element={<RouteWithSEO path="key-visualizer"><KeyVisualizerPage /></RouteWithSEO>} />
-          <Route path="spacebar"       element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
-          <Route path="double-click"   element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
-          <Route path="scroll-test"    element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
-          <Route path="mouse-accuracy" element={<RouteWithSEO path="mouse-accuracy"><MouseAccuracyPage /></RouteWithSEO>} />
-          <Route path="3d-aim-trainer" element={<RouteWithSEO path="3d-aim-trainer"><ThreeDAimTrainerPage /></RouteWithSEO>} />
-          <Route path="accuracy"       element={<RouteWithSEO path="accuracy"><AccuracyTestPage /></RouteWithSEO>} />
-          <Route path="space-defense"  element={<RouteWithSEO path="space-defense"><SpaceDefensePage /></RouteWithSEO>} />
-          <Route path="voyager-game"   element={<RouteWithSEO path="voyager-game"><VoyagerGame /></RouteWithSEO>} />
-          <Route path="f1-reaction"    element={<RouteWithSEO path="f1-reaction"><F1ReactionPage /></RouteWithSEO>} />
-          <Route path="cps-rush"       element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
-          <Route path="space-waves"    element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
+        <Route path="cps-test"       element={<RouteWithSEO path="cps-test"><CPSTestPage /></RouteWithSEO>} />
+        <Route path="typing-test"    element={<RouteWithSEO path="typing-test"><TypingTestPage /></RouteWithSEO>} />
+        <Route path="reaction-time"  element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
+        <Route path="aim-trainer"    element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
+        <Route path="key-visualizer" element={<RouteWithSEO path="key-visualizer"><KeyVisualizerPage /></RouteWithSEO>} />
+        <Route path="spacebar"       element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
+        <Route path="double-click"   element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
+        <Route path="scroll-test"    element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
+        <Route path="mouse-accuracy" element={<RouteWithSEO path="mouse-accuracy"><MouseAccuracyPage /></RouteWithSEO>} />
+        <Route path="3d-aim-trainer" element={<RouteWithSEO path="3d-aim-trainer"><ThreeDAimTrainerPage /></RouteWithSEO>} />
+        <Route path="accuracy"       element={<RouteWithSEO path="accuracy"><AccuracyTestPage /></RouteWithSEO>} />
+        <Route path="space-defense"  element={<RouteWithSEO path="space-defense"><SpaceDefensePage /></RouteWithSEO>} />
+        <Route path="voyager-game"   element={<RouteWithSEO path="voyager-game"><VoyagerGame /></RouteWithSEO>} />
+        <Route path="f1-reaction"    element={<RouteWithSEO path="f1-reaction"><F1ReactionPage /></RouteWithSEO>} />
+        <Route path="cps-rush"       element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
+        <Route path="space-waves"    element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
 
-          {/* Category Pages */}
-          <Route path="mouse"    element={<RouteWithSEO path="mouse"><MousePage /></RouteWithSEO>} />
-          <Route path="keyboard" element={<RouteWithSEO path="keyboard"><KeyboardPage /></RouteWithSEO>} />
-          <Route path="aim"      element={<RouteWithSEO path="aim"><AimPage /></RouteWithSEO>} />
-          <Route path="games"    element={<RouteWithSEO path="games"><GamesPage /></RouteWithSEO>} />
+        {/* Category Pages */}
+        <Route path="mouse"    element={<RouteWithSEO path="mouse"><MousePage /></RouteWithSEO>} />
+        <Route path="keyboard" element={<RouteWithSEO path="keyboard"><KeyboardPage /></RouteWithSEO>} />
+        <Route path="aim"      element={<RouteWithSEO path="aim"><AimPage /></RouteWithSEO>} />
+        <Route path="games"    element={<RouteWithSEO path="games"><GamesPage /></RouteWithSEO>} />
 
-          <Route path="leaderboard"  element={<RouteWithSEO path="leaderboard"><LeaderboardPage /></RouteWithSEO>} />
-          <Route path="hall-of-fame" element={<RouteWithSEO path="hall-of-fame"><LeaderboardPage /></RouteWithSEO>} />
+        <Route path="leaderboard"  element={<RouteWithSEO path="leaderboard"><LeaderboardPage /></RouteWithSEO>} />
+        <Route path="hall-of-fame" element={<RouteWithSEO path="hall-of-fame"><LeaderboardPage /></RouteWithSEO>} />
 
-          <Route path="blog"           element={<RouteWithSEO path="blog"><BlogPage /></RouteWithSEO>} />
-          <Route path="privacy-policy" element={<RouteWithSEO path="privacy-policy"><PrivacyPolicy /></RouteWithSEO>} />
-          <Route path="terms"          element={<RouteWithSEO path="terms"><TermsPage /></RouteWithSEO>} />
-          <Route path="contact"        element={<RouteWithSEO path="contact"><ContactPage /></RouteWithSEO>} />
-        </Route>
+        <Route path="blog"           element={<RouteWithSEO path="blog"><BlogPage /></RouteWithSEO>} />
+        <Route path="privacy-policy" element={<RouteWithSEO path="privacy-policy"><PrivacyPolicy /></RouteWithSEO>} />
+        <Route path="terms"          element={<RouteWithSEO path="terms"><TermsPage /></RouteWithSEO>} />
+        <Route path="contact"        element={<RouteWithSEO path="contact"><ContactPage /></RouteWithSEO>} />
+      </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 
