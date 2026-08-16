@@ -426,7 +426,12 @@ const aimTrainerHTML = `<!DOCTYPE html>
     <div class="info-card"><div class="ic-label">Spawn</div><div class="ic-val" style="font-size:13px;">50ms</div></div>
     <div class="info-card"><div class="ic-label">Ammo</div><div class="ic-val" style="font-size:13px;color:#cbd5e1;padding-top:2px;">∞</div></div>
   </div>
-  <button class="btn-primary" id="btn-start">▶ Start Training</button>
+  <div class="sens-control">
+      <div class="sens-label">Sensitivity</div>
+      <input type="range" min="0.1" max="5.0" step="0.1" value="1.0" class="sens-slider" id="sens-slider-start">
+      <div class="sens-value" id="sens-val-start">1.0x</div>
+    </div>
+    <button class="btn-primary" id="btn-start">▶ Start Training</button>
   <div class="hint">ESC to pause · Left click to shoot</div>
 </div>
 <div id="result-popup" class="hidden">
@@ -455,7 +460,12 @@ const aimTrainerHTML = `<!DOCTYPE html>
     <div class="pause-stat"><div class="ps-label">Misses</div><div class="ps-val" id="p-misses">0</div></div>
     <div class="pause-stat"><div class="ps-label">Accuracy</div><div class="ps-val" id="p-acc">-</div></div>
   </div>
-  <button class="btn-primary" id="btn-resume">▶ Resume</button>
+  <div class="sens-control" style="margin-bottom: 24px;">
+      <div class="sens-label">Sensitivity</div>
+      <input type="range" min="0.1" max="5.0" step="0.1" value="1.0" class="sens-slider" id="sens-slider-pause">
+      <div class="sens-value" id="sens-val-pause">1.0x</div>
+    </div>
+    <button class="btn-primary" id="btn-resume">▶ Resume</button>
   <button class="btn-secondary" id="btn-restart">Restart</button>
   <button class="btn-secondary" id="btn-pause-menu" style="margin-top: 14px;">↩ Menu</button>
 </div>
@@ -557,15 +567,40 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerH
 camera.position.set(0, 1.65, 0);
 const euler = new THREE.Euler(0, 0, 0, 'YXZ');
 const PI_2 = Math.PI / 2;
-const lookSensitivity = 0.0018;
+const baseLookSensitivity = 0.0018;
+let userSensMultiplier = parseFloat(localStorage.getItem('aimTrainerSens')) || 1.0;
 function applyMouseMove(dx, dy) {
+  const finalSens = baseLookSensitivity * userSensMultiplier;
   euler.setFromQuaternion(camera.quaternion);
-  euler.y -= dx * lookSensitivity;
-  euler.x -= dy * lookSensitivity;
+  euler.y -= dx * finalSens;
+  euler.x -= dy * finalSens;
   euler.x = Math.max(-PI_2 * 0.88, Math.min(PI_2 * 0.88, euler.x));
   camera.quaternion.setFromEuler(euler);
 }
-window.addEventListener('resize', () => {
+const setupSensUI = (idBase) => {
+    const slider = document.getElementById('sens-slider-' + idBase);
+    const valText = document.getElementById('sens-val-' + idBase);
+    if (slider && valText) {
+      slider.value = userSensMultiplier;
+      valText.textContent = userSensMultiplier.toFixed(1) + 'x';
+      slider.addEventListener('input', (e) => {
+        userSensMultiplier = parseFloat(e.target.value);
+        valText.textContent = userSensMultiplier.toFixed(1) + 'x';
+        localStorage.setItem('aimTrainerSens', userSensMultiplier);
+        const otherBase = idBase === 'start' ? 'pause' : 'start';
+        const otherSlider = document.getElementById('sens-slider-' + otherBase);
+        const otherVal = document.getElementById('sens-val-' + otherBase);
+        if (otherSlider && otherVal) {
+          otherSlider.value = userSensMultiplier;
+          otherVal.textContent = userSensMultiplier.toFixed(1) + 'x';
+        }
+      });
+    }
+  };
+  setupSensUI('start');
+  setupSensUI('pause');
+
+  window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);

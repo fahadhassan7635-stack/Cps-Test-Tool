@@ -605,3 +605,24 @@ html, body { margin: 0; padding: 0; }
   .footer-grid { grid-template-columns: 1fr; }
 }
 
+
+/* Added to fix SSR hydration mismatch on inline styles */
+.hero-gradient-text {
+  display: block;
+  background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-green) 50%, var(--neon-cyan) 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--neon-green);
+  display: inline-block;
+  box-shadow: 0 0 8px var(--neon-green);
+  animation: pulse-glow 2s infinite;
+}

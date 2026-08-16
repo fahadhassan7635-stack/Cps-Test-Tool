@@ -370,12 +370,7 @@ export default function HomePage() {
           color: 'var(--neon-cyan)', marginBottom: '2rem',
           letterSpacing: '0.05em',
         }}>
-          <span style={{
-            width: '7px', height: '7px', borderRadius: '50%',
-            background: 'var(--neon-green)', display: 'inline-block',
-            boxShadow: '0 0 8px var(--neon-green)',
-            animation: 'pulse-glow 2s infinite',
-          }} />
+          <span className="hero-pulse-dot" />
           v2.0 — Daily Challenges Live
         </div>
 
@@ -386,15 +381,7 @@ export default function HomePage() {
           marginBottom: '1.5rem',
         }}>
           <span style={{ display: 'block', color: 'var(--text-primary)' }}>Test Train </span>
-          <span style={{
-            display: 'block',
-            background: 'linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-green) 50%, var(--neon-cyan) 100%)',
-            backgroundSize: '200% 200%',
-            animation: 'gradient-shift 3s ease infinite',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}>Dominate </span>
+          <span className="hero-gradient-text">Dominate </span>
         </h1>
 
         <p className="fade-in-up d2" style={{
@@ -483,7 +470,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="fade-in-up d4" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div  style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/cps-test" className="btn btn-primary" style={{ fontSize: '1rem', padding: '0.85rem 2rem' }}>
             ⚡ Start CPS Test
           </Link>
@@ -492,7 +479,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="fade-in-up d5" style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
+        <div  style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'center' }}>
           <button 
             onClick={() => {
               const element = document.getElementById('all-tools');
