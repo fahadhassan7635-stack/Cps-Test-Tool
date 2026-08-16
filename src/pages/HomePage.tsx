@@ -814,7 +814,7 @@ export default function HomePage() {
                 textAlign: 'center', marginBottom: '1.5rem',
               }}>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Resets in</div>
-                <div style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums' }}>
+                <div suppressHydrationWarning style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums' }}>
                   {challengeTime}
                 </div>
               </div>
