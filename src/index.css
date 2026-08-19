@@ -47,15 +47,7 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; opacity: 0.5; }
 
-/* ============================================================
-   Animations — double-fire fixed
-   - animation-fill-mode: both  →  honours delay without flash
-   - will-change: transform, opacity  →  compositor layer, no re-trigger
-   ============================================================ */
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(30px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* Keyframes — only for looping/interactive animations, not page-entry */
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 20px rgba(0,245,255,0.3); }
   50%       { box-shadow: 0 0 40px rgba(0,245,255,0.6); }
@@ -86,18 +78,18 @@ body {
   to   { transform: scale(1);   opacity: 1; }
 }
 
-/* fade-in-up — fill-mode: both prevents the opacity-0 flash on hydration */
+/* fade-in-up — animation removed to prevent double-fire on prerender+hydration.
+   Prerender already shows content instantly; no entry animation needed. */
 .fade-in-up {
-  animation: fadeInUp 0.6s ease;
-  animation-fill-mode: both;
-  will-change: transform, opacity;
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Delay helpers — no inline opacity:0 needed; 'both' handles it */
-.d1 { animation-delay: 0.1s; }
-.d2 { animation-delay: 0.2s; }
-.d3 { animation-delay: 0.3s; }
-.d4 { animation-delay: 0.4s; }
+/* Delay helpers — kept for compatibility but no longer animate */
+.d1 { }
+.d2 { }
+.d3 { }
+.d4 { }
 
 /* Buttons */
 .btn {
@@ -615,12 +607,7 @@ html, body { margin: 0; padding: 0; }
   .footer-grid         { grid-template-columns: 1fr; }
 }
 
-/* ============================================================
-   Hero gradient text
-   — background-size:200% lets gradient-shift animate smoothly
-   — will-change keeps it on its own compositor layer so it
-     never triggers a second layout/paint pass on hydration
-   ============================================================ */
+/* Hero gradient text */
 .hero-gradient-text {
   display: block;
   background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-green) 50%, var(--neon-cyan) 100%);
@@ -632,11 +619,7 @@ html, body { margin: 0; padding: 0; }
   will-change: background-position;
 }
 
-/* ============================================================
-   Hero pulse dot
-   — pulse-glow animates box-shadow only (no transform),
-     so it never conflicts with layout animations
-   ============================================================ */
+/* Hero pulse dot */
 .hero-pulse-dot {
   width: 7px;
   height: 7px;
@@ -646,27 +629,4 @@ html, body { margin: 0; padding: 0; }
   box-shadow: 0 0 8px var(--neon-green);
   animation: pulse-glow 2s ease infinite;
   will-change: box-shadow;
-}
-
-/* ============================================================
-   Hydration animation fix
-   — during SSR hydration, #root gets class "hydrating"
-   — this pauses ALL animations so SSR paint + hydration paint
-     don't both fire animations (double animation fix)
-   — class is removed after 2x rAF in main.tsx
-   ============================================================ */
-#root.hydrating *,
-#root.hydrating *::before,
-#root.hydrating *::after {
-  animation-play-state: paused !important;
-  transition: none !important;
-}
-
-/* hero-gradient-text & hero-pulse-dot — negative delay so they
-   appear already mid-animation on first paint, no visible restart */
-.hero-gradient-text {
-  animation-delay: -1.5s;
-}
-.hero-pulse-dot {
-  animation-delay: -0.5s;
 }
