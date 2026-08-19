@@ -1453,7 +1453,12 @@ Space Waves rewards anticipation and short, controlled taps far more than raw re
     <div class="info-card"><div class="ic-label">Spawn</div><div class="ic-val" style="font-size:13px;">50ms</div></div>
     <div class="info-card"><div class="ic-label">Ammo</div><div class="ic-val" style="font-size:13px;color:#cbd5e1;padding-top:2px;">∞</div></div>
   </div>
-  <button class="btn-primary" id="btn-start">▶ Start Training</button>
+  <div class="sens-control">
+      <div class="sens-label">Sensitivity</div>
+      <input type="range" min="0.1" max="5.0" step="0.1" value="1.0" class="sens-slider" id="sens-slider-start">
+      <div class="sens-value" id="sens-val-start">1.0x</div>
+    </div>
+    <button class="btn-primary" id="btn-start">▶ Start Training</button>
   <div class="hint">ESC to pause · Left click to shoot</div>
 </div>
 <div id="result-popup" class="hidden">
@@ -1482,7 +1487,12 @@ Space Waves rewards anticipation and short, controlled taps far more than raw re
     <div class="pause-stat"><div class="ps-label">Misses</div><div class="ps-val" id="p-misses">0</div></div>
     <div class="pause-stat"><div class="ps-label">Accuracy</div><div class="ps-val" id="p-acc">-</div></div>
   </div>
-  <button class="btn-primary" id="btn-resume">▶ Resume</button>
+  <div class="sens-control" style="margin-bottom: 24px;">
+      <div class="sens-label">Sensitivity</div>
+      <input type="range" min="0.1" max="5.0" step="0.1" value="1.0" class="sens-slider" id="sens-slider-pause">
+      <div class="sens-value" id="sens-val-pause">1.0x</div>
+    </div>
+    <button class="btn-primary" id="btn-resume">▶ Resume</button>
   <button class="btn-secondary" id="btn-restart">Restart</button>
   <button class="btn-secondary" id="btn-pause-menu" style="margin-top: 14px;">↩ Menu</button>
 </div>
@@ -1505,62 +1515,55 @@ function ensureAudio() {
 function playGunshot() {
   if (!audioCtx) return;
   const t = audioCtx.currentTime;
-  const sr = audioCtx.sampleRate;
-  // Layer 1: Transient click (bolt snap)
-  const ckB = audioCtx.createBuffer(1, Math.floor(sr*0.008), sr);
-  const ckD = ckB.getChannelData(0);
-  for (let i=0;i<ckD.length;i++) ckD[i]=(Math.random()*2-1)*(1-i/ckD.length);
-  const ckS=audioCtx.createBufferSource(); ckS.buffer=ckB;
-  const ckG=audioCtx.createGain(); ckG.gain.setValueAtTime(2.8,t); ckG.gain.exponentialRampToValueAtTime(0.001,t+0.009);
-  ckS.connect(ckG); ckG.connect(audioCtx.destination); ckS.start(t); ckS.stop(t+0.01);
-  // Layer 2: Noise blast (gunpowder explosion)
-  const blB=audioCtx.createBuffer(1,Math.floor(sr*0.19),sr);
-  const blD=blB.getChannelData(0);
-  for (let i=0;i<blD.length;i++) blD[i]=Math.random()*2-1;
-  const blS=audioCtx.createBufferSource(); blS.buffer=blB;
-  const lp=audioCtx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=2200; lp.Q.value=0.5;
-  const hp=audioCtx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=110; hp.Q.value=0.4;
-  const blG=audioCtx.createGain();
-  blG.gain.setValueAtTime(0,t); blG.gain.linearRampToValueAtTime(1.5,t+0.003); blG.gain.exponentialRampToValueAtTime(0.001,t+0.19);
-  blS.connect(hp); hp.connect(lp); lp.connect(blG); blG.connect(audioCtx.destination); blS.start(t); blS.stop(t+0.19);
-  // Layer 3: Sub-bass thump (pressure wave)
-  const thO=audioCtx.createOscillator(); const thG=audioCtx.createGain();
-  thO.type='sine'; thO.frequency.setValueAtTime(95,t); thO.frequency.exponentialRampToValueAtTime(26,t+0.09);
-  thG.gain.setValueAtTime(1.2,t); thG.gain.exponentialRampToValueAtTime(0.001,t+0.1);
-  thO.connect(thG); thG.connect(audioCtx.destination); thO.start(t); thO.stop(t+0.11);
-  // Layer 4: Metallic clink (shell casing ejection)
-  const clO=audioCtx.createOscillator(); const clG=audioCtx.createGain();
-  clO.type='triangle'; clO.frequency.setValueAtTime(3800,t+0.04); clO.frequency.exponentialRampToValueAtTime(1800,t+0.11);
-  clG.gain.setValueAtTime(0,t+0.04); clG.gain.linearRampToValueAtTime(0.18,t+0.05); clG.gain.exponentialRampToValueAtTime(0.001,t+0.13);
-  clO.connect(clG); clG.connect(audioCtx.destination); clO.start(t+0.04); clO.stop(t+0.14);
+  const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.12, audioCtx.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1);
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(1.2, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
+  const filter = audioCtx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = 420;
+  filter.Q.value = 0.6;
+  src.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
+  src.start(t); src.stop(t + 0.12);
+  const osc = audioCtx.createOscillator();
+  const og = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(140, t);
+  osc.frequency.exponentialRampToValueAtTime(40, t + 0.1);
+  og.gain.setValueAtTime(0.8, t);
+  og.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+  osc.connect(og); og.connect(audioCtx.destination);
+  osc.start(t); osc.stop(t + 0.1);
 }
 function playHit() {
   if (!audioCtx) return;
   const t = audioCtx.currentTime;
-  const nB=audioCtx.createBuffer(1,Math.floor(audioCtx.sampleRate*0.06),audioCtx.sampleRate);
-  const nD=nB.getChannelData(0);
-  for (let i=0;i<nD.length;i++) nD[i]=Math.random()*2-1;
-  const nS=audioCtx.createBufferSource(); nS.buffer=nB;
-  const nLp=audioCtx.createBiquadFilter(); nLp.type='lowpass'; nLp.frequency.value=750;
-  const nG=audioCtx.createGain(); nG.gain.setValueAtTime(0.55,t); nG.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-  nS.connect(nLp); nLp.connect(nG); nG.connect(audioCtx.destination); nS.start(t); nS.stop(t+0.07);
-  const osc=audioCtx.createOscillator(); const g=audioCtx.createGain();
-  osc.type='sine'; osc.frequency.setValueAtTime(340,t); osc.frequency.exponentialRampToValueAtTime(75,t+0.055);
-  g.gain.setValueAtTime(0.42,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.06);
-  osc.connect(g); g.connect(audioCtx.destination); osc.start(t); osc.stop(t+0.065);
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(900, t);
+  osc.frequency.exponentialRampToValueAtTime(400, t + 0.06);
+  g.gain.setValueAtTime(0.35, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+  osc.connect(g); g.connect(audioCtx.destination);
+  osc.start(t); osc.stop(t + 0.07);
 }
 function playDestroy() {
   if (!audioCtx) return;
   const t = audioCtx.currentTime;
-  [0,0.022,0.05].forEach((delay,i) => {
-    const dur=0.09-i*0.015;
-    const nb=audioCtx.createBuffer(1,Math.floor(audioCtx.sampleRate*dur),audioCtx.sampleRate);
-    const d=nb.getChannelData(0);
-    for (let j=0;j<d.length;j++) d[j]=Math.random()*2-1;
-    const ns=audioCtx.createBufferSource(); ns.buffer=nb;
-    const bp=audioCtx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1200+i*600; bp.Q.value=1.5;
-    const ng=audioCtx.createGain(); ng.gain.setValueAtTime(0.35-i*0.08,t+delay); ng.gain.exponentialRampToValueAtTime(0.001,t+delay+dur);
-    ns.connect(bp); bp.connect(ng); ng.connect(audioCtx.destination); ns.start(t+delay); ns.stop(t+delay+dur);
+  [600, 800, 1100].forEach((freq, i) => {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(freq, t + i * 0.018);
+    g.gain.setValueAtTime(0.22, t + i * 0.018);
+    g.gain.exponentialRampToValueAtTime(0.001, t + i * 0.018 + 0.08);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t + i * 0.018); o.stop(t + i * 0.018 + 0.09);
   });
 }
 const state = { running: false, paused: false, hits: 0, misses: 0, score: 0, startTime: 0, pauseAccum: 0, pauseStart: 0 };
@@ -1601,25 +1604,30 @@ function applyMouseMove(dx, dy) {
   euler.x = Math.max(-PI_2 * 0.88, Math.min(PI_2 * 0.88, euler.x));
   camera.quaternion.setFromEuler(euler);
 }
-const setupSensUI = (id) => {
-    const sl = document.getElementById('sens-sl-' + id);
-    const num = document.getElementById('sens-num-' + id);
-    if (!sl || !num) return;
-    sl.value = userSensMultiplier;
-    num.textContent = userSensMultiplier.toFixed(1) + 'x';
-    sl.addEventListener('input', (e) => {
-      userSensMultiplier = parseFloat(e.target.value);
-      num.textContent = userSensMultiplier.toFixed(1) + 'x';
-      localStorage.setItem('aimTrainerSens', String(userSensMultiplier));
-      const otherId = id === 'start' ? 'pause' : 'start';
-      const oSl = document.getElementById('sens-sl-' + otherId);
-      const oNum = document.getElementById('sens-num-' + otherId);
-      if (oSl && oNum) { oSl.value = String(userSensMultiplier); oNum.textContent = userSensMultiplier.toFixed(1) + 'x'; }
-    });
+const setupSensUI = (idBase) => {
+    const slider = document.getElementById('sens-slider-' + idBase);
+    const valText = document.getElementById('sens-val-' + idBase);
+    if (slider && valText) {
+      slider.value = userSensMultiplier;
+      valText.textContent = userSensMultiplier.toFixed(1) + 'x';
+      slider.addEventListener('input', (e) => {
+        userSensMultiplier = parseFloat(e.target.value);
+        valText.textContent = userSensMultiplier.toFixed(1) + 'x';
+        localStorage.setItem('aimTrainerSens', userSensMultiplier);
+        const otherBase = idBase === 'start' ? 'pause' : 'start';
+        const otherSlider = document.getElementById('sens-slider-' + otherBase);
+        const otherVal = document.getElementById('sens-val-' + otherBase);
+        if (otherSlider && otherVal) {
+          otherSlider.value = userSensMultiplier;
+          otherVal.textContent = userSensMultiplier.toFixed(1) + 'x';
+        }
+      });
+    }
   };
   setupSensUI('start');
   setupSensUI('pause');
-window.addEventListener('resize', () => {
+
+  window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   if (renderer) renderer.setSize(window.innerWidth, window.innerHeight);

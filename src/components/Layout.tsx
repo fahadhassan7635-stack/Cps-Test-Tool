@@ -79,20 +79,19 @@ export default function Layout() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
             <div style={{
-              width: '32px', height: '32px',
+              width: '44px', height: '44px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent',
             }}>
-              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'screen', transform: 'scale(1)' }} />
+              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} />
             </div>
             <span style={{
               fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em',
               textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
             }}>
-              Fixed<span style={{
+              Fixed <span style={{
                 color: 'var(--neon-cyan)',
-                textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)',
-                marginLeft: '6px'
+                textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)'
               }}>Aim</span>
             </span>
           </Link>
@@ -397,16 +396,15 @@ export default function Layout() {
           <div style={{ paddingRight: '2rem' }}>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', marginBottom: '1rem' }}>
               <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
-                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'screen', transform: 'scale(1.2)' }} />
+                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(0,245,255,0.7)) drop-shadow(0 0 12px rgba(0,245,255,0.4))' }} />
               </div>
               <span style={{
                 fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)',
                 textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
               }}>
-                Fixed<span style={{
+                Fixed <span style={{
                   color: 'var(--neon-cyan, #00f5ff)',
-                  textShadow: '0 0 8px var(--neon-cyan, #00f5ff), 0 0 20px var(--neon-cyan, #00f5ff)',
-                  marginLeft: '6px'
+                  textShadow: '0 0 8px var(--neon-cyan, #00f5ff), 0 0 20px var(--neon-cyan, #00f5ff)'
                 }}>Aim</span>
               </span>
             </Link>
@@ -479,7 +477,7 @@ export default function Layout() {
         </div>
 
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '1.5rem 0 0 0', maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>© Fixed Aim - All rights reserved.</p>
+          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>© FixedAim — All rights reserved.</p>
           <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link to="/privacy-policy" className="footer-bottom-link">Privacy Policy</Link>
             <Link to="/terms" className="footer-bottom-link">Terms of Service</Link>
