@@ -47,18 +47,22 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg-primary); }
 ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; opacity: 0.5; }
 
-/* Animations */
+/* ============================================================
+   Animations — double-fire fixed
+   - animation-fill-mode: both  →  honours delay without flash
+   - will-change: transform, opacity  →  compositor layer, no re-trigger
+   ============================================================ */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes pulse-glow {
   0%, 100% { box-shadow: 0 0 20px rgba(0,245,255,0.3); }
-  50% { box-shadow: 0 0 40px rgba(0,245,255,0.6); }
+  50%       { box-shadow: 0 0 40px rgba(0,245,255,0.6); }
 }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50%       { transform: translateY(-10px); }
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -66,27 +70,34 @@ body {
   75%, 100% { transform: scale(2); opacity: 0; }
 }
 @keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 @keyframes target-appear {
   from { transform: scale(0) translate(-50%,-50%); opacity: 0; }
-  to { transform: scale(1) translate(-50%,-50%); opacity: 1; }
+  to   { transform: scale(1) translate(-50%,-50%); opacity: 1; }
 }
 @keyframes ripple {
   to { transform: scale(4); opacity: 0; }
 }
 @keyframes countdown {
   from { transform: scale(1.5); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  to   { transform: scale(1);   opacity: 1; }
 }
 
-.fade-in-up { animation: fadeInUp 0.6s ease forwards; }
-.d1 { animation-delay: 0.1s; opacity: 0; }
-.d2 { animation-delay: 0.2s; opacity: 0; }
-.d3 { animation-delay: 0.3s; opacity: 0; }
-.d4 { animation-delay: 0.4s; opacity: 0; }
+/* fade-in-up — fill-mode: both prevents the opacity-0 flash on hydration */
+.fade-in-up {
+  animation: fadeInUp 0.6s ease;
+  animation-fill-mode: both;
+  will-change: transform, opacity;
+}
+
+/* Delay helpers — no inline opacity:0 needed; 'both' handles it */
+.d1 { animation-delay: 0.1s; }
+.d2 { animation-delay: 0.2s; }
+.d3 { animation-delay: 0.3s; }
+.d4 { animation-delay: 0.4s; }
 
 /* Buttons */
 .btn {
@@ -201,10 +212,10 @@ body {
 }
 
 /* Neon text colors */
-.text-cyan { color: var(--neon-cyan); }
-.text-green { color: var(--neon-green); }
+.text-cyan   { color: var(--neon-cyan); }
+.text-green  { color: var(--neon-green); }
 .text-orange { color: var(--neon-orange); }
-.text-red { color: var(--neon-red); }
+.text-red    { color: var(--neon-red); }
 .text-purple { color: var(--neon-purple); }
 .text-yellow { color: var(--neon-yellow); }
 
@@ -237,9 +248,9 @@ body {
   padding: 1rem;
   margin: 1rem 0;
 }
-.ad-Hall of Fame { height: 90px; }
-.ad-sidebar { height: 250px; }
-.ad-banner { height: 90px; }
+.ad-leaderboard { height: 90px; }
+.ad-sidebar     { height: 250px; }
+.ad-banner      { height: 90px; }
 
 /* Keyboard key styles */
 .key {
@@ -281,7 +292,7 @@ body {
   border-radius: 50%;
   cursor: crosshair;
   transform: translate(-50%, -50%);
-  animation: target-appear 0.15s ease forwards;
+  animation: target-appear 0.15s ease both;
   transition: box-shadow 0.1s;
 }
 .aim-target:hover {
@@ -323,7 +334,7 @@ body {
   justify-content: center;
   font-size: 1rem;
 }
-.lb-name { flex: 1; font-weight: 500; }
+.lb-name  { flex: 1; font-weight: 500; }
 .lb-score { font-weight: 700; color: var(--neon-cyan); }
 .lb-country { font-size: 1.1rem; }
 
@@ -334,10 +345,10 @@ body {
   line-height: 2;
   letter-spacing: 0.05em;
 }
-.char-default { color: var(--text-muted); }
-.char-correct { color: var(--neon-green); }
-.char-wrong { color: var(--neon-red); background: rgba(255,45,85,0.15); border-radius: 2px; }
-.char-current { background: rgba(0,245,255,0.3); border-radius: 2px; animation: blink 1s infinite; }
+.char-default  { color: var(--text-muted); }
+.char-correct  { color: var(--neon-green); }
+.char-wrong    { color: var(--neon-red); background: rgba(255,45,85,0.15); border-radius: 2px; }
+.char-current  { background: rgba(0,245,255,0.3); border-radius: 2px; animation: blink 1s infinite; }
 
 /* CPS click zone */
 .cps-zone {
@@ -445,10 +456,10 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-.diff-easy { background: rgba(0,255,136,0.15); color: var(--neon-green); }
+.diff-easy   { background: rgba(0,255,136,0.15);  color: var(--neon-green); }
 .diff-medium { background: rgba(255,214,10,0.15); color: var(--neon-yellow); }
-.diff-hard { background: rgba(255,107,0,0.15); color: var(--neon-orange); }
-.diff-insane { background: rgba(255,45,85,0.15); color: var(--neon-red); }
+.diff-hard   { background: rgba(255,107,0,0.15);  color: var(--neon-orange); }
+.diff-insane { background: rgba(255,45,85,0.15);  color: var(--neon-red); }
 
 /* Tooltip */
 .tooltip {
@@ -475,7 +486,7 @@ body {
 }
 .tooltip:hover::after { opacity: 1; }
 
-/* Scrollbar for code areas */
+/* Code area */
 .code-area {
   font-family: 'Courier New', monospace;
   background: rgba(0,0,0,0.3);
@@ -490,26 +501,25 @@ body {
 
 /* ==========================================================================
    Layout Component Styles
-   (Extracted from Layout.tsx <style> block for browser caching)
    ========================================================================== */
 
 html, body { margin: 0; padding: 0; }
 
-.top-nav { padding: 0 2rem; }
-.main-content { padding: 2rem; }
-.main-footer { padding: 3rem 2rem 1.5rem; }
-.mobile-menu-overlay { padding: 1rem 2rem; }
+.top-nav            { padding: 0 2rem; }
+.main-content       { padding: 2rem; }
+.main-footer        { padding: 3rem 2rem 1.5rem; }
+.mobile-menu-overlay{ padding: 1rem 2rem; }
 
 .footer-grid { grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; }
 
 .top-nav-link:hover {
-  color: var(--neon-cyan, #00f5ff) !important;
+  color: var(--neon-cyan) !important;
   background: rgba(0,245,255,0.1) !important;
   text-shadow: 0 0 8px rgba(0,245,255,0.6);
 }
 
 .mobile-nav-link:hover {
-  color: var(--neon-cyan, #00f5ff) !important;
+  color: var(--neon-cyan) !important;
   background: rgba(0,245,255,0.1) !important;
 }
 
@@ -520,7 +530,7 @@ html, body { margin: 0; padding: 0; }
   transition: color 0.2s, text-shadow 0.2s;
 }
 .footer-link:hover {
-  color: var(--neon-cyan, #00f5ff);
+  color: var(--neon-cyan);
   text-shadow: 0 0 8px rgba(0,245,255,0.5);
 }
 
@@ -530,7 +540,7 @@ html, body { margin: 0; padding: 0; }
   font-size: 0.85rem;
   transition: color 0.2s;
 }
-.footer-bottom-link:hover { color: var(--neon-cyan, #00f5ff); }
+.footer-bottom-link:hover { color: var(--neon-cyan); }
 
 .social-btn {
   width: 36px;
@@ -547,7 +557,7 @@ html, body { margin: 0; padding: 0; }
 }
 .social-btn:hover {
   background: rgba(0,245,255,0.12);
-  color: var(--neon-cyan, #00f5ff);
+  color: var(--neon-cyan);
   box-shadow: 0 0 10px rgba(0,245,255,0.4);
 }
 
@@ -585,28 +595,32 @@ html, body { margin: 0; padding: 0; }
   transition-delay: 0.35s;
 }
 
-.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar       { width: 4px; }
 .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
 
 @media (max-width: 1024px) {
-  .desktop-nav { display: none !important; }
+  .desktop-nav   { display: none !important; }
   .hamburger-btn { display: flex !important; }
-  .sidebar-pannel { display: none !important; }
-  .footer-grid { grid-template-columns: repeat(2, 1fr); }
+  .sidebar-pannel{ display: none !important; }
+  .footer-grid   { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .top-nav { padding: 0 1rem !important; }
-  .main-content { padding: 1rem !important; }
-  .main-footer { padding: 2rem 1rem 1rem !important; }
+  .top-nav             { padding: 0 1rem !important; }
+  .main-content        { padding: 1rem !important; }
+  .main-footer         { padding: 2rem 1rem 1rem !important; }
   .mobile-menu-overlay { padding: 1rem !important; }
-  .footer-grid { grid-template-columns: 1fr; }
+  .footer-grid         { grid-template-columns: 1fr; }
 }
 
-
-/* Added to fix SSR hydration mismatch on inline styles */
+/* ============================================================
+   Hero gradient text
+   — background-size:200% lets gradient-shift animate smoothly
+   — will-change keeps it on its own compositor layer so it
+     never triggers a second layout/paint pass on hydration
+   ============================================================ */
 .hero-gradient-text {
   display: block;
   background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-green) 50%, var(--neon-cyan) 100%);
@@ -615,8 +629,14 @@ html, body { margin: 0; padding: 0; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  will-change: background-position;
 }
 
+/* ============================================================
+   Hero pulse dot
+   — pulse-glow animates box-shadow only (no transform),
+     so it never conflicts with layout animations
+   ============================================================ */
 .hero-pulse-dot {
   width: 7px;
   height: 7px;
@@ -624,5 +644,6 @@ html, body { margin: 0; padding: 0; }
   background: var(--neon-green);
   display: inline-block;
   box-shadow: 0 0 8px var(--neon-green);
-  animation: pulse-glow 2s infinite;
+  animation: pulse-glow 2s ease infinite;
+  will-change: box-shadow;
 }
