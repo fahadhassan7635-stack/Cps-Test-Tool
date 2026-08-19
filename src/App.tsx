@@ -199,16 +199,17 @@ function RouteWithSEO({ path, children }: { path: string, children: React.ReactN
 }
 
 // ---------------------------------------------------------------------------
-// AppRoutes — key={location.pathname} fixes double animation on navigation
-// React destroys the old tree completely before mounting the new one,
-// so fade-in-up animations fire exactly once per page visit.
+// AppRoutes — key={location.pathname} REMOVED to fix double animation bug.
+// That prop was causing Routes to fully unmount/remount on every navigation,
+// firing page-entry animations twice. location={location} is kept so that
+// usePageTracking() still sees the correct pathname on each render.
 // ---------------------------------------------------------------------------
 function AppRoutes() {
   usePageTracking();
-  const location = useLocation(); // ← NEW
+  const location = useLocation();
 
   return (
-    <Routes location={location} key={location.pathname}> {/* ← key fixes double animation */}
+    <Routes location={location}>
       <Route path="/" element={<Layout />}>
         <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
 
