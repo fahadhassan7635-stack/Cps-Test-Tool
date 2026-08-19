@@ -362,7 +362,7 @@ export default function HomePage() {
 
       {/* Hero */}
       <section style={{ textAlign: 'center', padding: '5rem 1rem 4rem' }}>
-        <div className="fade-in-up" style={{
+        <div  style={{
           display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
           padding: '0.3rem 1rem',
           background: 'rgba(0,245,255,0.08)', border: '1px solid rgba(0,245,255,0.25)',
@@ -374,7 +374,7 @@ export default function HomePage() {
           v2.0 — Daily Challenges Live
         </div>
 
-        <h1 className="fade-in-up d1" style={{
+        <h1  style={{
           fontSize: 'clamp(3rem, 8vw, 6rem)',
           fontWeight: '900',
           lineHeight: '1.1',
@@ -384,7 +384,7 @@ export default function HomePage() {
           <span className="hero-gradient-text">Dominate </span>
         </h1>
 
-        <p className="fade-in-up d2" style={{
+        <p  style={{
           fontSize: 'clamp(1rem, 2vw, 1.25rem)',
           color: 'var(--text-secondary)',
           maxWidth: '600px', margin: '0 auto 2.5rem',
@@ -393,7 +393,7 @@ export default function HomePage() {
           The ultimate free platform to test your clicking speed, typing WPM, reaction time, aim precision, and more. 14 professional tools. No signup. No downloads. Just pure performance data.
         </p>
 
-        <div className="fade-in-up d3" style={{ marginBottom: '2.5rem' }}>
+        <div  style={{ marginBottom: '2.5rem' }}>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem', textAlign: 'center' }}>
             🔥 Most Popular Tools
           </div>
