@@ -630,3 +630,13 @@ html, body { margin: 0; padding: 0; }
   animation: pulse-glow 2s ease infinite;
   will-change: box-shadow;
 }
+
+/* Prerender hydration fix — freezes animations until React attaches.
+   __prerender-freeze__ style + hydrating class both removed in main.tsx
+   after 2x rAF, so animations fire exactly once after hydration. */
+#root.hydrating *,
+#root.hydrating *::before,
+#root.hydrating *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
