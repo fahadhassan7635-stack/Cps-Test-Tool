@@ -647,3 +647,26 @@ html, body { margin: 0; padding: 0; }
   animation: pulse-glow 2s ease infinite;
   will-change: box-shadow;
 }
+
+/* ============================================================
+   Hydration animation fix
+   — during SSR hydration, #root gets class "hydrating"
+   — this pauses ALL animations so SSR paint + hydration paint
+     don't both fire animations (double animation fix)
+   — class is removed after 2x rAF in main.tsx
+   ============================================================ */
+#root.hydrating *,
+#root.hydrating *::before,
+#root.hydrating *::after {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+/* hero-gradient-text & hero-pulse-dot — negative delay so they
+   appear already mid-animation on first paint, no visible restart */
+.hero-gradient-text {
+  animation-delay: -1.5s;
+}
+.hero-pulse-dot {
+  animation-delay: -0.5s;
+}
