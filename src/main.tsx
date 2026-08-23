@@ -16,6 +16,19 @@ const app = (
 // In development (vite dev), root is always empty, so we fall back to createRoot.
 if (rootEl.hasChildNodes()) {
   hydrateRoot(rootEl, app);
+  
+  // Cleanup the hydration freeze after React finishes hydrating.
+  // Use double requestAnimationFrame to ensure the browser has painted the hydrated DOM
+  // before we remove the freeze, preventing a flash or double-animation.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      rootEl.classList.remove('hydrating');
+      const freezeStyle = document.getElementById('__prerender-freeze__');
+      if (freezeStyle) {
+        freezeStyle.remove();
+      }
+    });
+  });
 } else {
   createRoot(rootEl).render(app);
 }

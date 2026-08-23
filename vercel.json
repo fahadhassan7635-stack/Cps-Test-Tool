@@ -1,1 +1,12 @@
-{"outputDirectory": "dist", "buildCommand": "npm run build", "rewrites": [{"source": "/(.*)", "destination": "/index.html"}]}
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "outputDirectory": "dist",
+  "buildCommand": "npm run build",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

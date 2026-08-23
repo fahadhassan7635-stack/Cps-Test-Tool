@@ -46,6 +46,8 @@ interface PageMeta {
   title: string;
   desc: string;
   applicationCategory?: AppCategory;
+  /** Longer name used only in the WebPage JSON-LD schema (not the <title> tag). */
+  schemaName?: string;
 }
 
 // CHANGED: all titles are now SEO-friendly with "| FixedAim" suffix and descriptive keywords.
@@ -54,6 +56,7 @@ const PAGE_META: Record<string, PageMeta> = {
   '/': {
     title: 'FixedAim - Free CPS Test, Aim Trainer & Typing Speed Test Online',
     desc:  'The ultimate free platform to test clicking speed, typing WPM, reaction time, and aim precision. No signup needed. Play, test, and improve instantly.',
+    schemaName: 'FixedAim - Free CPS Test, Typing Test, Reaction Time Test, 2D Aim Trainer, 3D Aim Trainer, Spacebar Counter, Double Click Test, Scroll Test, Mouse Accuracy, Key Visualizer, Accuracy Test, Space Defense, Voyager Game, F1 Reaction, CPS Rush & Space Waves',
   },
 
   // ── Tools ──────────────────────────────────────────────────────────────────
@@ -73,7 +76,7 @@ const PAGE_META: Record<string, PageMeta> = {
     applicationCategory: 'UtilitiesApplication',
   },
   'aim-trainer': {
-    title: 'Aim Trainer - Free Browser FPS Aim Practice | FixedAim',
+    title: '2D Aim Trainer - Free Browser FPS Aim Practice | FixedAim',
     desc:  'Sharpen your FPS aim in the browser — no download needed. Choose Easy, Medium, Hard, or Flick mode. Track accuracy, combos, and personal records instantly.',
     applicationCategory: 'GameApplication',
   },
@@ -200,6 +203,7 @@ function RouteWithSEO({ path, children }: { path: string, children: React.ReactN
         url={url}
         isWebApplication={!!meta.applicationCategory}
         applicationCategory={meta.applicationCategory}
+        schemaName={meta.schemaName}
       />
       {children}
     </>

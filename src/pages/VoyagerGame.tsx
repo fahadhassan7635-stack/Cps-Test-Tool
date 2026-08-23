@@ -1429,7 +1429,7 @@ export default function VoyagerGame() {
   // ── RENDER ─────────────────────────────────────────────
   return (
     <>
-      <SeoHead />
+      
 
       <div style={{
         maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem',
@@ -1918,41 +1918,7 @@ export default function VoyagerGame() {
 }
 
 // ── SEO HEAD ─────────────────────────────────────────────────
-function SeoHead() {
-  useEffect(() => {
-    document.title = 'Voyager Space Game — Spacebar CPS Test & Asteroid Navigator';
-    const setMeta = (name: string, content: string, prop = false) => {
-      const attr = prop ? 'property' : 'name';
-      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
-      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, name); document.head.appendChild(el); }
-      el.content = content;
-    };
-    setMeta('description', 'Play Voyager — the ultimate browser spacebar CPS test game.');
-    setMeta('robots', 'index, follow');
-    setMeta('theme-color', '#00f5ff');
-    setMeta('keywords', 'CPS test, spacebar clicker, clicks per second, asteroid game');
-    setMeta('og:title', 'Voyager Space Game — Spacebar CPS Test', true);
-    setMeta('og:type', 'website', true);
-    setMeta('twitter:card', 'summary_large_image');
-    // Canonical is managed by App.tsx RouteWithSEO — do not override here.
 
-
-    const existing = document.getElementById('voyager-jsonld');
-    if (existing) existing.remove();
-    const script = document.createElement('script');
-    script.id   = 'voyager-jsonld';
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify({
-      '@context': 'https://schema.org', '@type': 'WebApplication',
-      name: 'Voyager Space Game',
-      applicationCategory: 'GameApplication',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    });
-    document.head.appendChild(script);
-    return () => { document.getElementById('voyager-jsonld')?.remove(); };
-  }, []);
-  return null;
-}
 
 // ── SEO EXTRAS ───────────────────────────────────────────────
 const seoH3: React.CSSProperties = { fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' };

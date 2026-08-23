@@ -6,7 +6,9 @@
  *   1. Spins up a local Express server on the built dist/ folder.
  *   2. Opens each URL in a headless Chromium browser (Puppeteer).
  *   3. Waits until SEO.tsx has injected <title>, <meta>, canonical, etc.
- *   4. Saves the fully-rendered HTML to dist/<route>/index.html
+ *   4. Strips all inline animation/transition styles before saving
+ *      (prevents double-animation on hydration).
+ *   5. Saves the fully-rendered HTML to dist/<route>/index.html
  *
  * Result: Bingbot / any crawler that doesn't run JS will receive
  * route-specific pre-rendered HTML instead of a blank SPA shell.
@@ -65,7 +67,6 @@ function startServer() {
   return new Promise((resolve) => {
     const app = express();
     app.use(express.static(DIST_DIR));
-    // Express 5 requires named wildcard params — '/{*path}' catches all routes.
     app.get('/{*path}', (_req, res) => res.sendFile(path.join(DIST_DIR, 'index.html')));
     const server = app.listen(PORT, () => {
       console.log(`[prerender] Local server started on ${BASE_URL}`);
@@ -76,14 +77,13 @@ function startServer() {
 
 // ─────────────────────────────────────────────────────────────
 // Render one route: open in Puppeteer, wait for SEO tags,
-// save the full HTML to dist/<route>/index.html
+// strip animation state, save HTML to dist/<route>/index.html
 // ─────────────────────────────────────────────────────────────
 async function renderRoute(page, route) {
   const url = `${BASE_URL}${route}`;
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-  // Wait until SEO.tsx has injected the <title> (it runs via useEffect).
-  // We poll for a non-generic title as the signal that React has hydrated.
+  // Wait until SEO.tsx has injected the <title>.
   await page.waitForFunction(
     () => {
       const t = document.title;
@@ -91,8 +91,34 @@ async function renderRoute(page, route) {
     },
     { timeout: 15000 }
   ).catch(() => {
-    // If timeout (e.g. homepage keeps generic title), just continue.
     console.warn(`[prerender] Title wait timed out for ${route} — using whatever is rendered.`);
+  });
+
+  // ─────────────────────────────────────────────────────────
+  // FIX: Before capturing HTML, pause all animations on the
+  // page. This means the saved HTML snapshot has no
+  // mid-animation inline styles that would cause a visual
+  // "double fire" when React re-hydrates in the user's browser.
+  // ─────────────────────────────────────────────────────────
+  await page.evaluate(() => {
+    // 1. Inject a one-time <style> that freezes every animation
+    //    at its start frame. It will be removed by main.tsx
+    //    after hydration (via the 'hydrating' class mechanism).
+    const style = document.createElement('style');
+    style.id = '__prerender-freeze__';
+    style.textContent = `
+      *, *::before, *::after {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+        transition-duration: 0s !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    // 2. Add the 'hydrating' class to #root so main.tsx knows
+    //    to keep animations paused until React has attached.
+    const root = document.getElementById('root');
+    if (root) root.classList.add('hydrating');
   });
 
   const html = await page.content();
@@ -100,7 +126,7 @@ async function renderRoute(page, route) {
   // Determine output path
   let outDir;
   if (route === '/') {
-    outDir = DIST_DIR; // dist/index.html already exists; we overwrite it
+    outDir = DIST_DIR;
   } else {
     outDir = path.join(DIST_DIR, route.replace(/^\//, ''));
     fs.mkdirSync(outDir, { recursive: true });

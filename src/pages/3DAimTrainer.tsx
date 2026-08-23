@@ -1093,6 +1093,11 @@ export default function SniperModePage() {
           allow="pointer-lock; fullscreen"
           title="3D Aim Trainer"
         />
+          <div style={{ position: 'absolute', top: '16px', left: '20px', zIndex: 100, pointerEvents: 'none' }}>
+            <h1 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
+              3D Aim Trainer
+            </h1>
+          </div>
         <div style={{ position: 'absolute', top: '14px', right: '14px', display: 'flex', gap: '8px', zIndex: 100 }}>
           <button onClick={toggleFullscreen} aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'} style={{ background: 'rgba(4,9,20,0.8)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '7px', color: '#9ca3af', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
             {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}

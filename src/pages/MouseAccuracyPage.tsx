@@ -103,21 +103,7 @@ function Breadcrumb() {
   );
 }
 
-function SEOHead() {
-  useEffect(() => {
-    document.title = 'Mouse Button Test — Check Left, Right, Middle & Scroll Clicks Online';
-    const setMeta = (sel: string, attr: string, val: string) => {
-      let el = document.querySelector(sel) as HTMLMetaElement | null;
-      if (!el) { el = document.createElement('meta'); document.head.appendChild(el); }
-      el.setAttribute(attr, val);
-    };
-    const desc = 'Test every button on your mouse — left click, right click, middle click, scroll wheel, and back/forward side buttons — instantly in your browser.';
-    setMeta('meta[name="description"]', 'content', desc);
-    setMeta('meta[property="og:title"]', 'content', 'Mouse Button Test');
-    setMeta('meta[property="og:description"]', 'content', desc);
-  }, []);
-  return null;
-}
+
 
 export default function MouseButtonTestPage() {
   const [status, setStatus] = useState<Record<ButtonId, ButtonStatus>>(initialStatus);
@@ -221,7 +207,7 @@ export default function MouseButtonTestPage() {
 
   return (
     <>
-      <SEOHead />
+      
       <div style={{ maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <Breadcrumb />
 

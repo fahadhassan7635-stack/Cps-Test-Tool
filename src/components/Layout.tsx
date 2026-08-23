@@ -36,7 +36,7 @@ const TOOLS_LIST: (ToolItem & { icon: string })[] = [
   { to: '/accuracy', label: 'Accuracy Test', category: 'keyboard', icon: '✔️' },
 
   { to: '/reaction-time', label: 'Reaction Time Test', category: 'aim', icon: '⏱️' },
-  { to: '/aim-trainer', label: 'Aim Trainer', category: 'aim', icon: '🔫' },
+  { to: '/aim-trainer', label: '2D Aim Trainer', category: 'aim', icon: '🎯' },
   { to: '/3d-aim-trainer', label: '3D Aim Trainer', category: 'aim', icon: '🎯' },
   { to: '/f1-reaction', label: 'F1 Reaction', category: 'aim', icon: '🏎️' },
 
@@ -465,7 +465,7 @@ export default function Layout() {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
               {[
                 { to: '/hall-of-fame', label: 'Leaderboard' },
-                { to: '/aim-trainer', label: 'Aim Trainer' },
+                { to: '/aim-trainer', label: '2D Aim Trainer' },
                 { to: '/reaction-time', label: 'Reaction Time' },
                 { to: '/blog', label: '📖 Blog' }
               ].map(l => (

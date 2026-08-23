@@ -1858,6 +1858,30 @@ export default function TypingTestPage() {
               </ul>
             </section>
 
+            {/* IELTS Section */}
+            <section>
+              <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '0.75rem', color: 'var(--neon-cyan)', marginTop: '2rem' }}>
+                Typing Test for IELTS (CDI) & TOEFL
+              </h2>
+              <p style={{ marginBottom: '1rem' }}>
+                If you are preparing for the Computer-Delivered IELTS (CDI) or the TOEFL iBT, your typing speed and accuracy will directly impact your score in the Writing modules. In these exams, you must type essays and reports within a strict time limit (e.g., 150 words in 20 minutes for IELTS Task 1, and 250 words in 40 minutes for Task 2).
+              </p>
+              <p style={{ marginBottom: '1rem' }}>
+                A slow typing speed means you spend less time thinking about vocabulary, grammar, and paragraph structure, and more time hunting for keys. 
+              </p>
+              <ul style={{ paddingLeft: '1.25rem', marginBottom: '1.5rem', listStyleType: 'disc' }}>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <strong>Target Speed:</strong> Aim for at least <strong>35-40 WPM</strong> with high accuracy. This ensures you can comfortably finish your IELTS essays with 5-10 minutes left for proofreading and correcting spelling mistakes.
+                </li>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <strong>How to Practice:</strong> Use our <em>Paragraph Mode</em> to simulate the real exam environment. Try typing complex academic passages to get used to the vocabulary and punctuation (commas, periods, capital letters) required in IELTS and TOEFL.
+                </li>
+                <li style={{ marginBottom: '0.4rem' }}>
+                  <strong>Accuracy Over Speed:</strong> In language tests, spelling errors will lower your Lexical Resource score. Use our tool to track your accuracy and backspace usage to ensure you are typing correctly the first time.
+                </li>
+              </ul>
+            </section>
+
             {/* FAQ */}
             <FaqSection />
 

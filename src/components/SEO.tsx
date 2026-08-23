@@ -55,6 +55,13 @@ export interface SEOProps {
    * Pass 'noindex, nofollow' for pages you want de-indexed.
    */
   robots?: string;
+  /**
+   * Optional longer name used ONLY in the WebPage JSON-LD schema.
+   * Useful for the homepage where you want the schema to list all tools
+   * but the <title> tag stays concise for SERPs (~60 chars).
+   * Falls back to `title` if omitted.
+   */
+  schemaName?: string;
 }
 
 /* ─────────────────────────────────────────────
@@ -134,6 +141,7 @@ export default function SEO({
   article,
   ogImage,
   robots = 'index, follow',
+  schemaName,
 }: SEOProps) {
   useEffect(() => {
     const pageUrl = toAbsolute(url);
@@ -237,7 +245,7 @@ export default function SEO({
       '@type': webPageType,
       '@id': `${pageUrl}#webpage`,
       url: pageUrl,
-      name: title,
+      name: schemaName ?? title,
       description,
       inLanguage: 'en',
       isPartOf: { '@id': `${SITE_URL}/#website` },

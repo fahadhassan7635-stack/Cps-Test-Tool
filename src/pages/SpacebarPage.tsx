@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SpacebarPage.tsx
  * - Full SEO: meta, OG, Twitter, JSON-LD, breadcrumb, FAQ
  * - Real spacebar animation (spring physics)
@@ -26,7 +26,7 @@ const MAX_HISTORY = 10;
 const SITE_URL  = 'https://www.example.com';
 const SITE_NAME = 'KeyboardTest.io';
 const PAGE_URL  = `${SITE_URL}/spacebar-counter`;
-const OG_IMAGE  = `${SITE_URL}/og-spacebar-counter.png`;
+const _OG_IMAGE  = `${SITE_URL}/og-spacebar-counter.png`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface HistoryItem { count: number; sps: number; duration: number; }
@@ -698,64 +698,7 @@ ResultModal.displayName = 'ResultModal';
 
 
 // ─── SEO Head Tags ────────────────────────────────────────────────────────────
-function SeoHead() {
-  useEffect(() => {
-    const tags: Array<{ tag: string; attrs: Record<string, string> }> = [
-      { tag: 'meta', attrs: { name: 'description',    content: 'Free Spacebar Counter & CPS Test — measure your spacebar speed test score in clicks per second. Track CPS, ratings & history with our keyboard test tool.' } },
-      { tag: 'meta', attrs: { name: 'robots',         content: 'index,follow,max-image-preview:large' } },
-      { tag: 'meta', attrs: { name: 'theme-color',    content: '#00f5ff' } },
-      { tag: 'link', attrs: { rel: 'canonical',       href: PAGE_URL } },
-      { tag: 'link', attrs: { rel: 'icon',            href: '/favicon.ico',        sizes: 'any' } },
-      { tag: 'link', attrs: { rel: 'icon',            href: '/favicon-32x32.png',  type: 'image/png', sizes: '32x32' } },
-      { tag: 'link', attrs: { rel: 'icon',            href: '/favicon-16x16.png',  type: 'image/png', sizes: '16x16' } },
-      { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' } },
-      { tag: 'link', attrs: { rel: 'manifest',        href: '/manifest.webmanifest' } },
-      { tag: 'link', attrs: { rel: 'mask-icon',       href: '/safari-pinned-tab.svg', color: '#00f5ff' } },
-      { tag: 'meta', attrs: { property: 'og:type',        content: 'website' } },
-      { tag: 'meta', attrs: { property: 'og:url',         content: PAGE_URL } },
-      { tag: 'meta', attrs: { property: 'og:site_name',   content: SITE_NAME } },
-      { tag: 'meta', attrs: { property: 'og:title',       content: 'Spacebar Counter — Free Spacebar Speed Test & CPS Test' } },
-      { tag: 'meta', attrs: { property: 'og:description', content: 'Test your spacebar speed for free! Measure CPS in 5s, 10s, 15s, 30s or 60s. Track history, get ratings & improve your keyboard test score.' } },
-      { tag: 'meta', attrs: { property: 'og:image',       content: OG_IMAGE } },
-      { tag: 'meta', attrs: { name: 'twitter:card',        content: 'summary_large_image' } },
-      { tag: 'meta', attrs: { name: 'twitter:title',       content: 'Spacebar Counter — Free Spacebar Speed Test & CPS Test' } },
-      { tag: 'meta', attrs: { name: 'twitter:description', content: 'Test your spacebar speed for free! Measure CPS in 5–60 second rounds. Real-time ratings, history & audio feedback.' } },
-      { tag: 'meta', attrs: { name: 'twitter:image',       content: OG_IMAGE } },
-    ];
 
-    const inserted: HTMLElement[] = [];
-
-    for (const { tag, attrs } of tags) {
-      const selector =
-        tag === 'meta' && attrs.name     ? `meta[name="${attrs.name}"]`     :
-        tag === 'meta' && attrs.property ? `meta[property="${attrs.property}"]` :
-        tag === 'link' && attrs.rel      ? `link[rel="${attrs.rel}"]`        :
-        null;
-
-      if (selector) {
-        const existing = document.head.querySelector(selector);
-        if (existing) {
-          for (const [k, v] of Object.entries(attrs)) existing.setAttribute(k, v);
-          continue;
-        }
-      }
-
-      const el = document.createElement(tag) as HTMLElement;
-      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
-      document.head.appendChild(el);
-      inserted.push(el);
-    }
-
-    const prevTitle = document.title;
-    document.title = 'Spacebar Counter — Free Spacebar Speed Test & CPS Test';
-    return () => {
-      inserted.forEach(el => { if (document.head.contains(el)) document.head.removeChild(el); });
-      document.title = prevTitle;
-    };
-  }, []);
-
-  return null;
-}
 
 // ─── JSON-LD Injector ─────────────────────────────────────────────────────────
 function JsonLd({ data }: { data: string }) {
@@ -1486,7 +1429,7 @@ export default function SpacebarPage() {
 
   return (
     <>
-      <SeoHead />
+      
       <JsonLd data={JSON_LD_DATA} />
 
       <main

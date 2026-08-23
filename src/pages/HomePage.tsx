@@ -29,7 +29,7 @@ const tools = [
   { to: '/typing-test', icon: '⌨️', name: 'Typing Speed', tag: 'WPM Test', accent: 'var(--neon-cyan)' },
   { to: '/cps-test', icon: '🖱️', name: 'CPS Test', tag: 'Click Speed', accent: 'var(--neon-green)' },
   { to: '/reaction-time', icon: '⚡', name: 'Reaction Time', tag: 'Reflex Test', accent: 'var(--neon-orange)' },
-  { to: '/aim-trainer', icon: '🎯', name: 'Aim Trainer', tag: 'FPS Skills', accent: 'var(--neon-red)' },
+  { to: '/aim-trainer', icon: '🎯', name: '2D Aim Trainer', tag: 'FPS Skills', accent: 'var(--neon-red)' },
   { to: '/spacebar', icon: '▭', name: 'Spacebar Counter', tag: 'Key Smash', accent: 'var(--neon-cyan)' },
   { to: '/key-visualizer', icon: '👁️', name: 'Key Visualizer', tag: 'Real-Time', accent: 'var(--neon-purple)' },
   { to: '/double-click', icon: '🖱️', name: 'Double Click', tag: 'Mouse Test', accent: 'var(--neon-green)' },
@@ -110,7 +110,7 @@ const seoArticles = [
     to: '/aim-trainer',
     icon: '🎯',
     color: 'var(--neon-red)',
-    title: 'Browser Aim Trainer — Warm Up Before Ranked',
+    title: '2D Browser Aim Trainer — Warm Up Before Ranked',
     badge: 'AIM',
     content: [
       'Don\'t feel like launching a bulky software just to warm up? Our <strong>Aim Trainer</strong> runs right in your browser. Just pick your target size, hit start, and get your wrist moving before you queue up for a match.',

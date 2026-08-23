@@ -912,14 +912,14 @@ export default function AimTrainerPage() {
             fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.12em',
             color: '#2dd4bf', textTransform: 'uppercase',
           }}>
-            Aim Tool
+            2D Aim Tool
           </div>
           <h1 style={{
             fontWeight: 900, fontSize: 'clamp(2.2rem, 5vw, 3.4rem)', lineHeight: 1.1,
             margin: '0 0 0.85rem', letterSpacing: '-0.02em',
             color: '#2dd4bf', textShadow: '0 0 40px rgba(45,212,191,0.25)',
           }}>
-            Aim Trainer
+            2D Aim Trainer
           </h1>
           <p style={{ margin: 0, fontSize: '1.02rem', color: '#9ca3af', fontWeight: 400 }}>
             Track and hit the small moving target — precision matters!
@@ -1971,7 +1971,7 @@ function SeoHero({ accentColor, accentRgb }: { accentColor: string; accentRgb: s
         borderRadius: '20px', padding: '0.3rem 0.9rem', fontSize: '0.7rem', fontWeight: 700,
         letterSpacing: '0.1em', color: accentColor, textTransform: 'uppercase',
       }}>
-        Free Online Aim Trainer
+        Free Online 2D Aim Trainer
       </div>
       <h2 style={{
         fontWeight: 900, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#fff',
@@ -1980,7 +1980,7 @@ function SeoHero({ accentColor, accentRgb }: { accentColor: string; accentRgb: s
         Train Faster, More Accurate Aim
       </h2>
       <p style={{ color: '#8888a0', fontSize: '1rem', maxWidth: '620px', margin: '0 auto', lineHeight: 1.7 }}>
-        A browser-based aim trainer with five difficulty tiers, combo multipliers, S–F grading, and full
+        A browser-based 2D aim trainer with five difficulty tiers, combo multipliers, S–F grading, and full
         session history — built to sharpen the click accuracy and reaction speed that competitive shooters demand.
       </p>
     </header>

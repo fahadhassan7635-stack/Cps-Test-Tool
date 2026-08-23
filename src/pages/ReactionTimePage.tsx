@@ -59,126 +59,7 @@ const FAQ_DATA = [
 // ============================================================
 // SEO HEAD COMPONENT
 // ============================================================
-function SEOHead() {
-  useEffect(() => {
-    document.title = 'Reaction Time Test — Free Online Reflex Speed Tester | Human Benchmark';
 
-    const setMeta = (name: string, content: string, isProperty = false) => {
-      const attr = isProperty ? 'property' : 'name';
-      let el = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-
-    setMeta('description', 'Take the free online reaction time test and benchmark your reflex speed. Measure your visual reaction time in milliseconds. Perfect for gamers, athletes, and curious minds.');
-    setMeta('robots', 'index, follow');
-    setMeta('theme-color', '#070a12');
-    setMeta('viewport', 'width=device-width, initial-scale=1');
-    setMeta('author', 'Reaction Time Test Tool');
-    setMeta('keywords', 'reaction time test, reflex test, human benchmark, average reaction time, gaming reflex test, FPS reaction time, reaction trainer, online reaction test, mouse reaction test, visual reaction time, fast reflex test, brain reaction speed, reflex game, reaction latency, reaction speed test');
-    setMeta('og:title', 'Reaction Time Test — Free Online Reflex Speed Tester', true);
-    setMeta('og:description', 'Measure your visual reaction speed in milliseconds. See how you compare to pro gamers and average humans. Free, fast, and accurate.', true);
-    setMeta('og:type', 'website', true);
-    setMeta('og:url', window.location.href, true);
-    setMeta('og:site_name', 'Reaction Time Test', true);
-    setMeta('twitter:card', 'summary_large_image');
-    setMeta('twitter:title', 'Reaction Time Test — Measure Your Reflex Speed');
-    setMeta('twitter:description', 'Free online reaction time test. Measure how fast your brain responds to visual stimuli. Compare with gamers and athletes worldwide.');
-
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', 'https://fixedaim.com/reaction-time');
-
-    let appleIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
-    if (!appleIcon) {
-      appleIcon = document.createElement('link');
-      appleIcon.setAttribute('rel', 'apple-touch-icon');
-      document.head.appendChild(appleIcon);
-    }
-    appleIcon.setAttribute('href', "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23070a12'/%3E%3Ctext y='.9em' font-size='80' x='10'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E");
-
-    let favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
-    if (!favicon) {
-      favicon = document.createElement('link');
-      favicon.setAttribute('rel', 'icon');
-      document.head.appendChild(favicon);
-    }
-    favicon.setAttribute('href', "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='80'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E");
-    favicon.setAttribute('type', 'image/svg+xml');
-
-    const schemas = [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: 'Reaction Time Test',
-        url: window.location.origin,
-        description: 'Free online reaction time test and reflex speed benchmark tool.',
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: { '@type': 'EntryPoint', urlTemplate: `${window.location.origin}/?q={search_term_string}` },
-          'query-input': 'required name=search_term_string',
-        },
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'WebApplication',
-        name: 'Reaction Time Test',
-        url: window.location.href,
-        description: 'Measure your visual reaction time in milliseconds across 5 rounds. Compare your reflex speed to pro gamers and average humans.',
-        applicationCategory: 'UtilityApplication',
-        operatingSystem: 'Any',
-        browserRequirements: 'Requires JavaScript. Works on Chrome, Firefox, Safari, Edge.',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-        aggregateRating: {
-          '@type': 'AggregateRating',
-          ratingValue: '4.8',
-          ratingCount: '3200',
-          bestRating: '5',
-          worstRating: '1',
-        },
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home', item: window.location.origin },
-          { '@type': 'ListItem', position: 2, name: 'Reaction Time Test', item: window.location.href },
-        ],
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: FAQ_DATA.map(({ q, a }) => ({
-          '@type': 'Question',
-          name: q,
-          acceptedAnswer: { '@type': 'Answer', text: a },
-        })),
-      },
-    ];
-
-    schemas.forEach((schema, i) => {
-      const id = `jsonld-schema-${i}`;
-      let el = document.getElementById(id) as HTMLScriptElement | null;
-      if (!el) {
-        el = document.createElement('script');
-        el.id = id;
-        el.setAttribute('type', 'application/ld+json');
-        document.head.appendChild(el);
-      }
-      el.textContent = JSON.stringify(schema);
-    });
-  }, []);
-
-  return null;
-}
 
 // ============================================================
 // WEB AUDIO SOUND ENGINE
@@ -564,7 +445,7 @@ export default function ReactionTimePage() {
 
   return (
     <>
-      <SEOHead />
+      
       <div style={{ maxWidth: '700px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 
         {/* ---- HEADER ---- */}

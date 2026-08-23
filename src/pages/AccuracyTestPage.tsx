@@ -769,119 +769,7 @@ const Breadcrumb = memo(function Breadcrumb() {
 
 // ─── SEO Meta (injected into <head> via portal-like effect) ──────────────────
 
-function SEOHead() {
-  useEffect(() => {
-    // Title
-    document.title = 'Free Keyboard Accuracy Test — Improve Typing Precision Online | TypingPro';
 
-    const setMeta = (name: string, content: string, prop = false) => {
-      const sel = prop
-        ? `meta[property="${name}"]`
-        : `meta[name="${name}"]`;
-      let el = document.querySelector<HTMLMetaElement>(sel);
-      if (!el) {
-        el = document.createElement('meta');
-        prop ? el.setAttribute('property', name) : el.setAttribute('name', name);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-
-    const setLink = (rel: string, href: string) => {
-      let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
-      if (!el) { el = document.createElement('link'); el.rel = rel; document.head.appendChild(el); }
-      el.href = href;
-    };
-
-    const BASE = 'https://fixedaim.com';
-    const URL  = `${BASE}/keyboard-accuracy-test`;
-    const IMG  = `${BASE}/og-accuracy-test.png`;
-
-    setMeta('description', 'Take our free Keyboard Accuracy Test and measure your typing precision instantly. Get live WPM, CPM, error stats, heatmap, and detailed results. No signup required.');
-    setMeta('robots', 'index, follow, max-snippet:-1, max-image-preview:large');
-    setMeta('theme-color', '#0a0a0f');
-    setLink('canonical', URL);
-
-    // OG
-    setMeta('og:title',       'Free Keyboard Accuracy Test | FixedAim', true);
-    setMeta('og:description', 'Measure typing precision with WPM, CPM, heatmap, and accuracy graph.', true);
-    setMeta('og:image', IMG, true);
-    setMeta('og:url', URL, true);
-    setMeta('og:type', 'website', true);
-
-    // Twitter
-    setMeta('twitter:card',        'summary_large_image');
-    setMeta('twitter:title',       'Free Keyboard Accuracy Test | FixedAim');
-    setMeta('twitter:description', 'Live WPM, CPM, heatmap, and accuracy graph. Test your typing precision now!');
-    setMeta('twitter:image', IMG);
-
-    // JSON-LD
-    const schemas = [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: 'FixedAim',
-        url: BASE,
-        potentialAction: {
-          '@type': 'SearchAction',
-          target: `${BASE}/search?q={search_term_string}`,
-          'query-input': 'required name=search_term_string',
-        },
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'WebApplication',
-        name: 'Keyboard Accuracy Test',
-        url: URL,
-        applicationCategory: 'UtilitiesApplication',
-        operatingSystem: 'Any',
-        description: 'Free online keyboard accuracy test with WPM, CPM, error heatmap, and live accuracy graph.',
-        offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-        featureList: [
-          'Live WPM & CPM tracking',
-          'Typing accuracy measurement',
-          'Keyboard error heatmap',
-          'Accuracy over time graph',
-          'Multiple timer modes',
-          'Custom text support',
-          'Sound effects',
-        ],
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          { '@type': 'ListItem', position: 1, name: 'Home',                  item: BASE },
-          { '@type': 'ListItem', position: 2, name: 'Keyboard Tools',        item: `${BASE}/keyboard-tools` },
-          { '@type': 'ListItem', position: 3, name: 'Keyboard Accuracy Test',item: URL  },
-        ],
-      },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
-          '@type': 'Question',
-          name: q,
-          acceptedAnswer: { '@type': 'Answer', text: typeof a === 'string' ? a : q },
-        })),
-      },
-    ];
-
-    schemas.forEach((schema, i) => {
-      const id = `ld-json-${i}`;
-      let s = document.getElementById(id) as HTMLScriptElement | null;
-      if (!s) {
-        s = document.createElement('script');
-        s.id   = id;
-        s.type = 'application/ld+json';
-        document.head.appendChild(s);
-      }
-      s.textContent = JSON.stringify(schema);
-    });
-  }, []);
-
-  return null;
-}
 
 // ─── FAQ Data ─────────────────────────────────────────────────────────────────
 
@@ -1189,7 +1077,7 @@ export default function AccuracyTestPage() {
 
   return (
     <>
-      <SEOHead />
+      
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem' }}>
 

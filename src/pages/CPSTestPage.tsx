@@ -281,7 +281,7 @@ const FAQ_DATA = [
 // ─────────────────────────────────────────────
 // JSON-LD SCHEMA DATA (stable constant)
 // ─────────────────────────────────────────────
-const JSON_LD_SCHEMAS: object[] = [
+const _JSON_LD_SCHEMAS: object[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
