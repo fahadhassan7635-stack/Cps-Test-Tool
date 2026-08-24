@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import { usePageTracking } from './hooks/usePageTracking';
 
@@ -34,7 +34,6 @@ import SpaceWavesGame from './pages/SpaceWavesGame';
 
 import SEO from './components/SEO';
 
-// CHANGED: centralised URL constant — update once if the domain ever changes
 const SITE_URL = 'https://fixedaim.com';
 
 type AppCategory =
@@ -50,8 +49,6 @@ interface PageMeta {
   schemaName?: string;
 }
 
-// CHANGED: all titles are now SEO-friendly with "| FixedAim" suffix and descriptive keywords.
-// CHANGED: all descriptions are 140–160 characters with action-oriented copy.
 const PAGE_META: Record<string, PageMeta> = {
   '/': {
     title: 'FixedAim - Free CPS Test, Aim Trainer & Typing Speed Test Online',
@@ -59,7 +56,6 @@ const PAGE_META: Record<string, PageMeta> = {
     schemaName: 'FixedAim - Free CPS Test, Typing Test, Reaction Time Test, 2D Aim Trainer, 3D Aim Trainer, Spacebar Counter, Double Click Test, Scroll Test, Mouse Accuracy, Key Visualizer, Accuracy Test, Space Defense, Voyager Game, F1 Reaction, CPS Rush & Space Waves',
   },
 
-  // ── Tools ──────────────────────────────────────────────────────────────────
   'cps-test': {
     title: 'CPS Test - Free Click Speed Test Online | FixedAim',
     desc:  'Test your CPS (Clicks Per Second) for free. Measure click speed with 1s–100s timer modes, compare your scores, and challenge yourself to click faster.',
@@ -116,7 +112,6 @@ const PAGE_META: Record<string, PageMeta> = {
     applicationCategory: 'EducationalApplication',
   },
 
-  // ── Games ─────────────────────────────────────────────────────────────────
   'space-defense': {
     title: 'Space Defense Game - Click Fast Under Pressure | FixedAim',
     desc:  'Defend your base from incoming threats in this free browser clicking game. Wave-based difficulty ramps up fast — can you keep up and protect your space station?',
@@ -143,7 +138,6 @@ const PAGE_META: Record<string, PageMeta> = {
     applicationCategory: 'GameApplication',
   },
 
-  // ── Category / Static pages — no applicationCategory → no WebApplication schema ──
   'mouse': {
     title: 'Mouse Tools - CPS, Accuracy & Scroll Tests | FixedAim',
     desc:  'Browse all free mouse testing tools on FixedAim: CPS test, double click test, scroll speed test, mouse accuracy, and more. No signup — just open and test.',
@@ -186,14 +180,12 @@ const PAGE_META: Record<string, PageMeta> = {
   },
 };
 
-// CHANGED: url now uses the SITE_URL constant instead of a hardcoded string literal.
-// Trailing slash kept on homepage to match canonical.
 function RouteWithSEO({ path, children }: { path: string, children: React.ReactNode }) {
   const meta = PAGE_META[path] || {
     title: 'FixedAim - Free Browser Skill Testing Platform',
     desc:  'Test your clicking speed, typing speed, reaction time, aim precision, and more for free.',
   };
-  const url  = path === '/' ? `${SITE_URL}/` : `${SITE_URL}/${path}`;
+  const url = path === '/' ? `${SITE_URL}/` : `${SITE_URL}/${path}`;
 
   return (
     <>
@@ -210,15 +202,18 @@ function RouteWithSEO({ path, children }: { path: string, children: React.ReactN
   );
 }
 
-
 // ---------------------------------------------------------------------------
-// AppRoutes — inner component so usePageTracking can access Router context
+// AppRoutes — key={location.pathname} REMOVED to fix double animation bug.
+// That prop was causing Routes to fully unmount/remount on every navigation,
+// firing page-entry animations twice. location={location} is kept so that
+// usePageTracking() still sees the correct pathname on each render.
 // ---------------------------------------------------------------------------
 function AppRoutes() {
-  usePageTracking(); // ← GA4: fires page_view on every route change
+  usePageTracking();
+  const location = useLocation();
 
   return (
-    <Routes>
+    <Routes location={location}>
       <Route path="/" element={<Layout />}>
         <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
 
@@ -239,7 +234,6 @@ function AppRoutes() {
         <Route path="cps-rush"       element={<RouteWithSEO path="cps-rush"><CpsRush /></RouteWithSEO>} />
         <Route path="space-waves"    element={<RouteWithSEO path="space-waves"><SpaceWavesGame /></RouteWithSEO>} />
 
-        {/* Category Pages */}
         <Route path="mouse"    element={<RouteWithSEO path="mouse"><MousePage /></RouteWithSEO>} />
         <Route path="keyboard" element={<RouteWithSEO path="keyboard"><KeyboardPage /></RouteWithSEO>} />
         <Route path="aim"      element={<RouteWithSEO path="aim"><AimPage /></RouteWithSEO>} />
