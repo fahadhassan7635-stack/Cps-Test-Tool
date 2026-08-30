@@ -45,15 +45,12 @@ interface PageMeta {
   title: string;
   desc: string;
   applicationCategory?: AppCategory;
-  /** Longer name used only in the WebPage JSON-LD schema (not the <title> tag). */
-  schemaName?: string;
 }
 
 const PAGE_META: Record<string, PageMeta> = {
   '/': {
     title: 'FixedAim - Free CPS Test, Aim Trainer & Typing Speed Test Online',
     desc:  'The ultimate free platform to test clicking speed, typing WPM, reaction time, and aim precision. No signup needed. Play, test, and improve instantly.',
-    schemaName: 'FixedAim - Free CPS Test, Typing Test, Reaction Time Test, 2D Aim Trainer, 3D Aim Trainer, Spacebar Counter, Double Click Test, Scroll Test, Mouse Accuracy, Key Visualizer, Accuracy Test, Space Defense, Voyager Game, F1 Reaction, CPS Rush & Space Waves',
   },
 
   'cps-test': {
@@ -72,7 +69,7 @@ const PAGE_META: Record<string, PageMeta> = {
     applicationCategory: 'UtilitiesApplication',
   },
   'aim-trainer': {
-    title: '2D Aim Trainer - Free Browser FPS Aim Practice | FixedAim',
+    title: 'Aim Trainer - Free Browser FPS Aim Practice | FixedAim',
     desc:  'Sharpen your FPS aim in the browser — no download needed. Choose Easy, Medium, Hard, or Flick mode. Track accuracy, combos, and personal records instantly.',
     applicationCategory: 'GameApplication',
   },
@@ -195,7 +192,6 @@ function RouteWithSEO({ path, children }: { path: string, children: React.ReactN
         url={url}
         isWebApplication={!!meta.applicationCategory}
         applicationCategory={meta.applicationCategory}
-        schemaName={meta.schemaName}
       />
       {children}
     </>
@@ -203,17 +199,16 @@ function RouteWithSEO({ path, children }: { path: string, children: React.ReactN
 }
 
 // ---------------------------------------------------------------------------
-// AppRoutes — key={location.pathname} REMOVED to fix double animation bug.
-// That prop was causing Routes to fully unmount/remount on every navigation,
-// firing page-entry animations twice. location={location} is kept so that
-// usePageTracking() still sees the correct pathname on each render.
+// AppRoutes — key={location.pathname} fixes double animation on navigation
+// React destroys the old tree completely before mounting the new one,
+// so fade-in-up animations fire exactly once per page visit.
 // ---------------------------------------------------------------------------
 function AppRoutes() {
   usePageTracking();
-  const location = useLocation();
+  const location = useLocation(); // ← NEW
 
   return (
-    <Routes location={location}>
+    <Routes location={location} key={location.pathname}> {/* ← key fixes double animation */}
       <Route path="/" element={<Layout />}>
         <Route index element={<RouteWithSEO path="/"><HomePage /></RouteWithSEO>} />
 

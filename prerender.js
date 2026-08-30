@@ -115,11 +115,11 @@ async function renderRoute(page, route) {
     `;
     document.head.appendChild(style);
 
-    // 2. Add the 'hydrating' class to #root so main.tsx knows
-    //    to keep animations paused until React has attached.
-    const root = document.getElementById('root');
-    if (root) root.classList.add('hydrating');
-  });
+      // 2. Add the 'hydrating' class to #root so main.tsx knows
+      //    to keep animations paused until React has attached.
+      const root = document.getElementById('root');
+      if (root) root.classList.add('hydrating');
+    });
 
   const html = await page.content();
 
