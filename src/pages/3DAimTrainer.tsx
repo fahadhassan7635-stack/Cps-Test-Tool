@@ -81,7 +81,7 @@ const aimTrainerHTML = `<!DOCTYPE html>
   }
   #stats {
     position: absolute;
-    top: 18px; left: 18px;
+    top: 45px; left: 18px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -144,7 +144,7 @@ const aimTrainerHTML = `<!DOCTYPE html>
   }
   #fps {
     position: absolute;
-    top: 18px; right: 18px;
+    top: 52px; right: 18px;
     background: rgba(0,0,0,0.4);
     border: 1px solid rgba(255,255,255,0.07);
     border-radius: 6px;
@@ -1049,17 +1049,13 @@ export default function SniperModePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [iframeUrl, setIframeUrl] = useState<string>('');
 
   useEffect(() => {
-    // Create a blob URL so pointer lock & audio work properly inside the iframe
-    const blob = new Blob([aimTrainerHTML], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    setIframeUrl(url);
-
-    return () => {
-      URL.revokeObjectURL(url);
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
     };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
   }, []);
 
   const toggleFullscreen = useCallback(() => {
@@ -1083,14 +1079,14 @@ export default function SniperModePage() {
       <div ref={containerRef} style={{ width: '100%', height: '100vh', position: 'relative', background: '#0a0a0c', overflow: 'hidden' }}>
         <iframe
           ref={iframeRef}
-          src={iframeUrl}
+          srcDoc={aimTrainerHTML}
           style={{
             width: '100%',
             height: '100%',
             border: 'none',
             display: 'block',
           }}
-          allow="pointer-lock; fullscreen"
+          allow="fullscreen"
           title="3D Aim Trainer"
         />
           <div style={{ position: 'absolute', top: '16px', left: '20px', zIndex: 100, pointerEvents: 'none' }}>

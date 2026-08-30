@@ -535,6 +535,14 @@ const ResultModal = memo(({
   const dialogRef = useRef<HTMLDivElement>(null);
   useFocusTrap(true, dialogRef);
 
+  // Prevent accidental spacebar/enter presses from instantly restarting the test 
+  // right after it finishes. Give the user a 500ms cooldown.
+  const [cooldown, setCooldown] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setCooldown(false), 500);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <>
       {/* Backdrop */}
@@ -577,6 +585,7 @@ const ResultModal = memo(({
         {/* Close */}
         <button
           onClick={onReset}
+          disabled={cooldown}
           aria-label="Close result dialog"
           style={{
             position: 'absolute', top: '0.75rem', right: '0.75rem',
@@ -585,7 +594,8 @@ const ResultModal = memo(({
             color: rating.color,
             width: '32px', height: '32px',
             borderRadius: '50%',
-            cursor: 'pointer',
+            cursor: cooldown ? 'not-allowed' : 'pointer',
+            opacity: cooldown ? 0.5 : 1,
             fontSize: '0.9rem',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}
@@ -674,17 +684,20 @@ const ResultModal = memo(({
           <button
             className="btn btn-secondary"
             onClick={onReset}
-            style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+            disabled={cooldown}
+            style={{ padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', opacity: cooldown ? 0.5 : 1, cursor: cooldown ? 'not-allowed' : 'pointer' }}
           >
             🔄 Reset
           </button>
           <button
             className="btn btn-primary"
             onClick={onTryAgain}
+            disabled={cooldown}
             style={{
               padding: '0.5rem 1.2rem', fontSize: '0.85rem', flex: 1, maxWidth: '160px', height: '38px',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
               backgroundColor: rating.color, borderColor: rating.color, color: '#000', fontWeight: '700',
+              opacity: cooldown ? 0.5 : 1, cursor: cooldown ? 'not-allowed' : 'pointer'
             }}
           >
             ▶ Try Again
@@ -1378,7 +1391,11 @@ export default function SpacebarPage() {
       e.preventDefault();
       if (e.repeat) return;
       setSpacePressed(true);
-      if (phaseRef.current === 'idle')    { start(); return; }
+      if (phaseRef.current === 'idle') { 
+        start(); 
+        recordPress();
+        return; 
+      }
       if (phaseRef.current === 'running') recordPress();
     };
     const handleKeyUp = (e: KeyboardEvent) => {
