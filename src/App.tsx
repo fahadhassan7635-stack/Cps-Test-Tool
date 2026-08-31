@@ -11,13 +11,13 @@ import TypingTestPage from './pages/TypingTestPage';
 import ReactionTimePage from './pages/ReactionTimePage';
 import AimTrainerPage from './pages/AimTrainerPage';
 import KeyVisualizerPage from './pages/KeyVisualizerPage';
-import SpacebarPage from './pages/SpacebarPage';
+import SpacebarPage, { FAQ_ITEMS as spacebarFaqs } from './pages/SpacebarPage';
 import MousePage from './pages/MousePage';
 import KeyboardPage from './pages/KeyboardPage';
 import AimPage from './pages/AimPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import BlogPage from './pages/BlogPage';
-import DoubleClickPage from './pages/DoubleClickPage';
+import DoubleClickPage, { FAQ_ITEMS as doubleClickFaqs } from './pages/DoubleClickPage';
 import ScrollTestPage from './pages/ScrollTestPage';
 import MouseAccuracyPage from './pages/MouseAccuracyPage';
 import ThreeDAimTrainerPage from './pages/3DAimTrainer';
@@ -217,8 +217,8 @@ function AppRoutes() {
         <Route path="reaction-time"  element={<RouteWithSEO path="reaction-time"><ReactionTimePage /></RouteWithSEO>} />
         <Route path="aim-trainer"    element={<RouteWithSEO path="aim-trainer"><AimTrainerPage /></RouteWithSEO>} />
         <Route path="key-visualizer" element={<RouteWithSEO path="key-visualizer"><KeyVisualizerPage /></RouteWithSEO>} />
-        <Route path="spacebar"       element={<RouteWithSEO path="spacebar"><SpacebarPage /></RouteWithSEO>} />
-        <Route path="double-click"   element={<RouteWithSEO path="double-click"><DoubleClickPage /></RouteWithSEO>} />
+        <Route path="spacebar"       element={<RouteWithSEO path="spacebar" faqs={spacebarFaqs}><SpacebarPage /></RouteWithSEO>} />
+        <Route path="double-click"   element={<RouteWithSEO path="double-click" faqs={doubleClickFaqs}><DoubleClickPage /></RouteWithSEO>} />
         <Route path="scroll-test"    element={<RouteWithSEO path="scroll-test"><ScrollTestPage /></RouteWithSEO>} />
         <Route path="mouse-accuracy" element={<RouteWithSEO path="mouse-accuracy"><MouseAccuracyPage /></RouteWithSEO>} />
         <Route path="3d-aim-trainer" element={<RouteWithSEO path="3d-aim-trainer"><ThreeDAimTrainerPage /></RouteWithSEO>} />
@@ -255,3 +255,4 @@ export default function App() {
     </BrowserRouter>
   );
 }
+

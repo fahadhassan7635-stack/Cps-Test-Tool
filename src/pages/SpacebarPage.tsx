@@ -23,10 +23,10 @@ const DURATIONS = [5, 10, 15, 30, 60] as const;
 const MAX_CUSTOM_SECONDS = 300;
 const MIN_CUSTOM_SECONDS = 1;
 const MAX_HISTORY = 10;
-const SITE_URL  = 'https://www.example.com';
-const SITE_NAME = 'KeyboardTest.io';
-const PAGE_URL  = `${SITE_URL}/spacebar-counter`;
-const _OG_IMAGE  = `${SITE_URL}/og-spacebar-counter.png`;
+
+
+
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface HistoryItem { count: number; sps: number; duration: number; }
@@ -64,7 +64,7 @@ const getRating = (n: number): RatingResult => {
 };
 
 // ─── FAQ Data ─────────────────────────────────────────────────────────────────
-const FAQ_ITEMS = [
+export const FAQ_ITEMS = [
   {
     q: 'What is a Spacebar Counter and how does it work?',
     a: 'A Spacebar Counter is a browser-based diagnostic and speed measurement tool that tracks how many times you press the spacebar key within a set time window. When you press the Space key, the tool captures a precise hardware event timestamp from the browser\'s native KeyboardEvent API. It counts each distinct physical keydown stroke, ignores operating-system auto-repeat signals using the e.repeat guard, and computes your Clicks Per Second (CPS) by dividing total presses by elapsed seconds. The result is displayed in real time so you can observe your rhythm and burst-speed patterns as they happen.',
@@ -168,69 +168,7 @@ const FAQ_ITEMS = [
 ] as const;
 
 // ─── JSON-LD Schemas ──────────────────────────────────────────────────────────
-const buildJsonLd = (): string => {
-  const schemas = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebSite',
-      name: SITE_NAME,
-      url: SITE_URL,
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
-        'query-input': 'required name=search_term_string',
-      },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebApplication',
-      name: 'Spacebar Counter – CPS Test',
-      url: PAGE_URL,
-      description: 'Free online spacebar speed test. Measure your spacebar clicks per second (CPS) with real-time ratings, session history, and audio feedback.',
-      applicationCategory: 'GameApplication',
-      operatingSystem: 'Any',
-      browserRequirements: 'Requires a modern browser with JavaScript enabled.',
-      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-      creator: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
-      featureList: [
-        'Real-time CPS measurement',
-        'Multiple timer durations',
-        'Custom duration support',
-        'Session history tracking',
-        'Audio click feedback',
-        'Speed rating system',
-      ],
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Organization',
-      name: SITE_NAME,
-      url: SITE_URL,
-      logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home',            item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Keyboard Tools',  item: `${SITE_URL}/keyboard-tools` },
-        { '@type': 'ListItem', position: 3, name: 'Spacebar Counter', item: PAGE_URL },
-      ],
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
-        '@type': 'Question',
-        name: q,
-        acceptedAnswer: { '@type': 'Answer', text: a },
-      })),
-    },
-  ];
-  return JSON.stringify(schemas);
-};
 
-const JSON_LD_DATA = buildJsonLd();
 
 // ─── Shared static styles (module-level, avoids re-creating per render) ──────
 const GLOBAL_STYLES = `
@@ -714,16 +652,7 @@ ResultModal.displayName = 'ResultModal';
 
 
 // ─── JSON-LD Injector ─────────────────────────────────────────────────────────
-function JsonLd({ data }: { data: string }) {
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = data;
-    document.head.appendChild(script);
-    return () => { if (document.head.contains(script)) document.head.removeChild(script); };
-  }, [data]);
-  return null;
-}
+
 
 // ─── External citation link (matches in-article inline source style) ────────
 const SourceLink = memo(({ href, children }: { href: string; children: React.ReactNode }) => (
@@ -1447,7 +1376,7 @@ export default function SpacebarPage() {
   return (
     <>
       
-      <JsonLd data={JSON_LD_DATA} />
+      
 
       <main
         style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}

@@ -101,7 +101,7 @@ function useClickSounds(enabled: boolean) {
 }
 
 // ─── JSON-LD schemas ──────────────────────────────────────────────────────────
-const FAQ_ITEMS = [
+export const FAQ_ITEMS = [
   { q: 'What is a Double Click Test?',                              a: 'A Double Click Test measures the millisecond interval between two consecutive mouse clicks to verify your hardware and reflexes can produce a valid double-click within the OS threshold.' },
   { q: 'What is the default double-click speed in Windows?',        a: 'Windows defaults to a 500 ms threshold. You can adjust it in Control Panel → Mouse → Buttons → Double-click speed.' },
   { q: 'What is the default double-click speed on macOS?',          a: 'macOS uses a similar ~500 ms default. Change it in System Preferences → Accessibility → Pointer Control → Double-click speed.' },
@@ -131,100 +131,7 @@ const FAQ_ITEMS = [
   { q: 'Can I use this test to benchmark a new mouse before buying?', a: 'Many retailers offer return windows, so testing a new mouse here immediately after unboxing is a quick way to confirm the switches are not chattering before the return period expires.' },
 ];
 
-const buildSchemas = () => [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'Double Click Test',
-    url: 'https://fixedaim.com/double-click',
-    description: 'Test how fast you can double-click your mouse. Measure your double-click interval in milliseconds and diagnose mouse hardware issues.',
-    applicationCategory: 'UtilityApplication',
-    operatingSystem: 'All',
-    browserRequirements: 'Requires JavaScript',
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: 'FixedAim',
-    url: 'https://fixedaim.com',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: 'https://fixedaim.com/?q={search_term_string}',
-      'query-input': 'required name=search_term_string',
-    },
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',              item: 'https://fixedaim.com' },
-      { '@type': 'ListItem', position: 2, name: 'Double Click Test', item: 'https://fixedaim.com/double-click' },
-    ],
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
-      '@type': 'Question',
-      name: q,
-      acceptedAnswer: { '@type': 'Answer', text: a },
-    })),
-  },
-];
-
 // ─── SEO head injection (no next/head needed) ─────────────────────────────────
-function useSEOHead() {
-  useEffect(() => {
-    // Title
-    document.title = 'Double Click Test — Measure Your Double-Click Speed in ms';
-
-    const setMeta = (sel: string, attr: string, val: string, content: string) => {
-      let el = document.querySelector<HTMLMetaElement>(sel);
-      if (!el) {
-        el = document.createElement('meta');
-        el.setAttribute(attr, val);
-        document.head.appendChild(el);
-      }
-      el.setAttribute('content', content);
-    };
-
-    const setLink = (rel: string, href: string) => {
-      let el = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
-      if (!el) { el = document.createElement('link'); el.rel = rel; document.head.appendChild(el); }
-      el.href = href;
-    };
-
-    setMeta('meta[name="description"]',         'name',     'description',         'Free online Double Click Test. Measure the millisecond interval between two mouse clicks, diagnose double-click hardware issues, and compare your speed with global averages.');
-    setMeta('meta[name="robots"]',              'name',     'robots',              'index, follow');
-    setMeta('meta[name="theme-color"]',         'name',     'theme-color',         '#00f5ff');
-    setMeta('meta[property="og:title"]',        'property', 'og:title',            'Double Click Test — Measure Your Double-Click Speed in ms');
-    setMeta('meta[property="og:description"]',  'property', 'og:description',      'Test your double-click interval in milliseconds. Diagnose mouse hardware problems, compare difficulty levels, and track your stats.');
-    setMeta('meta[property="og:image"]',        'property', 'og:image',            'https://fixedaim.com/og-double-click.png');
-    setMeta('meta[property="og:url"]',          'property', 'og:url',              'https://fixedaim.com/double-click');
-    setMeta('meta[property="og:type"]',         'property', 'og:type',             'website');
-    setMeta('meta[name="twitter:card"]',        'name',     'twitter:card',        'summary_large_image');
-    setMeta('meta[name="twitter:title"]',       'name',     'twitter:title',       'Double Click Test — Measure Your Double-Click Speed in ms');
-    setMeta('meta[name="twitter:description"]', 'name',     'twitter:description', 'Free browser tool to measure your double-click speed. No download required.');
-    setMeta('meta[name="twitter:image"]',       'name',     'twitter:image',       'https://fixedaim.com/og-double-click.png');
-
-    setLink('canonical',      'https://fixedaim.com/double-click');
-    setLink('icon',           '/favicon.ico');
-    setLink('apple-touch-icon', '/apple-touch-icon.png');
-
-    // JSON-LD schemas
-    const schemaId = 'double-click-schemas';
-    let schemaEl = document.getElementById(schemaId);
-    if (!schemaEl) {
-      schemaEl = document.createElement('script');
-      schemaEl.id = schemaId;
-      schemaEl.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(schemaEl);
-    }
-    schemaEl.textContent = JSON.stringify(buildSchemas());
-  }, []);
-}
-
 // ─── Ripple Component ─────────────────────────────────────────────────────────
 interface Ripple { id: number; x: number; y: number }
 
@@ -254,8 +161,6 @@ function RippleEffect({ ripples }: { ripples: Ripple[] }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function DoubleClickPage() {
-  useSEOHead();
-
   const [results, setResults]           = useState<number[]>([]);
   const [lastInterval, setLastInterval] = useState<number | null>(null);
   const [status, setStatus]             = useState('');
@@ -994,3 +899,4 @@ export default function DoubleClickPage() {
     </div>
   );
 }
+
