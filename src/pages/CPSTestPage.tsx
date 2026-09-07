@@ -61,7 +61,26 @@ const codeStyle: CSSProperties = {
 // ─────────────────────────────────────────────
 // ARTICLE RESEARCH LINK (external reference citation used inside SeoArticle)
 // ─────────────────────────────────────────────
-
+const ArticleLink = memo(({ href, children }: { href: string; children: ReactNode }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer nofollow"
+    style={{
+      color: 'var(--neon-cyan, #00f5ff)',
+      textDecoration: 'none',
+      fontWeight: 700,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '3px',
+      borderBottom: '1px dashed rgba(0,245,255,0.4)',
+    }}
+  >
+    {children}
+    <ExternalLink size={13} style={{ position: 'relative', top: '1px', flexShrink: 0 }} />
+  </a>
+));
+ArticleLink.displayName = 'ArticleLink';
 
 // ─────────────────────────────────────────────
 // GLOBAL CSS (extracted constant — no new string each render)
@@ -146,8 +165,8 @@ const FAQ_DATA = [
     a: "CPS stands for Clicks Per Second — the number of times you can click your mouse button in one second. In gaming, especially Minecraft PvP, higher CPS gives more hit registrations and better combat performance. Most gamers aim for 6–12 CPS depending on their game and playstyle.",
   },
   {
-    q: "Is this click speed test accurate?",
-    a: "Yes. The CPS Test uses the browser's performance.now() API for sub-millisecond click timestamping, a 50ms polling interval for live updates, and a dedicated click counter that is immune to auto-clicker memory pruning. Results reflect genuine hardware and biological performance.",
+    q: "Is this CPS Test accurate?",
+    a: "Yes. The tool uses the browser's performance.now() API for sub-millisecond click timestamping, a 50ms polling interval for live updates, and a dedicated click counter that is separate from the rolling-window memory used for live CPS display — making it immune to auto-clicker pruning. Every registered click is counted in the final score.",
   },
   {
     q: "What is a CPS Test?",
@@ -156,20 +175,117 @@ const FAQ_DATA = [
   {
     q: "What is a good CPS score?",
     a: "For casual users, 5–7 CPS is normal. Competitive gamers typically reach 8–12 CPS. Professional Minecraft PvP players using Butterfly or Jitter techniques can achieve 14–20+ CPS.",
-  }
+  },
+  {
+    q: "How do I improve my CPS?",
+    a: "Practice daily using 1–5 second burst tests. Adopt a claw or fingertip grip, use a lightweight mouse, ensure your polling rate is 1000 Hz, and progressively learn Jitter or Butterfly Clicking techniques.",
+  },
+  {
+    q: "Does CPS matter in gaming?",
+    a: "Yes — especially in Minecraft PvP, PUBG single-fire modes, Fortnite building, and MOBA micro. Higher CPS directly translates to more hits per second, faster item use, and quicker ability rotations.",
+  },
+  {
+    q: "Can CPS be trained over time?",
+    a: "Absolutely. With consistent daily practice of 5–10 minutes, many users report noticeable improvement in CPS within a few weeks. Finger mobility exercises and interval sprint sessions accelerate progress.",
+  },
+  {
+    q: "Is Butterfly Clicking cheating in Minecraft?",
+    a: "Some competitive servers restrict or ban Butterfly Clicking because it can exceed typical single-finger click rates. Always check the specific server rules before using this technique.",
+  },
+  {
+    q: "Is Drag Clicking allowed on servers?",
+    a: "Drag Clicking is banned on virtually all competitive servers because it produces 25–50+ CPS through mechanical friction rather than genuine human clicking. It is also considered hardware exploitation.",
+  },
+  {
+    q: "What mouse is best for high CPS?",
+    a: "Ultralight mice with optical switches (like Razer Viper V3 Pro, Logitech G Pro X Superlight 2, or Glorious Model O 2) are ideal. Look for mice under 80 g with switches rated for 50 M+ clicks and low actuation force.",
+  },
+  {
+    q: "Does DPI affect CPS?",
+    a: "No. DPI controls cursor movement sensitivity and has no effect on clicking speed. CPS is determined purely by your finger biomechanics and mouse switch actuation speed.",
+  },
+  {
+    q: "Can mobile users take the CPS Test?",
+    a: "Yes. The test supports touch input on mobile and tablet devices. Tap the click zone to start. Note that mobile CPS is typically lower (2–5 CPS) due to touchscreen response latency.",
+  },
+  {
+    q: "What games need high CPS the most?",
+    a: "Minecraft 1.8 PvP, PUBG: Battlegrounds (semi-auto weapons), Roblox combat games, Fortnite building, and any game with manual-fire mechanics. MOBA games also benefit from fast clicking for last-hits and micro.",
+  },
+  {
+    q: "What is Jitter Clicking?",
+    a: "Jitter Clicking is a technique where you rapidly tense and relax your forearm muscles to generate vibrations that translate into fast mouse clicks, typically producing 10–14 CPS. Overuse can cause forearm strain.",
+  },
+  {
+    q: "Can high CPS damage your hand?",
+    a: "Yes. Aggressive clicking techniques stress forearm tendons and wrist joints, potentially causing Repetitive Strain Injury (RSI). Take regular breaks, stretch, and stop immediately if you feel any pain.",
+  },
+  {
+    q: "What is the world record CPS?",
+    a: "Unofficial community records suggest top single-finger clicking speeds of around 14–16 CPS in 5-second tests. Drag-clicking figures exceed 40 CPS but are mechanically assisted and not widely recognized as standard human performance.",
+  },
+
+  {
+    q: "What is the difference between CPS and APM?",
+    a: "CPS measures raw mouse click speed. APM (Actions Per Minute) is a broader metric used in strategy games that includes all mouse clicks, keyboard inputs, and ability activations. High CPS contributes to high APM.",
+  },
+  {
+    q: "How does the anti-cheat system work?",
+    a: "The system analyzes click intervals for biological impossibility, entropy of timing patterns, mouse movement activity, tab/window visibility events, and untrusted synthetic event flags to detect macros and auto-clickers.",
+  },
+  {
+    q: "What is the best test duration for benchmarking?",
+    a: "The 5-second test is the industry standard. Use 1-second tests for peak burst measurement, 10-second tests for consistency evaluation, and 30-second tests for stamina and fatigue-curve analysis.",
+  },
+  {
+    q: "Does mouse weight affect CPS?",
+    a: "Yes. Lighter mice (under 80 g) require less energy and generate less counter-vibration during fast clicking. Ultralight mice can improve sustainable CPS by 1–3 points over heavier alternatives.",
+  },
+  {
+    q: "Can I use a trackpad for the CPS Test?",
+    a: "Yes, but trackpad CPS is significantly lower (2–4 CPS typical) because trackpad surfaces have higher physical resistance and slower mechanical feedback compared to dedicated mouse buttons.",
+  },
+  {
+    q: "What is a Right Click CPS Test?",
+    a: "A Right Click CPS Test measures how many times you can right-click your mouse button within a set time period. It uses the same precision timing as the left-click test but registers only right mouse button inputs, making it ideal for benchmarking your ring or middle finger speed independently.",
+  },
+  {
+    q: "Is right click CPS faster or slower than left click CPS?",
+    a: "For most users, right click CPS is 1–3 points lower than left click CPS. The right mouse button is typically operated by the ring or middle finger, which has less fast-twitch muscle fiber density and weaker independent motor control compared to the index finger used for left clicking.",
+  },
+  {
+    q: "Why does right click speed matter in gaming?",
+    a: "Right click speed is critical in games where the right button controls abilities, ADS (Aim Down Sights), block actions, or context menus. In Minecraft, right-clicking places blocks and uses items — faster right-click CPS means faster bridging, item use, and ability cycling. In many RPGs and MOBAs, right click governs movement commands and attack targeting.",
+  },
+  {
+    q: "Does right clicking carry any injury risk?",
+    a: "Yes. Rapid right clicking engages the ring finger extensor tendons which are generally weaker and less conditioned than the index finger. Prolonged high-speed right clicking can cause lateral forearm strain. Limit right click sprint sessions to under 30 seconds and stretch between attempts.",
+  },
+  {
+    q: "How do I switch between Left Click and Right Click test modes?",
+    a: "Use the Left / Right mode toggle in the control bar above the click area. Switching modes resets the current test. In Right Click mode, the browser context menu is disabled inside the click area so your right clicks are counted accurately without interruption.",
+  },
+  {
+    q: "What is a good right click CPS score?",
+    a: "A score of 4–6 right CPS is average for casual users. Competitive players typically achieve 6–9 right CPS. Scores above 10 right CPS are considered elite and require deliberate daily practice targeting ring finger independence and speed.",
+  },
+  {
+    q: "Can I train my right click speed separately?",
+    a: "Yes. Use the Right Click mode in short daily sessions — 5 to 10 repeats of 5-second tests with 30-second rest periods. This builds independent ring finger fast-twitch endurance without cross-contaminating your left click muscle memory.",
+  },
 ];
 
 // ─────────────────────────────────────────────
 // JSON-LD SCHEMA DATA (stable constant)
 // ─────────────────────────────────────────────
-const _JSON_LD_SCHEMAS: object[] = [
+const JSON_LD_SCHEMAS: object[] = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'CPS Test — Free Click Speed Test Online | FixedAim',
-    alternateName: ['Click Speed Test', 'Clicks Per Second Test', 'Mouse Click Test', 'Right Click Test'],
+    name: 'CPS Test — Free Click Speed Test, CPS Counter & Kohi Click Test | FixedAim',
+    alternateName: ['Click Speed Test', 'Clicks Per Second Test', 'CPS Counter', 'CPS Tester', 'Click Test', 'Kohi Click Test', 'Mouse Click Test', 'Right Click Test', 'Jitter Click Test', 'Butterfly Click Test', 'Click Speed Checker', 'CPS Test Unblocked'],
     description:
-      'Free CPS Test — measure your clicks per second with left click and right click modes. Instant results, live graph, session history, anti-cheat detection. No download required. Play on PC, mobile, and tablet.',
+      'Free CPS Test & Click Speed Test — measure clicks per second (CPS) with left click, right click, jitter click, and butterfly click modes. Kohi click test inspired. Live CPS graph, session history, anti-cheat. Works on PC, mobile & tablet. No download.',
     applicationCategory: 'GameApplication',
     operatingSystem: 'All',
     browserRequirements: 'Requires JavaScript',
@@ -196,13 +312,13 @@ const _JSON_LD_SCHEMAS: object[] = [
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     '@id': 'https://fixedaim.com/cps-test',
-    name: 'CPS Test — Free Click Speed Test Online',
-    description: 'Test your clicks per second for free. Supports left click, right click, custom durations, live CPS graph, and session history. Works on PC, mobile, and tablet.',
+    name: 'CPS Test — Free Click Speed Test, CPS Counter & Kohi Click Test Online',
+    description: 'Free CPS Test & click speed test — measure clicks per second (CPS), test jitter click, right click, butterfly click speed. Kohi click test style. Live graph, anti-cheat, session history. Works on PC, mobile & tablet.',
     url: 'https://fixedaim.com/cps-test',
     inLanguage: 'en',
     isPartOf: { '@type': 'WebSite', name: 'FixedAim', url: 'https://fixedaim.com' },
     about: { '@type': 'Thing', name: 'CPS Test', description: 'A tool that measures mouse clicks per second (CPS) for gaming performance benchmarking.' },
-    keywords: 'CPS test, click speed test, clicks per second, right click test, mouse click test, CPS checker, click counter, gaming mouse test',
+    keywords: 'CPS test, click speed test, clicks per second, CPS counter, click test, kohi click test, jitter click test, butterfly click test, drag click test, right click test, mouse click test, CPS checker, click counter, click speed checker, how fast can i click, clicks per second test, cps tester, gaming mouse test, minecraft pvp cps, cps test unblocked',
     mainEntity: { '@type': 'SoftwareApplication', name: 'CPS Test', url: 'https://fixedaim.com/cps-test' },
   },
   {
@@ -399,7 +515,9 @@ SessionHistory.displayName = 'SessionHistory';
 // ─────────────────────────────────────────────
 const FaqSection = memo(() => {
   const [open, setOpen] = useState<number | null>(null);
-  
+  const [showAll, setShowAll] = useState<boolean>(false);
+  const visibleFaqs = showAll ? FAQ_DATA : FAQ_DATA.slice(0, 8);
+
   return (
     <section aria-label="Frequently Asked Questions" style={{ marginBottom: '3rem', marginTop: '2rem' }}>
       <h2
@@ -420,7 +538,7 @@ const FaqSection = memo(() => {
         Frequently Asked Questions
       </h2>
       <div role="list" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {FAQ_DATA.map((faq, i) => {
+        {visibleFaqs.map((faq, i) => {
           const isOpen = open === i;
           return (
             <div
@@ -479,6 +597,26 @@ const FaqSection = memo(() => {
           );
         })}
       </div>
+      {!showAll && (
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <button
+            onClick={() => setShowAll(true)}
+            style={{
+              background: 'rgba(0,245,255,0.08)',
+              border: '1px solid rgba(0,245,255,0.25)',
+              color: 'var(--neon-cyan, #00f5ff)',
+              padding: '0.6rem 1.8rem',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '700',
+              fontSize: '0.85rem',
+              transition: 'all 0.2s',
+            }}
+          >
+            Show all {FAQ_DATA.length} FAQs ↓
+          </button>
+        </div>
+      )}
     </section>
   );
 });
@@ -491,45 +629,107 @@ const SeoArticle = memo(() => (
   <>
     <hr style={{ border: 0, borderTop: '1px solid var(--border)', margin: '3rem 0' }} />
     <article className="cps-article" style={{ color: 'var(--text-secondary,#cbd5e1)', fontSize: '0.95rem', lineHeight: '1.8' }}>
-        <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary,#f8fafc)', marginBottom: '1.25rem' }}>What is a CPS Test?</h2>
-        <p style={{ marginBottom: '1.25rem' }}>
-          A <strong>CPS Test</strong> (Clicks Per Second Test) is a free online tool that measures how fast you can click your mouse button within a given timeframe. Whether you're a competitive gamer looking to improve your mechanics or simply testing a new gaming mouse, this clicker test provides a reliable, accurate benchmark of your finger speed and hardware responsiveness.
-        </p>
 
-        <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary,#f8fafc)', marginBottom: '1.25rem' }}>How to Calculate Clicks Per Second</h2>
-        <p style={{ marginBottom: '1.25rem' }}>
-          The math behind the test is simple: your total number of valid clicks is divided by the total time elapsed. For example, if you click 65 times in 10 seconds, your CPS score is 6.5. This test uses precise browser event timers to prevent lag or framerate drops from affecting your score, ensuring 100% accurate results.
-        </p>
+      <h2 style={{ fontWeight: '800', fontSize: '1.75rem', marginBottom: '1rem', color: 'var(--neon-cyan,#00f5ff)', marginTop: '0' }}>
+        CPS Test — Click Speed Testing Guide
+      </h2>
+      <p style={pStyle}>
+        A <strong>CPS Test</strong> (Clicks Per Second) measures how many times you can click your mouse
+        per second. Used by Minecraft PvP players, FPS gamers, and hardware enthusiasts to benchmark
+        click speed and track improvement. Our tool is modeled after the Kohi Click Test format, with
+        added right click mode, live graph, and anti-cheat detection.
+      </p>
 
-        <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary,#f8fafc)', marginBottom: '1.25rem' }}>CPS Ranks & Benchmarks</h2>
-        <p style={{ marginBottom: '1.25rem' }}>
-          After completing a click speed test, your performance is categorized into distinct animal ranks:
-        </p>
-        <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem' }}>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Turtle (0 - 4 CPS):</strong> The average speed for casual computer users using a standard mouse.</li>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Rabbit (5 - 7 CPS):</strong> Intermediate speed. This is typically achieved by casual gamers using regular clicking techniques.</li>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Cheetah (8 - 10 CPS):</strong> Advanced speed. This requires dedicated practice and a good gaming mouse.</li>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Alien (10+ CPS):</strong> Professional level. Usually only achievable through advanced techniques like Jitter or Butterfly clicking.</li>
-        </ul>
+      <h2 style={h2Style}>What is a Good CPS Score?</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: '0.6rem', margin: '0.75rem 0 1.25rem' }}>
+        {[
+          { range: '1–4', label: '🐌 Beginner', color: '#8395a7' },
+          { range: '5–6', label: '🐢 Casual',   color: '#10ac84' },
+          { range: '7–9', label: '🦊 Intermediate', color: '#00d2d3' },
+          { range: '10–12', label: '🐆 Advanced', color: '#ff9f43' },
+          { range: '13+',  label: '🤖 Elite',    color: '#ff3838' },
+        ].map(t => (
+          <div key={t.range} style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '8px', padding: '0.7rem', border: `1px solid ${t.color}40`, textAlign: 'center' }}>
+            <div style={{ fontWeight: '800', color: t.color }}>{t.range} CPS</div>
+            <div style={{ fontSize: '0.78rem', color: '#9ca3af', marginTop: '2px' }}>{t.label}</div>
+          </div>
+        ))}
+      </div>
+      <p style={pStyle}>
+        These are approximate community benchmarks. 6–8 CPS is normal for casual players; 10+ CPS is
+        competitive. Hardware, grip style, and technique all affect your score.
+      </p>
 
-        <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary,#f8fafc)', marginBottom: '1.25rem' }}>Why CPS Matters in Gaming</h2>
-        <p style={{ marginBottom: '1.25rem' }}>
-          In competitive games, every millisecond counts. In games like <strong>Minecraft (PvP)</strong>, a higher click rate can give you a significant advantage in melee combat, allowing you to hit your opponent more frequently while taking less knockback. In shooters like <strong>VALORANT</strong> or <strong>CS2</strong>, mastering short, rapid bursts with weapons like pistols relies on consistent, controlled clicking speed rather than just raw spam.
-        </p>
+      <h2 style={h2Style}>Clicking Techniques</h2>
+      <p style={pStyle}>
+        <strong>Normal clicking</strong> (6–9 CPS) is the sustainable baseline. <strong>Jitter clicking</strong> uses
+        rapid forearm contractions for 10–14 CPS — limit to 30-second sessions to avoid strain (see{' '}
+        <ArticleLink href="https://my.clevelandclinic.org/health/diseases/17424-repetitive-strain-injury">Cleveland Clinic RSI guide</ArticleLink>).
+        <strong> Butterfly clicking</strong> (15–20 CPS) alternates two fingers — restricted on many competitive servers.
+        <strong> Drag clicking</strong> (25–50+ CPS) is mechanically assisted and banned virtually everywhere.
+      </p>
 
-        <h2 style={{ fontSize: '1.25rem', color: 'var(--text-primary,#f8fafc)', marginBottom: '1.25rem' }}>Advanced Clicking Techniques</h2>
-        <p style={{ marginBottom: '1.25rem' }}>
-          To break past the 7 CPS barrier, many gamers use specialized clicking methods:
-        </p>
-        <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem' }}>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Jitter Clicking:</strong> Tensing the forearm muscles to generate a rapid vibration that transfers to the mouse button. Can reach 10-14 CPS.</li>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Butterfly Clicking:</strong> Alternating rapid taps between the index and middle fingers on the same mouse button. Highly effective, but requires a mouse with a large left-click surface.</li>
-          <li style={{ marginBottom: '0.5rem' }}><strong>Drag Clicking:</strong> Dragging your finger across the surface of the mouse button to utilize friction, creating dozens of micro-clicks per second. Requires a matte-finish gaming mouse and can reach 20+ CPS.</li>
-        </ul>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted,#94a3b8)', fontStyle: 'italic' }}>
-          Note: Always take breaks while practicing advanced clicking techniques. Pushing your muscles too hard can lead to repetitive strain injuries (RSI).
-        </p>
-      </article>
+      <h2 style={h2Style}>CPS in Gaming</h2>
+      <p style={pStyle}>
+        In <strong>Minecraft 1.8 PvP</strong>, higher CPS means more knockback and hit registration. Practice on{' '}
+        <ArticleLink href="https://minemen.club/">Minemen Club</ArticleLink>,{' '}
+        <ArticleLink href="https://hypixel.net/">Hypixel</ArticleLink>, or{' '}
+        <ArticleLink href="https://donutsmp.net/">DonutSMP</ArticleLink>.
+        In <strong>FPS games</strong> (Valorant, PUBG, CS2), 7–10 CPS maximizes semi-auto fire rate.
+        In <strong>MOBAs</strong>, faster clicking improves last-hits and APM. Right click speed affects
+        ADS, blocking, and movement commands across all genres.
+      </p>
+
+      <h2 style={h2Style}>Right Click Test</h2>
+      <p style={pStyle}>
+        Switch to Right Click mode above the test area. Right CPS is typically 1–3 points lower than left
+        click for most players. It matters in Minecraft (placing blocks, using items), FPS ADS, and MOBA
+        movement. Train both buttons independently to close the performance gap.
+      </p>
+
+      <h2 style={h2Style}>How to Improve Your CPS</h2>
+      <ul style={ulStyle}>
+        <li><strong>Sprint intervals:</strong> 10 × 1-second max-effort tests with 30-second rest periods.</li>
+        <li><strong>Grip:</strong> Claw or fingertip grip is faster than palm grip for most players.</li>
+        <li><strong>Hardware:</strong> Lightweight mice (&lt;80g) with optical switches and 1000 Hz polling remove mechanical bottlenecks.</li>
+        <li><strong>Warm up:</strong> 60 seconds of gentle finger taps before testing noticeably improves results.</li>
+        <li><strong>Recovery:</strong> Stop if you feel forearm pain. Consistent injury-free practice delivers the best long-term gains.</li>
+      </ul>
+
+      <h2 style={h2Style}>Resources &amp; Practice Servers</h2>
+      <ul style={ulStyle}>
+        <li><ArticleLink href="https://www.lunarclient.com/tools/kohi-click-test">Lunar Client — Kohi Click Test</ArticleLink> — the original Minecraft CPS benchmark</li>
+        <li><ArticleLink href="https://minemen.club/">Minemen Club</ArticleLink> — leading Minecraft practice PvP server</li>
+        <li><ArticleLink href="https://donutsmp.net/">DonutSMP</ArticleLink> — Dr Donut's hardcore survival PvP (35,000 players)</li>
+        <li><ArticleLink href="https://mcpvp.com/">McPvP / McTiers</ArticleLink> — ranked competitive Minecraft PvP</li>
+        <li><ArticleLink href="https://na.badlion.net/">Badlion Network</ArticleLink> — ArenaPvP and UHC with strict anti-cheat</li>
+        <li><ArticleLink href="https://hypixel.net/">Hypixel</ArticleLink> — world's largest Minecraft server</li>
+        <li><ArticleLink href="https://minecraft.wiki/w/Melee_attack">Minecraft Wiki — Melee Attack</ArticleLink> — how CPS translates to combat advantage</li>
+        <li><ArticleLink href="https://playvalorant.com/en-us/">Valorant</ArticleLink> &amp; <ArticleLink href="https://pubg.com/en">PUBG</ArticleLink> — official weapon stats and patch notes</li>
+      </ul>
+
+      <h2 style={h2Style}>More Free Tests on FixedAim</h2>
+      <p style={pStyle}>
+        <a href="/reaction-time" style={{color:'var(--neon-cyan,#00f5ff)',textDecoration:'none',fontWeight:700,borderBottom:'1px dashed rgba(0,245,255,0.4)'}}>Reaction Time</a>{' · '}
+        <a href="/aim-trainer" style={{color:'var(--neon-cyan,#00f5ff)',textDecoration:'none',fontWeight:700,borderBottom:'1px dashed rgba(0,245,255,0.4)'}}>Aim Trainer</a>{' · '}
+        <a href="/mouse-accuracy" style={{color:'var(--neon-cyan,#00f5ff)',textDecoration:'none',fontWeight:700,borderBottom:'1px dashed rgba(0,245,255,0.4)'}}>Mouse Accuracy</a>{' · '}
+        <a href="/double-click" style={{color:'var(--neon-cyan,#00f5ff)',textDecoration:'none',fontWeight:700,borderBottom:'1px dashed rgba(0,245,255,0.4)'}}>Double Click</a>{' · '}
+        <a href="/scroll-test" style={{color:'var(--neon-cyan,#00f5ff)',textDecoration:'none',fontWeight:700,borderBottom:'1px dashed rgba(0,245,255,0.4)'}}>Scroll Speed</a>
+        {' '} — all free, no download.
+      </p>
+
+      <div style={{ margin: '2.5rem 0 0', background: 'linear-gradient(135deg, rgba(0,245,255,0.06) 0%, rgba(0,255,136,0.06) 100%)', border: '1px solid rgba(0,245,255,0.2)', borderRadius: '16px', padding: '1.75rem', textAlign: 'center' }}>
+        <h2 style={{ color: '#fff', fontWeight: '900', fontSize: '1.4rem', margin: '0 0 0.4rem' }}>Ready to Improve Your CPS?</h2>
+        <p style={{ color: '#9ca3af', margin: '0 0 1.1rem', fontSize: '0.9rem' }}>Free 5-second test — no account, no download, instant results.</p>
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          style={{ background: 'var(--neon-green, #00ff88)', color: '#000', border: 'none', borderRadius: '10px', padding: '0.65rem 1.75rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer' }}
+        >
+          ▶ Take the CPS Test Now
+        </button>
+      </div>
+
+    </article>
   </>
 ));
 SeoArticle.displayName = 'SeoArticle';
@@ -1182,9 +1382,9 @@ export default function CPSTestPage() {
 
       {/* ── HEADER ── */}
       <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>Click Speed Test · CPS Counter · Mouse Test</div>
-        <h1 className="tool-title" style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0.5rem 0 0.2rem', color: '#fff' }}>CPS Test — Free Click Speed Test Online</h1>
-        <p className="tool-subtitle" style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '1rem', margin: '0' }}>Measure your <strong style={{color:'#fff'}}>clicks per second</strong> with left &amp; right click modes — live graph, session history, anti-cheat. Free, instant, no download.</p>
+        <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>CPS Test</div>
+        <h1 className="tool-title" style={{ fontSize: '2.5rem', fontWeight: '900', margin: '0.5rem 0 0.2rem', color: '#fff' }}>CPS Test — Free Click Speed Test &amp; CPS Counter Online</h1>
+        <p className="tool-subtitle" style={{ color: 'var(--text-secondary, #94a3b8)', fontSize: '1rem', margin: '0' }}>Free <strong style={{color:'#fff'}}>CPS Test</strong> — measure your <strong style={{color:'#fff'}}>clicks per second</strong> with left &amp; right click modes. Kohi click test, jitter click test, drag click test, butterfly click — all in one <strong style={{color:'#fff'}}>click speed tester</strong>. No download required.</p>
       </header>
 
       {/* ── DURATION SELECTOR & CONTROLS ── */}
@@ -1648,6 +1848,29 @@ export default function CPSTestPage() {
                 color: '#cbd5e1', textAlign: 'center', lineHeight: 1.3,
               }}>{label}</span>
             </a>
+          ))}
+        </div>
+      </section>
+
+      {/* ── WHY FIXEDAIM ── */}
+      <section style={{ marginBottom: '2.5rem', background: 'var(--bg-card, #1e2235)', border: '1px solid var(--border, #2a3047)', borderRadius: '16px', padding: '1.75rem 1.5rem' }}>
+        <h2 style={{ fontWeight: 800, fontSize: '1.3rem', color: 'var(--neon-cyan, #00f5ff)', margin: '0 0 1rem' }}>
+          Why Use FixedAim's CPS Test?
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+          {[
+            { icon: '📈', title: 'Real-time Graph', desc: 'Live CPS graph with hover tooltip — see exactly when your speed peaks or drops.' },
+            { icon: '🛡️', title: 'Anti-Cheat Built-in', desc: 'Detects macros and auto-clickers using interval analysis — your score is genuine.' },
+            { icon: '🖱️', title: 'Left + Right Click', desc: 'Test both mouse buttons independently. Most tools only support left click.' },
+            { icon: '📊', title: 'Session History', desc: 'Every test run saved in a session table — track your improvement across attempts.' },
+            { icon: '⚡', title: 'Sub-ms Accuracy', desc: 'Uses performance.now() for sub-millisecond timing — not a simple click counter.' },
+            { icon: '📱', title: 'Works Everywhere', desc: 'PC, Mac, mobile, tablet — no download, no account, no ads.' },
+          ].map(({ icon, title, desc }) => (
+            <div key={title} style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>{icon}</div>
+              <div style={{ fontWeight: 700, color: '#fff', fontSize: '0.9rem', marginBottom: '0.3rem' }}>{title}</div>
+              <div style={{ color: '#6b7280', fontSize: '0.8rem', lineHeight: 1.5 }}>{desc}</div>
+            </div>
           ))}
         </div>
       </section>
