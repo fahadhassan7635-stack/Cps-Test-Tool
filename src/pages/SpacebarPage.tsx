@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SpacebarPage.tsx
  * - Full SEO: meta, OG, Twitter, JSON-LD, breadcrumb, FAQ
  * - Real spacebar animation (spring physics)
