@@ -83,13 +83,17 @@ async function renderRoute(page, route) {
   const url = `${BASE_URL}${route}`;
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
-  // Wait until SEO.tsx has injected the <title>.
+  // Wait until SEO.tsx has injected the page-specific <title>.
+  // The fallback title in index.html is the generic one — we wait
+  // until document.title changes away from that fallback.
+  const FALLBACK_TITLE = 'FixedAim \u2014 Free CPS Test, Aim Trainer & Gaming Tools';
   await page.waitForFunction(
-    () => {
+    (fallback) => {
       const t = document.title;
-      return t && t.length > 10 && !t.startsWith('FixedAim — Free CPS');
+      return t && t.length > 10 && t !== fallback;
     },
-    { timeout: 15000 }
+    { timeout: 20000 },
+    FALLBACK_TITLE
   ).catch(() => {
     console.warn(`[prerender] Title wait timed out for ${route} — using whatever is rendered.`);
   });
@@ -121,7 +125,24 @@ async function renderRoute(page, route) {
       if (root) root.classList.add('hydrating');
     });
 
-  const html = await page.content();
+  let html = await page.content();
+
+  // ─────────────────────────────────────────────────────────
+  // CLEAN UP: Strip prerender-only artifacts before saving.
+  // These are needed to prevent double-animation on hydration,
+  // but they must NOT be in the saved HTML because:
+  //   1. __prerender-freeze__ freezes all animations/transitions
+  //   2. class="hydrating" pauses all animations via CSS
+  // If Googlebot renders the page before JS removes these,
+  // it sees a frozen/incomplete page → "not worth indexing".
+  // ─────────────────────────────────────────────────────────
+
+  // Remove the __prerender-freeze__ <style> tag
+  html = html.replace(/<style\s+id="__prerender-freeze__"[\s\S]*?<\/style>/i, '');
+
+  // Remove the 'hydrating' class from <div id="root">
+  // Puppeteer adds it as the only class, so a simple replace works.
+  html = html.replace(/<div id="root" class="hydrating"/, '<div id="root"');
 
   // Determine output path
   let outDir;
