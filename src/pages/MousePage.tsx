@@ -9,23 +9,23 @@ const tools = [
 
 export default function MousePage() {
   return (
-    /* আপনার AimPage এর মত maxWidth 900px এবং সেম প্যাডিং দেওয়া হয়েছে */
+    /* Same maxWidth (900px) and padding as AimPage */
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <div className="section-label">Category</div>
-        {/* ইনলাইন ফন্ট-সাইজ সরিয়ে দেওয়া হয়েছে, এখন AimPage এর মত সমান বড় দেখাবে */}
+        {/* Tool title styled consistently with AimPage */}
         <h1 className="tool-title">Mouse Tools</h1>
         <p className="tool-subtitle">Test and measure every aspect of your mouse performance</p>
       </div>
 
-      {/* আপনার AimPage এর গ্রিড সাইজ (260px) ব্যবহার করা হয়েছে */}
+      {/* Grid layout matching AimPage (260px column minmax) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         {tools.map(tool => (
           <Link key={tool.to} to={tool.to} style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: '16px', padding: '1.75rem', textDecoration: 'none',
             color: 'var(--text-primary)', 
-            /* কার্ডগুলোর সাইজ সমান রাখার জন্য flex ব্যবহার করা হয়েছে, বাকি সব AimPage এর মত */
+            /* Flex column to ensure equal card heights matching AimPage */
             display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', 
             transition: 'all 0.3s ease', position: 'relative',
           }}
@@ -43,7 +43,7 @@ export default function MousePage() {
         ))}
       </div>
 
-      {/* নিচের টিপস সেকশনটিও AimPage এর সাইজের সাথে মিলিয়ে দেওয়া হয়েছে */}
+      {/* Performance tips section styled consistently with AimPage */}
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.75rem' }}>
         <h3 style={{ fontWeight: '700', marginBottom: '1rem', color: 'var(--neon-green)' }}>🖱️ Mouse Performance Tips</h3>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.7', marginBottom: '1.25rem' }}>
