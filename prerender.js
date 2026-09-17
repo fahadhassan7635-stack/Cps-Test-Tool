@@ -141,8 +141,7 @@ async function renderRoute(page, route) {
   html = html.replace(/<style\s+id="__prerender-freeze__"[\s\S]*?<\/style>/i, '');
 
   // Remove the 'hydrating' class from <div id="root">
-  // Puppeteer adds it as the only class, so a simple replace works.
-  html = html.replace(/<div id="root" class="hydrating"/, '<div id="root"');
+  // html = html.replace(/<div id="root" class="hydrating"/, '<div id="root"');
 
   // Determine output path
   let outDir;
