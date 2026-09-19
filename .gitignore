@@ -2,3 +2,8 @@ node_modules/
 package-lock.json
 .vscode/
 .cache/
+
+.next/
+out/
+build/
+.env*.local

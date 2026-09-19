@@ -1,9 +1,7 @@
-// src/hooks/usePageTracking.ts
-// Tracks SPA route changes and sends page_view events to GA4.
-// Usage: call once inside App.tsx (or your router root component).
+"use client";
 
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { usePathname, useSearchParams } from 'next/navigation';
 
 declare global {
   interface Window {
@@ -12,14 +10,15 @@ declare global {
 }
 
 export function usePageTracking(): void {
-  const location = useLocation();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (typeof window.gtag !== 'function') return;
 
     window.gtag('event', 'page_view', {
-      page_path: location.pathname + location.search,
+      page_path: pathname + (searchParams?.toString() ? '?' + searchParams.toString() : ''),
       page_title: document.title,
     });
-  }, [location.pathname, location.search]);
+  }, [pathname, searchParams]);
 }
