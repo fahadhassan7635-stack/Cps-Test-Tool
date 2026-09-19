@@ -3,7 +3,25 @@ import LeaderboardPage from '@/views/LeaderboardPage';
 
 export const metadata: Metadata = {
   title: "Leaderboard - Top CPS & WPM Scores | FixedAim",
-  description: "See the highest CPS and WPM scores from players around the world. Can you make it onto the FixedAim global leaderboard? Test your skills and submit your score.",
+  description: "See the highest CPS and WPM scores from players around the world.",
+  alternates: {
+    canonical: "https://fixedaim.com/leaderboard",
+  },
+  openGraph: {
+    title: "Leaderboard - Top CPS & WPM Scores | FixedAim",
+    description: "See the highest CPS and WPM scores from players around the world.",
+    url: "https://fixedaim.com/leaderboard",
+    siteName: "FixedAim",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Leaderboard - Top CPS & WPM Scores | FixedAim",
+    description: "See the highest CPS and WPM scores from players around the world.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function Page() {
