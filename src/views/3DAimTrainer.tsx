@@ -471,9 +471,19 @@ const aimTrainerHTML = `<!DOCTYPE html>
   <button class="btn-secondary" id="btn-restart">Restart</button>
   <button class="btn-secondary" id="btn-pause-menu" style="margin-top: 14px;">↩ Menu</button>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 "use strict";
+(function loadThreeAndInit() {
+  var script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  script.crossOrigin = 'anonymous';
+  script.onload = function() { initGame(); };
+  script.onerror = function() {
+    document.getElementById('start-screen').innerHTML = '<div style="color:#ff5252;padding:20px;text-align:center;max-width:400px;margin:0 auto;line-height:1.5;">Failed to load the 3D engine. Please check your internet connection and try again.</div>';
+  };
+  document.head.appendChild(script);
+})();
+function initGame() {
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 function ensureAudio() {
@@ -1023,6 +1033,7 @@ document.getElementById('rp-menu').addEventListener('click', () => {
   document.getElementById('hud').classList.remove('active');
 });
 requestAnimationFrame(loop);
+}
 </script>
 </body>
 </html>`;
