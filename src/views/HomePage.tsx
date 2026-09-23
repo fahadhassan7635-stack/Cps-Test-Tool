@@ -968,7 +968,7 @@ export default function HomePage() {
                   </div>
                 </button>
 
-                {isExpanded && (
+                <div style={{ display: isExpanded ? 'block' : 'none' }}>
                   <div style={{ padding: '0 1.75rem 1.75rem', borderTop: `1px solid ${article.color}20` }}>
                     <div style={{ marginBottom: '1.75rem', paddingTop: '1.25rem' }}>
                       {article.content.map((para, i) => (
@@ -1051,7 +1051,7 @@ export default function HomePage() {
                       {article.icon} Launch {article.badge} Tool →
                     </Link>
                   </div>
-                )}
+                </div>
               </article>
             );
           })}
