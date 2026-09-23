@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const mouseIcon = '/gun-pfp.png';
@@ -85,7 +86,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent',
             }}>
-              <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} />
+              <Image src={mouseIcon} alt="Logo" width={44} height={44} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} priority />
             </div>
             <span style={{
               fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em',
@@ -407,7 +408,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <div style={{ paddingRight: '2rem' }}>
             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none', marginBottom: '1rem' }}>
               <div style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent' }}>
-                <img src={mouseIcon} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(0,245,255,0.7)) drop-shadow(0 0 12px rgba(0,245,255,0.4))' }} />
+                <Image src={mouseIcon} alt="Logo" width={36} height={36} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 5px rgba(0,245,255,0.7)) drop-shadow(0 0 12px rgba(0,245,255,0.4))' }} />
               </div>
               <span style={{
                 fontWeight: '700', fontSize: '1.2rem', color: 'var(--text-primary)',

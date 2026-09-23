@@ -29,6 +29,7 @@ export default function SniperModePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
 
   useEffect(() => {
     const handleFsChange = () => {
@@ -57,18 +58,34 @@ export default function SniperModePage() {
   return (
     <div style={{ width: '100%', minHeight: '100vh' }}>
       <div ref={containerRef} style={{ width: '100%', height: '100vh', position: 'relative', background: '#0a0a0c', overflow: 'hidden' }}>
-        <iframe
-          ref={iframeRef}
-          src="/3d-aim-trainer.html"
-          style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            display: 'block',
-          }}
-          allow="fullscreen"
-          title="3D Aim Trainer"
-        />
+                {!gameStarted ? (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'radial-gradient(circle at center, #1a2332 0%, #080d14 100%)', zIndex: 10 }}>
+            <h2 style={{ color: '#fff', fontSize: '2rem', fontWeight: 800, marginBottom: '1rem' }}>3D Aim Trainer</h2>
+            <p style={{ color: '#8b949e', marginBottom: '2rem', textAlign: 'center', maxWidth: '400px' }}>A full 3D environment to train your flicking and tracking. Requires WebGL.</p>
+            <button 
+              onClick={() => setGameStarted(true)}
+              style={{
+                background: 'linear-gradient(135deg, #ff2d55, #ff6b00)',
+                color: '#fff', border: 'none', padding: '1rem 2.5rem',
+                fontSize: '1.1rem', fontWeight: 700, borderRadius: '50px',
+                cursor: 'pointer', boxShadow: '0 4px 15px rgba(255,45,85,0.4)',
+                transition: 'transform 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              Start Game
+            </button>
+          </div>
+        ) : (
+          <iframe
+            ref={iframeRef}
+            src="/3d-aim-trainer.html"
+            style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+            allow="fullscreen"
+            title="3D Aim Trainer"
+          />
+        )}
           <div style={{ position: 'absolute', top: '16px', left: '20px', zIndex: 100, pointerEvents: 'none' }}>
             <h1 style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>
               3D Aim Trainer
