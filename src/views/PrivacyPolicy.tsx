@@ -1,25 +1,8 @@
-"use client";
 
 import Link from 'next/link';
 
-import { useEffect } from 'react';
-
 const PrivacyPolicy = () => {
-  useEffect(() => {
-    document.title = 'Privacy Policy | FixedAim';
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', 'Read the FixedAim Privacy Policy to learn how we handle data, cookies, analytics, advertising, and your privacy while using our free online tools.');
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = 'Read the FixedAim Privacy Policy to learn how we handle data, cookies, analytics, advertising, and your privacy while using our free online tools.';
-      document.head.appendChild(meta);
-    }
-    return () => {
-      document.title = 'Fixed Aim – Free CPS Test, Aim Trainer & Gaming Tools';
-    };
-  }, []);
+
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 1.5rem', color: 'var(--text-primary)', lineHeight: '1.8' }}>

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import KeyVisualizerPage from '@/views/KeyVisualizerPage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Key Visualizer - Live Keystroke Display Online | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <KeyVisualizerPage />;
+  return <DynamicPage />;
 }

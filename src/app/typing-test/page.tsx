@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import TypingTestPage from '@/views/TypingTestPage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Typing Speed Test - Free WPM Test Online | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <TypingTestPage />;
+  return <DynamicPage />;
 }

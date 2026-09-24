@@ -1,25 +1,8 @@
-"use client";
 
 import Link from 'next/link';
 
-import { useEffect } from 'react';
-
 export default function TermsPage() {
-  useEffect(() => {
-    document.title = 'Terms of Service | FixedAim';
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', 'Read the FixedAim Terms of Service to understand the rules, limitations, and guidelines for using our free online gaming and typing tools.');
-    } else {
-      const meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.content = 'Read the FixedAim Terms of Service to understand the rules, limitations, and guidelines for using our free online gaming and typing tools.';
-      document.head.appendChild(meta);
-    }
-    return () => {
-      document.title = 'Fixed Aim – Free CPS Test, Aim Trainer & Gaming Tools';
-    };
-  }, []);
+
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '4rem 1.5rem', color: 'var(--text-primary)', lineHeight: '1.8' }}>
@@ -189,3 +172,4 @@ export default function TermsPage() {
     </div>
   );
 }
+

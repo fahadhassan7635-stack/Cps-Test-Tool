@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import SpaceWavesGame from '@/views/SpaceWavesGame';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Space Waves - Arcade Dodge & Timing Game | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <SpaceWavesGame />;
+  return <DynamicPage />;
 }

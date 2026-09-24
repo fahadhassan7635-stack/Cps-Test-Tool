@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import SpaceDefensePage from '@/views/SpaceDefensePage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Space Defense Game - Click Fast Under Pressure | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <SpaceDefensePage />;
+  return <DynamicPage />;
 }

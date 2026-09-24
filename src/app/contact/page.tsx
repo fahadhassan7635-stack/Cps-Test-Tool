@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ContactPage from '@/views/ContactPage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Contact Us - Get in Touch with FixedAim | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ContactPage />;
+  return <DynamicPage />;
 }

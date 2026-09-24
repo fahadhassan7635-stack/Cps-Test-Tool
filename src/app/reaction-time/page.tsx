@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ReactionTimePage from '@/views/ReactionTimePage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Reaction Time Test - Human Reflex Speed Test | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ReactionTimePage />;
+  return <DynamicPage />;
 }

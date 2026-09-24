@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import VoyagerGame from '@/views/VoyagerGame';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Voyager Game - Endless Mouse Evasion Arcade | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <VoyagerGame />;
+  return <DynamicPage />;
 }

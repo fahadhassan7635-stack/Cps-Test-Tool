@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import AccuracyTestPage from '@/views/AccuracyTestPage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Keyboard Accuracy Test - Stop Typos & Track Errors | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <AccuracyTestPage />;
+  return <DynamicPage />;
 }

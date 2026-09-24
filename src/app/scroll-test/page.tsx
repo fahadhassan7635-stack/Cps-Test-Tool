@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import ScrollTestPage from '@/views/ScrollTestPage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Scroll Speed Test - Mouse Wheel Speed Checker | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ScrollTestPage />;
+  return <DynamicPage />;
 }

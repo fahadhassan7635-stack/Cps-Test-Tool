@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import CpsRush from '@/views/CpsRush';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "CPS Rush - Burst Click Speed Game | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <CpsRush />;
+  return <DynamicPage />;
 }

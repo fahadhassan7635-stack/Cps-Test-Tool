@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DAimTrainer from '@/views/3DAimTrainer';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "3D Aim Trainer - Browser FPS Practice in 3D | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DAimTrainer />;
+  return <DynamicPage />;
 }

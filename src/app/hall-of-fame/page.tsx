@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import LeaderboardPage from '@/views/LeaderboardPage';
+import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "Hall of Fame - All-Time Best Scores | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <LeaderboardPage />;
+  return <DynamicPage />;
 }
