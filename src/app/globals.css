@@ -671,3 +671,5 @@ html, body { margin: 0; padding: 0; }
 .hero-pulse-dot {
   animation-delay: -0.5s;
 }
+@media (max-width: 768px) { .hero-gradient-text, .hero-pulse-dot { animation: none !important; } }
+

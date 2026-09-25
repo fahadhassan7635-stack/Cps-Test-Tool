@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import ClientLayout from "../components/ClientLayout";
+import Footer from "../components/Footer";
 
 const SITE_URL = "https://fixedaim.com";
 
@@ -80,7 +81,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ClientLayout>{children}</ClientLayout>
+        <div style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%' }}>
+          <ClientLayout>{children}</ClientLayout>
+          <Footer />
+        </div>
       </body>
     </html>
   );
