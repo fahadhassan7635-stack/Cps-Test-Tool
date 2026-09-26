@@ -229,7 +229,7 @@ const JSON_LD_DATA = {
         itemListElement: [
           { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://fixedaim.com' },
           { '@type': 'ListItem', position: 2, name: 'Keyboard', item: 'https://fixedaim.com/keyboard' },
-          { '@type': 'ListItem', position: 3, name: 'Typing Speed Test', item: 'https://fixedaim.com/keyboard/typing-speed-test' },
+          { '@type': 'ListItem', position: 3, name: 'Typing Speed Test', item: 'https://fixedaim.com/typing-test' },
         ],
       },
     },

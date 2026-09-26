@@ -898,7 +898,7 @@ const BreadcrumbSchema = Object.freeze({
   '@type':    'BreadcrumbList',
   'itemListElement': Object.freeze([
     Object.freeze({ '@type': 'ListItem', 'position': 1, 'name': 'Home',           'item': 'https://fixedaim.com/'               }),
-    Object.freeze({ '@type': 'ListItem', 'position': 2, 'name': 'Keyboard', 'item': 'https://fixedaim.com/keyboard-tools' }),
+    Object.freeze({ '@type': 'ListItem', 'position': 2, 'name': 'Keyboard', 'item': 'https://fixedaim.com/keyboard' }),
     Object.freeze({ '@type': 'ListItem', 'position': 3, 'name': 'Key Visualizer', 'item': PAGE_META.canonical                     }),
   ]),
 });

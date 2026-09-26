@@ -328,7 +328,7 @@ const JSON_LD_SCHEMAS: object[] = [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home',        item: 'https://fixedaim.com' },
-      { '@type': 'ListItem', position: 2, name: 'Mouse Tools', item: 'https://fixedaim.com/mouse-tools' },
+      { '@type': 'ListItem', position: 2, name: 'Mouse Tools', item: 'https://fixedaim.com/mouse' },
       { '@type': 'ListItem', position: 3, name: 'CPS Test',    item: 'https://fixedaim.com/cps-test' },
     ],
   },
@@ -417,7 +417,7 @@ const Breadcrumb = memo(() => (
     >
       {[
         { label: 'Home',        href: '/' },
-        { label: 'Mouse Tools', href: '/mouse-tools' },
+        { label: 'Mouse Tools', href: '/mouse' },
         { label: 'CPS Test',    href: '/cps-test', current: true },
       ].map((item, i, arr) => (
         <li key={item.href} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

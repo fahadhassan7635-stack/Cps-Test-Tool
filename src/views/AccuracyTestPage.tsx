@@ -731,8 +731,8 @@ const ResultModal = memo(function ResultModal({
 const Breadcrumb = memo(function Breadcrumb() {
   const crumbs = [
     { label: 'Home', href: '/' },
-    { label: 'Keyboard Tools', href: '/keyboard-tools' },
-    { label: 'Keyboard Accuracy Test', href: '/keyboard-accuracy-test' },
+    { label: 'Keyboard Tools', href: '/keyboard' },
+    { label: 'Keyboard Accuracy Test', href: '/accuracy' },
   ];
   return (
     <nav aria-label="Breadcrumb" style={{ marginBottom: '1.5rem' }}>
