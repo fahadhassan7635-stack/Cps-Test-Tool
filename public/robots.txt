@@ -51,9 +51,6 @@ Allow: /
 # BLOCK BAD BOTS & SCRAPERS
 # ==========================================
 
-User-agent: AhrefsBot
-Disallow: /
-
 User-agent: SemrushBot
 Disallow: /
 
