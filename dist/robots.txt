@@ -123,7 +123,6 @@ Allow: /
 
 # Block private/internal paths
 Disallow: /api/
-Disallow: /_next/
 Disallow: /src/
 Disallow: /node_modules/
 Disallow: /.git/
