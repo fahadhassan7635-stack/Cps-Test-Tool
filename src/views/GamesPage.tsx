@@ -41,6 +41,20 @@ export default function GamesPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem', minHeight: '80vh' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://fixedaim.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Games', item: 'https://fixedaim.com/games' },
+            ],
+          }),
+        }}
+      />
+
       
       {/* HEADER SECTION (Standardized to match other pages) */}
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>

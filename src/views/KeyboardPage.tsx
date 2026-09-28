@@ -11,6 +11,20 @@ const tools = [
 export default function KeyboardPage() {
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://fixedaim.com/' },
+              { '@type': 'ListItem', position: 2, name: 'Keyboard Tools', item: 'https://fixedaim.com/keyboard' },
+            ],
+          }),
+        }}
+      />
+
       <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <div className="section-label">Category</div>
         <h1 className="tool-title">Keyboard Tools</h1>
