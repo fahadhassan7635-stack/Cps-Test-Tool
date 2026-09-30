@@ -583,7 +583,7 @@ export default function TypingTestPage() {
   const [customDuration, setCustomDuration] = useState('');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customError, setCustomError]     = useState('');
-  const [text, setText]                   = useState(() => generateText('medium', 'words'));
+  const [text, setText]                   = useState('');
   const [typed, setTyped]                 = useState('');
   const [phase, setPhase]                 = useState<Phase>('idle');
   const [timeLeft, setTimeLeft]           = useState(60);
@@ -611,6 +611,9 @@ export default function TypingTestPage() {
   const mistakeCount        = useRef(0);
   const warningTimerRef     = useRef<ReturnType<typeof setTimeout> | null>(null);
   const finalLiveStats      = useRef<LiveStats>({ correct: 0, incorrect: 0, mistakes: 0, backspaces: 0 });
+
+  // Generate initial text on client-only (Math.random differs between server and client)
+  useEffect(() => { setText(generateText('medium', 'words')); }, []);
 
   // Sync soundOn to ref
   useEffect(() => { soundOnRef.current = soundOn; }, [soundOn]);
