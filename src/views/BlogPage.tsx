@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from 'react';
 
@@ -18,6 +18,31 @@ function ResearchLink({ href, children }: { href: string; children: React.ReactN
       {children}
     </a>
   );
+}
+
+
+function getCtaDetails(id: number) {
+  const defaultDesc = "Free test — no account, no download, instant results.";
+  const map: Record<number, {url: string, title: string, desc: string, cta: string}> = {
+    1: { url: '/typing-test', title: 'Ready to Type Faster?', desc: defaultDesc, cta: 'Take the Typing Test Now' },
+    2: { url: '/cps-test', title: 'Ready to Improve Your CPS?', desc: defaultDesc, cta: 'Take the CPS Test Now' },
+    3: { url: '/reaction-time', title: 'Test Your Reflexes Now', desc: defaultDesc, cta: 'Take the Reaction Time Test' },
+    4: { url: '/aim-trainer', title: 'Ready to Improve Your Aim?', desc: defaultDesc, cta: 'Launch 2D Aim Trainer' },
+    5: { url: '/spacebar', title: 'Test Your Spacebar Speed', desc: defaultDesc, cta: 'Take the Spacebar Counter' },
+    6: { url: '/key-visualizer', title: 'Test Your Keyboard Ghosting', desc: defaultDesc, cta: 'Launch Key Visualizer' },
+    7: { url: '/double-click', title: 'Check Your Mouse Switches', desc: defaultDesc, cta: 'Take the Double Click Test' },
+    8: { url: '/accuracy', title: 'Test Your Keyboard Accuracy', desc: defaultDesc, cta: 'Take the Accuracy Test' },
+    9: { url: '/scroll-test', title: 'Test Your Scroll Speed', desc: defaultDesc, cta: 'Take the Scroll Test' },
+    10: { url: '/mouse-accuracy', title: 'Check Your Mouse Accuracy', desc: defaultDesc, cta: 'Take the Mouse Accuracy Test' },
+    11: { url: '/3d-aim-trainer', title: 'Practice 3D Aiming', desc: defaultDesc, cta: 'Launch 3D Aim Trainer' },
+    12: { url: '/space-defense', title: 'Play Space Defense', desc: defaultDesc, cta: 'Play Space Defense Now' },
+    13: { url: '/voyager-game', title: 'Play Voyager', desc: defaultDesc, cta: 'Play Voyager Game Now' },
+    14: { url: '/cps-rush', title: 'Ready for CPS Rush?', desc: defaultDesc, cta: 'Play CPS Rush Now' },
+    15: { url: '/cps-test', title: 'Ready to Improve Your CPS?', desc: defaultDesc, cta: 'Take the CPS Test Now' },
+    16: { url: '/reaction-time', title: 'Test Your Reflexes Now', desc: defaultDesc, cta: 'Take the Reaction Time Test' },
+    17: { url: '/space-waves', title: 'Play Space Waves', desc: defaultDesc, cta: 'Play Space Waves Now' },
+  };
+  return map[id] || { url: '/', title: 'Explore More Free Tools', desc: 'Check out all our free gaming and testing tools.', cta: 'View All Tools' };
 }
 
 const posts = [
@@ -1235,6 +1260,20 @@ export default function BlogPage() {
             </ul>
           </div>
         )}
+
+          {/* DYNAMIC CTA BUTTON */}
+          {getCtaDetails(post.id) && (
+            <div style={{ margin: '3.5rem 0 0', background: `linear-gradient(135deg, ${post.tagColor}15 0%, rgba(0,255,136,0.06) 100%)`, border: `1px solid ${post.tagColor}40`, borderRadius: '16px', padding: '1.75rem', textAlign: 'center' }}>
+              <h2 style={{ color: '#fff', fontWeight: '900', fontSize: '1.4rem', margin: '0 0 0.4rem' }}>{getCtaDetails(post.id).title}</h2>
+              <p style={{ color: '#9ca3af', margin: '0 0 1.1rem', fontSize: '0.9rem' }}>{getCtaDetails(post.id).desc}</p>
+              <a
+                href={getCtaDetails(post.id).url}
+                style={{ display: 'inline-block', background: 'var(--neon-green, #00ff88)', color: '#000', border: 'none', borderRadius: '10px', padding: '0.65rem 1.75rem', fontWeight: '800', fontSize: '0.95rem', cursor: 'pointer', textDecoration: 'none' }}
+              >
+                {'\u25b6'} {getCtaDetails(post.id).cta}
+              </a>
+            </div>
+          )}
       </div>
     );
   }
