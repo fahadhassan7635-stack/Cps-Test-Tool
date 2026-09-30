@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from 'next/link';
 import React, {
@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from 'react';
 
-// ─── More Tools ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ More Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface ToolLink { label: string; href: string; icon: React.ReactNode; }
 
 const MORE_TOOLS: ToolLink[] = [
@@ -287,7 +287,7 @@ class AudioManager {
 
 const audio = new AudioManager();
 
-// ── CONSTANTS ────────────────────────────────────────────────
+// â”€â”€ CONSTANTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const GRAVITY             = 0.35;
 const BOOST_STRENGTH      = -0.75;
 const MAX_VELOCITY        = 7;
@@ -316,24 +316,24 @@ const POWERUP_COLORS: Record<string, string> = {
   invincibility: '#ec4899',
 };
 const POWERUP_ICONS: Record<string, string> = {
-  shield: '🛡️', slowmo: '⏱️', doubleboost: '⚡', multiplier: '✖️', invincibility: '💫',
+  shield: 'ðŸ›¡ï¸', slowmo: 'â±ï¸', doubleboost: 'âš¡', multiplier: 'âœ–ï¸', invincibility: 'ðŸ’«',
 };
 const DIFF_COLORS: Record<Difficulty, string> = {
   easy: '#22c55e', normal: '#eab308', hard: '#ef4444',
 };
 const ACHIEVEMENT_DEFS: Omit<Achievement, 'unlocked' | 'unlockedAt'>[] = [
-  { id: 'first_flight',  title: 'First Flight',   description: 'Complete your first mission',    icon: '🚀' },
-  { id: 'dist_500',      title: 'Explorer',        description: 'Travel 500 distance',            icon: '🌠' },
-  { id: 'dist_1000',     title: 'Deep Space',      description: 'Travel 1,000 distance',          icon: '🌌' },
-  { id: 'dist_5000',     title: 'Voyager Elite',   description: 'Travel 5,000 distance',          icon: '🏆' },
-  { id: 'cps_10',        title: 'Speed Fingers',   description: 'Reach 10 CPS',                   icon: '⚡' },
-  { id: 'cps_15',        title: 'Lightning Hands', description: 'Reach 15 CPS',                   icon: '🌩️' },
-  { id: 'avoid_20',      title: 'Dodger',          description: 'Avoid 20 obstacles in one run',  icon: '🎯' },
-  { id: 'avoid_50',      title: 'Matrix',          description: 'Avoid 50 obstacles in one run',  icon: '🕶️' },
-  { id: 'survivor_60',   title: 'Survivor',        description: 'Survive for 60 seconds',         icon: '⏱️' },
-  { id: 'space_master',  title: 'Space Master',    description: 'Survive for 120 seconds',        icon: '👑' },
-  { id: 'near_miss_5',   title: 'Daredevil',       description: 'Get 5 near misses in one run',   icon: '😎' },
-  { id: 'boss_survived', title: 'Boss Slayer',     description: 'Survive a boss asteroid',        icon: '💀' },
+  { id: 'first_flight',  title: 'First Flight',   description: 'Complete your first mission',    icon: 'ðŸš€' },
+  { id: 'dist_500',      title: 'Explorer',        description: 'Travel 500 distance',            icon: 'ðŸŒ ' },
+  { id: 'dist_1000',     title: 'Deep Space',      description: 'Travel 1,000 distance',          icon: 'ðŸŒŒ' },
+  { id: 'dist_5000',     title: 'Voyager Elite',   description: 'Travel 5,000 distance',          icon: 'ðŸ†' },
+  { id: 'cps_10',        title: 'Speed Fingers',   description: 'Reach 10 CPS',                   icon: 'âš¡' },
+  { id: 'cps_15',        title: 'Lightning Hands', description: 'Reach 15 CPS',                   icon: 'ðŸŒ©ï¸' },
+  { id: 'avoid_20',      title: 'Dodger',          description: 'Avoid 20 obstacles in one run',  icon: 'ðŸŽ¯' },
+  { id: 'avoid_50',      title: 'Matrix',          description: 'Avoid 50 obstacles in one run',  icon: 'ðŸ•¶ï¸' },
+  { id: 'survivor_60',   title: 'Survivor',        description: 'Survive for 60 seconds',         icon: 'â±ï¸' },
+  { id: 'space_master',  title: 'Space Master',    description: 'Survive for 120 seconds',        icon: 'ðŸ‘‘' },
+  { id: 'near_miss_5',   title: 'Daredevil',       description: 'Get 5 near misses in one run',   icon: 'ðŸ˜Ž' },
+  { id: 'boss_survived', title: 'Boss Slayer',     description: 'Survive a boss asteroid',        icon: 'ðŸ’€' },
 ];
 
 const LS = {
@@ -403,7 +403,7 @@ const makeInitialState = (): GameState => ({
   fps: 0, fpsFrameCount: 0, fpsLastTime: 0,
 });
 
-// ── COMPONENT ────────────────────────────────────────────────
+// â”€â”€ COMPONENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function VoyagerGame() {
   const canvasRef    = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -413,7 +413,7 @@ export default function VoyagerGame() {
   const countdownTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const loopRunning     = useRef(false);
 
-  // Scale factor ref: tracks current dpr scale so game logic coords stay at CANVAS_W × CANVAS_H
+  // Scale factor ref: tracks current dpr scale so game logic coords stay at CANVAS_W Ã— CANVAS_H
   const scaleRef = useRef({ x: 1, y: 1 });
 
   const [uiView, setUiView]             = useState<UiView>('start');
@@ -428,20 +428,16 @@ export default function VoyagerGame() {
     { type: string; remaining: number; total: number }[]
   >([]);
   const [newAchievements, setNewAchievements] = useState<Achievement[]>([]);
-  const [highScores, setHighScores]     = useState<HighScores>(() =>
-    LS.get('voyager_highscores', { bestDistance: 0, bestTime: 0, highestCps: 0, mostAvoided: 0 })
-  );
-  const [lifetimeStats, setLifetimeStats] = useState<LifetimeStats>(() =>
-    LS.get('voyager_lifetime', {
-      gamesPlayed: 0, totalDistance: 0, totalTime: 0, totalAvoided: 0,
-      highestCps: 0, highestDistance: 0, averageCpsSum: 0, averageCpsCount: 0,
-    })
-  );
-  const [achievements, setAchievements] = useState<Achievement[]>(() => {
-    const saved = LS.get<Record<string, boolean>>('voyager_achievements', {});
-    return ACHIEVEMENT_DEFS.map(d => ({ ...d, unlocked: !!saved[d.id] }));
-  });
-  const [showStats, setShowStats]               = useState(false);
+  const [highScores, setHighScores] = useState<HighScores>({ bestDistance: 0, bestTime: 0, highestCps: 0, mostAvoided: 0 });
+  const [lifetimeStats, setLifetimeStats] = useState<LifetimeStats>({ gamesPlayed: 0, totalDistance: 0, totalTime: 0, totalAvoided: 0, highestCps: 0, highestDistance: 0, averageCpsSum: 0, averageCpsCount: 0 });
+  const [achievements, setAchievements] = useState<Achievement[]>(ACHIEVEMENT_DEFS.map(d => ({ ...d, unlocked: false })));
+  const [showStats, setShowStats] = useState(false);
+  useEffect(() => {
+    setHighScores(LS.get('voyager_highscores', { bestDistance: 0, bestTime: 0, highestCps: 0, mostAvoided: 0 }));
+    setLifetimeStats(LS.get('voyager_lifetime', { gamesPlayed: 0, totalDistance: 0, totalTime: 0, totalAvoided: 0, highestCps: 0, highestDistance: 0, averageCpsSum: 0, averageCpsCount: 0 }));
+    const savedAch = LS.get<Record<string, boolean>>('voyager_achievements', {});
+    setAchievements(ACHIEVEMENT_DEFS.map(d => ({ ...d, unlocked: !!savedAch[d.id] })));
+  }, []);
   const [showAchievements, setShowAchievements] = useState(false);
 
   const difficultyRef = useRef(difficulty);
@@ -451,7 +447,7 @@ export default function VoyagerGame() {
   useEffect(() => { highScoresRef.current = highScores; }, [highScores]);
   useEffect(() => { showFpsRef.current    = showFps;    }, [showFps]);
 
-  // ── Fullscreen ──────────────────────────────────────────
+  // â”€â”€ Fullscreen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const toggleFullscreen = useCallback(async () => {
     const el = containerRef.current;
     if (!el) return;
@@ -467,7 +463,7 @@ export default function VoyagerGame() {
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
-  // ── Sound ───────────────────────────────────────────────
+  // â”€â”€ Sound â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const toggleSound = useCallback(() => {
     const next = !audio.muted;
     audio.muted = next;
@@ -475,7 +471,7 @@ export default function VoyagerGame() {
     if (!next) audio.init();
   }, []);
 
-  // ── Achievement check ───────────────────────────────────
+  // â”€â”€ Achievement check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const checkAchievements = useCallback((state: GameState) => {
     setAchievements(prev => {
       const unlocked: Achievement[] = [];
@@ -589,18 +585,18 @@ export default function VoyagerGame() {
     tick();
   }, [clearCountdown]);
 
-  // ── MAIN GAME LOOP ──────────────────────────────────────
+  // â”€â”€ MAIN GAME LOOP â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // ── Canvas setup: always render at CANVAS_W × CANVAS_H logical pixels
+    // â”€â”€ Canvas setup: always render at CANVAS_W Ã— CANVAS_H logical pixels
     // but scale the backing store for the device pixel ratio.
     // The CSS keeps width/height = 100% so the browser handles CSS scaling.
     const setupCanvas = () => {
-      const dpr  = Math.min(window.devicePixelRatio || 1, 2); // cap at 2× to avoid blowout
+      const dpr  = Math.min(window.devicePixelRatio || 1, 2); // cap at 2Ã— to avoid blowout
       canvas.width  = CANVAS_W * dpr;
       canvas.height = CANVAS_H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -614,7 +610,7 @@ export default function VoyagerGame() {
     if (ro) ro.observe(canvas);
     window.addEventListener('resize', onResize, { passive: true });
 
-    // ── Stars ──────────────────────────────────────────────
+    // â”€â”€ Stars â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const state = gs.current;
     if (state.stars.length === 0) {
       state.stars = Array.from({ length: 180 }, () => ({
@@ -625,7 +621,7 @@ export default function VoyagerGame() {
       }));
     }
 
-    // ── Particle helpers ───────────────────────────────────
+    // â”€â”€ Particle helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const addParticle = (p: Particle) => {
       const s = gs.current;
       if (s.particles.length >= MAX_PARTICLES) {
@@ -645,7 +641,7 @@ export default function VoyagerGame() {
       s.floatingTexts.push({ x, y, text, life: 1, color, vy: -2, size });
     };
 
-    // ── Entity factories ───────────────────────────────────
+    // â”€â”€ Entity factories â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const createObstacle = (speed: number, forceBoss = false): Obstacle => {
       if (forceBoss) {
         const sz = 80 + Math.random() * 40;
@@ -693,7 +689,7 @@ export default function VoyagerGame() {
       };
     };
 
-    // ── Game over ──────────────────────────────────────────
+    // â”€â”€ Game over â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const triggerGameOver = () => {
       const s = gs.current;
       if (s.status === 'gameover') return;
@@ -720,7 +716,7 @@ export default function VoyagerGame() {
       setUiView('gameover');
     };
 
-    // ── Update ─────────────────────────────────────────────
+    // â”€â”€ Update â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const update = (now: number) => {
       const s   = gs.current;
       if (s.status !== 'playing') return;
@@ -806,7 +802,7 @@ export default function VoyagerGame() {
         s.lastBossSpawn = now;
         audio.playBossSpawn();
         GA.bossSpawn();
-        addFloat(CANVAS_W / 2, 80, '⚠️ BOSS ASTEROID!', '#ef4444', 22);
+        addFloat(CANVAS_W / 2, 80, 'âš ï¸ BOSS ASTEROID!', '#ef4444', 22);
       }
 
       const slowFactor = s.hasSlowmo ? 0.4 : 1;
@@ -838,7 +834,7 @@ export default function VoyagerGame() {
                 size: Math.random() * 3 + 1,
               });
             }
-            addFloat(VOYAGER_X, s.y - 40, '🛡️ SHIELD!', '#22c55e', 16);
+            addFloat(VOYAGER_X, s.y - 40, 'ðŸ›¡ï¸ SHIELD!', '#22c55e', 16);
             continue;
           } else {
             triggerGameOver();
@@ -856,7 +852,7 @@ export default function VoyagerGame() {
           const comboMult = 1 + s.combo * 0.1;
           const mult      = comboMult * (s.hasMultiplier ? s.multiplierBonus : 1);
           s.scoreMultiplier = mult;
-          addFloat(VOYAGER_X + 20, s.y - 35, `NEAR MISS! ×${mult.toFixed(1)}`, '#00f5ff', 15);
+          addFloat(VOYAGER_X + 20, s.y - 35, `NEAR MISS! Ã—${mult.toFixed(1)}`, '#00f5ff', 15);
         }
 
         if (obs.x < -obs.radius * 2) {
@@ -864,7 +860,7 @@ export default function VoyagerGame() {
           if (obs.isBoss) {
             s.bossSpawned = false;
             s.bossCleared = true;
-            addFloat(CANVAS_W / 2, CANVAS_H / 2 - 60, '👑 BOSS CLEARED!', '#eab308', 24);
+            addFloat(CANVAS_W / 2, CANVAS_H / 2 - 60, 'ðŸ‘‘ BOSS CLEARED!', '#eab308', 24);
           }
           updateHUD('stat-avoided', s.avoided);
           continue;
@@ -989,7 +985,7 @@ export default function VoyagerGame() {
       s.particles.length = w;
     };
 
-    // ── Draw ───────────────────────────────────────────────
+    // â”€â”€ Draw â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const draw = (timestamp: number) => {
       if (!loopRunning.current) return;
 
@@ -1262,7 +1258,7 @@ export default function VoyagerGame() {
       rafIdRef.current = requestAnimationFrame(draw);
     };
 
-    // ── Input ──────────────────────────────────────────────
+    // â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const stopBoost = () => { gs.current.isBoosting = false; };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1313,7 +1309,7 @@ export default function VoyagerGame() {
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Actions ────────────────────────────────────────────
+  // â”€â”€ Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const actionsRef = useRef({
     start: () => {
       const now        = Date.now();
@@ -1400,7 +1396,7 @@ export default function VoyagerGame() {
     },
   });
 
-  // ── Canvas pointer handlers ─────────────────────────────
+  // â”€â”€ Canvas pointer handlers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const handleCanvasMouseDown = useCallback(() => {
     const s = gs.current.status;
     if      (s === 'playing')                    actionsRef.current.boostUp();
@@ -1429,7 +1425,7 @@ export default function VoyagerGame() {
     actionsRef.current.boostDown();
   }, []);
 
-  // ── RENDER ─────────────────────────────────────────────
+  // â”€â”€ RENDER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   return (
     <>
       
@@ -1462,13 +1458,13 @@ export default function VoyagerGame() {
           {/*
             The canvas is absolutely positioned to fill the container exactly.
             Its internal pixel dimensions are set by setupCanvas() and are always
-            CANVAS_W × CANVAS_H logical pixels (scaled by dpr for sharpness).
+            CANVAS_W Ã— CANVAS_H logical pixels (scaled by dpr for sharpness).
             CSS width/height 100% means the browser scales the canvas to fit
             the container without any overflow or clipping.
           */}
           <canvas
             ref={canvasRef}
-            aria-label="Voyager Space Game — click or press Space to boost"
+            aria-label="Voyager Space Game â€” click or press Space to boost"
             style={{
               position: 'absolute',
               top: 0, left: 0,
@@ -1548,7 +1544,7 @@ export default function VoyagerGame() {
                 }}>
                   <div style={{ fontSize: '0.6rem', color: '#eab308', fontWeight: '800', letterSpacing: '0.1em' }}>COMBO</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#eab308', lineHeight: 1 }}>
-                    ×{scoreMultiplier.toFixed(1)}
+                    Ã—{scoreMultiplier.toFixed(1)}
                   </div>
                 </div>
               )}
@@ -1646,7 +1642,7 @@ export default function VoyagerGame() {
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}
                       >
-                        {d === 'easy' ? '🟢' : d === 'normal' ? '🟡' : '🔴'} {d}
+                        {d === 'easy' ? 'ðŸŸ¢' : d === 'normal' ? 'ðŸŸ¡' : 'ðŸ”´'} {d}
                       </button>
                     ))}
                   </div>
@@ -1809,14 +1805,14 @@ export default function VoyagerGame() {
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{a.icon}</div>
                   <div style={{ fontSize: '0.8rem', fontWeight: '800', color: a.unlocked ? '#eab308' : '#94a3b8' }}>{a.title}</div>
                   <div style={{ fontSize: '0.68rem', color: '#64748b' }}>{a.description}</div>
-                  {a.unlocked && <div style={{ fontSize: '0.6rem', color: '#22c55e', marginTop: '0.25rem', fontWeight: '700' }}>✓ Unlocked</div>}
+                  {a.unlocked && <div style={{ fontSize: '0.6rem', color: '#22c55e', marginTop: '0.25rem', fontWeight: '700' }}>âœ“ Unlocked</div>}
                 </div>
               ))}
             </div>
           </Modal>
         )}
 
-        {/* ── MORE TOOLS GRID ── */}
+        {/* â”€â”€ MORE TOOLS GRID â”€â”€ */}
         <section aria-label="More Tools" style={{ width: '100%', maxWidth: '850px', marginBottom: '3.5rem', marginTop: '1rem' }}>
           <h2 style={{
             fontWeight: 800, fontSize: '1.5rem', color: '#fff',
@@ -1894,8 +1890,8 @@ export default function VoyagerGame() {
             <li style={{ marginBottom: '0.5rem' }}><strong>Peak Score Analytics:</strong> The post-game screen displays your maximum Peak CPS.</li>
           </ul>
           <div style={{ background: 'rgba(0,245,255,0.03)', borderLeft: '4px solid #00f5ff', padding: '1rem', margin: '1.5rem 0', borderRadius: '0 12px 12px 0' }}>
-            <span style={{ display: 'block', fontWeight: '800', color: '#fff', marginBottom: '0.25rem' }}>💡 Did You Know?</span>
-            The average global CPS sits between 4–6.5. Professional esports veterans frequently breach sustained ranges of 12–15 clicks per second!
+            <span style={{ display: 'block', fontWeight: '800', color: '#fff', marginBottom: '0.25rem' }}>ðŸ’¡ Did You Know?</span>
+            The average global CPS sits between 4â€“6.5. Professional esports veterans frequently breach sustained ranges of 12â€“15 clicks per second!
           </div>
           <SeoExtraSections />
           <h3 style={seoH3}>Frequently Asked Questions</h3>
@@ -1920,17 +1916,17 @@ export default function VoyagerGame() {
   );
 }
 
-// ── SEO HEAD ─────────────────────────────────────────────────
+// â”€â”€ SEO HEAD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 
-// ── SEO EXTRAS ───────────────────────────────────────────────
+// â”€â”€ SEO EXTRAS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const seoH3: React.CSSProperties = { fontSize: '1.25rem', fontWeight: '700', color: '#00f5ff', marginTop: '1.5rem', marginBottom: '0.5rem' };
 const seoP:  React.CSSProperties = { marginBottom: '1.25rem' };
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
   { q: 'Is my score saved if I close the tab?',  a: 'Yes. Best distance, survival time, peak CPS and achievements are stored locally in your browser.' },
-  { q: 'Does difficulty affect my CPS score?',   a: 'Difficulty changes obstacle speed and gravity — not the CPS calculation itself.' },
-  { q: 'Can I play Voyager on mobile?',          a: 'Yes — tapping the canvas works the same as holding Spacebar on desktop.' },
+  { q: 'Does difficulty affect my CPS score?',   a: 'Difficulty changes obstacle speed and gravity â€” not the CPS calculation itself.' },
+  { q: 'Can I play Voyager on mobile?',          a: 'Yes â€” tapping the canvas works the same as holding Spacebar on desktop.' },
   { q: 'Why does the ship suddenly drop?',       a: 'Releasing boost lets gravity take over. Short rhythmic taps give more precise altitude control.' },
 ];
 
@@ -1975,7 +1971,7 @@ function SeoExtraSections() {
   );
 }
 
-// ── STYLE CONSTANTS ───────────────────────────────────────────
+// â”€â”€ STYLE CONSTANTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const outlineBtn: React.CSSProperties = {
   flex: 1, padding: '0.5rem 0.25rem',
   background: 'rgba(255,255,255,0.03)',
@@ -1993,7 +1989,7 @@ const solidBtn: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
 };
 
-// ── SUB-COMPONENTS ────────────────────────────────────────────
+// â”€â”€ SUB-COMPONENTS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const StatBox = React.memo(({ icon, label, id, initialValue }: {
   icon: React.ReactNode; label: string; id: string; initialValue?: string | number;
 }) => (
@@ -2070,7 +2066,7 @@ const Modal = React.memo(({ title, icon, onClose, children }: {
           {icon}
           <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: '800', color: '#fff' }}>{title}</h2>
         </div>
-        <button aria-label="Close modal" onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.3rem 0.6rem', color: '#94a3b8', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
+        <button aria-label="Close modal" onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.3rem 0.6rem', color: '#94a3b8', cursor: 'pointer', fontSize: '1rem' }}>âœ•</button>
       </div>
       {children}
     </div>
