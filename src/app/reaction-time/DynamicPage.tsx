@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 const ReactionTimePage = dynamic(
   () => import('@/views/ReactionTimePage'),
   {
-    ssr: false,
+    
     loading: () => (<div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#080d14' }}><p style={{ color: '#8b949e', fontSize: '0.9rem' }}>Loading...</p></div>),
   }
 );
