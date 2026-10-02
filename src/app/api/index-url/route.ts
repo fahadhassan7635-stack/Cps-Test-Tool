@@ -23,13 +23,11 @@ export async function GET(request: Request) {
       );
     }
 
-    const jwtClient = new google.auth.JWT(
-      clientEmail,
-      undefined,
-      privateKey,
-      ['https://www.googleapis.com/auth/indexing'],
-      undefined
-    );
+    const jwtClient = new google.auth.JWT({
+      email: clientEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/indexing'],
+    });
 
     // 3. Authenticate with Google
     await jwtClient.authorize();
