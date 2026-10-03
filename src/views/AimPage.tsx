@@ -39,8 +39,6 @@ export default function AimPage() {
             color: 'var(--text-primary)', display: 'block', transition: 'all 0.3s ease',
             position: 'relative',
           }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color; el.style.transform = 'translateY(-4px)'; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.transform = 'translateY(0)'; }}
           >
             {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}
             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{tool.icon}</div>

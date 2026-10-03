@@ -90,15 +90,9 @@ export default function GamesPage() {
                 transition: 'all 0.3s ease',
                 position: 'relative',
               }}
-              onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.transform = 'translateY(-4px)';
-                el.style.borderColor = game.color;
               }}
-              onMouseLeave={e => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.transform = 'translateY(0)';
-                el.style.borderColor = 'var(--border)';
               }}
             >
               <div>
