@@ -90,10 +90,6 @@ export default function GamesPage() {
                 transition: 'all 0.3s ease',
                 position: 'relative',
               }}
-                const el = e.currentTarget as HTMLElement;
-              }}
-                const el = e.currentTarget as HTMLElement;
-              }}
             >
               <div>
                 {/* Badge */}
