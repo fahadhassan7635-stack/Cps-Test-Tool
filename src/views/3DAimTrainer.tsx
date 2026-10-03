@@ -30,14 +30,29 @@ export default function SniperModePage() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [srcdoc, setSrcdoc] = useState<string>('');
 
   useEffect(() => {
-    const handleFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+    const handler = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handler);
+    return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
+
+  // Fetch the game HTML and inject as srcdoc to bypass X-Frame-Options
+  useEffect(() => {
+    if (!gameStarted) return;
+    fetch('/3d-aim-trainer.html')
+      .then(r => r.text())
+      .then(html => {
+        // Inject a <base> tag so relative paths like /three.min.js resolve correctly
+        const withBase = html.replace(
+          '<head>',
+          `<head><base href="${window.location.origin}/">`
+        );
+        setSrcdoc(withBase);
+      })
+      .catch(() => setSrcdoc('<p style="color:red;padding:2rem">Failed to load game.</p>'));
+  }, [gameStarted]);
 
   const toggleFullscreen = useCallback(() => {
     const el = containerRef.current;
@@ -49,11 +64,6 @@ export default function SniperModePage() {
     }
   }, []);
 
-  useEffect(() => {
-    const handler = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handler);
-    return () => document.removeEventListener('fullscreenchange', handler);
-  }, []);
 
   return (
     <div style={{ width: '100%', minHeight: '100vh' }}>
@@ -80,7 +90,7 @@ export default function SniperModePage() {
         ) : (
           <iframe
             ref={iframeRef}
-            src="/3d-aim-trainer.html"
+            srcDoc={srcdoc || '<html><body style="background:#0a0a0c;display:flex;align-items:center;justify-content:center;height:100vh"><p style="color:#8b949e;font-size:1rem">Loading 3D game…</p></body></html>'}
             style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
             allow="fullscreen"
             title="3D Aim Trainer"
