@@ -1,5 +1,3 @@
-"use client";
-
 import Link from 'next/link';
 const tools = [
   { to: '/typing-test', icon: '⌨️', title: 'Typing Speed Test', desc: 'Measure your WPM across multiple difficulties and durations. Track your improvement over time.', color: 'var(--neon-cyan)', tag: 'Most Popular' },
@@ -33,15 +31,13 @@ export default function KeyboardPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         {tools.map(tool => (
-          <Link key={tool.to} href={tool.to} style={{
+          <Link key={tool.to} href={tool.to} className="hub-tool-card" style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: '16px', padding: '1.75rem', textDecoration: 'none',
             color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', 
             height: '100%', justifyContent: 'space-between', transition: 'all 0.3s ease',
             position: 'relative',
           }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color; el.style.transform = 'translateY(-4px)'; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.transform = 'translateY(0)'; }}
           >
             <div>
               {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}

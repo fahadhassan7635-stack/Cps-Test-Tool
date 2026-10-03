@@ -1,5 +1,3 @@
-"use client";
-
 import Link from 'next/link';
 const tools = [
   { to: '/cps-test', icon: '⚡', title: 'CPS Test', desc: 'Click as fast as possible. Measure your Clicks Per Second over multiple duration options.', color: 'var(--neon-green)', tag: 'Most Popular' },
@@ -22,16 +20,13 @@ export default function MousePage() {
       {/* Grid layout matching AimPage (260px column minmax) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         {tools.map(tool => (
-          <Link key={tool.to} href={tool.to} style={{
+          <Link key={tool.to} href={tool.to} className="hub-tool-card" style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: '16px', padding: '1.75rem', textDecoration: 'none',
             color: 'var(--text-primary)', 
-            /* Flex column to ensure equal card heights matching AimPage */
             display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between', 
             transition: 'all 0.3s ease', position: 'relative',
           }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = tool.color; el.style.transform = 'translateY(-4px)'; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--border)'; el.style.transform = 'translateY(0)'; }}
           >
             <div>
               {tool.tag && <span style={{ position: 'absolute', top: '1rem', right: '1rem', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700', background: `${tool.color}20`, color: tool.color, textTransform: 'uppercase' }}>{tool.tag}</span>}

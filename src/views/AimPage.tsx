@@ -1,5 +1,3 @@
-"use client";
-
 import Link from 'next/link';
 
 
@@ -35,7 +33,7 @@ export default function AimPage() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
         {tools.map(tool => (
-          <Link key={tool.to} href={tool.to} style={{
+          <Link key={tool.to} href={tool.to} className="hub-tool-card" style={{
             background: 'var(--bg-card)', border: '1px solid var(--border)',
             borderRadius: '16px', padding: '1.75rem', textDecoration: 'none',
             color: 'var(--text-primary)', display: 'block', transition: 'all 0.3s ease',
