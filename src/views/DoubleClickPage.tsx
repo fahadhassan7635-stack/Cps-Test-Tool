@@ -598,6 +598,45 @@ export default function DoubleClickPage() {
           <li style={{ marginBottom: '0.6rem' }}><strong>Delayed registration:</strong> Noticeable lag between click and response. Suggests a driver issue or high system CPU load.</li>
         </ul>
 
+        {/* ================= YOUTUBE VIDEO EMBED ================= */}
+        <div style={{
+          margin: '2.5rem 0',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '16px',
+          padding: '1.25rem',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ color: '#fff', fontSize: '1.15rem', fontWeight: '600', marginBottom: '1rem' }}>
+            📹 Watch: Double Click Test & Mouse Switch Guide
+          </h3>
+          <div style={{
+            position: 'relative',
+            paddingBottom: '56.25%',
+            height: 0,
+            overflow: 'hidden',
+            borderRadius: '12px',
+            maxWidth: '100%',
+          }}>
+            <iframe
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                border: 0,
+                borderRadius: '12px'
+              }}
+              src="https://www.youtube.com/embed/LucSXI6nl8A?si=Gw8kl0Pil8Tlubhu"
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
+
         <h2 style={{ fontWeight: '700', fontSize: '1.4rem', marginBottom: '1rem', color: 'var(--neon-cyan)', marginTop: '2.5rem' }}>
           How to Fix a Mouse That Double Clicks
         </h2>
