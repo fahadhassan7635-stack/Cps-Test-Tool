@@ -310,10 +310,12 @@ const SEOHead: React.FC = () => {
 
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
 const FAQ_ITEMS = [
-  { q: 'What is CPS Rush?', a: 'CPS Rush is a browser-based platformer game that uses your clicks per second (CPS) to control your character\'s speed and jump height, combining a CPS test with a fun platforming challenge.' },
+  { q: 'What is CPS Rush and how does it work?', a: 'CPS Rush is a browser-based speed platformer game where your real-time Clicks Per Second (CPS) directly powers your character\'s forward velocity and jump boost. The faster and more consistently you click, the faster your runner moves across platforms and the higher you leap across gaps.' },
+  { q: 'How does CPS Rush help you improve your CPS?', a: 'Unlike static 5-second timer tests where you click into an empty box, CPS Rush provides immediate visual biofeedback. Sustaining speed across moving obstacles forces your forearm and finger muscles to build twitch endurance, resist lactic acid fatigue, and maintain 10–20+ CPS under pressure.' },
+  { q: 'Can you play CPS Rush with Jitter Clicking and Butterfly Clicking?', a: 'Yes! CPS Rush is fully compatible with both techniques. Jitter clicking provides steady 10–14 CPS cruising speed across platforms, while butterfly clicking unleashes 15–25+ CPS bursts for massive jump boosts over wide chasms. You can also play with keyboard spacebar mode.' },
   { q: 'How does CPS affect gameplay in CPS Rush?', a: 'The more clicks per second you generate, the faster your character moves horizontally and the higher it jumps. This directly ties your clicking speed to your in-game performance.' },
-  { q: 'What is a good CPS score?', a: 'A score of 6–8 CPS is average for casual gamers. Competitive players often achieve 10–14 CPS with regular clicking, while skilled butterfly or jitter clickers can reach 15–20+ CPS.' },
-  { q: 'Can I use a keyboard instead of a mouse?', a: 'Yes! CPS Rush supports both mouse clicks and spacebar presses. Switch to keyboard mode in the main menu to test your spacebar pressing speed.' },
+  { q: 'What is a good CPS score in CPS Rush?', a: 'A score of 6–8 CPS is average for casual gamers. Competitive players often achieve 10–14 CPS with regular clicking, while skilled butterfly or jitter clickers can reach 15–20+ CPS.' },
+  { q: 'Can I use a keyboard spacebar instead of a mouse?', a: 'Yes! CPS Rush supports both mouse clicks and keyboard spacebar tapping. Select your input mode in the main menu to test your spacebar pressing speed.' },
   { q: 'What is jitter clicking?', a: 'Jitter clicking is a technique where you vibrate your forearm and wrist muscles to rapidly tap the mouse button, achieving speeds of 10–14 CPS. It requires practice to master.' },
   { q: 'What is butterfly clicking?', a: 'Butterfly clicking involves alternately tapping the mouse button with your index and middle fingers, allowing speeds of 15–25 CPS. This technique is often banned on some game servers.' }
 ];
@@ -926,15 +928,158 @@ export default function CpsRush() {
               SEO ARTICLE
           ================================================================ */}
           <article style={{ borderTop: '1px solid var(--border)', paddingTop: '3rem' }}>
-      <section style={{ color: 'var(--text-secondary)', fontSize: '0.91rem', lineHeight: '1.78' }}>
-        <h2 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1.5rem', fontWeight: '700', margin: '0 0 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.5rem' }}>
-          What is CPS Rush?
-        </h2>
-        <p style={{ marginBottom: '1.25rem', color: '#9ca3af' }}>
-          CPS Rush is a fast-paced clicker game that challenges your reflexes and mouse speed. Your goal is to click on the moving targets as fast as possible within the time limit. By practicing CPS Rush, gamers can improve their hand-eye coordination, reaction time, and raw clicking speed (CPS), which translates directly to better performance in competitive games like Minecraft, Valorant, and CS2.
-        </p>
-      </section>
-    </article>
+            <section style={{ color: 'var(--text-secondary)', fontSize: '0.91rem', lineHeight: '1.78' }}>
+              
+              {/* ── 1. WHAT IS CPS RUSH? ── */}
+              <h2 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1.45rem', fontWeight: 700, margin: '0 0 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.5rem' }}>
+                What is CPS Rush? (The Click-Speed Platformer Game)
+              </h2>
+              <p style={{ marginBottom: '1.25rem', color: '#9ca3af' }}>
+                <strong>CPS Rush</strong> is a high-octane browser game that turns traditional click speed testing into an interactive, physics-based platformer. Instead of clicking into a sterile, static box, your real-time <strong>Clicks Per Second (CPS)</strong> directly drives your in-game runner's horizontal velocity and jumping power. The faster and more consistently you click, the faster your character rushes across floating neon platforms, soars over bottomless chasms, and races toward the finish line.
+              </p>
+
+              {/* ── 2. HOW DOES THIS CPS RUSH GAME WORK? ── */}
+              <h2 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1.45rem', fontWeight: 700, margin: '2.5rem 0 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.5rem' }}>
+                How Does This CPS Rush Game Work? (Physics &amp; Mechanics)
+              </h2>
+              <p style={{ marginBottom: '1.25rem', color: '#9ca3af' }}>
+                CPS Rush combines arcade runner physics with real-time hardware input monitoring. Here is exactly how the game mechanics function under the hood:
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem', margin: '1.25rem 0 1.5rem' }}>
+                <div style={{ background: 'rgba(0,245,255,0.04)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '10px', padding: '1rem' }}>
+                  <h3 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>⚡ Click-to-Velocity Engine</h3>
+                  <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+                    Every click you register accelerates your character horizontally. Dropping below 6 CPS slows your runner down, while sustaining 12–20+ CPS unleashes blinding hyper-speed across the terrain.
+                  </p>
+                </div>
+                <div style={{ background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: '10px', padding: '1rem' }}>
+                  <h3 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🚀 Dynamic Jump Boost Multipliers</h3>
+                  <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+                    When leaping off platform edges, your live CPS provides an instant vertical jump multiplier (scaling with your peak burst speed), allowing skilled clickers to clear massive gaps effortlessly.
+                  </p>
+                </div>
+                <div style={{ background: 'rgba(255,159,67,0.04)', border: '1px solid rgba(255,159,67,0.15)', borderRadius: '10px', padding: '1rem' }}>
+                  <h3 style={{ color: 'var(--neon-orange, #ff9f43)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🎮 Dual Input Modes (Mouse &amp; Spacebar)</h3>
+                  <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+                    You can switch seamlessly between Mouse Mode (primary/secondary mouse buttons) and Keyboard Mode (Spacebar tapping). Train both your trigger finger and keyboard thumb dexterity.
+                  </p>
+                </div>
+                <div style={{ background: 'rgba(168,85,247,0.04)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '10px', padding: '1rem' }}>
+                  <h3 style={{ color: '#a855f7', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🏁 Distance Countdown &amp; Score</h3>
+                  <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+                    A real-time HUD tracks your remaining distance to the finish platform (reducing to 0m). Your final score factors in total speed, peak burst CPS, and platform completion time.
+                  </p>
+                </div>
+              </div>
+
+              {/* ── 3. HOW DOES CPS RUSH HELP YOU IMPROVE YOUR CPS? ── */}
+              <h2 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1.45rem', fontWeight: 700, margin: '2.5rem 0 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.5rem' }}>
+                How Does CPS Rush Help You to Improve Your CPS?
+              </h2>
+              <p style={{ marginBottom: '1.25rem', color: '#9ca3af' }}>
+                Many players hit a plateau when practicing on standard 5-second CPS tests because clicking into a static box does not reflect actual gaming conditions. CPS Rush solves this by introducing dynamic physical stakes:
+              </p>
+              <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.4rem', color: '#9ca3af', lineHeight: '1.85' }}>
+                <li>
+                  <strong style={{ color: '#fff' }}>1. Real-Time Biofeedback (Consequence-Driven Training):</strong>
+                  In standard tests, you only see a score after the timer expires. In CPS Rush, if your clicking speed drops by even 2–3 CPS, your character immediately decelerates, falling short of incoming jumps. This visual feedback trains your nervous system to maintain an unbroken clicking rhythm.
+                </li>
+                <li>
+                  <strong style={{ color: '#fff' }}>2. Building Muscular Stamina &amp; Twitch Endurance:</strong>
+                  While anyone can spam clicks for 1 or 2 seconds, maintaining 12–16+ CPS across an entire 20–30 second platformer run pushes your forearm tendons and fast-twitch muscle fibers to adapt, drastically reducing mid-game finger fatigue.
+                </li>
+                <li>
+                  <strong style={{ color: '#fff' }}>3. Simulates Real Gaming Multitasking (Minecraft &amp; FPS):</strong>
+                  In competitive Minecraft 1.8 PvP, you never click in isolation—you must click rapidly while tracking opponents, sprint-jumping, and judging distances. CPS Rush forces your brain to process visual obstacles simultaneously with maximum hand actuation.
+                </li>
+                <li>
+                  <strong style={{ color: '#fff' }}>4. Speed Pacing &amp; Burst Timing:</strong>
+                  You learn how to alternate between a sustainable baseline speed (8–10 CPS) during flat runs and explosive burst clicking (15–20+ CPS) right before launching across wide hazards.
+                </li>
+              </ul>
+
+              {/* ── 4. PLAYING WITH JITTER CLICK & BUTTERFLY CLICK ── */}
+              <h2 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1.45rem', fontWeight: 700, margin: '2.5rem 0 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.5rem' }}>
+                Play CPS Rush Games with Jitter Click &amp; Butterfly Click
+              </h2>
+              <p style={{ marginBottom: '1.25rem', color: '#9ca3af' }}>
+                CPS Rush is the ultimate training arena to test and master competitive clicking techniques. Here is how to apply jitter clicking and butterfly clicking for maximum in-game performance:
+              </p>
+
+              <h3 style={{ color: 'var(--neon-orange, #ff9f43)', fontSize: '1.15rem', fontWeight: 700, margin: '1.5rem 0 0.5rem' }}>
+                ⚡ How to Play CPS Rush with Jitter Clicking
+              </h3>
+              <p style={{ marginBottom: '1.1rem', color: '#9ca3af' }}>
+                In jitter clicking, you tense the flexor and extensor muscles in your forearm to induce high-frequency micro-tremors, channeling those rapid spasms into your fingertip:
+              </p>
+              <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.4rem', color: '#9ca3af', lineHeight: '1.85' }}>
+                <li><strong>Grip &amp; Stabilization:</strong> Rest your wrist firmly on your desk or mousepad. Use a firm claw or fingertip grip to prevent the mouse sensor from drifting while your arm vibrates.</li>
+                <li><strong>Pacing in CPS Rush:</strong> Keep jitter bursts timed with upcoming jump ramps. Since jitter clicking induces forearm muscle fatigue faster than other methods, maintain a steady 10–12 CPS during straight stretches and spike to 14+ CPS on major gap leaps.</li>
+                <li><strong>Safety Tip:</strong> Limit jitter sessions to short runs. If you feel tightness or wrist ache, pause the game (ESC key) and stretch your forearm muscles.</li>
+              </ul>
+
+              <h3 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '1.15rem', fontWeight: 700, margin: '1.5rem 0 0.5rem' }}>
+                🦋 How to Play CPS Rush with Butterfly Clicking
+              </h3>
+              <p style={{ marginBottom: '1.1rem', color: '#9ca3af' }}>
+                Butterfly clicking involves placing two fingers (index and middle) on the primary mouse button and rapidly alternating taps in a flutter motion:
+              </p>
+              <ul style={{ marginBottom: '1.5rem', paddingLeft: '1.4rem', color: '#9ca3af', lineHeight: '1.85' }}>
+                <li><strong>Unrivaled Acceleration (15–25+ CPS):</strong> Butterfly clicking generates the highest sustained velocity in CPS Rush. With mouse debounce set to low (0–4ms), each finger tap can register double actuations, rocketing your character across the map.</li>
+                <li><strong>Lower Muscular Strain:</strong> Because butterfly clicking relies on relaxed tendon agility rather than sustained isometric arm tension, you can complete multiple consecutive runs without wrist exhaustion.</li>
+                <li><strong>Rhythm Discipline:</strong> Establish a metronome-like see-saw rhythm between your index and middle finger. Irregular flutters can cause micro-stutters in momentum right at the takeoff edge.</li>
+              </ul>
+
+              {/* ── 5. COMPARISON TABLE ── */}
+              <h2 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1.45rem', fontWeight: 700, margin: '2.5rem 0 1rem', borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '0.5rem' }}>
+                Techniques Comparison in CPS Rush
+              </h2>
+              <div style={{ overflowX: 'auto', margin: '1.25rem 0 2rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', textAlign: 'left', minWidth: '640px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '2px solid rgba(0,245,255,0.3)', color: '#fff', background: 'rgba(0,245,255,0.06)' }}>
+                      <th style={{ padding: '0.75rem 0.85rem' }}>Click Technique</th>
+                      <th style={{ padding: '0.75rem 0.85rem' }}>CPS in Game</th>
+                      <th style={{ padding: '0.75rem 0.85rem' }}>Runner Speed</th>
+                      <th style={{ padding: '0.75rem 0.85rem' }}>Jump Boost Clearance</th>
+                      <th style={{ padding: '0.75rem 0.85rem' }}>Fatigue Rate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-green, #00ff88)' }}>Normal Clicking</td>
+                      <td style={{ padding: '0.7rem 0.85rem' }}>6 – 9 CPS</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Moderate Pace</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#ff9f43' }}>Standard Gaps</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Very Low</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-orange, #ff9f43)' }}>Jitter Clicking</td>
+                      <td style={{ padding: '0.7rem 0.85rem' }}>10 – 14 CPS</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: 'var(--neon-orange, #ff9f43)' }}>High Speed</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>High Jump Boost</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#ff3838' }}>High (Forearm Strain)</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-cyan, #00f5ff)' }}>Butterfly Clicking</td>
+                      <td style={{ padding: '0.7rem 0.85rem' }}>15 – 25+ CPS</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: 'var(--neon-cyan, #00f5ff)' }}>Maximum Hyper-Speed</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: 'var(--neon-cyan, #00f5ff)' }}>Extreme Airtime</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#ff9f43' }}>Moderate</td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: '#a855f7' }}>Keyboard Spacebar Mode</td>
+                      <td style={{ padding: '0.7rem 0.85rem' }}>8 – 16+ CPS</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#a855f7' }}>Fast &amp; Stable</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>High Clearance</td>
+                      <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Low (Two-Handed)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </section>
+          </article>
         </div>
       </div>
     </>
