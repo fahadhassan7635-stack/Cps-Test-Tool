@@ -191,6 +191,10 @@ const FAQ_DATA = [
     a: "Absolutely. With consistent daily practice of 5–10 minutes, many users report noticeable improvement in CPS within a few weeks. Finger mobility exercises and interval sprint sessions accelerate progress.",
   },
   {
+    q: "What is a Left Click CPS Test?",
+    a: "A Left Click CPS Test measures how many times you can actuate your primary mouse button (Left Mouse Button / LMB) in one second. Left clicking is the universal standard for attacking in Minecraft PvP, single-tap shooting in FPS games, and executing high-APM commands across all desktop titles.",
+  },
+  {
     q: "What is a Right Click Test?",
     a: "A Right Click Test measures how many times you can click your secondary right mouse button (RMB) in one second (Right CPS). It is essential for measuring block placement speed in Minecraft (especially god-bridging and breezily-bridging), aiming down sights (ADS) in tactical shooters, and kiting/movement commands in MOBAs.",
   },
@@ -677,6 +681,74 @@ const SeoArticle = memo(() => (
         These are approximate community benchmarks. 6–8 CPS is normal for casual players; 10+ CPS is
         competitive. Hardware, grip style, and technique all affect your score.
       </p>
+
+      {/* ── 0. WHAT IS LEFT CLICK CPS TEST? ── */}
+      <h2 style={h2Style}>What is a Left Click CPS Test? (Primary Click Speed)</h2>
+      <p style={pStyle}>
+        A <strong>Left Click CPS Test</strong> measures the raw clicking speed of your primary left mouse button (LMB)
+        using your index finger within a chosen timeframe. As the primary input across virtually every desktop game and application,
+        your left click CPS directly impacts your weapon fire rate in tactical shooters, hit registration and knockback in Minecraft PvP,
+        and action execution speed in fast-paced MOBAs.
+      </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', margin: '1rem 0 1.5rem' }}>
+        <div style={{ background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: '10px', padding: '1rem' }}>
+          <h3 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>⚔️ Combat &amp; Knockback Reduction</h3>
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+            In Minecraft 1.8 PvP, higher left-click CPS registers more attacks, reduces incoming knockback, and allows you to combo-lock opponents before they can retaliate.
+          </p>
+        </div>
+        <div style={{ background: 'rgba(0,245,255,0.04)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '10px', padding: '1rem' }}>
+          <h3 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🔫 Semi-Auto &amp; Single-Tap Fire</h3>
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+            In shooters like CS2, Valorant, and PUBG, rapid left click actuation allows semi-automatic rifles, DMRs, and pistols to reach their maximum cyclic fire caps without delay.
+          </p>
+        </div>
+        <div style={{ background: 'rgba(255,159,67,0.04)', border: '1px solid rgba(255,159,67,0.15)', borderRadius: '10px', padding: '1rem' }}>
+          <h3 style={{ color: 'var(--neon-orange, #ff9f43)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🖱️ Universal Technique Compatibility</h3>
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+            Left click is the natural home for all core techniques—Normal Clicking (6–9 CPS), Jitter Clicking (10–14 CPS), and Butterfly Clicking (15–25+ CPS).
+          </p>
+        </div>
+      </div>
+
+      {/* ── YOUTUBE VIDEO EMBED ── */}
+      <div style={{
+        margin: '2rem 0 2.5rem',
+        background: 'var(--bg-card, #1e2235)',
+        border: '1px solid var(--border, #2a3047)',
+        borderRadius: '16px',
+        padding: '1.25rem',
+        textAlign: 'center'
+      }}>
+        <h3 style={{ color: '#fff', fontSize: '1.15rem', fontWeight: '700', marginBottom: '1rem' }}>
+          📹 Watch: Left Click CPS Test &amp; Click Speed Guide
+        </h3>
+        <div style={{
+          position: 'relative',
+          paddingBottom: '56.25%',
+          height: 0,
+          overflow: 'hidden',
+          borderRadius: '12px',
+          maxWidth: '100%',
+        }}>
+          <iframe
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              border: 0,
+              borderRadius: '12px'
+            }}
+            src="https://www.youtube.com/embed/mpkH7MphzQY?si=5E9kEB52e4RwR5uB"
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
+        </div>
+      </div>
 
       {/* ── 1. WHAT IS RIGHT CLICK TEST? ── */}
       <h2 style={h2Style}>What is a Right Click Test? (Right CPS)</h2>

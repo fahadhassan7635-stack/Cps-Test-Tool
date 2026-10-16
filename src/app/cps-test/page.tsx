@@ -3,10 +3,12 @@ import DynamicPage from './DynamicPage';
 
 export const metadata: Metadata = {
   title: "CPS Test - Free Click Speed Test Online | FixedAim",
-  description: "Test your CPS (Clicks Per Second) online. Master Right Click, Butterfly Clicking, Jitter Clicking, and Drag Clicking with custom timers, live graph, and instant ranks.",
+  description: "Test your CPS (Clicks Per Second) online. Master Left Click, Right Click, Butterfly Clicking, Jitter Clicking, and Drag Clicking with custom timers, live graph, and instant ranks.",
   keywords: [
     "CPS test",
     "click speed test",
+    "what is left click test",
+    "left click cps test",
     "what is right click test",
     "what is butterfly click test",
     "what is jitter click test",
