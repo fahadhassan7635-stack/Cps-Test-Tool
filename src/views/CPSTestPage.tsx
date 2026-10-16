@@ -191,12 +191,28 @@ const FAQ_DATA = [
     a: "Absolutely. With consistent daily practice of 5–10 minutes, many users report noticeable improvement in CPS within a few weeks. Finger mobility exercises and interval sprint sessions accelerate progress.",
   },
   {
+    q: "What is a Right Click Test?",
+    a: "A Right Click Test measures how many times you can click your secondary right mouse button (RMB) in one second (Right CPS). It is essential for measuring block placement speed in Minecraft (especially god-bridging and breezily-bridging), aiming down sights (ADS) in tactical shooters, and kiting/movement commands in MOBAs.",
+  },
+  {
+    q: "What is Butterfly Clicking?",
+    a: "Butterfly Clicking is an advanced technique where a gamer places two fingers (usually index and middle) on the same mouse button and rapidly alternates tapping it in a see-saw motion. On mice with low debounce settings, it easily produces 15–25+ CPS to maximize hit registration and knockback in PvP combat.",
+  },
+  {
+    q: "What is Jitter Clicking?",
+    a: "Jitter Clicking is a technique where you rapidly tense and contract your forearm, wrist, and hand muscles to produce controlled physical micro-vibrations that travel directly into your index fingertip. It reliably produces 10–14 CPS but requires claw/fingertip grip discipline to stabilize your aim.",
+  },
+  {
+    q: "What is Drag Clicking?",
+    a: "Drag Clicking is a method where you slide your finger across the textured matte surface of a mouse button at an angle, using skin-to-plastic friction to make the switch bounce rapidly. It produces extreme bursts of 25–60+ CPS (and 80+ CPS on specialized mice), widely used for Minecraft god-bridging.",
+  },
+  {
     q: "Is Butterfly Clicking cheating in Minecraft?",
-    a: "Some competitive servers restrict or ban Butterfly Clicking because it can exceed typical single-finger click rates. Always check the specific server rules before using this technique.",
+    a: "Some competitive servers restrict or ban Butterfly Clicking because it can exceed typical single-finger click rates and trigger double-clicks. Always check specific server rules (such as Hypixel's click policies) before using this technique.",
   },
   {
     q: "Is Drag Clicking allowed on servers?",
-    a: "Drag Clicking is banned on virtually all competitive servers because it produces 25–50+ CPS through mechanical friction rather than genuine human clicking. It is also considered hardware exploitation.",
+    a: "Drag Clicking is banned on virtually all competitive servers (Hypixel, Minemen, Lunar) because its 30–60+ CPS output triggers automated anti-cheat filters (Watchdog/Karhu) as illegal macros. It should only be used on dedicated bridging servers.",
   },
   {
     q: "What mouse is best for high CPS?",
@@ -662,14 +678,169 @@ const SeoArticle = memo(() => (
         competitive. Hardware, grip style, and technique all affect your score.
       </p>
 
-      <h2 style={h2Style}>Clicking Techniques</h2>
+      {/* ── 1. WHAT IS RIGHT CLICK TEST? ── */}
+      <h2 style={h2Style}>What is a Right Click Test? (Right CPS)</h2>
       <p style={pStyle}>
-        <strong>Normal clicking</strong> (6–9 CPS) is the sustainable baseline. <strong>Jitter clicking</strong> uses
-        rapid forearm contractions for 10–14 CPS — limit to 30-second sessions to avoid strain (see{' '}
-        <ArticleLink href="https://my.clevelandclinic.org/health/diseases/17424-repetitive-strain-injury">Cleveland Clinic RSI guide</ArticleLink>).
-        <strong> Butterfly clicking</strong> (15–20 CPS) alternates two fingers — restricted on many competitive servers.
-        <strong> Drag clicking</strong> (25–50+ CPS) is mechanically assisted and banned virtually everywhere.
+        A <strong>Right Click Test</strong> (also referred to as a Right CPS Test) measures how many times you can actuate your
+        secondary right mouse button (RMB) within a set duration. While most gamers benchmark their primary left click for standard
+        attacks, right-click speed and stamina are just as vital in modern competitive gaming:
       </p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', margin: '1rem 0 1.5rem' }}>
+        <div style={{ background: 'rgba(0,245,255,0.04)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '10px', padding: '1rem' }}>
+          <h3 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🧱 Minecraft Bridging &amp; Defense</h3>
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+            Placing blocks while speed-bridging, god-bridging, or clutching over the void relies entirely on right-click output. Reaching 12–20+ Right CPS ensures uninterrupted block placement directly under your player model.
+          </p>
+        </div>
+        <div style={{ background: 'rgba(255,159,67,0.04)', border: '1px solid rgba(255,159,67,0.15)', borderRadius: '10px', padding: '1rem' }}>
+          <h3 style={{ color: 'var(--neon-orange, #ff9f43)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🎯 Tactical FPS Scoping &amp; ADS</h3>
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+            In CS2, Valorant, Apex Legends, and Call of Duty, right click governs Aim Down Sights (ADS), secondary fire modes (like the Valorant Classic right-click burst), sniper zoom adjustments, and weapon attachments.
+          </p>
+        </div>
+        <div style={{ background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: '10px', padding: '1rem' }}>
+          <h3 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>⚔️ MOBA Navigation &amp; Kiting</h3>
+          <p style={{ fontSize: '0.88rem', color: '#9ca3af', margin: 0, lineHeight: '1.6' }}>
+            In League of Legends and Dota 2, virtually every movement order, micro-pathfinding tap, and stutter-stepping (orb-walking) command is executed via right click. Higher right-click APM directly improves positioning precision.
+          </p>
+        </div>
+      </div>
+      <p style={pStyle}>
+        <strong>Right Click vs Left Click CPS:</strong> Most players score <strong>1 to 3 CPS lower</strong> on right click than on left click.
+        This discrepancy happens because the human middle finger typically has slightly less isolated motor conditioning than the index finger.
+        You can test and train your middle finger reflexes by toggling the <strong style={{ color: 'var(--neon-cyan, #00f5ff)' }}>Right Click</strong> mode button above the test zone.
+      </p>
+
+      {/* ── 2. WHAT IS BUTTERFLY CLICK TEST? ── */}
+      <h2 style={h2Style}>What is Butterfly Click Test? (The Dual-Finger Flutter)</h2>
+      <p style={pStyle}>
+        A <strong>Butterfly Click Test</strong> benchmarks the butterfly clicking technique—an advanced clicking method where a gamer positions
+        two fingers (usually the index and middle finger) on the same mouse button and rapidly alternates tapping it in a fluid, see-saw motion
+        resembling a butterfly fluttering its wings.
+      </p>
+      <ul style={ulStyle}>
+        <li><strong>Typical CPS Range:</strong> <span style={{ color: 'var(--neon-cyan, #00f5ff)', fontWeight: 700 }}>15 to 25+ CPS</span> (and up to 30 CPS on mice with tunable debounce time).</li>
+        <li><strong>Aim Precision:</strong> <span style={{ color: 'var(--neon-green, #00ff88)', fontWeight: 700 }}>High (8/10)</span> — because the palm and base of the hand rest comfortably on the mouse shell, tracking targets remains relatively smooth.</li>
+        <li><strong>Physical Strain:</strong> <span style={{ color: '#ff9f43', fontWeight: 700 }}>Moderate</span> — relies on finger tendon agility rather than intense full-arm contractions.</li>
+      </ul>
+      <h3 style={h3Style}>The Double-Clicking Switch Secret</h3>
+      <p style={pStyle}>
+        The true power of butterfly clicking stems from mechanical switch debounce behavior. On popular gaming mice such as the <em>Glorious Model O/D</em>,
+        <em>Roccat Kain 100/120</em>, and <em>Bloody A70</em>, players can configure software debounce delays down to 0–4ms. As each finger strikes and rebounds,
+        the electrical contacts bounce, registering <strong>two distinct click signals per individual tap</strong>.
+      </p>
+      <div style={{ background: 'rgba(255,56,56,0.06)', borderLeft: '4px solid #ff3838', padding: '0.9rem 1.25rem', borderRadius: '0 8px 8px 0', margin: '1rem 0 1.5rem' }}>
+        <strong style={{ color: '#ff3838', display: 'block', marginBottom: '0.3rem' }}>⚠️ Server Anti-Cheat &amp; Click Caps:</strong>
+        <p style={{ margin: 0, fontSize: '0.88rem', color: '#cbd5e1', lineHeight: '1.6' }}>
+          Because butterfly clicking with double clicks closely mimics automated click macros, strict competitive servers (Hypixel, Minemen Club, Badlion)
+          enforce hit registration caps (often 15–20 CPS) or utilize anti-cheat monitors (Watchdog/Karhu). Always check your server's rules regarding debounce modification.
+        </p>
+      </div>
+
+      {/* ── 3. WHAT IS JITTER CLICK TEST? ── */}
+      <h2 style={h2Style}>What is Jitter Click Test? (Forearm Muscle Vibration)</h2>
+      <p style={pStyle}>
+        A <strong>Jitter Click Test</strong> evaluates your speed and endurance when using the jitter clicking technique. In jitter clicking, you
+        deliberately tense and stiffen the muscles throughout your forearm, wrist, and hand to trigger rapid, involuntary-like tremors and micro-spasms.
+        These high-frequency physical vibrations are channeled directly into your index fingertip to strike the mouse button repeatedly.
+      </p>
+      <ul style={ulStyle}>
+        <li><strong>Typical CPS Range:</strong> <span style={{ color: 'var(--neon-cyan, #00f5ff)', fontWeight: 700 }}>10 to 14+ CPS</span> reliably with a single finger.</li>
+        <li><strong>Aim Precision:</strong> <span style={{ color: '#ff9f43', fontWeight: 700 }}>Difficult (5/10)</span> — because your entire arm vibrates, steadying the crosshair requires a firm claw or fingertip grip with high thumb/pinky anchoring.</li>
+        <li><strong>Hardware Independence:</strong> Jitter clicking works on virtually any mouse (office or gaming) since it relies entirely on biological muscle frequency rather than switch bounce.</li>
+      </ul>
+      <h3 style={h3Style}>Ergonomics &amp; Health Guidelines</h3>
+      <p style={pStyle}>
+        Sustained isometric forearm contraction places significant mechanical load on your flexor tendons and the median nerve in your carpal tunnel.
+        To practice jitter clicking safely:
+      </p>
+      <ul style={ulStyle}>
+        <li><strong>Keep Bursts Short:</strong> Limit jitter clicking to quick 5–10 second combat bursts rather than shaking your arm constantly throughout a match.</li>
+        <li><strong>Stretch and Warm Up:</strong> Perform wrist rotations and finger extensor stretches before competitive PvP sessions.</li>
+        <li><strong>Heed Warning Signs:</strong> If you feel burning sensations, joint pain, or finger numbness, stop immediately and rest (see the{' '}
+        <ArticleLink href="https://my.clevelandclinic.org/health/diseases/17424-repetitive-strain-injury">Cleveland Clinic RSI guide</ArticleLink>).</li>
+      </ul>
+
+      {/* ── 4. WHAT IS DRAG CLICK TEST? ── */}
+      <h2 style={h2Style}>What is Drag Click Test? (Surface Friction Gliding)</h2>
+      <p style={pStyle}>
+        A <strong>Drag Click Test</strong> measures the most mechanically extreme clicking technique in gaming. Rather than tapping downward, a player
+        gently pulls or drags their finger across the mouse button at a shallow angle. The dynamic friction between your skin and the textured matte plastic
+        causes your finger to stick and slip rapidly, sending a continuous wave of micro-bounces into the switch.
+      </p>
+      <ul style={ulStyle}>
+        <li><strong>Typical CPS Range:</strong> <span style={{ color: '#ff3838', fontWeight: 700 }}>25 to 60+ CPS</span> in short drags; over <strong>80 to 100+ CPS</strong> on long continuous drags with grip tape!</li>
+        <li><strong>Primary Application:</strong> <span style={{ color: 'var(--neon-green, #00ff88)', fontWeight: 700 }}>Minecraft God-Bridging</span> — laying down a bridge of blocks while sprinting backwards without sneaking.</li>
+        <li><strong>Aim Control:</strong> <span style={{ color: '#ff3838', fontWeight: 700 }}>Very Low (2/10)</span> — dragging moves your hand across the shell, making enemy crosshair tracking during melee combat nearly impossible.</li>
+      </ul>
+      <h3 style={h3Style}>Hardware Requirements for Drag Clicking</h3>
+      <p style={pStyle}>
+        Drag clicking cannot be performed on every mouse. Optical switches (common in newer Razer and Logitech mice) eliminate switch bounce and will not register drag clicks properly. To achieve high drag CPS:
+      </p>
+      <ul style={ulStyle}>
+        <li><strong>Matte or Textured Surface:</strong> You need a textured matte shell or grip tape (electrical tape, Razer grip tape, or masking tape) to maximize skin friction.</li>
+        <li><strong>Mechanical Switches with Low Debounce:</strong> Mice like the <em>A4Tech Bloody A60 / A70</em>, <em>Roccat Kone Pro / AIMO</em>, and <em>Glorious Model O</em> are community benchmarks for drag clicking.</li>
+        <li><strong>Server Warning:</strong> Because drag clicking produces 30–80+ CPS, virtually all competitive PvP servers (Hypixel, Minemen, Lunar) ban drag clicking, and automated anti-cheat watchdogs will immediately ban you for macro exploitation. Only use drag clicking on dedicated bridging practice servers.</li>
+      </ul>
+
+      {/* ── 5. COMPARISON TABLE ── */}
+      <h2 style={h2Style}>Clicking Techniques Comparison Table</h2>
+      <div style={{ overflowX: 'auto', margin: '1.25rem 0 2rem' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', textAlign: 'left', minWidth: '640px' }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid rgba(0,245,255,0.3)', color: '#fff', background: 'rgba(0,245,255,0.06)' }}>
+              <th style={{ padding: '0.75rem 0.85rem' }}>Technique</th>
+              <th style={{ padding: '0.75rem 0.85rem' }}>Average CPS</th>
+              <th style={{ padding: '0.75rem 0.85rem' }}>Aim Control</th>
+              <th style={{ padding: '0.75rem 0.85rem' }}>Strain Risk</th>
+              <th style={{ padding: '0.75rem 0.85rem' }}>Server Status</th>
+              <th style={{ padding: '0.75rem 0.85rem' }}>Best Used For</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-green, #00ff88)' }}>Normal Click</td>
+              <td style={{ padding: '0.7rem 0.85rem' }}>6 – 9 CPS</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>10 / 10 (Perfect)</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Very Low</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>100% Allowed</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted, #9ca3af)' }}>All games, daily browsing</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-cyan, #00f5ff)' }}>Right Click</td>
+              <td style={{ padding: '0.7rem 0.85rem' }}>5 – 8 CPS</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>9 / 10 (High)</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Low</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>100% Allowed</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted, #9ca3af)' }}>Fast-bridging, FPS ADS, MOBA kiting</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-orange, #ff9f43)' }}>Jitter Click</td>
+              <td style={{ padding: '0.7rem 0.85rem' }}>10 – 14 CPS</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#ff9f43' }}>5 / 10 (Difficult)</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#ff3838' }}>High (RSI Risk)</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>100% Allowed</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted, #9ca3af)' }}>Minecraft 1.8 PvP bursts</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: '#38bdf8' }}>Butterfly Click</td>
+              <td style={{ padding: '0.7rem 0.85rem' }}>15 – 25+ CPS</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>8 / 10 (Good)</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#ff9f43' }}>Moderate</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#ff9f43' }}>Watch Click Caps</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted, #9ca3af)' }}>PvP knockback reduction, combos</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: '#ff3838' }}>Drag Click</td>
+              <td style={{ padding: '0.7rem 0.85rem' }}>25 – 60+ CPS</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#ff3838' }}>2 / 10 (Very Poor)</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Low - Moderate</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: '#ff3838' }}>Restricted / Banned</td>
+              <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted, #9ca3af)' }}>God-bridging, breezily bridging</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h2 style={h2Style}>CPS in Gaming</h2>
       <p style={pStyle}>
@@ -680,13 +851,6 @@ const SeoArticle = memo(() => (
         In <strong>FPS games</strong> (Valorant, PUBG, CS2), 7–10 CPS maximizes semi-auto fire rate.
         In <strong>MOBAs</strong>, faster clicking improves last-hits and APM. Right click speed affects
         ADS, blocking, and movement commands across all genres.
-      </p>
-
-      <h2 style={h2Style}>Right Click Test</h2>
-      <p style={pStyle}>
-        Switch to Right Click mode above the test area. Right CPS is typically 1–3 points lower than left
-        click for most players. It matters in Minecraft (placing blocks, using items), FPS ADS, and MOBA
-        movement. Train both buttons independently to close the performance gap.
       </p>
 
       <h2 style={h2Style}>How to Improve Your CPS</h2>
