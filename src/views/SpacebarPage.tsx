@@ -88,6 +88,22 @@ export const FAQ_ITEMS = [
     a: 'The Butterfly Method involves placing the index finger of one hand and the index or middle finger of your other hand on opposite ends of the spacebar. You alternate pressing each finger in a rapid rhythmic sequence, much like a butterfly\'s wings flapping. Because both fingers are actuating the key at independent intervals, the combined press frequency can reach two to three times what a single-thumb technique achieves. Practice slow alternating taps first, then gradually increase the tempo over several sessions. Always press near the center third of each end to avoid key binding from the stabilizer bar.',
   },
   {
+    q: 'What is the Butterfly Spacebar Test and how fast can it go?',
+    a: 'The Butterfly Spacebar Test measures your speed using the dual-finger flutter technique on the spacebar. While casual single-thumb clicking averages 4–7 CPS, butterfly tapping on the spacebar easily delivers 8–15+ CPS. Its wide keycap surface makes it ideal for two-finger or two-handed alternating actuation, giving a massive edge in rhythm and parkour games.',
+  },
+  {
+    q: 'How do you jitter click on a keyboard spacebar?',
+    a: 'Jitter clicking on a spacebar involves tensing and contracting your forearm and wrist muscles to create high-frequency physical tremors that travel into your fingertip resting on the spacebar. Skilled players feather the switch near its actuation reset point instead of bottoming out, achieving 8–12+ CPS without fatiguing the hand on deep key travel.',
+  },
+  {
+    q: 'Where can we use spacebar click speed in gaming and everyday use?',
+    a: 'Rapid spacebar actuation is vital across multiple fields: (1) Minecraft for sprint-jumping, parkour neo-jumps, bunny hopping, and water clutches; (2) Rhythm and arcade games such as Geometry Dash, Friday Night Funkin\', and Osu! Mania for wave spamming; (3) Browser games like Chrome Dinosaur T-Rex Runner and Flappy Bird; (4) Tactical FPS games (CS2, Valorant, Apex Legends) for bhop chains and jump-peeks; (5) Typing WPM efficiency, as spacebars represent nearly 20% of all typing keystrokes; and (6) Mechanical keyboard hardware testing for switch chatter and stabilizer tuning.',
+  },
+  {
+    q: 'Can you drag click on a keyboard spacebar?',
+    a: 'No, drag clicking does not work effectively on a keyboard spacebar. Drag clicking requires shallow switch bounce (sub-millimeter travel) and flat mouse buttons. Spacebars have 2.0–4.0mm of key travel, heavy return springs, and steel wire stabilizers that cause key binding rather than friction bounces. To achieve maximum spacebar CPS, gamers rely on butterfly tapping or two-handed alternating.',
+  },
+  {
     q: 'Can I practice spacebar speed on a mobile device or tablet?',
     a: 'While this tool is optimized for use with a physical keyboard on a desktop or laptop computer, the website is fully responsive and loads correctly on mobile browsers. On touchscreen devices, you can tap the large hitbox area to register presses instead of using the spacebar key. However, mobile tap speeds are generally lower than physical keyboard speeds because touchscreen digitizer polling rates are typically 60–120 Hz versus mechanical keyboard matrix scan rates of often 1000 Hz. For serious speed testing and training, a dedicated physical keyboard on a desktop or laptop is strongly recommended.',
   }
@@ -717,25 +733,159 @@ function SpacebarArticleContent() {
           <li style={li}><strong>Alien (10+ CPS):</strong> Pro level. Typically achieved by competitive gamers using advanced techniques like "jitter clicking" or "butterfly clicking" on the spacebar.</li>
         </ul>
 
-        <h2 style={h2}>Why Practice Spacebar Clicking?</h2>
+        {/* ── 1. WHAT IS BUTTERFLY SPACEBAR TEST? ── */}
+        <h2 style={h2}>What is a Butterfly Spacebar Test? (Dual-Finger Flutter Technique)</h2>
         <p style={p}>
-          Practicing your spacebar speed isn't just a fun mini-game�it has practical benefits for your daily computer usage:
+          A <strong>Butterfly Spacebar Test</strong> measures your ability to execute the butterfly clicking technique on a computer keyboard's space key. Rather than pressing with a single thumb, a user alternates two fingers in rapid succession over the spacebar in a fluid flutter motion resembling butterfly wings.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', margin: '1rem 0 1.5rem' }}>
+          <div style={{ background: 'rgba(0,245,255,0.04)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '10px', padding: '1rem' }}>
+            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>👐 Two-Handed Alternating</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+              Place your left index finger on the left side of the spacebar and your right index finger on the right side. Alternating left-right taps at high frequency can easily double or triple your CPS to <strong>10–16+ CPS</strong>.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: '10px', padding: '1rem' }}>
+            <h3 style={{ color: 'var(--neon-green)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>✌️ Single-Hand Index &amp; Middle</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+              Position both your index and middle finger of your dominant hand over the center section of the spacebar, rapidly fluttering between fingers while keeping your wrist elevated.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,159,67,0.04)', border: '1px solid rgba(255,159,67,0.15)', borderRadius: '10px', padding: '1rem' }}>
+            <h3 style={{ color: 'var(--neon-orange)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.5rem' }}>⌨️ Why the Spacebar Excels at Butterfly</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.6' }}>
+              Unlike mouse buttons which are narrow, a standard 6.25u keyboard spacebar offers a wide physical strike zone supported by steel stabilizers, providing ample room for multi-finger flutter tapping.
+            </p>
+          </div>
+        </div>
+        <p style={p}>
+          <strong>Performance Range:</strong> Normal single-thumb clicking averages 4–7 CPS, whereas butterfly spacebar tapping routinely delivers <strong>8 to 15+ CPS</strong>. For best results, use linear mechanical switches with short actuation distance (e.g. Cherry MX Speed Silver or Gateron Red) and well-lubricated stabilizers to prevent keycap binding.
+        </p>
+
+        {/* ── 2. WHAT IS JITTER CLICK COUNTER ON SPACEBAR? ── */}
+        <h2 style={h2}>What is a Jitter Spacebar Test? (Forearm Vibration Method)</h2>
+        <p style={p}>
+          A <strong>Jitter Spacebar Test</strong> (or Jitter Click Counter on Spacebar) benchmarks how fast you can actuate the spacebar using rapid physical forearm contractions. In jitter clicking, you deliberately tense your wrist and forearm muscles until they produce rapid, controlled micro-spasms. These tremors are channeled into your fingertip resting gently on the spacebar switch.
         </p>
         <ul style={ul}>
-          <li style={li}><strong>Gaming Performance:</strong> Many popular games (like Minecraft, Geometry Dash, and various platformers or rhythm games) rely heavily on rapid spacebar inputs for jumping, dodging, or attacking. A higher CPS directly translates to better in-game performance.</li>
-          <li style={li}><strong>Typing Speed:</strong> The spacebar is the most frequently used key on the keyboard. Improving your thumb dexterity can help you transition between words faster, subtly improving your overall Words Per Minute (WPM).</li>
-          <li style={li}><strong>Stamina & Endurance:</strong> Rapidly pressing a key builds finger stamina, which is helpful during long gaming or typing sessions, reducing early fatigue.</li>
+          <li style={li}><strong>Average Speed:</strong> <span style={{ color: 'var(--neon-cyan)', fontWeight: 700 }}>8 to 12+ CPS</span> with a single finger or thumb.</li>
+          <li style={li}><strong>Execution on Keyboard:</strong> Anchor your palm or wrist firmly on the desk or keyboard wrist rest to provide a stable foundation. Hover your index finger or thumb lightly above the spacebar keycap, tense your forearm, and let the tremors trigger rapid switch actuations without bottoming out the key completely.</li>
+          <li style={li}><strong>Feathering the Actuation Point:</strong> Unlike mouse switches with sub-millimeter travel, mechanical keyboard switches have 2.0–4.0mm of key travel. Skilled jitter tappers "feather" the switch near its actuation reset point instead of bottoming out, conserving stamina and boosting frequency.</li>
+        </ul>
+        <div style={{ background: 'rgba(255,159,67,0.06)', borderLeft: '4px solid var(--neon-orange)', padding: '0.9rem 1.25rem', borderRadius: '0 8px 8px 0', margin: '1rem 0 1.5rem' }}>
+          <strong style={{ color: 'var(--neon-orange)', display: 'block', marginBottom: '0.3rem' }}>⚠️ Ergonomics &amp; Health Precaution:</strong>
+          <p style={{ margin: 0, fontSize: '0.88rem', color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+            Jitter clicking on a keyboard places significant strain on the tendons in your forearm and wrist. Limit jitter spacebar practice to short 5–10 second burst sessions. Always stretch your wrists, and stop immediately if you feel pain, fatigue, or tingling.
+          </p>
+        </div>
+
+        {/* ── 3. WHERE CAN WE USE A SPACEBAR COUNTER? ── */}
+        <h2 style={h2}>Where Can We Use a Spacebar Counter? (Top Games &amp; Practical Applications)</h2>
+        <p style={p}>
+          A spacebar click counter is far more than an isolated speed game—spacebar velocity and timing precision are foundational skills across numerous gaming genres, typing workflows, and hardware diagnostics:
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', margin: '1.25rem 0 1.75rem' }}>
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <h3 style={{ color: 'var(--neon-green)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🎮 Minecraft Parkour, Bunny Hopping &amp; PvP</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.65' }}>
+              In Minecraft, timing your spacebar presses determines sprint-jump momentum, neo-jump clearance, ladder clutching, and water bucket landings. Fast spacebar tapping allows instant recovery jumps when taking knockback in Bedwars, Skywars, and 1.8 PvP.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <h3 style={{ color: 'var(--neon-cyan)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🎵 Rhythm &amp; Arcade Games (Geometry Dash, Osu!, FNF)</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.65' }}>
+              Games like <em>Geometry Dash</em>, <em>Osu! Mania</em>, and <em>Friday Night Funkin'</em> demand precise spacebar actuation. High CPS and microsecond rhythm control allow you to clear spam sections, wave spamming, and ultra-dense obstacle clusters without falling out of sync.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <h3 style={{ color: 'var(--neon-orange)', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🦖 Browser Classics (Chrome Dino &amp; Flappy Bird)</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.65' }}>
+              Classic reflex games like Google Chrome's offline Dinosaur T-Rex Runner and Flappy Bird rely solely on spacebar inputs. Training your spacebar trigger finger improves short-hop versus full-jump height modulation.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <h3 style={{ color: '#ff3838', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🔫 Tactical Shooters (CS2, Valorant &amp; Apex Legends)</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.65' }}>
+              In competitive tactical shooters, mastering the spacebar rhythm is essential for bunny hopping (bhop chains), silent jump-spotting over cover, slide-jumping in Apex Legends, and super-glides.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <h3 style={{ color: '#38bdf8', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem' }}>⌨️ Typing Speed &amp; Words Per Minute (WPM)</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.65' }}>
+              The spacebar is statistically the most frequently pressed key on any keyboard, representing <strong>18% to 20% of all keystrokes</strong>. Thumb sluggishness on the spacebar creates bottleneck pauses between words; improving thumb actuation speed noticeably lifts overall typing WPM.
+            </p>
+          </div>
+          <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '12px', padding: '1.25rem' }}>
+            <h3 style={{ color: '#a855f7', fontSize: '1.05rem', fontWeight: 700, margin: '0 0 0.5rem' }}>🛠️ Mechanical Keyboard &amp; Switch Diagnostics</h3>
+            <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)', margin: 0, lineHeight: '1.65' }}>
+              Use the spacebar counter to diagnose hardware health. Rapid tapping reveals switch chattering (accidental double inputs), stabilizer rattle, uneven wire balance, or unresponsive switch leaf contacts on custom mechanical builds.
+            </p>
+          </div>
+        </div>
+
+        {/* ── 4. WHY DRAG CLICKING DOES NOT APPLY TO SPACEBAR ── */}
+        <h2 style={h2}>Why Drag Clicking is Not Recommended on Keyboard Spacebars</h2>
+        <p style={p}>
+          While drag clicking is widely famous for gaming mice in Minecraft god-bridging, it <strong>does not translate effectively to a keyboard spacebar</strong> for several structural reasons:
+        </p>
+        <ul style={ul}>
+          <li style={li}><strong>Key Travel Distance:</strong> Mouse switches actuate in less than 0.5mm, enabling tiny skin-friction bounces. In contrast, mechanical keyboard switches have 2.0mm to 4.0mm of travel, making surface-friction drag bouncing physically ineffective.</li>
+          <li style={li}><strong>Heavy Return Springs &amp; Stabilizers:</strong> Keyboard spacebars use 50g–70g return springs and wide steel wire stabilizers. Attempting to drag-click across a spacebar creates diagonal torque that can bend stabilizer wires or bind the switch stem rather than actuating smoothly.</li>
+          <li style={li}><strong>Recommended Alternatives:</strong> For high-frequency spacebar tapping, competitive gamers stick exclusively to <em>Butterfly Tapping</em> or <em>Two-Hand Alternating</em>, which are ergonomic, reliable, and produce up to 15+ CPS without hardware strain.</li>
         </ul>
 
+        {/* ── 5. COMPARISON TABLE ── */}
+        <h2 style={h2}>Spacebar Tapping Techniques Comparison Table</h2>
+        <div style={{ overflowX: 'auto', margin: '1.25rem 0 2rem' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', textAlign: 'left', minWidth: '640px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid rgba(0,245,255,0.3)', color: '#fff', background: 'rgba(0,245,255,0.06)' }}>
+                <th style={{ padding: '0.75rem 0.85rem' }}>Technique</th>
+                <th style={{ padding: '0.75rem 0.85rem' }}>Typical CPS</th>
+                <th style={{ padding: '0.75rem 0.85rem' }}>Hand / Finger Setup</th>
+                <th style={{ padding: '0.75rem 0.85rem' }}>Strain Level</th>
+                <th style={{ padding: '0.75rem 0.85rem' }}>Best For</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-green)' }}>Single Thumb (Normal)</td>
+                <td style={{ padding: '0.7rem 0.85rem' }}>4 – 7 CPS</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-secondary)' }}>Dominant thumb only</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Very Low</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted)' }}>Daily typing, casual gaming</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-cyan)' }}>Butterfly Spacebar</td>
+                <td style={{ padding: '0.7rem 0.85rem' }}>8 – 15+ CPS</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-secondary)' }}>Index + Middle or 2 Index fingers</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: '#ff9f43' }}>Moderate</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted)' }}>Geometry Dash spam, high CPS tests</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: 'var(--neon-orange)' }}>Jitter Spacebar</td>
+                <td style={{ padding: '0.7rem 0.85rem' }}>8 – 12 CPS</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-secondary)' }}>Tensed forearm vibration into thumb/finger</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: '#ff3838' }}>High (RSI Risk)</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted)' }}>Short combat bursts, burst tests</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '0.7rem 0.85rem', fontWeight: 700, color: '#38bdf8' }}>Two-Hand Alternating</td>
+                <td style={{ padding: '0.7rem 0.85rem' }}>10 – 16+ CPS</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-secondary)' }}>Both thumbs or left/right index fingers</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: '#10ac84' }}>Low</td>
+                <td style={{ padding: '0.7rem 0.85rem', color: 'var(--text-muted)' }}>Rhythm games, breaking personal records</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <h2 style={h2}>Tips to Improve Your Spacebar Speed</h2>
-        <p style={p}>
-          If you want to achieve the "Alien" rank and push your CPS to the absolute limit, try these proven techniques:
-        </p>
         <ul style={ul}>
-          <li style={li}><strong>Use Two Hands:</strong> Instead of relying on a single thumb, use two fingers (one from each hand) and alternate them rapidly over the spacebar. This instantly doubles your pressing speed.</li>
-          <li style={li}><strong>Jitter Clicking:</strong> Tense the muscles in your arm and wrist to generate a rapid vibration. Transfer this vibration directly to your fingertip resting on the spacebar.</li>
-          <li style={li}><strong>Posture and Positioning:</strong> Keep your keyboard flat or slightly angled according to your comfort. Ensure your forearm rests comfortably on the desk to minimize wrist strain.</li>
-          <li style={li}><strong>Hardware Matters:</strong> A mechanical keyboard with light, linear switches (like Cherry MX Red or Silver) will actuate faster and reset quicker than a standard membrane keyboard.</li>
+          <li style={li}><strong>Keyboard Angle &amp; Rest:</strong> Keep your keyboard flat or slightly negative-tilted to keep wrists straight and prevent carpal pressure.</li>
+          <li style={li}><strong>Light Linear Switches:</strong> Switches with 45g actuation (Cherry Speed Silver, Gateron Yellow/Red) reset significantly faster than heavy tactile switches.</li>
+          <li style={li}><strong>Lube Your Stabilizers:</strong> Unlubricated spacebar wire stabilizers cause friction rattles that sap click rhythm. A well-tuned stabilizer allows effortless flutter taps.</li>
+          <li style={li}><strong>Interval Training:</strong> Practice in 5-second max-effort sprint sets followed by 20 seconds of rest to build twitch muscle endurance.</li>
         </ul>
 
       </section>
