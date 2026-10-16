@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from 'next/link';
 import React, {
@@ -316,24 +316,24 @@ const POWERUP_COLORS: Record<string, string> = {
   invincibility: '#ec4899',
 };
 const POWERUP_ICONS: Record<string, string> = {
-  shield: 'ðŸ›¡ï¸', slowmo: 'â±ï¸', doubleboost: 'âš¡', multiplier: 'âœ–ï¸', invincibility: 'ðŸ’«',
+  shield: 'SHD', slowmo: 'SLO', doubleboost: 'DBL', multiplier: 'MLT', invincibility: 'INV',
 };
 const DIFF_COLORS: Record<Difficulty, string> = {
   easy: '#22c55e', normal: '#eab308', hard: '#ef4444',
 };
 const ACHIEVEMENT_DEFS: Omit<Achievement, 'unlocked' | 'unlockedAt'>[] = [
-  { id: 'first_flight',  title: 'First Flight',   description: 'Complete your first mission',    icon: 'ðŸš€' },
-  { id: 'dist_500',      title: 'Explorer',        description: 'Travel 500 distance',            icon: 'ðŸŒ ' },
-  { id: 'dist_1000',     title: 'Deep Space',      description: 'Travel 1,000 distance',          icon: 'ðŸŒŒ' },
-  { id: 'dist_5000',     title: 'Voyager Elite',   description: 'Travel 5,000 distance',          icon: 'ðŸ†' },
-  { id: 'cps_10',        title: 'Speed Fingers',   description: 'Reach 10 CPS',                   icon: 'âš¡' },
-  { id: 'cps_15',        title: 'Lightning Hands', description: 'Reach 15 CPS',                   icon: 'ðŸŒ©ï¸' },
-  { id: 'avoid_20',      title: 'Dodger',          description: 'Avoid 20 obstacles in one run',  icon: 'ðŸŽ¯' },
-  { id: 'avoid_50',      title: 'Matrix',          description: 'Avoid 50 obstacles in one run',  icon: 'ðŸ•¶ï¸' },
-  { id: 'survivor_60',   title: 'Survivor',        description: 'Survive for 60 seconds',         icon: 'â±ï¸' },
-  { id: 'space_master',  title: 'Space Master',    description: 'Survive for 120 seconds',        icon: 'ðŸ‘‘' },
-  { id: 'near_miss_5',   title: 'Daredevil',       description: 'Get 5 near misses in one run',   icon: 'ðŸ˜Ž' },
-  { id: 'boss_survived', title: 'Boss Slayer',     description: 'Survive a boss asteroid',        icon: 'ðŸ’€' },
+  { id: 'first_flight',  title: 'First Flight',   description: 'Complete your first mission',    icon: '★' },
+  { id: 'dist_500',      title: 'Explorer',        description: 'Travel 500 distance',            icon: '★' },
+  { id: 'dist_1000',     title: 'Deep Space',      description: 'Travel 1,000 distance',          icon: '★' },
+  { id: 'dist_5000',     title: 'Voyager Elite',   description: 'Travel 5,000 distance',          icon: '★' },
+  { id: 'cps_10',        title: 'Speed Fingers',   description: 'Reach 10 CPS',                   icon: '★' },
+  { id: 'cps_15',        title: 'Lightning Hands', description: 'Reach 15 CPS',                   icon: '★' },
+  { id: 'avoid_20',      title: 'Dodger',          description: 'Avoid 20 obstacles in one run',  icon: '★' },
+  { id: 'avoid_50',      title: 'Matrix',          description: 'Avoid 50 obstacles in one run',  icon: '★' },
+  { id: 'survivor_60',   title: 'Survivor',        description: 'Survive for 60 seconds',         icon: '★' },
+  { id: 'space_master',  title: 'Space Master',    description: 'Survive for 120 seconds',        icon: '★' },
+  { id: 'near_miss_5',   title: 'Daredevil',       description: 'Get 5 near misses in one run',   icon: '★' },
+  { id: 'boss_survived', title: 'Boss Slayer',     description: 'Survive a boss asteroid',        icon: '★' },
 ];
 
 const LS = {
@@ -413,7 +413,7 @@ export default function VoyagerGame() {
   const countdownTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const loopRunning     = useRef(false);
 
-  // Scale factor ref: tracks current dpr scale so game logic coords stay at CANVAS_W Ã— CANVAS_H
+  // Scale factor ref: tracks current dpr scale so game logic coords stay at CANVAS_W x CANVAS_H
   const scaleRef = useRef({ x: 1, y: 1 });
 
   const [uiView, setUiView]             = useState<UiView>('start');
@@ -592,11 +592,11 @@ export default function VoyagerGame() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // â”€â”€ Canvas setup: always render at CANVAS_W Ã— CANVAS_H logical pixels
+    // â”€â”€ Canvas setup: always render at CANVAS_W x CANVAS_H logical pixels
     // but scale the backing store for the device pixel ratio.
     // The CSS keeps width/height = 100% so the browser handles CSS scaling.
     const setupCanvas = () => {
-      const dpr  = Math.min(window.devicePixelRatio || 1, 2); // cap at 2Ã— to avoid blowout
+      const dpr  = Math.min(window.devicePixelRatio || 1, 2); // cap at 2x to avoid blowout
       canvas.width  = CANVAS_W * dpr;
       canvas.height = CANVAS_H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -802,7 +802,7 @@ export default function VoyagerGame() {
         s.lastBossSpawn = now;
         audio.playBossSpawn();
         GA.bossSpawn();
-        addFloat(CANVAS_W / 2, 80, 'âš ï¸ BOSS ASTEROID!', '#ef4444', 22);
+        addFloat(CANVAS_W / 2, 80, '!! BOSS ASTEROID!', '#ef4444', 22);
       }
 
       const slowFactor = s.hasSlowmo ? 0.4 : 1;
@@ -834,7 +834,7 @@ export default function VoyagerGame() {
                 size: Math.random() * 3 + 1,
               });
             }
-            addFloat(VOYAGER_X, s.y - 40, 'ðŸ›¡ï¸ SHIELD!', '#22c55e', 16);
+            addFloat(VOYAGER_X, s.y - 40, 'SHIELD!', '#22c55e', 16);
             continue;
           } else {
             triggerGameOver();
@@ -852,7 +852,7 @@ export default function VoyagerGame() {
           const comboMult = 1 + s.combo * 0.1;
           const mult      = comboMult * (s.hasMultiplier ? s.multiplierBonus : 1);
           s.scoreMultiplier = mult;
-          addFloat(VOYAGER_X + 20, s.y - 35, `NEAR MISS! Ã—${mult.toFixed(1)}`, '#00f5ff', 15);
+          addFloat(VOYAGER_X + 20, s.y - 35, `NEAR MISS! x${mult.toFixed(1)}`, '#00f5ff', 15);
         }
 
         if (obs.x < -obs.radius * 2) {
@@ -860,7 +860,7 @@ export default function VoyagerGame() {
           if (obs.isBoss) {
             s.bossSpawned = false;
             s.bossCleared = true;
-            addFloat(CANVAS_W / 2, CANVAS_H / 2 - 60, 'ðŸ‘‘ BOSS CLEARED!', '#eab308', 24);
+            addFloat(CANVAS_W / 2, CANVAS_H / 2 - 60, 'BOSS CLEARED!', '#eab308', 24);
           }
           updateHUD('stat-avoided', s.avoided);
           continue;
@@ -1458,13 +1458,13 @@ export default function VoyagerGame() {
           {/*
             The canvas is absolutely positioned to fill the container exactly.
             Its internal pixel dimensions are set by setupCanvas() and are always
-            CANVAS_W Ã— CANVAS_H logical pixels (scaled by dpr for sharpness).
+            CANVAS_W x CANVAS_H logical pixels (scaled by dpr for sharpness).
             CSS width/height 100% means the browser scales the canvas to fit
             the container without any overflow or clipping.
           */}
           <canvas
             ref={canvasRef}
-            aria-label="Voyager Space Game â€” click or press Space to boost"
+            aria-label="Voyager Space Game - click or press Space to boost"
             style={{
               position: 'absolute',
               top: 0, left: 0,
@@ -1544,7 +1544,7 @@ export default function VoyagerGame() {
                 }}>
                   <div style={{ fontSize: '0.6rem', color: '#eab308', fontWeight: '800', letterSpacing: '0.1em' }}>COMBO</div>
                   <div style={{ fontSize: '1.8rem', fontWeight: '900', color: '#eab308', lineHeight: 1 }}>
-                    Ã—{scoreMultiplier.toFixed(1)}
+                    x{scoreMultiplier.toFixed(1)}
                   </div>
                 </div>
               )}
@@ -1584,37 +1584,41 @@ export default function VoyagerGame() {
           {uiView === 'start' && (
             <div style={{
               position: 'absolute', inset: 0,
-              background: 'rgba(8,13,20,0.88)', backdropFilter: 'blur(8px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem',
+              background: 'rgba(2,6,18,0.92)', backdropFilter: 'blur(10px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
               boxSizing: 'border-box',
             }}>
               <div style={{
-                maxWidth: '480px', width: '100%', textAlign: 'center',
-                background: 'rgba(255,255,255,0.02)',
-                border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: '24px', padding: '2rem',
-                boxSizing: 'border-box',
+                maxWidth: '400px', width: '100%', textAlign: 'center',
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
               }}>
+                {/* Icon */}
                 <div style={{
-                  width: '72px', height: '72px',
-                  background: 'rgba(0,245,255,0.1)', borderRadius: '18px',
-                  border: '1px solid rgba(0,245,255,0.3)',
-                  margin: '0 auto 1.25rem',
+                  width: '64px', height: '64px',
+                  background: 'rgba(0,245,255,0.08)', borderRadius: '16px',
+                  border: '1px solid rgba(0,245,255,0.25)',
+                  marginBottom: '0.9rem',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transform: 'rotate(15deg)',
                 }}>
-                  <Rocket size={36} color="#00f5ff" style={{ transform: 'rotate(-45deg)' }} />
+                  <Rocket size={30} color="#00f5ff" />
                 </div>
 
-                <h1 style={{ fontSize: '2.2rem', fontWeight: '900', color: '#fff', marginBottom: '0.25rem', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                {/* Badge */}
+                <div style={{ display: 'inline-flex', backgroundColor: 'rgba(0,245,255,0.06)', border: '1px solid rgba(0,245,255,0.2)', color: '#00f5ff', fontSize: '10px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>
+                  SPACE ENDURANCE GAME
+                </div>
+
+                {/* Title */}
+                <h1 style={{ fontSize: '2.2rem', fontWeight: 900, margin: '0 0 0.3rem', color: '#fff', letterSpacing: '-0.5px' }}>
                   Guide The <span style={{ color: '#00f5ff' }}>Voyager</span>
                 </h1>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
-                  Navigate through the asteroid field. Hold SPACE or tap to boost.
+                <p style={{ color: '#64748b', fontSize: '0.85rem', margin: '0 0 1.25rem' }}>
+                  Navigate the asteroid field. Hold SPACE or tap to boost.
                 </p>
 
+                {/* Best scores */}
                 {highScores.bestDistance > 0 && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem', width: '100%' }}>
                     <HiScoreChip label="Best Dist"    value={highScores.bestDistance.toLocaleString()} color="#00f5ff" />
                     <HiScoreChip label="Best Time"    value={`${highScores.bestTime}s`}                color="#a855f7" />
                     <HiScoreChip label="Peak CPS"     value={highScores.highestCps}                    color="#eab308" />
@@ -1622,49 +1626,52 @@ export default function VoyagerGame() {
                   </div>
                 )}
 
-                <div style={{ marginBottom: '1.25rem' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Difficulty</div>
-                  <div style={{ display: 'flex', gap: '0.35rem', justifyContent: 'center' }}>
+                {/* Difficulty */}
+                <div style={{ width: '100%', marginBottom: '1.1rem' }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 800, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Difficulty</div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                     {(['easy', 'normal', 'hard'] as Difficulty[]).map(d => (
                       <button
                         key={d}
                         aria-label={`Set difficulty to ${d}`}
                         onClick={() => setDifficulty(d)}
                         style={{
-                          flex: 1, padding: '0.4rem 0.15rem', minWidth: 0,
-                          background: difficulty === d ? DIFF_COLORS[d] + '22' : 'transparent',
-                          border: `1px solid ${difficulty === d ? DIFF_COLORS[d] : 'rgba(255,255,255,0.1)'}`,
+                          flex: 1, padding: '0.55rem 0.5rem',
+                          background: difficulty === d ? DIFF_COLORS[d] + '18' : '#0b111e',
+                          border: `1px solid ${difficulty === d ? DIFF_COLORS[d] : '#1f2937'}`,
                           borderRadius: '8px',
-                          color: difficulty === d ? DIFF_COLORS[d] : '#64748b',
-                          fontWeight: '700', fontSize: '0.65rem',
+                          color: difficulty === d ? DIFF_COLORS[d] : '#6b7280',
+                          fontWeight: 700, fontSize: '0.75rem',
                           cursor: 'pointer', textTransform: 'capitalize',
                           transition: 'all 0.2s',
-                          whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                          letterSpacing: '0.02em',
                         }}
                       >
-                        {d === 'easy' ? 'ðŸŸ¢' : d === 'normal' ? 'ðŸŸ¡' : 'ðŸ”´'} {d}
+                        {d.charAt(0).toUpperCase() + d.slice(1)}
                       </button>
                     ))}
                   </div>
                 </div>
 
+                {/* Start button */}
                 <button
                   aria-label="Start mission"
                   onClick={(e) => { e.currentTarget.blur(); actionsRef.current.start(); }}
                   style={{
-                    width: '100%', padding: '1.1rem',
+                    width: '100%', padding: '0.95rem',
                     background: 'linear-gradient(135deg,#00f5ff,#22c55e)',
-                    color: '#000', fontSize: '1rem', fontWeight: '900',
-                    borderRadius: '14px', border: 'none', cursor: 'pointer',
+                    color: '#000', fontSize: '0.95rem', fontWeight: 900,
+                    borderRadius: '10px', border: 'none', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                    boxShadow: '0 8px 24px rgba(0,245,255,0.3)', marginBottom: '0.75rem',
-                    boxSizing: 'border-box',
+                    boxShadow: '0 6px 20px rgba(0,245,255,0.25)', marginBottom: '0.6rem',
+                    boxSizing: 'border-box', letterSpacing: '0.5px',
                   }}
                 >
-                  <Play fill="currentColor" size={18} /> START MISSION
+                  <Play fill="currentColor" size={16} /> START MISSION
                 </button>
 
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {/* Bottom action row */}
+                <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                   <button aria-label="View stats"        onClick={() => setShowStats(true)}        style={outlineBtn}><BarChart2 size={14} /> Stats</button>
                   <button aria-label="View achievements" onClick={() => setShowAchievements(true)} style={outlineBtn}><Trophy    size={14} /> Achievements</button>
                   <button aria-label={isMuted ? 'Unmute' : 'Mute'} onClick={toggleSound}          style={outlineBtn}>{isMuted ? <VolumeX size={14} /> : <Volume2 size={14} color="#00f5ff" />}</button>
@@ -1872,32 +1879,98 @@ export default function VoyagerGame() {
 
         {/* SEO article */}
         <article style={{ width: '100%', maxWidth: '850px', padding: '2rem 0', lineHeight: '1.7', color: '#d1d5db' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-            <Gauge size={24} color="#00f5ff" />
-            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#fff', margin: 0 }}>
-              Spacebar CPS Test: Boost Your Clicking Speed with Voyager Game
+
+          {/* H2 Header */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '1rem' }}>
+            <Gauge size={22} color="#00f5ff" />
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', margin: 0, letterSpacing: '-0.3px' }}>
+              Voyager Game: Space Endurance Arcade That Trains Your CPS
             </h2>
           </div>
-          <p style={{ marginBottom: '1.25rem' }}>
-            Are you ready to calculate your exact clicking speed? Welcome to the ultimate <strong>Spacebar CPS Test</strong> (Clicks Per Second) packed inside an immersive interstellar arcade trainer.
+          <p style={{ marginBottom: '1.5rem' }}>
+            <strong>Voyager Game</strong> is a free browser-based <strong>space endurance arcade</strong> where your raw clicking speed controls everything. Every mouse click or spacebar tap fires the rocket engine — guiding your ship through an infinite asteroid field while measuring your <strong>Clicks Per Second (CPS)</strong> in real time.
           </p>
-          <h3 style={seoH3}>What is a CPS Test and Why Does it Matter?</h3>
-          <p style={seoP}><strong>CPS</strong> stands for <em>Clicks Per Second</em>. It is a core metric used by competitive pro-gamers to measure raw reflex velocity and finger stamina.</p>
-          <h3 style={seoH3}>How to Test and Improve Your Clicks Per Second Score</h3>
-          <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.25rem', color: '#9ca3af' }}>
-            <li style={{ marginBottom: '0.5rem' }}><strong>Real-time Tracking:</strong> Monitor your live CPS directly inside the upper HUD panel.</li>
-            <li style={{ marginBottom: '0.5rem' }}><strong>Stamina Training:</strong> Rhythmic click patterns regulate engine propulsion.</li>
-            <li style={{ marginBottom: '0.5rem' }}><strong>Peak Score Analytics:</strong> The post-game screen displays your maximum Peak CPS.</li>
-          </ul>
-          <div style={{ background: 'rgba(0,245,255,0.03)', borderLeft: '4px solid #00f5ff', padding: '1rem', margin: '1.5rem 0', borderRadius: '0 12px 12px 0' }}>
-            <span style={{ display: 'block', fontWeight: '800', color: '#fff', marginBottom: '0.25rem' }}>ðŸ’¡ Did You Know?</span>
-            The average global CPS sits between 4â€“6.5. Professional esports veterans frequently breach sustained ranges of 12â€“15 clicks per second!
+
+          {/* Section 1: What is Voyager Game */}
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '0.75rem', letterSpacing: '-0.2px' }}>What is Voyager Game?</h2>
+          <p style={seoP}>Voyager Game is an <strong>endless asteroid dodge game</strong> where you control a rocket ship by clicking or pressing SPACE. The more consistently you click, the more stable your altitude — making it both a fun arcade experience and a genuine <strong>CPS training tool</strong>.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(190px,1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+            {[
+              { title: 'Click-to-Thrust Engine', desc: 'Every click fires the engine. Your CPS directly controls vertical velocity and altitude stability.' },
+              { title: 'Infinite Asteroid Field', desc: 'Procedurally generated obstacles increase in speed and density the longer you survive.' },
+              { title: 'Boss Asteroids', desc: 'Every 90 seconds a massive boss asteroid fills the field — survive it to unlock the Boss Slayer achievement.' },
+              { title: 'Power-Up System', desc: 'Collect 5 types of power-ups: Shield, Invincibility, Slow-Mo, Double Boost, and Score Multiplier.' },
+            ].map(({ title, desc }) => (
+              <div key={title} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '14px', padding: '1.1rem' }}>
+                <div style={{ fontWeight: 700, color: '#00f5ff', fontSize: '0.9rem', marginBottom: '0.4rem' }}>{title}</div>
+                <div style={{ fontSize: '0.82rem', color: '#9ca3af' }}>{desc}</div>
+              </div>
+            ))}
           </div>
+
+          {/* Section 2: How does it work */}
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '0.75rem', letterSpacing: '-0.2px' }}>How Does Voyager Game Work?</h2>
+          <p style={seoP}>The game uses a <strong>Click-to-Velocity physics engine</strong> — each click adds upward force, while constant gravity pulls the ship down. Here is the full game loop:</p>
+          <ul style={{ paddingLeft: '1.4rem', marginBottom: '1.5rem', color: '#9ca3af' }}>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Select Difficulty:</strong> Choose Easy, Normal, or Hard — each changes obstacle speed, spawn rate, and gravity multiplier.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Hold SPACE or Click:</strong> Each input boosts the rocket upward. Stop clicking and gravity takes over.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Dodge Asteroids:</strong> Three asteroid types — regular, comet, and boss — each with different speeds and sizes.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Collect Power-Ups:</strong> Fly into glowing icons to activate Shield, Slow-Mo, Double Boost, Multiplier, or Invincibility.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Track Your CPS:</strong> The HUD shows live CPS, score, and distance. After the run, your Peak CPS is saved.</li>
+          </ul>
+
+          {/* Section 3: How it improves CPS */}
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '0.75rem', letterSpacing: '-0.2px' }}>How Does Voyager Game Help You Improve Your CPS?</h2>
+          <p style={seoP}>Unlike static click counters, Voyager gives you <strong>immediate physical feedback</strong> — your clicking speed directly controls game outcomes, forcing you to maintain rhythm under pressure.</p>
+          <ul style={{ paddingLeft: '1.4rem', marginBottom: '1.5rem', color: '#9ca3af' }}>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Biofeedback Loop:</strong> The ship visually responds to every click — you feel when your rhythm breaks, training you to stay consistent.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Finger Stamina:</strong> Surviving 60+ seconds requires sustained clicking without fatigue, building endurance over time.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Multitask Simulation:</strong> Clicking fast while dodging obstacles mirrors real gaming scenarios — improving hand-eye coordination.</li>
+            <li style={{ marginBottom: '0.5rem' }}><strong style={{ color: '#d1d5db' }}>Peak CPS Tracking:</strong> Your personal best is saved — giving you a measurable target to beat each session.</li>
+          </ul>
+          <div style={{ background: 'rgba(0,245,255,0.04)', borderLeft: '4px solid #00f5ff', padding: '1rem 1.2rem', margin: '1.5rem 0', borderRadius: '0 12px 12px 0' }}>
+            <span style={{ display: 'block', fontWeight: 800, color: '#fff', marginBottom: '0.3rem' }}>Did You Know?</span>
+            <span style={{ fontSize: '0.88rem', color: '#9ca3af' }}>The average global CPS is 4–6.5. Competitive gamers reach 10–14 CPS. Voyager Hard mode is calibrated to push you toward and beyond that range.</span>
+          </div>
+
+          {/* Section 4: SeoExtraSections */}
           <SeoExtraSections />
-          <h3 style={seoH3}>Frequently Asked Questions</h3>
+
+          {/* Section 5: Difficulty comparison table */}
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '0.75rem', letterSpacing: '-0.2px' }}>Voyager Difficulty Comparison</h2>
+          <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', minWidth: '500px' }}>
+              <thead>
+                <tr style={{ background: 'rgba(0,245,255,0.06)' }}>
+                  {['Difficulty', 'Speed Mult.', 'Gravity Mult.', 'Spawn Rate', 'Best For'].map(h => (
+                    <th key={h} style={{ padding: '0.7rem 1rem', textAlign: 'left', color: '#00f5ff', fontWeight: 700, borderBottom: '1px solid rgba(0,245,255,0.2)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['Easy',   '0.7×', '0.8×', 'Slower', 'Beginners, learning altitude control'],
+                  ['Normal', '1.0×', '1.0×', 'Standard', 'Intermediate players, CPS training'],
+                  ['Hard',   '1.35×', '1.15×', 'Faster', 'Advanced players, peak CPS challenge'],
+                ].map(([diff, speed, grav, spawn, use], i) => (
+                  <tr key={diff} style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent' }}>
+                    <td style={{ padding: '0.65rem 1rem', color: diff === 'Easy' ? '#22c55e' : diff === 'Normal' ? '#eab308' : '#ef4444', fontWeight: 700 }}>{diff}</td>
+                    <td style={{ padding: '0.65rem 1rem', color: '#9ca3af' }}>{speed}</td>
+                    <td style={{ padding: '0.65rem 1rem', color: '#9ca3af' }}>{grav}</td>
+                    <td style={{ padding: '0.65rem 1rem', color: '#9ca3af' }}>{spawn}</td>
+                    <td style={{ padding: '0.65rem 1rem', color: '#9ca3af' }}>{use}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* FAQ */}
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '0.75rem', letterSpacing: '-0.2px' }}>Frequently Asked Questions</h2>
           <FaqAccordion items={FAQ_ITEMS} />
-          <h3 style={seoH3}>Take the Challenge Now</h3>
-          <p style={{ margin: 0 }}>Launch the simulation above and see if you possess the elite micro-skills needed to guide the Voyager ship through deep space!</p>
+
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#fff', marginTop: '2rem', marginBottom: '0.75rem', letterSpacing: '-0.2px' }}>Ready to Launch?</h2>
+          <p style={{ margin: 0 }}>Start the simulation above and see how far you can guide the Voyager through deep space. Track your Peak CPS, unlock achievements, and challenge Hard mode for the ultimate endurance test!</p>
         </article>
       </div>
 
@@ -1924,10 +1997,14 @@ const seoH3: React.CSSProperties = { fontSize: '1.25rem', fontWeight: '700', col
 const seoP:  React.CSSProperties = { marginBottom: '1.25rem' };
 
 const FAQ_ITEMS: { q: string; a: string }[] = [
-  { q: 'Is my score saved if I close the tab?',  a: 'Yes. Best distance, survival time, peak CPS and achievements are stored locally in your browser.' },
-  { q: 'Does difficulty affect my CPS score?',   a: 'Difficulty changes obstacle speed and gravity â€” not the CPS calculation itself.' },
-  { q: 'Can I play Voyager on mobile?',          a: 'Yes â€” tapping the canvas works the same as holding Spacebar on desktop.' },
-  { q: 'Why does the ship suddenly drop?',       a: 'Releasing boost lets gravity take over. Short rhythmic taps give more precise altitude control.' },
+  { q: 'What is Voyager Game?',                   a: 'Voyager Game is a free browser space endurance arcade where you guide a rocket through an infinite asteroid field. Holding SPACE or clicking the mouse boosts the ship — your CPS directly controls speed and altitude.' },
+  { q: 'How does Voyager Game improve my CPS?',   a: 'Every SPACE press or mouse click generates real-time propulsion, so you naturally develop consistent click rhythm, finger stamina, and hand-eye coordination — the same skills trained by dedicated CPS tests.' },
+  { q: 'What difficulty should I start with?',    a: 'Start on Easy to learn asteroid timing and altitude control. Move to Normal once you survive 20 seconds comfortably, then try Hard where gravity and obstacle speed increase significantly.' },
+  { q: 'What are the power-ups in Voyager?',      a: 'Five power-ups: Shield (absorbs one hit), Invincibility (full immunity), Slow-Mo (reduces speed), Double Boost (doubles click force), and Multiplier (boosts score gain). Fly into glowing icons to collect them.' },
+  { q: 'Is my score saved if I close the tab?',  a: 'Yes. Best distance, survival time, peak CPS and achievements are all stored locally in your browser via localStorage.' },
+  { q: 'Does difficulty affect my CPS score?',   a: 'Difficulty changes obstacle speed and gravity — not the CPS calculation itself. Your Peak CPS is always measured accurately regardless of difficulty.' },
+  { q: 'Can I play Voyager Game on mobile?',     a: 'Yes — tapping the canvas works exactly like holding Spacebar on desktop. The game is fully touch-enabled for mobile browsers.' },
+  { q: 'Why does the ship suddenly drop?',       a: 'Releasing boost lets gravity take over. Short rhythmic taps give more precise altitude control than holding continuously.' },
 ];
 
 function FaqAccordion({ items }: { items: { q: string; a: string }[] }) {
