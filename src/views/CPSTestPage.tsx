@@ -9,7 +9,7 @@ import React, {
 } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Maximize2, Minimize2, ExternalLink } from 'lucide-react';
-import { ContextPill, AIContextualAssistant } from '../components/AIContextualAssistant';
+import { ContextPill, ContextSidebar, DiscoverMoreCard } from '../components/AIContextualAssistant';
 
 // ─────────────────────────────────────────────
 // TYPES & CONSTANTS
@@ -683,12 +683,16 @@ const SeoArticle = memo(() => (
         competitive. Hardware, grip style, and technique all affect your score.
       </p>
 
-      {/* ── CONTEXTUAL SPEED BENCHMARKS & PILL BADGES (matching user layout) ── */}
+      {/* ── DISCOVER MORE / CONTEXT GUIDES (MATCHING USER REFERENCE) ── */}
+      <DiscoverMoreCard />
+
+      {/* ── CONTEXTUAL SPEED BENCHMARKS & PILL BADGES ── */}
       <p style={pStyle}>
         The average CPS score in this mode is between 5 and 7. Players using techniques like jitter or butterfly clicking can reach up to 10-12 clicks per second. Beyond that, scores of 13+ are typically seen in highly trained users using gaming-grade mice.{' '}
         <ContextPill
           label="Click speed tester"
           variant="blue"
+          topicId="cps-test"
           query="What is a click speed tester and how does it measure CPS?"
         />
       </p>
@@ -701,6 +705,7 @@ const SeoArticle = memo(() => (
             label="jitter clicking"
             variant="green"
             icon="none"
+            topicId="jitter-clicking"
             query="How does jitter clicking work and how can I master it safely?"
           />
           , butterfly clicking, or drag clicking.
@@ -711,6 +716,7 @@ const SeoArticle = memo(() => (
             label="gaming"
             variant="green"
             icon="newspaper"
+            topicId="gaming-mouse"
             query="What are the best gaming mouse brands like Razer, Logitech, or Glorious for high CPS?"
           />
           {' '}mouse:</strong> Brands like Razer, Logitech, or Glorious offer responsive click rates.
@@ -730,6 +736,7 @@ const SeoArticle = memo(() => (
           label="Click Test"
           variant="green"
           icon="none"
+          topicId="click-test"
           query="What are the different click test durations like 1s, 2s, 10s, and more on FixedAim?"
         />
         {' '}homepage to explore all modes like 1s, 2s, 10s, and more.
@@ -2172,8 +2179,8 @@ export default function CPSTestPage() {
       {/* ── PRO SEO ARTICLE ── */}
       <SeoArticle />
 
-      {/* ── AI-POWERED CONTEXTUAL ASSISTANT ── */}
-      <AIContextualAssistant />
+      {/* ── CONTEXTUAL KNOWLEDGE SIDEBAR (NO CHAT, CLEAN READER PANEL) ── */}
+      <ContextSidebar />
     </div>
   );
 }
