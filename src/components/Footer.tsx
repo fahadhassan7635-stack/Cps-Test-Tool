@@ -35,8 +35,9 @@ export default function Footer() {
 
           <div>
             <h4 style={{ color: 'var(--neon-cyan)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>KEYBOARD</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: 0, padding: 0 }}>
               {[
+                { to: '/keyboard', label: '⌨️ All Keyboard Tools' },
                 { to: '/typing-test', label: 'Typing Speed Test' },
                 { to: '/key-visualizer', label: 'Key Visualizer' },
                 { to: '/spacebar', label: 'Spacebar Counter' },
@@ -49,8 +50,9 @@ export default function Footer() {
 
           <div>
             <h4 style={{ color: 'var(--neon-green)', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>MOUSE</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: 0, padding: 0 }}>
               {[
+                { to: '/mouse', label: '🖱️ All Mouse Tools' },
                 { to: '/cps-test', label: 'CPS Test' },
                 { to: '/double-click', label: 'Double Click Test' },
                 { to: '/scroll-test', label: 'Scroll Wheel Test' },
@@ -63,13 +65,14 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>🚀 ARCADE GAMES</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
+            <h4 style={{ color: '#00f5ff', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>🎯 AIM & REACTION</h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: 0, padding: 0 }}>
               {[
-                { to: '/games', label: '🎮 All Games Center' },
-                { to: '/space-defense', label: '🚀 Space Defense' },
-                { to: '/voyager-game', label: '🛸 Voyager Game' },
-                { to: '/space-waves', label: '🌊 Space Waves' },
+                { to: '/aim', label: '🎯 Aim & Reflex Hub' },
+                { to: '/aim-trainer', label: '2D Aim Trainer' },
+                { to: '/3d-aim-trainer', label: '3D Aim Trainer' },
+                { to: '/reaction-time', label: 'Reaction Time Test' },
+                { to: '/f1-reaction', label: 'F1 Reaction Test' }
               ].map(l => (
                 <li key={l.to}><Link href={l.to} className="footer-link">{l.label}</Link></li>
               ))}
@@ -77,18 +80,21 @@ export default function Footer() {
           </div>
 
           <div>
-            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>EXPLORE</h4>
-            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.85rem', margin: 0, padding: 0 }}>
+            <h4 style={{ color: '#ff6b35', fontSize: '0.85rem', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '1.25rem' }}>🚀 GAMES & COMMUNITY</h4>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.75rem', margin: 0, padding: 0 }}>
               {[
-                { to: '/hall-of-fame', label: 'Leaderboard' },
-                { to: '/aim-trainer', label: '2D Aim Trainer' },
-                { to: '/reaction-time', label: 'Reaction Time' },
-                { to: '/blog', label: '📖 Blog' }
+                { to: '/games', label: '🎮 All Games Center' },
+                { to: '/space-defense', label: '🚀 Space Defense' },
+                { to: '/voyager-game', label: '🛸 Voyager Game' },
+                { to: '/space-waves', label: '🌊 Space Waves' },
+                { to: '/leaderboard', label: '🏆 Global Leaderboard' },
+                { to: '/hall-of-fame', label: '⭐ Hall of Fame' },
+                { to: '/blog', label: '📖 Gaming Blog' }
               ].map(l => (
                 <li key={l.to}><Link href={l.to} className="footer-link">{l.label}</Link></li>
               ))}
             </ul>
-            </div>
+          </div>
           </div>
 
           {/* SEO Gaming Links */}
