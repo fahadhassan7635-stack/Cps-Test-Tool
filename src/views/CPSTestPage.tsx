@@ -9,6 +9,7 @@ import React, {
 } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import { Maximize2, Minimize2, ExternalLink } from 'lucide-react';
+import { ContextPill, AIContextualAssistant } from '../components/AIContextualAssistant';
 
 // ─────────────────────────────────────────────
 // TYPES & CONSTANTS
@@ -680,6 +681,58 @@ const SeoArticle = memo(() => (
       <p style={pStyle}>
         These are approximate community benchmarks. 6–8 CPS is normal for casual players; 10+ CPS is
         competitive. Hardware, grip style, and technique all affect your score.
+      </p>
+
+      {/* ── CONTEXTUAL SPEED BENCHMARKS & PILL BADGES (matching user layout) ── */}
+      <p style={pStyle}>
+        The average CPS score in this mode is between 5 and 7. Players using techniques like jitter or butterfly clicking can reach up to 10-12 clicks per second. Beyond that, scores of 13+ are typically seen in highly trained users using gaming-grade mice.{' '}
+        <ContextPill
+          label="Click speed tester"
+          variant="blue"
+          query="What is a click speed tester and how does it measure CPS?"
+        />
+      </p>
+
+      <h2 style={h2Style}>How to Improve Your Clicking Speed?</h2>
+      <ul style={ulStyle}>
+        <li>
+          <strong>Master advanced techniques:</strong> Try{' '}
+          <ContextPill
+            label="jitter clicking"
+            variant="green"
+            icon="none"
+            query="How does jitter clicking work and how can I master it safely?"
+          />
+          , butterfly clicking, or drag clicking.
+        </li>
+        <li>
+          <strong>Use a{' '}
+          <ContextPill
+            label="gaming"
+            variant="green"
+            icon="newspaper"
+            query="What are the best gaming mouse brands like Razer, Logitech, or Glorious for high CPS?"
+          />
+          {' '}mouse:</strong> Brands like Razer, Logitech, or Glorious offer responsive click rates.
+        </li>
+        <li>
+          <strong>Avoid trackpads:</strong> Trackpads are slower and limit finger placement and speed.
+        </li>
+        <li>
+          <strong>Stay consistent:</strong> Practicing daily builds muscle memory and click rhythm.
+        </li>
+      </ul>
+
+      <h2 style={h2Style}>Start Practicing Now</h2>
+      <p style={pStyle}>
+        Take the 5-second CPS Test below and track your performance. Want to try different durations? Go back to the{' '}
+        <ContextPill
+          label="Click Test"
+          variant="green"
+          icon="none"
+          query="What are the different click test durations like 1s, 2s, 10s, and more on FixedAim?"
+        />
+        {' '}homepage to explore all modes like 1s, 2s, 10s, and more.
       </p>
 
       {/* ── 0. WHAT IS LEFT CLICK CPS TEST? ── */}
@@ -2118,6 +2171,9 @@ export default function CPSTestPage() {
 
       {/* ── PRO SEO ARTICLE ── */}
       <SeoArticle />
+
+      {/* ── AI-POWERED CONTEXTUAL ASSISTANT ── */}
+      <AIContextualAssistant />
     </div>
   );
 }
