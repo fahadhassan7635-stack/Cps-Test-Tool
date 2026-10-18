@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import {
@@ -24,7 +24,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
-// â”€â”€â”€ More Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── More Tools ───────────────────────────────────────────────────────────────
 interface ToolLink { label: string; href: string; icon: React.ReactNode; }
 
 const MORE_TOOLS: ToolLink[] = [
@@ -208,7 +208,7 @@ interface Projectile extends Entity { speed: number; isDouble?: boolean; }
 interface Meteor extends Entity {
   id: number; radius: number; speed: number; health: number; maxHealth: number;
   rotation: number; rotationSpeed: number; color: string; isBoss?: boolean;
-  shapePoints: number[]; // âœ… pre-calculated shape to avoid jitter
+  shapePoints: number[]; // ✓ pre-calculated shape to avoid jitter
 }
 interface Particle {
   x: number; y: number; vx: number; vy: number; life: number; color: string; size: number;
@@ -230,11 +230,11 @@ const DIFFICULTY_CONFIG: Record<Difficulty, { speedMult: number; spawnMult: numb
 };
 
 const POWERUP_CONFIG: Record<PowerUpType, { label: string; color: string; icon: string; duration: number }> = {
-  shield:     { label: 'SHIELD',      color: '#00f5ff', icon: 'ðŸ›¡', duration: 5000  },
-  rapidfire:  { label: 'RAPID FIRE',  color: '#ff6b35', icon: 'âš¡', duration: 6000  },
-  doubleshot: { label: 'DOUBLE SHOT', color: '#a855f7', icon: 'âœ¦', duration: 7000  },
-  magnet:     { label: 'MAGNET',      color: '#facc15', icon: 'ðŸ§²', duration: 5000  },
-  slowmotion: { label: 'SLOW MOTION', color: '#22d3ee', icon: 'â³', duration: 4000  },
+  shield:     { label: 'SHIELD',      color: '#00f5ff', icon: '🛡️', duration: 5000  },
+  rapidfire:  { label: 'RAPID FIRE',  color: '#ff6b35', icon: '⚡', duration: 6000  },
+  doubleshot: { label: 'DOUBLE SHOT', color: '#a855f7', icon: '✦', duration: 7000  },
+  magnet:     { label: 'MAGNET',      color: '#facc15', icon: '🧲', duration: 5000  },
+  slowmotion: { label: 'SLOW MOTION', color: '#22d3ee', icon: '⏱️', duration: 4000  },
 };
 
 const LS_KEY = 'space_defense_highscore';
@@ -295,7 +295,7 @@ export default function SpaceDefensePage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // â”€â”€ CHANGE 1: removed 'loading' state, start directly at 'menu' â”€â”€
+  // ── CHANGE 1: removed 'loading' state, start directly at 'menu' ──
   const [gameState, setGameState] = useState<'menu' | 'countdown' | 'playing' | 'paused' | 'gameover'>('menu');
   const [score, setScore] = useState(0);
   const [meteorsDestroyed, setMeteorsDestroyed] = useState(0);
@@ -352,7 +352,7 @@ export default function SpaceDefensePage() {
   const PROJECTILE_SPEED = 12;
   const INVULNERABILITY_TIME = 60;
 
-  // â”€â”€ Fullscreen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Fullscreen ────────────────────────────────────────────
   const toggleFullscreen = useCallback(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -369,7 +369,7 @@ export default function SpaceDefensePage() {
     return () => document.removeEventListener('fullscreenchange', handler);
   }, []);
 
-  // â”€â”€ Sound â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Sound ─────────────────────────────────────────────────
   const toggleSound = () => {
     const newMuted = !isMuted;
     sounds.muted = newMuted;
@@ -377,7 +377,7 @@ export default function SpaceDefensePage() {
     if (!newMuted) sounds.init();
   };
 
-  // â”€â”€ Power-Up helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Power-Up helpers ──────────────────────────────────────
   const hasPowerUp = useCallback((type: PowerUpType) => {
     return activePowerUpsRef.current.some(p => p.type === type && p.endsAt > Date.now());
   }, []);
@@ -402,9 +402,9 @@ export default function SpaceDefensePage() {
     });
   }, []);
 
-  // â”€â”€ Particle helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Particle helper ────────────────────────────────────────
   const createExplosion = useCallback((x: number, y: number, color: string, count = 15) => {
-    // âœ… cap particles to avoid performance issues
+    // ✓ cap particles to avoid performance issues
     const toAdd = Math.min(count, MAX_PARTICLES - particlesRef.current.length);
     for (let i = 0; i < toAdd; i++) {
       particlesRef.current.push({
@@ -415,11 +415,11 @@ export default function SpaceDefensePage() {
     }
   }, []);
 
-  // â”€â”€ Spawn meteor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Spawn meteor ───────────────────────────────────────────
   const spawnMeteor = useCallback((canvasWidth: number, currentLevel: number, isBoss = false): Meteor => {
     const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
 
-    // âœ… pre-generate shape points here, NOT in draw()
+    // ✓ pre-generate shape points here, NOT in draw()
     const generateShapePoints = (numPoints: number, radiusMult: number) => {
       const pts: number[] = [];
       for (let j = 0; j < numPoints; j++) {
@@ -459,7 +459,7 @@ export default function SpaceDefensePage() {
     };
   }, []);
 
-  // â”€â”€ Shoot â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Shoot ──────────────────────────────────────────────────
   const handleShoot = useCallback(() => {
     if (gameStateRef.current !== 'playing') return;
     const now = Date.now();
@@ -480,7 +480,7 @@ export default function SpaceDefensePage() {
     }
   }, [hasPowerUp, createExplosion]);
 
-  // â”€â”€ Hit player â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Hit player ─────────────────────────────────────────────
   const gameOver = useCallback(() => {
     if (gameStateRef.current === 'gameover') return;
     gameStateRef.current = 'gameover';
@@ -523,7 +523,7 @@ export default function SpaceDefensePage() {
     comboRef.current = 0; setCombo(0);
   }, [hasPowerUp, gameOver]);
 
-  // â”€â”€ Init game â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Init game ──────────────────────────────────────────────
   const initGame = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -542,7 +542,7 @@ export default function SpaceDefensePage() {
     if (!isMuted) sounds.init();
   }, [isMuted]);
 
-  // â”€â”€ Countdown then start â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Countdown then start ───────────────────────────────────
   const startCountdown = useCallback(() => {
     initGame();
     setGameState('countdown');
@@ -566,7 +566,7 @@ export default function SpaceDefensePage() {
     setTimeout(tick, 900);
   }, [initGame]);
 
-  // â”€â”€ Pause â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pause ──────────────────────────────────────────────────
   const pauseGame = useCallback(() => {
     if (gameStateRef.current === 'playing') {
       setGameState('paused'); gameStateRef.current = 'paused';
@@ -580,7 +580,7 @@ export default function SpaceDefensePage() {
     }
   }, []);
 
-  // â”€â”€ Update â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Update ─────────────────────────────────────────────────
   const update = useCallback((_ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     const cfg = DIFFICULTY_CONFIG[difficultyRef.current];
     const slowFactor = hasPowerUp('slowmotion') ? 0.4 : 1;
@@ -731,7 +731,7 @@ export default function SpaceDefensePage() {
     if (invulnerabilityRef.current > 0) invulnerabilityRef.current--;
   }, [hasPowerUp, handleShoot, handleHitPlayer, spawnMeteor, spawnPowerUp, addPowerUp, createExplosion]);
 
-  // â”€â”€ Draw â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Draw ───────────────────────────────────────────────────
   const draw = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -779,7 +779,7 @@ export default function SpaceDefensePage() {
       ctx.fillRect(p.x, p.y, p.width, p.height); ctx.shadowBlur = 0;
     });
 
-    // Meteors â€” âœ… use pre-calculated shapePoints, no Math.random() here
+    // Meteors - use pre-calculated shapePoints, no Math.random here
     meteorsRef.current.forEach(m => {
       ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(m.rotation);
       ctx.shadowBlur = m.isBoss ? 30 : 15; ctx.shadowColor = m.color;
@@ -794,7 +794,7 @@ export default function SpaceDefensePage() {
       ctx.beginPath();
       for (let j = 0; j < 8; j++) {
         const angle = (j / 8) * Math.PI * 2;
-        // âœ… use stored shapePoints instead of Math.random()
+        // ✓ use stored shapePoints instead of Math.random()
         const r = m.isBoss
           ? m.radius * (0.95 + (m.shapePoints[j] || 0.05))
           : m.radius * m.shapePoints[j];
@@ -855,7 +855,7 @@ export default function SpaceDefensePage() {
     ctx.restore();
   }, [hasPowerUp]);
 
-  // â”€â”€ Game loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Game loop ──────────────────────────────────────────────
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -873,7 +873,7 @@ export default function SpaceDefensePage() {
     return () => { if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current); };
   }, [gameState, gameLoop]);
 
-  // â”€â”€ Keyboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Keyboard ───────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       keysRef.current[e.code] = true;
@@ -904,16 +904,16 @@ export default function SpaceDefensePage() {
     return () => clearInterval(interval);
   }, [gameState]);
 
-  // â”€â”€ Render â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Render ─────────────────────────────────────────────────
   return (
-    // â”€â”€ CHANGE 2: removed background/padding from outer wrapper â”€â”€
+    // ── CHANGE 2: removed background/padding from outer wrapper ──
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem' }}>
 
       {/* Game Container Wrapper */}
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '4rem' }}>
         <div ref={containerRef} style={{
           position: 'relative', width: '100%', maxWidth: '900px', aspectRatio: '16/9',
-          // â”€â”€ CHANGE 2: background removed from game container â”€â”€
+          // ── CHANGE 2: background removed from game container ──
           border: '1px solid rgba(0,245,255,0.2)',
           borderRadius: '20px', overflow: 'hidden',
           boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(0,245,255,0.05)', userSelect: 'none'
@@ -928,7 +928,7 @@ export default function SpaceDefensePage() {
             style={{ width: '100%', height: '100%', display: 'block', cursor: 'crosshair', touchAction: 'none' }}
           />
 
-          {/* â”€â”€ HUD (Playing) â”€â”€ */}
+          {/* ── HUD (Playing) ── */}
           {(gameState === 'playing' || gameState === 'paused') && (
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '1rem', display: 'flex', justifyContent: 'space-between', pointerEvents: 'none' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', pointerEvents: 'auto' }}>
@@ -1031,7 +1031,7 @@ export default function SpaceDefensePage() {
             </div>
           )}
 
-          {/* â”€â”€ Countdown â”€â”€ */}
+          {/* ── Countdown ── */}
           {gameState === 'countdown' && (
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,13,20,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div key={String(countdownNum)} style={{ fontSize: countdownNum === 'GO!' ? '5rem' : '8rem', fontWeight: '900', color: countdownNum === 'GO!' ? '#00ff88' : '#fff', textShadow: `0 0 60px ${countdownNum === 'GO!' ? '#00ff88' : '#00f5ff'}`, fontFamily: 'monospace', animation: 'countAnim 0.8s ease-out' }}>
@@ -1041,7 +1041,7 @@ export default function SpaceDefensePage() {
             </div>
           )}
 
-          {/* â”€â”€ Pause Overlay â”€â”€ */}
+          {/* ── Pause Overlay ── */}
           {gameState === 'paused' && (
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,13,20,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.25rem' }}>
@@ -1065,7 +1065,7 @@ export default function SpaceDefensePage() {
             </div>
           )}
 
-          {/* â”€â”€ Menu â”€â”€ */}
+          {/* ── Menu ── */}
           {gameState === 'menu' && (
             <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(2,4,10,0.95)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
               <div style={{ position: 'absolute', top: '14px', right: '14px', display: 'flex', gap: '8px' }}>
@@ -1112,17 +1112,17 @@ export default function SpaceDefensePage() {
                     })}
                   </div>
                   <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.5rem' }}>
-                    {difficulty === 'hard' ? '2Ã— score Â· Faster, tougher meteors' : difficulty === 'easy' ? '0.8Ã— score Â· Slower meteors' : 'Standard gameplay Â· 1Ã— score'}
+                    {difficulty === 'hard' ? '2x score · Faster, tougher meteors' : difficulty === 'easy' ? '0.8x score · Slower meteors' : 'Standard gameplay · 1x score'}
                   </div>
                 </div>
 
                 <div style={{ marginBottom: '1.2rem', color: '#6b7280', fontSize: '0.8rem' }}>
-                  <strong style={{ color: '#9ca3af' }}>WASD</strong> move Â· <strong style={{ color: '#9ca3af' }}>F / Space</strong> shoot
+                  <strong style={{ color: '#9ca3af' }}>WASD</strong> move · <strong style={{ color: '#9ca3af' }}>F / Space</strong> shoot
                 </div>
 
                 {highScore.score > 0 && (
                   <div style={{ color: 'rgba(255,215,0,0.75)', fontSize: '0.78rem', marginBottom: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                    <Trophy size={13} color="gold" /> Best: {highScore.score.toLocaleString()} pts Â· Lv {highScore.level}
+                    <Trophy size={13} color="gold" /> Best: {highScore.score.toLocaleString()} pts · Lv {highScore.level}
                   </div>
                 )}
 
@@ -1137,7 +1137,7 @@ export default function SpaceDefensePage() {
             </div>
           )}
 
-          {/* â”€â”€ Game Over â”€â”€ */}
+          {/* ── Game Over ── */}
           {gameState === 'gameover' && (
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(8,13,20,0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
               <div style={{ maxWidth: '380px', width: '100%', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '1.5rem', textAlign: 'center' }}>
@@ -1189,7 +1189,7 @@ export default function SpaceDefensePage() {
         </div>
       </div>
 
-      {/* â”€â”€ MORE TOOLS GRID â”€â”€ */}
+      {/* ── MORE TOOLS GRID ── */}
       <section aria-label="More Tools" style={{ marginBottom: '3.5rem', marginTop: '1rem' }}>
         <h2 style={{
           fontWeight: 800, fontSize: '1.5rem', color: '#fff',
@@ -1253,18 +1253,135 @@ export default function SpaceDefensePage() {
       <hr style={{ borderColor: 'var(--border)', margin: '5rem 0 4rem' }} />
 
       <div style={{ border: '1px solid var(--border)', borderRadius: '16px', padding: '3rem 2.5rem' }}>
-        <section style={{ maxWidth: '900px', margin: '0 auto', color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1.05rem' }}>
-          <h2 style={{ color: 'var(--text-primary)', fontSize: '2.25rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>
-            About Space Defense
-          </h2>
-          <p style={{ margin: '0 0 1.5rem 0' }}>
-            Space Defense is an action-packed aim training game where you defend your base against incoming asteroids and enemy projectiles. It helps you build spatial awareness, quick targeting skills, and precise flick aim. Regular practice builds the muscle memory needed to hit fast-moving targets in intense FPS scenarios.
+        <article style={{ maxWidth: '900px', margin: '0 auto', color: 'var(--text-secondary)', lineHeight: '1.8', fontSize: '1rem' }}>
+
+          {/* Main Title */}
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <h2 style={{ color: '#fff', fontSize: '2.2rem', fontWeight: 800, margin: '0 0 0.75rem', letterSpacing: '-0.5px' }}>
+              Space Defense: Meteor Shooter &amp; CPS Aim Trainer
+            </h2>
+            <p style={{ color: 'var(--neon-cyan)', fontSize: '1rem', fontWeight: 600, margin: 0 }}>
+              Master rapid targeting, burst clicking speed, and tactical evasion in deep space
+            </p>
+          </div>
+
+          <p style={{ marginBottom: '1.5rem', fontSize: '1.05rem', lineHeight: '1.8' }}>
+            <strong>Space Defense</strong> is an arcade space shooter and click speed trainer engineered to sharpen your{' '}
+            <strong>Clicks Per Second (CPS)</strong>, flick aim, and hand-eye coordination under pressure. Piloting a high-mobility 
+            fighter craft, you must eliminate incoming asteroid clusters, survive bullet-sponge Boss Meteors every 5 levels, 
+            and chain combo multipliers to conquer the leaderboard.
           </p>
+
+          {/* 1. What is Space Defense? */}
+          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, marginTop: '2.5rem', marginBottom: '1rem' }}>
+            What is Space Defense?
+          </h2>
+          <p style={{ marginBottom: '1.25rem' }}>
+            Space Defense combines classic retro arcade shooters with modern micro-mechanics. Every asteroid destroyed 
+            requires split-second aim alignment and repeated trigger pulls, reinforcing the finger-tap endurance vital for competitive gaming:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', margin: '1.5rem 0 2rem' }}>
+            {[
+              { title: 'Dynamic Meteor Defense', desc: 'Waves of procedural meteors scale in velocity, size, and hitpoints, requiring variable shot counts.' },
+              { title: 'Epic Boss Encounters', desc: 'Every 5 levels, a massive Boss Meteor challenges your sustained CPS output and dodging reflexes.' },
+              { title: '5-Power-Up Tactical Arsenal', desc: 'Collect Shield, Rapid Fire, Double Shot, Magnet, and Slow Motion drops to dominate high waves.' },
+              { title: 'Combo Multiplier Engine', desc: 'String consecutive hits without taking damage to elevate your score multiplier up to 4x.' },
+            ].map(({ title, desc }) => (
+              <div key={title} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '12px', padding: '1.1rem' }}>
+                <div style={{ fontWeight: 700, color: 'var(--neon-cyan)', fontSize: '0.95rem', marginBottom: '0.4rem' }}>{title}</div>
+                <div style={{ fontSize: '0.85rem', color: '#9ca3af', lineHeight: 1.6 }}>{desc}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* 2. How Does Space Defense Work? */}
+          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, marginTop: '2.5rem', marginBottom: '1rem' }}>
+            How Does This Space Defense Game Work?
+          </h2>
+          <p style={{ marginBottom: '1rem' }}>
+            The game runs on an optimized HTML5 Canvas physics engine with instantaneous input response. Here is the core combat loop:
+          </p>
+          <ul style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem', color: '#9ca3af' }}>
+            <li style={{ marginBottom: '0.6rem' }}><strong style={{ color: '#fff' }}>Dual Input Navigation:</strong> Maneuver your ship along the horizontal defense plane using <kbd style={{ background: '#111827', border: '1px solid #374151', padding: '2px 6px', borderRadius: '4px', color: '#00f5ff' }}>A / D</kbd>, <kbd style={{ background: '#111827', border: '1px solid #374151', padding: '2px 6px', borderRadius: '4px', color: '#00f5ff' }}>Left / Right Arrow</kbd>, or tap controls on mobile.</li>
+            <li style={{ marginBottom: '0.6rem' }}><strong style={{ color: '#fff' }}>Flexible Firing Mechanics:</strong> Fire plasma bolts using <kbd style={{ background: '#111827', border: '1px solid #374151', padding: '2px 6px', borderRadius: '4px', color: '#00f5ff' }}>Left Mouse Click</kbd>, <kbd style={{ background: '#111827', border: '1px solid #374151', padding: '2px 6px', borderRadius: '4px', color: '#00f5ff' }}>Spacebar</kbd>, or the <kbd style={{ background: '#111827', border: '1px solid #374151', padding: '2px 6px', borderRadius: '4px', color: '#00f5ff' }}>F</kbd> key. Faster clicking produces immediate cyclic rate advantages.</li>
+            <li style={{ marginBottom: '0.6rem' }}><strong style={{ color: '#fff' }}>Wave Scaling &amp; Boss Raids:</strong> Meteors speed up and cluster closer together each wave. Level 5, 10, 15, and beyond feature armored Bosses that demand concentrated 10+ CPS firing.</li>
+            <li style={{ marginBottom: '0.6rem' }}><strong style={{ color: '#fff' }}>Power-Up Drops:</strong> Destroying special meteors releases glowing power-up orbs. Collecting them grants immediate tactical perks like double projectile spread or 50% cooldown reductions.</li>
+          </ul>
+
+          {/* 3. How Space Defense Improves Your CPS & Aim */}
+          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, marginTop: '2.5rem', marginBottom: '1rem' }}>
+            How Does Space Defense Help You Improve Your CPS &amp; Aim?
+          </h2>
+          <p style={{ marginBottom: '1rem' }}>
+            Standard static CPS click tests measure isolated clicking speed in a vacuum. Space Defense takes click speed testing into an active combat environment:
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem', margin: '1.5rem 0 2rem' }}>
+            <div style={{ background: 'rgba(0,255,136,0.04)', border: '1px solid rgba(0,255,136,0.15)', borderRadius: '12px', padding: '1.1rem' }}>
+              <h3 style={{ color: 'var(--neon-green, #00ff88)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.4rem' }}>🎯 Precision Flick Aiming</h3>
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0, lineHeight: 1.6 }}>
+                Meteors spawn at unpredictable angles across the screen. Lining up shots trains target acquisition and micro-flick muscle memory similar to tactical shooters.
+              </p>
+            </div>
+            <div style={{ background: 'rgba(0,245,255,0.04)', border: '1px solid rgba(0,245,255,0.15)', borderRadius: '12px', padding: '1.1rem' }}>
+              <h3 style={{ color: 'var(--neon-cyan, #00f5ff)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.4rem' }}>⚡ High-CPS Burst Discipline</h3>
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0, lineHeight: 1.6 }}>
+                Overwhelming meteor swarms and tough bosses require rapid 8–12+ CPS bursts without tensing your forearm to the point of losing steering control.
+              </p>
+            </div>
+            <div style={{ background: 'rgba(255,159,67,0.04)', border: '1px solid rgba(255,159,67,0.15)', borderRadius: '12px', padding: '1.1rem' }}>
+              <h3 style={{ color: 'var(--neon-orange, #ff9f43)', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.4rem' }}>🕹️ Multitask Coordination</h3>
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0, lineHeight: 1.6 }}>
+                Simultaneously strafing with keyboard keys while hammering mouse clicks simulates the cognitive workload of high-stakes battle royales and Minecraft PvP.
+              </p>
+            </div>
+            <div style={{ background: 'rgba(168,85,247,0.04)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '12px', padding: '1.1rem' }}>
+              <h3 style={{ color: '#c084fc', fontSize: '1rem', fontWeight: 700, margin: '0 0 0.4rem' }}>🧠 Real-Time Biofeedback</h3>
+              <p style={{ fontSize: '0.85rem', color: '#9ca3af', margin: 0, lineHeight: 1.6 }}>
+                Immediate audio cues and visual particle explosions validate every confirmed hit, training your nervous system to sustain steady rhythmic tempo.
+              </p>
+            </div>
+          </div>
+
+          {/* 4. Difficulty Comparison */}
+          <h2 style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 800, marginTop: '2.5rem', marginBottom: '1rem' }}>
+            Space Defense Difficulty Comparison
+          </h2>
+          <div style={{ overflowX: 'auto', margin: '1.25rem 0 2rem' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', minWidth: '550px' }}>
+              <thead>
+                <tr style={{ background: 'rgba(0,245,255,0.06)' }}>
+                  {['Difficulty', 'Score Multiplier', 'Meteor Speed', 'Spawn Density', 'Best For'].map(h => (
+                    <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', color: 'var(--neon-cyan)', fontWeight: 700, borderBottom: '1px solid rgba(0,245,255,0.2)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['Easy',   '0.8x score', 'Gentle speed', 'Widely spaced', 'Beginners & casual warm-up'],
+                  ['Normal', '1.0x score', 'Standard pace', 'Balanced clusters', 'Standard CPS training & progression'],
+                  ['Hard',   '2.0x score', 'Fast & aggressive', 'Dense multi-waves', 'High-CPS masters & leaderboard runs'],
+                ].map(([diff, mult, spd, dens, best], i) => (
+                  <tr key={diff} style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.01)' : 'transparent', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '0.7rem 1rem', fontWeight: 700, color: diff === 'Easy' ? '#22c55e' : diff === 'Normal' ? '#00f5ff' : '#ef4444' }}>{diff}</td>
+                    <td style={{ padding: '0.7rem 1rem', color: '#fff', fontWeight: 600 }}>{mult}</td>
+                    <td style={{ padding: '0.7rem 1rem', color: '#9ca3af' }}>{spd}</td>
+                    <td style={{ padding: '0.7rem 1rem', color: '#9ca3af' }}>{dens}</td>
+                    <td style={{ padding: '0.7rem 1rem', color: '#9ca3af' }}>{best}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 5. FAQs */}
           <div style={{ margin: '3rem 0 0' }}>
-            <h2 style={{ color: 'var(--text-primary)', fontSize: '1.9rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>Frequently Asked Questions</h2>
+            <h2 style={{ color: 'var(--text-primary)', fontSize: '1.9rem', fontWeight: '800', marginBottom: '1.5rem', textAlign: 'center' }}>
+              Frequently Asked Questions
+            </h2>
             <FaqAccordion items={FAQ_ITEMS} />
           </div>
-        </section>
+
+        </article>
       </div>
 
       <style>{`
@@ -1274,13 +1391,16 @@ export default function SpaceDefensePage() {
   );
 }
 
-// â”€â”€ FAQ data & accordion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── FAQ data & accordion ────────────────────────────────────────
 const FAQ_ITEMS = [
-  { q: 'What is Space Defense?', a: 'Space Defense is a free browser-based space shooter game where you control a fighter spacecraft and destroy incoming meteors. The game features boss battles every 5 levels, five different power-ups, a combo multiplier system, three difficulty modes, and detailed performance statistics.' },
-  { q: 'How do I play Space Defense?', a: 'Use WASD or Arrow Keys to move your spaceship. Press F or Space to fire. You can also left-click to shoot. Destroy meteors before they hit you or reach the bottom. Press Esc to pause at any time.' },
-  { q: 'What power-ups are available?', a: 'There are five power-ups: Shield (5s invincibility), Rapid Fire (doubles fire rate for 6s), Double Shot (adds side projectiles for 7s), Magnet (attracts drops for 5s), and Slow Motion (slows meteors to 40% for 4s).' },
-  { q: 'Does Space Defense require a download?', a: 'No. Space Defense runs entirely in your browser using HTML5 Canvas and Web Audio API technology. No download, installation, or plugin is required.' },
-  { q: 'How are high scores saved?', a: "High scores are saved automatically to your browser's LocalStorage after each game over. No account or internet connection is needed." },
+  { q: 'What is Space Defense?', a: 'Space Defense is a free browser-based arcade space shooter and CPS trainer where you pilot a combat ship to destroy incoming meteor waves. It features procedural meteor spawns, Boss battles every 5 levels, 5 collectable power-ups, a combo multiplier system, and automatic high-score saving.' },
+  { q: 'How does Space Defense help improve my CPS?', a: 'Because destroying high-HP meteors and survival bosses requires rapid, continuous weapon fire, Space Defense forces you to maintain high clicking frequency (8–12+ CPS) while actively aiming and dodging with WASD, building genuine gaming dexterity and stamina.' },
+  { q: 'How do I control and shoot in the game?', a: 'Use WASD or the Arrow Keys to steer your ship along the lower perimeter. Fire your plasma blasters by clicking the Left Mouse Button, tapping the Spacebar, or pressing F. The game is also fully touch-compatible on mobile and tablet devices.' },
+  { q: 'What power-ups can I collect?', a: 'Destroying meteors can drop 5 distinct power-ups: Shield (absorbs hits for 5s), Rapid Fire (cuts shooting cooldown by 50% for 6s), Double Shot (adds dual angled plasma bolts for 7s), Magnet (vacuums nearby drops for 5s), and Slow Motion (reduces meteor speed to 40% for 4s).' },
+  { q: 'How do Boss Battles work?', a: 'Every 5 levels (Level 5, 10, 15, etc.), a colossal Boss Meteor appears on the field. Bosses possess massive hitpoint pools and require dozens of direct hits to eliminate. Defeating a boss drops guaranteed power-ups and advances you to the next stage.' },
+  { q: 'What difficulty mode should I choose?', a: 'Beginners should start on Easy to get comfortable with the steering velocity and projectile hitboxes. Normal offers a balanced speed-to-score ratio, while Hard mode features high-velocity meteor clusters with a 2x score multiplier for competitive players.' },
+  { q: 'Are my scores and high levels saved?', a: "Yes. Your all-time best score and highest level reached are automatically preserved in your browser's LocalStorage. You can refresh or close the tab at any time without losing your records." },
+  { q: 'Does Space Defense require any download or plugins?', a: 'No. Space Defense runs natively in any modern web browser utilizing HTML5 Canvas and the Web Audio API. No installation, plugins, or registration are ever needed.' },
 ];
 
 const FaqAccordion = ({ items }: { items: { q: string; a: string }[] }) => {
@@ -1316,7 +1436,7 @@ const FaqAccordion = ({ items }: { items: { q: string; a: string }[] }) => {
   );
 };
 
-// â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Sub-components ──────────────────────────────────────────────
 const StatBox = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) => (
   <div style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
     {icon}
@@ -1345,7 +1465,7 @@ const GameOverStat = ({ label, value, icon, highlight = '#fff' }: { label: strin
   </div>
 );
 
-// â”€â”€ External source link (styled like an inline citation) â”€â”€â”€â”€â”€â”€â”€â”€
+// ── External source link (styled like an inline citation) ────────
 const SourceLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
   <a
     href={href}
