@@ -363,6 +363,7 @@ const _soundEngine = (() => {
 
   function _getCtx(): AudioContext | null {
     try {
+      if (typeof window === 'undefined') return null;
       if (_ctx && _ctx.state !== 'closed') return _ctx;
       const w = window as unknown as {
         AudioContext?:       typeof AudioContext;

@@ -1,15 +1,18 @@
 import type { Metadata } from 'next';
 import DynamicPage from './DynamicPage';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
   title: "Key Visualizer - Live Keystroke Display Online | FixedAim",
-  description: "See every keystroke visualised in real time. Perfect for streamers, typists, and keyboard enthusiasts.",
+  description: "See every keystroke visualised in real time with full 104-key keyboard, Numpad, and Arrow keys. Perfect for streamers, typists, and keyboard enthusiasts.",
   alternates: {
     canonical: "https://fixedaim.com/key-visualizer",
   },
   openGraph: {
     title: "Key Visualizer - Live Keystroke Display Online | FixedAim",
-    description: "See every keystroke visualised in real time. Perfect for streamers, typists, and keyboard enthusiasts.",
+    description: "See every keystroke visualised in real time with full 104-key keyboard, Numpad, and Arrow keys. Perfect for streamers, typists, and keyboard enthusiasts.",
     url: "https://fixedaim.com/key-visualizer",
     siteName: "FixedAim",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
@@ -19,7 +22,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Key Visualizer - Live Keystroke Display Online | FixedAim",
-    description: "See every keystroke visualised in real time. Perfect for streamers, typists, and keyboard enthusiasts.",
+    description: "See every keystroke visualised in real time with full 104-key keyboard, Numpad, and Arrow keys. Perfect for streamers, typists, and keyboard enthusiasts.",
     images: ["/og-image.jpg"],
   },
 };
