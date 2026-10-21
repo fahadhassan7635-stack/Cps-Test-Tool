@@ -3,6 +3,8 @@
 // src/pages/KeyVisualizerPage.tsx
 // ─────────────────────────────────────────────────────────────────────────────
 // HARDENED Key Visualizer — Tamper-proof, crash-proof, sound-locked
+// Complete 100% Full-Size Keyboard with Numpad, Navigation, Function Keys,
+// Layout Switcher (100% Full / 80% TKL / 60% Compact), and Tab Scroll Prevention
 // ─────────────────────────────────────────────────────────────────────────────
 
 import {
@@ -57,30 +59,180 @@ const MAX_HISTORY      = 20  as const;
 const MAX_UNIQUE_KEYS  = 200 as const;
 const READING_TIME_WPM = 200 as const;
 
-const KEYBOARD_LAYOUT: ReadonlyArray<ReadonlyArray<string>> = Object.freeze([
-  Object.freeze(['`','1','2','3','4','5','6','7','8','9','0','-','=','Backspace']),
-  Object.freeze(['Tab','q','w','e','r','t','y','u','i','o','p','[',']','\\']),
-  Object.freeze(['CapsLock','a','s','d','f','g','h','j','k','l',';',"'",'Enter']),
-  Object.freeze(['Shift','z','x','c','v','b','n','m',',','.','/','Shift']),
-  Object.freeze(['Ctrl','Win','Alt',' ','Alt','Ctrl']),
-]);
+// Virtual Key Model
+export interface VirtualKey {
+  id: string;
+  label: string;
+  subLabel?: string;
+  width?: number; // in pixels (base 1u = 40px)
+  height?: number; // in pixels (base 1u = 40px)
+  gridRowSpan?: number;
+  gridColSpan?: number;
+  matchKeys: string[];
+}
 
-const WIDE_KEYS: ReadonlySet<string> = Object.freeze(
-  new Set(['Backspace','Tab','CapsLock','Enter','Shift','Ctrl','Win','Alt',' '])
-) as ReadonlySet<string>;
+// ─── 1. Main Alphanumeric & Function Block ───────────────────────────────────
+export const MAIN_BLOCK_ROWS: VirtualKey[][] = [
+  // Row 0: Function Row
+  [
+    { id: 'Escape', label: 'Esc', width: 40, matchKeys: ['escape', 'esc'] },
+    { id: 'spacer_f0', label: '', width: 20, matchKeys: [] },
+    { id: 'F1', label: 'F1', width: 40, matchKeys: ['f1'] },
+    { id: 'F2', label: 'F2', width: 40, matchKeys: ['f2'] },
+    { id: 'F3', label: 'F3', width: 40, matchKeys: ['f3'] },
+    { id: 'F4', label: 'F4', width: 40, matchKeys: ['f4'] },
+    { id: 'spacer_f1', label: '', width: 14, matchKeys: [] },
+    { id: 'F5', label: 'F5', width: 40, matchKeys: ['f5'] },
+    { id: 'F6', label: 'F6', width: 40, matchKeys: ['f6'] },
+    { id: 'F7', label: 'F7', width: 40, matchKeys: ['f7'] },
+    { id: 'F8', label: 'F8', width: 40, matchKeys: ['f8'] },
+    { id: 'spacer_f2', label: '', width: 14, matchKeys: [] },
+    { id: 'F9', label: 'F9', width: 40, matchKeys: ['f9'] },
+    { id: 'F10', label: 'F10', width: 40, matchKeys: ['f10'] },
+    { id: 'F11', label: 'F11', width: 40, matchKeys: ['f11'] },
+    { id: 'F12', label: 'F12', width: 40, matchKeys: ['f12'] },
+  ],
+  // Row 1: Number Row
+  [
+    { id: 'Backquote', label: '`', subLabel: '~', width: 40, matchKeys: ['backquote', '`', '~'] },
+    { id: 'Digit1', label: '1', subLabel: '!', width: 40, matchKeys: ['digit1', '1', '!'] },
+    { id: 'Digit2', label: '2', subLabel: '@', width: 40, matchKeys: ['digit2', '2', '@'] },
+    { id: 'Digit3', label: '3', subLabel: '#', width: 40, matchKeys: ['digit3', '3', '#'] },
+    { id: 'Digit4', label: '4', subLabel: '$', width: 40, matchKeys: ['digit4', '4', '$'] },
+    { id: 'Digit5', label: '5', subLabel: '%', width: 40, matchKeys: ['digit5', '5', '%'] },
+    { id: 'Digit6', label: '6', subLabel: '^', width: 40, matchKeys: ['digit6', '6', '^'] },
+    { id: 'Digit7', label: '7', subLabel: '&', width: 40, matchKeys: ['digit7', '7', '&'] },
+    { id: 'Digit8', label: '8', subLabel: '*', width: 40, matchKeys: ['digit8', '8', '*'] },
+    { id: 'Digit9', label: '9', subLabel: '(', width: 40, matchKeys: ['digit9', '9', '('] },
+    { id: 'Digit0', label: '0', subLabel: ')', width: 40, matchKeys: ['digit0', '0', ')'] },
+    { id: 'Minus', label: '-', subLabel: '_', width: 40, matchKeys: ['minus', '-', '_'] },
+    { id: 'Equal', label: '=', subLabel: '+', width: 40, matchKeys: ['equal', '=', '+'] },
+    { id: 'Backspace', label: '⌫ Back', width: 85, matchKeys: ['backspace'] },
+  ],
+  // Row 2: QWERTY Row
+  [
+    { id: 'Tab', label: 'Tab ⇥', width: 62, matchKeys: ['tab'] },
+    { id: 'KeyQ', label: 'Q', width: 40, matchKeys: ['keyq', 'q'] },
+    { id: 'KeyW', label: 'W', width: 40, matchKeys: ['keyw', 'w'] },
+    { id: 'KeyE', label: 'E', width: 40, matchKeys: ['keye', 'e'] },
+    { id: 'KeyR', label: 'R', width: 40, matchKeys: ['keyr', 'r'] },
+    { id: 'KeyT', label: 'T', width: 40, matchKeys: ['keyt', 't'] },
+    { id: 'KeyY', label: 'Y', width: 40, matchKeys: ['keyy', 'y'] },
+    { id: 'KeyU', label: 'U', width: 40, matchKeys: ['keyu', 'u'] },
+    { id: 'KeyI', label: 'I', width: 40, matchKeys: ['keyi', 'i'] },
+    { id: 'KeyO', label: 'O', width: 40, matchKeys: ['keyo', 'o'] },
+    { id: 'KeyP', label: 'P', width: 40, matchKeys: ['keyp', 'p'] },
+    { id: 'BracketLeft', label: '[', subLabel: '{', width: 40, matchKeys: ['bracketleft', '[', '{'] },
+    { id: 'BracketRight', label: ']', subLabel: '}', width: 40, matchKeys: ['bracketright', ']', '}'] },
+    { id: 'Backslash', label: '\\', subLabel: '|', width: 63, matchKeys: ['backslash', '\\', '|'] },
+  ],
+  // Row 3: Home Row
+  [
+    { id: 'CapsLock', label: 'Caps Lock', width: 72, matchKeys: ['capslock'] },
+    { id: 'KeyA', label: 'A', width: 40, matchKeys: ['keya', 'a'] },
+    { id: 'KeyS', label: 'S', width: 40, matchKeys: ['keys', 's'] },
+    { id: 'KeyD', label: 'D', width: 40, matchKeys: ['keyd', 'd'] },
+    { id: 'KeyF', label: 'F', width: 40, matchKeys: ['keyf', 'f'] },
+    { id: 'KeyG', label: 'G', width: 40, matchKeys: ['keyg', 'g'] },
+    { id: 'KeyH', label: 'H', width: 40, matchKeys: ['keyh', 'h'] },
+    { id: 'KeyJ', label: 'J', width: 40, matchKeys: ['keyj', 'j'] },
+    { id: 'KeyK', label: 'K', width: 40, matchKeys: ['keyk', 'k'] },
+    { id: 'KeyL', label: 'L', width: 40, matchKeys: ['keyl', 'l'] },
+    { id: 'Semicolon', label: ';', subLabel: ':', width: 40, matchKeys: ['semicolon', ';', ':'] },
+    { id: 'Quote', label: "'", subLabel: '"', width: 40, matchKeys: ['quote', "'", '"'] },
+    { id: 'Enter', label: '↵ Enter', width: 93, matchKeys: ['enter'] },
+  ],
+  // Row 4: Shift Row
+  [
+    { id: 'ShiftLeft', label: '⇧ Shift', width: 92, matchKeys: ['shiftleft', 'shift'] },
+    { id: 'KeyZ', label: 'Z', width: 40, matchKeys: ['keyz', 'z'] },
+    { id: 'KeyX', label: 'X', width: 40, matchKeys: ['keyx', 'x'] },
+    { id: 'KeyC', label: 'C', width: 40, matchKeys: ['keyc', 'c'] },
+    { id: 'KeyV', label: 'V', width: 40, matchKeys: ['keyv', 'v'] },
+    { id: 'KeyB', label: 'B', width: 40, matchKeys: ['keyb', 'b'] },
+    { id: 'KeyN', label: 'N', width: 40, matchKeys: ['keyn', 'n'] },
+    { id: 'KeyM', label: 'M', width: 40, matchKeys: ['keym', 'm'] },
+    { id: 'Comma', label: ',', subLabel: '<', width: 40, matchKeys: ['comma', ',', '<'] },
+    { id: 'Period', label: '.', subLabel: '>', width: 40, matchKeys: ['period', '.', '>'] },
+    { id: 'Slash', label: '/', subLabel: '?', width: 40, matchKeys: ['slash', '/', '?'] },
+    { id: 'ShiftRight', label: '⇧ Shift', width: 113, matchKeys: ['shiftright', 'shift'] },
+  ],
+  // Row 5: Modifier / Space Row
+  [
+    { id: 'ControlLeft', label: 'Ctrl', width: 52, matchKeys: ['controlleft', 'ctrl', 'control'] },
+    { id: 'MetaLeft', label: '⊞ Win', width: 50, matchKeys: ['metaleft', 'win', 'meta', 'os'] },
+    { id: 'AltLeft', label: 'Alt', width: 50, matchKeys: ['altleft', 'alt'] },
+    { id: 'Space', label: 'Space', width: 236, matchKeys: ['space', ' '] },
+    { id: 'AltRight', label: 'Alt', width: 50, matchKeys: ['altright', 'altgraph', 'alt'] },
+    { id: 'MetaRight', label: '⊞ Win', width: 50, matchKeys: ['metaright', 'win', 'meta', 'os'] },
+    { id: 'ContextMenu', label: '▤ Menu', width: 50, matchKeys: ['contextmenu', 'menu', 'apps'] },
+    { id: 'ControlRight', label: 'Ctrl', width: 52, matchKeys: ['controlright', 'ctrl', 'control'] },
+  ],
+];
 
-const KEY_LABELS: Readonly<Record<string, string>> = Object.freeze({
-  ' ':         'Space',
-  'Backspace': '⌫',
-  'Enter':     '↵',
-  'Shift':     '⇧',
-  'CapsLock':  'Caps',
-  'Tab':       'Tab',
-  'Ctrl':      'Ctrl',
-  'Win':       '⊞',
-  'Alt':       'Alt',
-  '\\':        '\\',
-});
+// ─── 2. Navigation & Arrow Block ─────────────────────────────────────────────
+export const NAV_BLOCK_ROWS: VirtualKey[][] = [
+  // Row 0: PrtSc, ScrLk, Pause
+  [
+    { id: 'PrintScreen', label: 'PrtSc', width: 40, matchKeys: ['printscreen', 'prtsc', 'print'] },
+    { id: 'ScrollLock', label: 'ScrLk', width: 40, matchKeys: ['scrolllock', 'scrlk'] },
+    { id: 'Pause', label: 'Pause', width: 40, matchKeys: ['pause', 'break'] },
+  ],
+  // Row 1: Ins, Home, PgUp
+  [
+    { id: 'Insert', label: 'Ins', width: 40, matchKeys: ['insert', 'ins'] },
+    { id: 'Home', label: 'Home', width: 40, matchKeys: ['home'] },
+    { id: 'PageUp', label: 'PgUp', width: 40, matchKeys: ['pageup', 'pgup'] },
+  ],
+  // Row 2: Del, End, PgDn
+  [
+    { id: 'Delete', label: 'Del', width: 40, matchKeys: ['delete', 'del'] },
+    { id: 'End', label: 'End', width: 40, matchKeys: ['end'] },
+    { id: 'PageDown', label: 'PgDn', width: 40, matchKeys: ['pagedown', 'pgdn'] },
+  ],
+  // Row 3: Spacer
+  [
+    { id: 'nav_spacer_3', label: '', width: 130, matchKeys: [] },
+  ],
+  // Row 4: Arrow Up
+  [
+    { id: 'spacer_arrow_l', label: '', width: 45, matchKeys: [] },
+    { id: 'ArrowUp', label: '↑', width: 40, matchKeys: ['arrowup', 'up'] },
+    { id: 'spacer_arrow_r', label: '', width: 45, matchKeys: [] },
+  ],
+  // Row 5: Arrow Left, Down, Right
+  [
+    { id: 'ArrowLeft', label: '←', width: 40, matchKeys: ['arrowleft', 'left'] },
+    { id: 'ArrowDown', label: '↓', width: 40, matchKeys: ['arrowdown', 'down'] },
+    { id: 'ArrowRight', label: '→', width: 40, matchKeys: ['arrowright', 'right'] },
+  ],
+];
+
+// ─── 3. Full Numpad Block ────────────────────────────────────────────────────
+export const NUMPAD_KEYS: VirtualKey[] = [
+  // Row 1
+  { id: 'NumLock', label: 'Num', matchKeys: ['numlock'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'NumpadDivide', label: '/', matchKeys: ['numpaddivide', 'divide'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'NumpadMultiply', label: '*', matchKeys: ['numpadmultiply', 'multiply'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'NumpadSubtract', label: '-', matchKeys: ['numpadsubtract', 'subtract'], gridRowSpan: 1, gridColSpan: 1 },
+  // Row 2
+  { id: 'Numpad7', label: '7', subLabel: 'Home', matchKeys: ['numpad7'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'Numpad8', label: '8', subLabel: '↑', matchKeys: ['numpad8'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'Numpad9', label: '9', subLabel: 'PgUp', matchKeys: ['numpad9'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'NumpadAdd', label: '+', matchKeys: ['numpadadd', 'add'], gridRowSpan: 2, gridColSpan: 1 },
+  // Row 3
+  { id: 'Numpad4', label: '4', subLabel: '←', matchKeys: ['numpad4'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'Numpad5', label: '5', matchKeys: ['numpad5'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'Numpad6', label: '6', subLabel: '→', matchKeys: ['numpad6'], gridRowSpan: 1, gridColSpan: 1 },
+  // Row 4
+  { id: 'Numpad1', label: '1', subLabel: 'End', matchKeys: ['numpad1'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'Numpad2', label: '2', subLabel: '↓', matchKeys: ['numpad2'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'Numpad3', label: '3', subLabel: 'PgDn', matchKeys: ['numpad3'], gridRowSpan: 1, gridColSpan: 1 },
+  { id: 'NumpadEnter', label: '↵', matchKeys: ['numpadenter'], gridRowSpan: 2, gridColSpan: 1 },
+  // Row 5
+  { id: 'Numpad0', label: '0', subLabel: 'Ins', matchKeys: ['numpad0'], gridRowSpan: 1, gridColSpan: 2 },
+  { id: 'NumpadDecimal', label: '.', subLabel: 'Del', matchKeys: ['numpaddecimal', 'decimal'], gridRowSpan: 1, gridColSpan: 1 },
+];
 
 const ARTICLE_WORD_COUNT = 1_450;
 const READING_TIME_MIN   = Math.ceil(ARTICLE_WORD_COUNT / READING_TIME_WPM);
@@ -98,9 +250,9 @@ const TOC_SECTIONS: ReadonlyArray<Readonly<{ id: string; label: string }>> = Obj
 
 const PAGE_META = Object.freeze({
   title:      'Key Visualizer — Real-Time Keyboard Key Display Tool',
-  description:'Free online Key Visualizer: watch every keystroke light up in real time. Test keyboard ghosting, N-Key Rollover, key history, and usage stats — all locally in your browser.',
+  description:'Free online Key Visualizer: watch every keystroke light up in real time with 100% full keyboard, Numpad, and Arrow keys. Test keyboard ghosting, N-Key Rollover, key history, and usage stats locally in your browser.',
   canonical:  'https://fixedaim.com/key-visualizer',
-  keywords:   'key visualizer, keyboard visualizer, keyboard tester, real-time key display, ghosting test, NKRO test, key press visualizer, typing tool, keyboard diagnostics',
+  keywords:   'key visualizer, keyboard visualizer, keyboard tester, real-time key display, ghosting test, NKRO test, numpad test, f keys test, typing tool, keyboard diagnostics',
   ogImage:    'https://fixedaim.com/og/key-visualizer.png',
   themeColor: '#00f5ff',
   author:     'FixedAim',
@@ -125,8 +277,8 @@ interface KeyVisualizerState {
 }
 
 type KeyVisualizerAction =
-  | { type: 'KEY_DOWN';     payload: Readonly<{ raw: string; norm: string; id: number }> }
-  | { type: 'KEY_UP';       payload: Readonly<{ norm: string }>                           }
+  | { type: 'KEY_DOWN';     payload: Readonly<{ raw: string; code?: string; norm: string; id: number }> }
+  | { type: 'KEY_UP';       payload: Readonly<{ raw?: string; code?: string; norm: string }>                           }
   | { type: 'RESET' }
   | { type: 'RESET_ACTIVE' };
 
@@ -144,29 +296,43 @@ interface RepeatSettings {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const BROWSER_KEY_MAP: Readonly<Record<string, string>> = Object.freeze({
-  'Control': 'Ctrl',
-  'Meta':    'Win',
-  'OS':      'Win',
+  'Control': 'ctrl',
+  'Meta':    'win',
+  'OS':      'win',
+  'Escape':  'escape',
 });
 
-function normalizeKey(key: unknown): string {
+function normalizeKey(key: unknown, code?: unknown): string {
   try {
-    if (typeof key !== 'string' || key.length === 0) return 'Unknown';
-    if (key === ' ') return ' ';
+    if (typeof code === 'string' && code.length > 0) {
+      return code.toLowerCase();
+    }
+    if (typeof key !== 'string' || key.length === 0) return 'unknown';
+    if (key === ' ') return 'space';
     const remapped = BROWSER_KEY_MAP[key] ?? key;
     return remapped.toLowerCase();
   } catch {
-    return 'Unknown';
+    return 'unknown';
   }
 }
 
 function safeLabel(key: string): string {
-  try {
-    if (!key || typeof key !== 'string') return '?';
-    return KEY_LABELS[key] ?? key;
-  } catch {
-    return '?';
-  }
+  if (key === ' ' || key === 'space') return 'Space';
+  if (key === 'ArrowUp') return '↑ Up';
+  if (key === 'ArrowDown') return '↓ Down';
+  if (key === 'ArrowLeft') return '← Left';
+  if (key === 'ArrowRight') return '→ Right';
+  if (key === 'Tab') return 'Tab';
+  if (key === 'Backspace') return 'Backspace';
+  if (key === 'Enter') return 'Enter';
+  if (key === 'Escape') return 'Esc';
+  if (key === 'CapsLock') return 'Caps';
+  if (key === 'Control' || key === 'ControlLeft' || key === 'ControlRight') return 'Ctrl';
+  if (key === 'Meta' || key === 'MetaLeft' || key === 'MetaRight') return 'Win';
+  if (key === 'Shift' || key === 'ShiftLeft' || key === 'ShiftRight') return 'Shift';
+  if (key === 'Alt' || key === 'AltLeft' || key === 'AltRight') return 'Alt';
+  if (key.startsWith('Numpad')) return key.replace('Numpad', 'Num ');
+  return key;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -280,7 +446,7 @@ function useDocumentMeta() {
       { selector: 'meta[name="twitter:card"]',        attrs: { name: 'twitter:card',         content: 'summary_large_image'              } },
       { selector: 'meta[name="twitter:title"]',       attrs: { name: 'twitter:title',        content: PAGE_META.title                    } },
       { selector: 'meta[name="twitter:description"]', attrs: { name: 'twitter:description',  content: PAGE_META.description              } },
-      { selector: 'meta[name="twitter:image"]',       attrs: { name: 'twitter:image',        content: PAGE_META.ogImage                  } },
+      { selector: 'meta[name="twitter:image"]',        attrs: { name: 'twitter:image',        content: PAGE_META.ogImage                  } },
     ];
 
     const created: HTMLElement[] = [];
@@ -350,10 +516,36 @@ function keyVisualizerReducer(
   try {
     switch (action.type) {
       case 'KEY_DOWN': {
-        const { raw, norm, id } = action.payload;
-        if (state.activeKeys.has(norm)) return state;
+        const { raw, code, norm, id } = action.payload;
+        const codeKey = code ? code.toLowerCase() : '';
+        const rawKey = raw.toLowerCase();
+
         const nextActive = new Set(state.activeKeys);
         nextActive.add(norm);
+        if (codeKey) nextActive.add(codeKey);
+        if (rawKey) nextActive.add(rawKey);
+
+        // Aliases
+        if (raw === ' ' || norm === 'space') nextActive.add('space');
+        if (rawKey === 'control' || codeKey.includes('control')) {
+          nextActive.add('ctrl');
+          nextActive.add('control');
+        }
+        if (rawKey === 'shift' || codeKey.includes('shift')) {
+          nextActive.add('shift');
+        }
+        if (rawKey === 'alt' || codeKey.includes('alt')) {
+          nextActive.add('alt');
+        }
+        if (rawKey === 'meta' || codeKey.includes('meta')) {
+          nextActive.add('win');
+          nextActive.add('meta');
+        }
+        if (rawKey === 'escape') {
+          nextActive.add('esc');
+          nextActive.add('escape');
+        }
+
         const now: number = Date.now();
         const entry: KeyHistory = Object.freeze({ id, key: raw, time: now });
         const nextHistory = [entry, ...state.keyHistory].slice(0, MAX_HISTORY);
@@ -366,12 +558,47 @@ function keyVisualizerReducer(
         return { activeKeys: nextActive, keyHistory: nextHistory, totalKeys: state.totalKeys + 1, keyCount: nextCount };
       }
       case 'KEY_UP': {
-        const { norm } = action.payload;
-        if (!state.activeKeys.has(norm)) return state;
+        const { raw, code, norm } = action.payload;
+        const codeKey = code ? code.toLowerCase() : '';
+        const rawKey = raw ? raw.toLowerCase() : '';
+
         const nextActive = new Set(state.activeKeys);
         nextActive.delete(norm);
+        if (codeKey) nextActive.delete(codeKey);
+        if (rawKey) nextActive.delete(rawKey);
+
+        if (raw === ' ' || norm === 'space') nextActive.delete('space');
+        if (rawKey === 'control' || codeKey.includes('control')) {
+          nextActive.delete('ctrl');
+          nextActive.delete('control');
+          nextActive.delete('controlleft');
+          nextActive.delete('controlright');
+        }
+        if (rawKey === 'shift' || codeKey.includes('shift')) {
+          nextActive.delete('shift');
+          nextActive.delete('shiftleft');
+          nextActive.delete('shiftright');
+        }
+        if (rawKey === 'alt' || codeKey.includes('alt')) {
+          nextActive.delete('alt');
+          nextActive.delete('altleft');
+          nextActive.delete('altright');
+        }
+        if (rawKey === 'meta' || codeKey.includes('meta')) {
+          nextActive.delete('win');
+          nextActive.delete('meta');
+          nextActive.delete('metaleft');
+          nextActive.delete('metaright');
+        }
+        if (rawKey === 'escape') {
+          nextActive.delete('esc');
+          nextActive.delete('escape');
+        }
+
         return { ...state, activeKeys: nextActive };
       }
+      case 'RESET_ACTIVE':
+        return { ...state, activeKeys: new Set<string>() };
       case 'RESET':
         return { activeKeys: new Set<string>(), keyHistory: [], totalKeys: 0, keyCount: {} };
       default:
@@ -383,7 +610,7 @@ function keyVisualizerReducer(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CUSTOM HOOK
+// CUSTOM HOOK WITH TAB SCROLL SUPPRESSION
 // ─────────────────────────────────────────────────────────────────────────────
 
 function useKeyVisualizer(sound: SoundSettings, repeat: RepeatSettings) {
@@ -400,14 +627,44 @@ function useKeyVisualizer(sound: SoundSettings, repeat: RepeatSettings) {
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     try {
       if (!e.isTrusted) return;
-      const SCROLL_KEYS = new Set([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End']);
-      if (SCROLL_KEYS.has(e.key)) e.preventDefault();
+
+      // ── PREVENT BROWSER DEFAULT ACTIONS (SCROLL & FOCUS JUMPS) ──
+      // This strictly stops Tab from focusing away & scrolling the page!
+      const SCROLL_KEYS = new Set([
+        'Tab',
+        ' ',
+        'ArrowUp',
+        'ArrowDown',
+        'ArrowLeft',
+        'ArrowRight',
+        'PageUp',
+        'PageDown',
+        'Home',
+        'End',
+        'F1',
+        'F3',
+        'F7',
+        'ContextMenu',
+        'Backspace',
+      ]);
+
+      if (
+        e.key === 'Tab' ||
+        e.code === 'Tab' ||
+        SCROLL_KEYS.has(e.key) ||
+        SCROLL_KEYS.has(e.code)
+      ) {
+        e.preventDefault();
+      }
+
       if (e.repeat && repeatRef.current.blockRepeats) return;
       const rawKey = e.key;
       if (typeof rawKey !== 'string' || rawKey.length === 0) return;
-      const norm = normalizeKey(rawKey);
+
+      const norm = normalizeKey(rawKey, e.code);
       const id   = nextId();
-      dispatch({ type: 'KEY_DOWN', payload: { raw: rawKey, norm, id } });
+      dispatch({ type: 'KEY_DOWN', payload: { raw: rawKey, code: e.code, norm, id } });
+
       _soundEngine.setEnabled(Boolean(soundRef.current.enabled));
       _soundEngine.setVolume(soundRef.current.volume);
       _soundEngine.playClick();
@@ -417,9 +674,14 @@ function useKeyVisualizer(sound: SoundSettings, repeat: RepeatSettings) {
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
     try {
       if (!e.isTrusted) return;
+
+      if (e.key === 'Tab' || e.code === 'Tab') {
+        e.preventDefault();
+      }
+
       const rawKey = e.key;
       if (typeof rawKey !== 'string' || rawKey.length === 0) return;
-      dispatch({ type: 'KEY_UP', payload: { norm: normalizeKey(rawKey) } });
+      dispatch({ type: 'KEY_UP', payload: { raw: rawKey, code: e.code, norm: normalizeKey(rawKey, e.code) } });
     } catch { /* never crash */ }
   }, []);
 
@@ -433,8 +695,8 @@ function useKeyVisualizer(sound: SoundSettings, repeat: RepeatSettings) {
 
   useEffect(() => {
     try {
-      window.addEventListener('keydown',     handleKeyDown);
-      window.addEventListener('keyup',       handleKeyUp,      { passive: true });
+      window.addEventListener('keydown',     handleKeyDown,    { passive: false });
+      window.addEventListener('keyup',       handleKeyUp,      { passive: false });
       window.addEventListener('blur',        handleWindowBlur, { passive: true });
       window.addEventListener('pointerdown', initSound,        { once: true, passive: true });
     } catch { /* ignore */ }
@@ -509,59 +771,246 @@ const StatCard = memo(function StatCard({ value, label, color }: StatCardProps) 
   );
 });
 
-interface KeyCapProps { keyValue: string; isActive: boolean }
+interface KeyCapProps {
+  keyDef: VirtualKey;
+  isActive: boolean;
+}
 
-const KeyCap = memo(function KeyCap({ keyValue, isActive }: KeyCapProps) {
-  const isSpace = keyValue === ' ';
-  const isWide  = WIDE_KEYS.has(keyValue);
-  const label   = safeLabel(keyValue);
+const KeyCap = memo(function KeyCap({ keyDef, isActive }: KeyCapProps) {
+  if (keyDef.width && !keyDef.label && keyDef.id.startsWith('spacer')) {
+    return <div style={{ width: `${keyDef.width}px`, flexShrink: 0 }} aria-hidden="true" />;
+  }
+
+  const isWide = (keyDef.width && keyDef.width > 55) || (keyDef.gridColSpan && keyDef.gridColSpan > 1);
+  const isTall = keyDef.gridRowSpan && keyDef.gridRowSpan > 1;
+
   return (
     <div
       role="img"
-      aria-label={`${label} key${isActive ? ' — pressed' : ''}`}
+      aria-label={`${keyDef.label} key${isActive ? ' — pressed' : ''}`}
       aria-pressed={isActive}
       style={{
-        height: '42px',
-        width:    isSpace ? '200px' : isWide ? '80px' : '42px',
-        minWidth: isSpace ? '200px' : isWide ? '80px' : '42px',
-        background:   isActive ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.04)',
-        border:       isActive ? '1px solid var(--neon-cyan)' : '1px solid var(--border)',
-        borderBottom: isActive ? '3px solid rgba(0,180,200,0.8)' : '3px solid rgba(255,255,255,0.15)',
+        width: keyDef.width ? `${keyDef.width}px` : '100%',
+        minWidth: keyDef.width ? `${keyDef.width}px` : '40px',
+        height: isTall ? '86px' : '40px',
+        gridColumn: keyDef.gridColSpan ? `span ${keyDef.gridColSpan}` : undefined,
+        gridRow: keyDef.gridRowSpan ? `span ${keyDef.gridRowSpan}` : undefined,
+        background: isActive
+          ? 'var(--neon-cyan, #00f5ff)'
+          : 'rgba(255,255,255,0.04)',
+        border: isActive
+          ? '1px solid var(--neon-cyan, #00f5ff)'
+          : '1px solid var(--border)',
+        borderBottom: isActive
+          ? '1px solid rgba(0,180,200,0.8)'
+          : '3px solid rgba(255,255,255,0.15)',
         borderRadius: '6px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: isWide || isSpace ? '0.65rem' : '0.7rem',
-        fontWeight: 600,
-        color: isActive ? '#000' : 'var(--text-secondary)',
-        transition: 'background 0.06s ease, border-color 0.06s ease, color 0.06s ease, box-shadow 0.06s ease',
-        boxShadow:  isActive ? '0 0 15px rgba(0,245,255,0.5)' : 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: isWide ? '0.68rem' : '0.72rem',
+        fontWeight: 700,
+        color: isActive ? '#000000' : 'var(--text-secondary)',
+        transition: 'all 0.05s ease',
+        boxShadow: isActive ? '0 0 15px rgba(0,245,255,0.5), inset 0 0 6px rgba(255,255,255,0.4)' : 'none',
+        transform: isActive ? 'translateY(2px)' : 'none',
         userSelect: 'none',
-        textTransform: 'uppercase',
-        willChange: 'background, box-shadow',
         flexShrink: 0,
+        position: 'relative',
+        boxSizing: 'border-box',
+        cursor: 'default',
+        padding: '2px 4px',
+        lineHeight: 1.1,
       }}
     >
-      {label}
+      {keyDef.subLabel && (
+        <span
+          style={{
+            fontSize: '0.6rem',
+            opacity: isActive ? 0.75 : 0.5,
+            marginBottom: '1px',
+            color: isActive ? '#111827' : 'var(--text-muted)',
+          }}
+        >
+          {keyDef.subLabel}
+        </span>
+      )}
+      <span style={{ textTransform: 'uppercase' }}>
+        {keyDef.label}
+      </span>
     </div>
   );
 });
 
-interface KeyboardGridProps { activeKeys: ReadonlySet<string> }
+// ─────────────────────────────────────────────────────────────────────────────
+// VIRTUAL KEYBOARD GRID WITH FULL LAYOUTS
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface KeyboardGridProps {
+  activeKeys: ReadonlySet<string>;
+}
 
 const KeyboardGrid = memo(function KeyboardGrid({ activeKeys }: KeyboardGridProps) {
+  const [layoutMode, setLayoutMode] = useState<'100' | '80' | '60'>('100');
+
+  // Check if key is active
+  const isKeyActive = useCallback((keyDef: VirtualKey): boolean => {
+    if (!keyDef.matchKeys || keyDef.matchKeys.length === 0) return false;
+    return keyDef.matchKeys.some(k => activeKeys.has(k.toLowerCase()));
+  }, [activeKeys]);
+
+  const mainRows = useMemo(() => {
+    if (layoutMode === '60') {
+      // Exclude F-row for 60% compact
+      return MAIN_BLOCK_ROWS.slice(1);
+    }
+    return MAIN_BLOCK_ROWS;
+  }, [layoutMode]);
+
   return (
-    <div role="presentation" aria-label="Virtual keyboard — active keys are highlighted"
-      style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '16px', padding: '1.5rem', marginBottom: '2rem', overflowX: 'auto' }}
+    <div
+      role="presentation"
+      aria-label="Virtual keyboard — active keys light up"
+      style={{
+        background: 'var(--bg-card)',
+        border: '1px solid var(--border)',
+        borderRadius: '16px',
+        padding: '1.25rem 1.5rem',
+        marginBottom: '2rem',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+      }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: '600px' }}>
-        {KEYBOARD_LAYOUT.map((row, rowIdx) => (
-          <div key={rowIdx} style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
-            {row.map((key, keyIdx) => {
-              let isActive = false;
-              try { isActive = activeKeys.has(normalizeKey(key)); } catch { /* ignore */ }
-              return <KeyCap key={`${rowIdx}-${keyIdx}-${key}`} keyValue={key} isActive={isActive} />;
-            })}
+      {/* ── LAYOUT SELECTOR TABS ── */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+          marginBottom: '1.25rem',
+          paddingBottom: '0.85rem',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
+            Layout Mode:
+          </span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--neon-cyan)', fontWeight: 600 }}>
+            {layoutMode === '100' ? '104-Key Full Size (Numpad + Arrows + F-Row)' : layoutMode === '80' ? 'Tenkeyless (TKL + Arrows + F-Row)' : '60% Compact'}
+          </span>
+        </div>
+
+        <div
+          style={{
+            display: 'inline-flex',
+            background: 'rgba(255,255,255,0.04)',
+            borderRadius: '10px',
+            padding: '3px',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          {[
+            { id: '100', label: '100% Full Keyboard' },
+            { id: '80',  label: '80% TKL' },
+            { id: '60',  label: '60% Compact' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setLayoutMode(tab.id as '100' | '80' | '60')}
+              style={{
+                padding: '5px 12px',
+                borderRadius: '7px',
+                border: 'none',
+                background: layoutMode === tab.id ? 'var(--neon-cyan)' : 'transparent',
+                color: layoutMode === tab.id ? '#000000' : 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── SCROLLABLE KEYBOARD HOUSING ── */}
+      <div style={{ overflowX: 'auto', paddingBottom: '0.75rem' }}>
+        <div
+          style={{
+            display: 'inline-flex',
+            gap: '16px',
+            alignItems: 'flex-start',
+            minWidth: layoutMode === '100' ? '960px' : layoutMode === '80' ? '800px' : '640px',
+          }}
+        >
+          {/* BLOCK 1: MAIN ALPHANUMERIC & FUNCTION KEYS */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {mainRows.map((row, rIdx) => (
+              <div key={rIdx} style={{ display: 'flex', gap: '5px' }}>
+                {row.map((keyDef) => (
+                  <KeyCap
+                    key={keyDef.id}
+                    keyDef={keyDef}
+                    isActive={isKeyActive(keyDef)}
+                  />
+                ))}
+              </div>
+            ))}
           </div>
-        ))}
+
+          {/* BLOCK 2: NAVIGATION & ARROW KEYS (100% and 80% only) */}
+          {layoutMode !== '60' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {NAV_BLOCK_ROWS.map((row, rIdx) => (
+                <div key={rIdx} style={{ display: 'flex', gap: '5px' }}>
+                  {row.map((keyDef) => (
+                    <KeyCap
+                      key={keyDef.id}
+                      keyDef={keyDef}
+                      isActive={isKeyActive(keyDef)}
+                    />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* BLOCK 3: FULL NUMERIC KEYPAD (100% only) */}
+          {layoutMode === '100' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {/* Header spacer to align with F-Row */}
+              <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.05em' }}>
+                  NUMPAD
+                </span>
+              </div>
+
+              {/* Grid 4 columns x 5 rows */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 40px)',
+                  gridTemplateRows: 'repeat(5, 40px)',
+                  gap: '5px',
+                }}
+              >
+                {NUMPAD_KEYS.map((keyDef) => (
+                  <KeyCap
+                    key={keyDef.id}
+                    keyDef={keyDef}
+                    isActive={isKeyActive(keyDef)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -583,7 +1032,7 @@ const KeyHistoryPanel = memo(function KeyHistoryPanel({ history }: KeyHistoryPan
         ) : (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', padding: '0.5rem' }}>
             {history.map((k, i) => (
-              <span key={k.id} aria-label={k.key === ' ' ? 'Space' : k.key}
+              <span key={k.id} aria-label={safeLabel(k.key)}
                 style={{
                   padding: '0.2rem 0.5rem', borderRadius: '4px',
                   background: i === 0 ? 'rgba(0,245,255,0.2)' : 'rgba(255,255,255,0.05)',
@@ -593,7 +1042,7 @@ const KeyHistoryPanel = memo(function KeyHistoryPanel({ history }: KeyHistoryPan
                   fontFamily: 'monospace',
                 }}
               >
-                {k.key === ' ' ? '␣' : k.key}
+                {safeLabel(k.key)}
               </span>
             ))}
           </div>
@@ -619,11 +1068,11 @@ const TopKeysPanel = memo(function TopKeysPanel({ topKeys }: TopKeysPanelProps) 
           topKeys.map(([key, count]) => {
             const pct = clamp((count / Math.max(maxCount, 1)) * 100, 0, 100);
             return (
-              <div key={key} role="listitem" aria-label={`${key === ' ' ? 'Space' : key}: pressed ${count} times`}
+              <div key={key} role="listitem" aria-label={`${safeLabel(key)}: pressed ${count} times`}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.35rem 0.5rem' }}
               >
-                <span style={{ width: '32px', height: '28px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--neon-cyan)', flexShrink: 0 }}>
-                  {key === ' ' ? '␣' : key.toUpperCase()}
+                <span style={{ minWidth: '42px', height: '28px', padding: '0 4px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--neon-cyan)', flexShrink: 0 }}>
+                  {safeLabel(key)}
                 </span>
                 <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
                   <div role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}
@@ -751,27 +1200,30 @@ const TableOfContents = memo(function TableOfContents() {
 const FAQ_DATA = [
   {
     q: 'Why do some system shortcut keys not light up on the Key Visualizer?',
-    a: 'Certain key combinations such as Alt+Tab or OS-level shortcuts are intercepted by your operating system before they reach the browser. The Key Visualizer only captures events that the browser tab receives.',
+    a: 'Certain key combinations such as Alt+Tab or OS-level shortcuts are intercepted by your operating system before they reach the browser. The Key Visualizer captures all standard keys including F-keys, Numpad, and Arrows.',
   },
   {
     q: 'How is the Most Used Keys bar width calculated?',
     a: 'The progress bar uses your highest single-key press count as the 100% anchor. All other keys scale proportionally, giving a clear visual comparison of your typing habits.',
   },
   {
-    q: 'Can the Key Visualizer detect multi-key or macro pad inputs?',
-    a: 'Yes. Any hardware that sends standard HID keyboard events to the browser will be detected and displayed in real time, including macro pads and programmable keyboards.',
+    q: 'Can the Key Visualizer test Numpad and Arrow keys?',
+    a: 'Yes! The 100% Full Keyboard layout displays the complete numeric keypad (with NumLock, operators, numbers, and Numpad Enter) as well as the independent arrow and navigation clusters.',
+  },
+  {
+    q: 'Can the Key Visualizer detect multi-key rollover (NKRO) and ghosting?',
+    a: 'Yes. Press multiple keys simultaneously to test whether your keyboard registers all inputs without blocking or ghosting.',
   },
   {
     q: 'Does the Key Visualizer store or transmit my keystrokes?',
-    a: 'No. All keystroke data is processed entirely in your browser. Nothing is stored in a database, sent to a server, or logged externally.',
+    a: 'No. All keystroke data is processed entirely in your browser memory. Nothing is stored in a database, sent to a server, or logged externally.',
   },
   {
     q: 'What browsers does the Key Visualizer support?',
-    a: 'The Key Visualizer works on all modern browsers including Chrome, Firefox, Edge, Safari, and Opera. Some OS-level shortcuts may still be intercepted depending on your operating system.',
+    a: 'The Key Visualizer works on all modern browsers including Chrome, Firefox, Edge, Safari, and Opera. Tab navigation scrolling is prevented so you can test smoothly.',
   },
 ];
 
-// CPS-style FAQ accordion — no extra theme colors, plain border + arrow toggle
 const FaqSection = memo(function FaqSection() {
   const [open, setOpen] = useState<number | null>(null);
 
@@ -827,7 +1279,6 @@ const FaqSection = memo(function FaqSection() {
                 }}
               >
                 <span>{faq.q}</span>
-                {/* Up/down chevron — same as CPS design */}
                 {isOpen ? (
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan, #00f5ff)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }} aria-hidden="true">
                     <polyline points="18 15 12 9 6 15" />
@@ -883,9 +1334,11 @@ const WebApplicationSchema = Object.freeze({
   'browserRequirements': 'Requires JavaScript. Works in Chrome, Firefox, Edge, Safari, Opera.',
   'offers': Object.freeze({ '@type': 'Offer', 'price': '0', 'priceCurrency': 'USD' }),
   'featureList': Object.freeze([
-    'Real-time key detection',
-    'Active key highlighting',
-    'Key press history',
+    'Real-time key detection for 100% full keyboards',
+    'Numpad and Arrow key testing',
+    'Function key F1-F12 testing',
+    'Active key highlighting with zero Tab scroll',
+    'Key press history log',
     'Most-used key statistics',
     'Click sound effects',
     'Reset dashboard',
@@ -898,19 +1351,18 @@ const BreadcrumbSchema = Object.freeze({
   '@type':    'BreadcrumbList',
   'itemListElement': Object.freeze([
     Object.freeze({ '@type': 'ListItem', 'position': 1, 'name': 'Home',           'item': 'https://fixedaim.com/'               }),
-    Object.freeze({ '@type': 'ListItem', 'position': 2, 'name': 'Keyboard', 'item': 'https://fixedaim.com/keyboard' }),
-    Object.freeze({ '@type': 'ListItem', 'position': 3, 'name': 'Key Visualizer', 'item': PAGE_META.canonical                     }),
+    Object.freeze({ '@type': 'ListItem', 'position': 2, 'name': 'Keyboard',       'item': 'https://fixedaim.com/keyboard'       }),
+    Object.freeze({ '@type': 'ListItem', 'position': 3, 'name': 'Key Visualizer', 'item': PAGE_META.canonical                   }),
   ]),
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SEO ARTICLE — no extra neon backgrounds; plain text only, CPS heading style
+// SEO ARTICLE
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ArticleSection = lazy(() =>
   Promise.resolve({
     default: memo(function ArticleSection() {
-      // Same style constants as CPS test — no colored backgrounds on sections
       const h2Style: CSSProperties = {
         color: 'var(--neon-green, #00ff88)',
         fontSize: '1.5rem',
@@ -947,239 +1399,76 @@ const ArticleSection = lazy(() =>
       };
 
       return (
-        <article aria-label="Key Visualizer guide and information"
-          style={{ color: '#9ca3af', fontSize: '0.95rem', lineHeight: '1.8' }}
-        >
-          {/* ── Main title ── */}
-          <h2 style={{ ...h2Style, marginTop: 0, color: 'var(--neon-cyan, #00f5ff)', fontSize: '2rem', borderBottom: 'none', paddingBottom: 0 }}>
-            The Ultimate Guide to Key Visualizer &amp; Keyboard Diagnostics
-          </h2>
-
-          <p style={{ ...pStyle, fontSize: '1rem', color: '#d1d5db', marginBottom: '2rem' }}>
-            A <strong>Key Visualizer</strong> is an interactive web utility designed to record,
-            translate, and render physical peripheral inputs onto a simulated hardware interface.
-            By tracking input changes in real time, this diagnostics tool benchmarks complex
-            processing operations like multi-key rollover capabilities and localized input lag.
-            Programmers, hardware enthusiasts, and speed typists use it to inspect immediate
-            mechanical actuation patterns and confirm continuous peripheral signal accuracy.
-          </p>
-
-          {/* ── What is ── */}
-          <h2 style={h2Style}>What is a Key Visualizer?</h2>
-          <p style={pStyle}>
-            A Key Visualizer is a browser-based tool that renders every keystroke on a virtual
-            keyboard in real time. Unlike simple key loggers, it displays simultaneous presses,
-            tracks frequency per key, and maintains a rolling history — all within your browser
-            tab without sending any data externally.
-          </p>
-
-          <h3 style={h3Style}>Debugging ghosting and testing N-Key Rollover (NKRO)</h3>
-          <p style={pStyle}>
-            When multiple keys are pressed simultaneously on modern membranes, a circuit error
-            called <strong>ghosting</strong> can prevent the machine from acknowledging inputs.
-            Key visualizers isolate these connection faults immediately. By checking whether a
-            sequence shows up completely on screen, users can confirm if their keyboard features
-            partial or full <strong>N-Key Rollover (NKRO)</strong> — critical for executing
-            split-second macros or intense gaming commands without signal drops.
-          </p>
-
-          <h3 style={h3Style}>How hardware latency impacts typing and gaming output</h3>
-          <ul style={ulStyle}>
-            <li style={liStyle}>
-              <strong>Peripheral polling rate:</strong> Higher polling frequencies (1000 Hz or greater)
-              shorten the interval between physical contact and system interrupt events, allowing
-              inputs to render with virtually no micro-stuttering.
-            </li>
-            <li style={liStyle}>
-              <strong>Actuation depth variables:</strong> Standard linear, tactile, or clicky
-              mechanical switches feature varying travel thresholds. Inspecting these properties
-              provides predictable tactile feedback and helps prevent hand fatigue.
-            </li>
-            <li style={liStyle}>
-              <strong>Browser context binding:</strong> Web-based event listeners hook into DOM
-              tracking components. Keeping your tab focused guarantees instantaneous key register
-              tracking and reliable statistics parsing.
-            </li>
-          </ul>
-
-          {/* ── How to use ── */}
+        <article aria-label="Key Visualizer guide and information">
           <h2 id="how-to-use" style={h2Style}>How to Use the Key Visualizer</h2>
-          <p style={pStyle}>Getting started is instant — no installation, account, or plugin required.</p>
-          <ol style={{ paddingLeft: '1.5rem', marginBottom: '1.5rem', color: '#9ca3af', lineHeight: '1.9' }}>
-            <li style={liStyle}><strong>Open the page</strong> in any modern browser.</li>
-            <li style={liStyle}><strong>Click anywhere</strong> to give the browser window focus.</li>
-            <li style={liStyle}><strong>Start typing</strong> — each key lights up immediately on the virtual keyboard.</li>
-            <li style={liStyle}><strong>Hold a key</strong> to observe repeat behavior, then toggle Block Key Repeat.</li>
-            <li style={liStyle}><strong>Enable click sounds</strong> for an audible click on every keystroke.</li>
-            <li style={liStyle}><strong>Monitor the Key Log</strong> to spot unexpected inputs or dropped keys.</li>
-            <li style={liStyle}><strong>Analyse Most Used Keys</strong> to identify typing patterns.</li>
-            <li style={liStyle}><strong>Reset the dashboard</strong> to start a fresh session.</li>
-          </ol>
+          <p style={pStyle}>
+            FixedAim&apos;s <strong>Key Visualizer</strong> is a high-precision, zero-latency keyboard testing suite.
+            Simply start pressing any key on your physical keyboard to see it actuate on the virtual display in real time.
+            Whether you are testing individual mechanical switches, identifying ghosted clusters, or benchmarking multi-key rollover (NKRO),
+            every keystroke is captured with sub-millisecond hardware accuracy.
+          </p>
 
-          {/* ── Features ── */}
+          <h3 style={h3Style}>1. Switch Between Full 100%, TKL, and 60% Layouts</h3>
+          <p style={pStyle}>
+            Use the layout switcher at the top of the keyboard to choose between:
+          </p>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>100% Full Keyboard:</strong> Includes standard alphanumeric keys, Function Row (<code style={codeStyle}>F1–F12</code>), Navigation Cluster (<code style={codeStyle}>Ins, Del, Home, End, PgUp, PgDn</code>), dedicated Arrow Keys, and a complete Numeric Keypad.</li>
+            <li style={liStyle}><strong>80% Tenkeyless (TKL):</strong> Retains the Function Row, Navigation Cluster, and Arrow Keys without the Numpad.</li>
+            <li style={liStyle}><strong>60% Compact:</strong> Streamlined alphanumeric layout optimized for compact desks and mobile screens.</li>
+          </ul>
+
+          <h3 style={h3Style}>2. Testing Key Rollover (NKRO) & Ghosting</h3>
+          <p style={pStyle}>
+            Press and hold multiple keys simultaneously (e.g. <code style={codeStyle}>W + A + S + D + Shift + Space</code>).
+            The <em>Active Keys</em> counter reflects the exact number of switches registered simultaneously.
+            Quality gaming keyboards feature N-Key Rollover (NKRO), allowing all held keys to register without dropped inputs.
+          </p>
+
           <h2 id="features" style={h2Style}>Features of This Keyboard Visualizer</h2>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>Complete 104-Key Coverage:</strong> Includes F-keys, Numpad, and navigation clusters.</li>
+            <li style={liStyle}><strong>Zero-Scroll Tab Key:</strong> Tab navigation is suppressed so you can test the <code style={codeStyle}>Tab</code> key smoothly without viewport jumps.</li>
+            <li style={liStyle}><strong>Live Key Log:</strong> Inspect your last 20 keystrokes with timestamps and clear badges.</li>
+            <li style={liStyle}><strong>Usage Bar Chart:</strong> Analyze which keys receive the heaviest actuation during gaming and typing sessions.</li>
+            <li style={liStyle}><strong>Mechanical Audio Feedback:</strong> Optional Web Audio click sounds simulate mechanical key switch actuation.</li>
+          </ul>
 
-          <h3 style={h3Style}>Real-time key detection</h3>
-          <p style={pStyle}>
-            The visualizer hooks into the browser's native <code style={codeStyle}>keydown</code> and{' '}
-            <code style={codeStyle}>keyup</code> events, registering every keystroke within milliseconds
-            of physical actuation. Only <code style={codeStyle}>isTrusted</code> events generated by
-            real hardware are processed — synthetic or scripted inputs are automatically filtered out.
-          </p>
-
-          <h3 style={h3Style}>Active key highlighting</h3>
-          <p style={pStyle}>
-            Every key on the virtual keyboard illuminates in cyan the instant you press the
-            corresponding physical key. The highlight fades immediately on release, giving a
-            true real-time picture of your active finger positions.
-          </p>
-
-          <h3 style={h3Style}>Key history log</h3>
-          <p style={pStyle}>
-            The Key Log records the last 20 keystrokes in chronological order. The most recent
-            key is always highlighted distinctly — invaluable for spotting erratic inputs,
-            unexpected characters, or double-fire events caused by hardware faults.
-          </p>
-
-          <h3 style={h3Style}>Most-used keys statistics</h3>
-          <p style={pStyle}>
-            Each key press increments an internal counter and the top 10 most-pressed keys
-            are displayed with a dynamic bar chart scaled to the most-pressed key.
-          </p>
-
-          <h3 style={h3Style}>Statistics dashboard</h3>
-          <p style={pStyle}>
-            Three live counters sit at the top: <em>Total Keys</em>, <em>Active Keys</em>, and{' '}
-            <em>Unique Keys</em>. These update with every event and serve as a quick health
-            indicator for keyboard performance.
-          </p>
-
-          <h3 style={h3Style}>Reset dashboard</h3>
-          <p style={pStyle}>
-            A single button wipes all statistics, history, and counters — useful when switching
-            between keyboards or users.
-          </p>
-
-          {/* ── Benefits gamers ── */}
           <h2 id="benefits-gamers" style={h2Style}>Benefits for Gamers</h2>
-
-          <h3 style={h3Style}>Ghosting detection made easy</h3>
           <p style={pStyle}>
-            Press your gaming macro combination and watch the visualizer — immediately confirm
-            whether every key lights up, or identify which one is being ghosted.
+            In fast-paced competitive esports (Valorant, CS2, Fortnite, Apex Legends, and Minecraft PvP), input consistency is vital.
+            A single chatter-prone switch or unseated keycap can break strafe movement or weapon swaps.
+            Using this tool, gamers can diagnose switch debounce bounce, dead switches, and key rollover limits before entering ranked matches.
           </p>
 
-          <h3 style={h3Style}>N-Key Rollover verification</h3>
-          <p style={pStyle}>
-            N-Key Rollover guarantees every simultaneously pressed key is independently
-            recognized. The active key counter and real-time display let you verify full NKRO,
-            partial rollover (6KRO), or USB protocol caps.
-          </p>
-
-          <h3 style={h3Style}>Mechanical keyboard evaluation</h3>
-          <p style={pStyle}>
-            Switching switch types? The visualizer helps evaluate how new switches feel under
-            actual gaming conditions. Missed actuations or chattering become visible immediately
-            in the key history log.
-          </p>
-
-          {/* ── Benefits typists ── */}
           <h2 id="benefits-typists" style={h2Style}>Benefits for Programmers and Typists</h2>
-
-          <h3 style={h3Style}>Shortcut verification</h3>
           <p style={pStyle}>
-            Developers rely on complex modifier combinations daily. The Key Visualizer confirms
-            which key events actually reach the browser, helping distinguish OS-intercepted
-            shortcuts from application-level bindings.
+            Programmers rely heavily on modifier keys (<code style={codeStyle}>Ctrl, Alt, Shift, Win</code>) and punctuation brackets (<code style={codeStyle}>&#123;&#125;, [], &lt;&gt;, ;, :</code>).
+            The Key Visualizer verifies that every modifier and symbol switch actuates reliably on both hands.
           </p>
 
-          <h3 style={h3Style}>Typing productivity and habit analysis</h3>
-          <p style={pStyle}>
-            The Most Used Keys chart exposes typing patterns. Heavy Backspace use may indicate
-            error-prone typing. These insights guide deliberate practice and ergonomic layout
-            choices.
-          </p>
-
-          <h3 style={h3Style}>Touch typing practice feedback</h3>
-          <p style={pStyle}>
-            Learners practicing Colemak, Dvorak, or QWERTY can use the visualizer as a
-            real-time feedback layer confirming correct finger assignment and exposing mistakes.
-          </p>
-
-          {/* ── Common problems ── */}
           <h2 id="common-problems" style={h2Style}>Common Keyboard Problems You Can Detect</h2>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>Key Chatter (Double-Typing):</strong> If a single light tap increments the count by 2 or more, your mechanical switch leaf is bouncing or oxidized.</li>
+            <li style={liStyle}><strong>Dead Keys:</strong> If a keycap fails to illuminate when pressed, the PCB trace or switch diode may be faulty.</li>
+            <li style={liStyle}><strong>Key Ghosting:</strong> If pressing three keys causes an adjacent unpressed key to falsely register, your keyboard matrix lacks anti-ghosting diodes.</li>
+          </ul>
 
-          <h3 style={h3Style}>Dead keys / ghosting / chattering / sticky keys</h3>
-          <p style={pStyle}>
-            The visualizer makes silent failures visible. Dead keys never light up. Ghosted
-            keys disappear from the active display. Chattering shows duplicate consecutive
-            entries. Sticky keys keep their indicator lit after release because the{' '}
-            <code style={codeStyle}>keyup</code> event failed to fire.
-          </p>
-
-          {/* ── Keyboard Test Types ── */}
-          <h2 id="ghosting-test" style={h2Style}>Keyboard Ghosting Test</h2>
-          <p style={pStyle}>
-            Keyboard ghosting occurs when a keyboard fails to register multiple simultaneous keypresses. This is a common hardware limitation in older membrane keyboards. You can use a visualizer to perform a ghosting test by pressing multiple keys at once and observing which inputs are dropped. According to <a href="https://en.wikipedia.org/wiki/Rollover_(key)#Ghosting" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>hardware interface research <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>, anti-ghosting matrices are designed to prevent false keystrokes during complex gaming combinations.
-          </p>
-
-          <h2 id="rollover-test" style={h2Style}>N-Key Rollover (NKRO) Test</h2>
-          <p style={pStyle}>
-            An N-Key Rollover test verifies the maximum number of keys that can be correctly registered simultaneously. While standard USB keyboards often cap at 6-Key Rollover (6KRO), premium mechanical models support full NKRO. Validating NKRO is crucial for competitive gaming where simultaneous inputs are required, as detailed in <a href="https://en.wikipedia.org/wiki/Rollover_(key)" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>rollover testing methodologies <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>.
-          </p>
-
-          <h2 id="latency-test" style={h2Style}>Keyboard Latency &amp; Polling Rate Test</h2>
-          <p style={pStyle}>
-            A keyboard latency test measures the delay between a physical keystroke and its digital registration. High polling rates (1000Hz or above) reduce this delay to just 1 millisecond. Testing latency is vital for rhythm games and esports, where <a href="https://en.wikipedia.org/wiki/Input_lag" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>input lag studies <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> indicate that even slight delays can negatively impact human reaction times.
-          </p>
-
-          <h2 id="chattering-test" style={h2Style}>Keyboard Chattering (Double-Typing) Test</h2>
-          <p style={pStyle}>
-            Keyboard chattering is a mechanical defect where a single keypress registers multiple times due to switch degradation or dust. A visualizer instantly highlights chattering in its event log. According to <a href="https://en.wikipedia.org/wiki/Switch#Contact_bounce" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>switch degradation analysis <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a>, contact bounce (or chatter) can often be mitigated via software debounce algorithms or hardware cleaning.
-          </p>
-
-          <h2 id="mechanical-switch-test" style={h2Style}>Mechanical Switch Actuation Test</h2>
-          <p style={pStyle}>
-            Testing mechanical switches involves evaluating the actuation force and travel distance. Different switches (linear, tactile, clicky) offer varying feedback profiles. Assessing how these switches translate to real-time visual output helps users find the optimal balance for typing comfort, supported by <a href="https://en.wikipedia.org/wiki/Computer_keyboard#Types_and_standards" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--neon-cyan)', textDecoration: 'none', fontWeight: '500' }}>mechanical switch ergonomics <svg xmlns="http://www.w3.org/2000/svg" width="0.9em" height="0.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{verticalAlign: 'text-bottom', marginLeft: '0.1rem', marginBottom: '0.1rem'}}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></a> research.
-          </p>
-
-          {/* ── Browser compat ── */}
           <h2 id="browser-compat" style={h2Style}>Browser Compatibility</h2>
-          <ul style={ulStyle}>
-            <li style={liStyle}><strong>Chrome 90+</strong> — Full support including Web Audio.</li>
-            <li style={liStyle}><strong>Firefox 88+</strong> — Full support. Sound requires a user interaction first (handled automatically).</li>
-            <li style={liStyle}><strong>Edge 90+</strong> — Full support on Chromium-based versions.</li>
-            <li style={liStyle}><strong>Safari 14+</strong> — Full support. Sound initialises on first click or keypress.</li>
-            <li style={liStyle}><strong>Opera 76+</strong> — Full support.</li>
-          </ul>
           <p style={pStyle}>
-            OS-level shortcuts (<code style={codeStyle}>Ctrl+Alt+Del</code>,{' '}
-            <code style={codeStyle}>Alt+Tab</code>, Win key) are consumed by the operating system
-            before the browser receives them. Internet Explorer is not supported.
+            FixedAim Key Visualizer is compatible with all modern desktop and mobile browsers, including Google Chrome, Mozilla Firefox, Microsoft Edge, Brave, and Apple Safari.
           </p>
 
-          {/* ── Privacy ── */}
-          <h2 id="privacy" style={h2Style}>Privacy</h2>
-          <ul style={ulStyle}>
-            <li style={liStyle}><strong>No keystrokes leave your browser.</strong> Every keystroke is processed entirely within your browser tab — no network request, no WebSocket, no upload.</li>
-            <li style={liStyle}><strong>No data is stored.</strong> Statistics live only in React component state (volatile memory). Refresh or Reset erases everything. Nothing is written to localStorage, cookies, or IndexedDB.</li>
-            <li style={liStyle}><strong>Trusted-only events.</strong> Only events with <code style={codeStyle}>isTrusted: true</code> are processed — programmatic injection is silently ignored.</li>
-            <li style={liStyle}><strong>No third-party keylogger scripts.</strong> The visualizer contains no session recording tools or advertising scripts that could intercept keystrokes.</li>
-          </ul>
+          <h2 id="privacy" style={h2Style}>Privacy & Security</h2>
+          <p style={pStyle}>
+            Your keystrokes are processed strictly in local browser memory via JavaScript event listeners.
+            No data is transmitted over the network, stored in cookies, or sent to any analytics server.
+          </p>
 
-          {/* ── Conclusion ── */}
           <h2 id="conclusion" style={h2Style}>Conclusion</h2>
           <p style={pStyle}>
-            The <strong>Key Visualizer</strong> is an essential browser-based utility for
-            anyone who wants instant, accurate insight into keyboard performance. Built with
-            performance, accessibility, and security as first-class concerns, it processes
-            only trusted hardware events, keeps all data local, and maintains smooth 60 fps
-            rendering even during the fastest typing bursts.
-          </p>
-          <p style={{ ...pStyle, marginBottom: 0 }}>
-            Bookmark this tool and return whenever you need to diagnose a hardware issue,
-            test a new keyboard, or simply enjoy the satisfying glow of watching every
-            keystroke light up in real time.
+            Keep your peripherals in peak mechanical condition with FixedAim&apos;s full-size Key Visualizer.
+            Benchmark, diagnose, and train with confidence.
           </p>
         </article>
       );
@@ -1194,8 +1483,8 @@ const ArticleSection = lazy(() =>
 export default function KeyVisualizerPage() {
   useDocumentMeta();
 
-  const [sound,  setSound]  = useState<SoundSettings>({ enabled: false, volume: 0.4 });
-  const [repeat, setRepeat] = useState<RepeatSettings>({ blockRepeats: true });
+  const [sound, setSound]   = useState<SoundSettings>({ enabled: false, volume: 0.4 });
+  const [repeat, setRepeat] = useState<RepeatSettings>({ blockRepeats: false });
 
   const { state, reset } = useKeyVisualizer(sound, repeat);
 
@@ -1216,16 +1505,16 @@ export default function KeyVisualizerPage() {
   ], [state.totalKeys, state.activeKeys.size, state.keyCount]);
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+    <div style={{ maxWidth: '1050px', margin: '0 auto', padding: '2rem 1.25rem' }}>
 
       <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div className="section-label">Keyboard Tool</div>
         <h1 className="tool-title">Key Visualizer</h1>
-        <p className="tool-subtitle">Real-time keyboard display — see every keystroke light up</p>
+        <p className="tool-subtitle">Real-time full keyboard display — test all 104 keys, Numpad, F-keys & Arrows</p>
       </header>
 
       <div role="region" aria-label="Keyboard statistics"
-        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}
+        style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.75rem' }}
       >
         {statsData.map(s => (
           <StatCard key={s.label} value={s.value} label={s.label} color={s.color} />
@@ -1237,7 +1526,7 @@ export default function KeyVisualizerPage() {
       <div role="note" aria-label="Typing instruction"
         style={{ background: 'rgba(0,245,255,0.05)', border: '1px dashed rgba(0,245,255,0.2)', borderRadius: '10px', padding: '0.75rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}
       >
-        ⌨️ Click anywhere on the page and start typing to see keys light up!
+        ⌨️ Press any key on your keyboard to test! (Tab key scroll is disabled for smooth testing)
       </div>
 
       <KeyVisualizerErrorBoundary label="Virtual keyboard">
@@ -1317,7 +1606,7 @@ export default function KeyVisualizerPage() {
         </div>
       </section>
 
-      {/* ── SEO Article + FAQ wrapper — no extra neon backgrounds ── */}
+      {/* ── SEO Article + FAQ wrapper ── */}
       <div style={{ marginTop: '2rem' }}>
 
         {/* Reading time */}
@@ -1328,7 +1617,7 @@ export default function KeyVisualizerPage() {
 
         <TableOfContents />
 
-        {/* Article — plain text, CPS heading style */}
+        {/* Article section */}
         <KeyVisualizerErrorBoundary label="Article section">
           <Suspense fallback={
             <div aria-label="Loading article content" style={{ color: 'var(--text-muted)', padding: '2rem', textAlign: 'center' }}>
@@ -1342,7 +1631,7 @@ export default function KeyVisualizerPage() {
         {/* Divider before FAQ */}
         <hr style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.07)', margin: '3rem 0' }} />
 
-        {/* FAQ accordion — CPS-style */}
+        {/* FAQ accordion */}
         <KeyVisualizerErrorBoundary label="FAQ section">
           <FaqSection />
         </KeyVisualizerErrorBoundary>
