@@ -443,6 +443,281 @@ export const KNOWLEDGE_ARTICLES: KnowledgeArticle[] = [
         ]
       }
     ]
+  },
+  {
+    id: 'pc-shortcuts',
+    title: "100+ Essential PC & Laptop Shortcuts for Everyday Life",
+    badge: 'Shortcut Mastery',
+    keywords: ['shortcuts', 'shortcut keys', 'short key', 'pc shortcuts', 'laptop shortcuts', 'windows shortcuts', 'mac shortcuts', '100+ short key', 'keyboard shortcuts', 'hotkeys'],
+    sections: [
+      {
+        paragraphs: [
+          "Mastering keyboard shortcuts is the single highest-return computer skill you can develop. Research shows keyboard shortcuts save the average computer user over 64 hours per year by eliminating mouse travel and repetitive menu navigation. Below are 116 indispensable shortcuts organized across Windows, macOS, web browsing, text editing, file management, development, and spreadsheets."
+        ]
+      },
+      {
+        heading: "1. Windows 10 & 11 System Navigation (20 Shortcuts)",
+        paragraphs: [
+          "Universal shortcuts built into the Windows operating system for window management, virtual desktops, and system utilities:"
+        ],
+        bullets: [
+          "Win + E: Open File Explorer immediately from any application.",
+          "Win + D: Minimize all windows and show desktop (press again to restore).",
+          "Win + L: Instantly lock your workstation or laptop.",
+          "Win + V: Open Cloud Clipboard History (access multiple copied texts and screenshots).",
+          "Win + Shift + S: Open Snipping Tool for custom area, window, or fullscreen capture.",
+          "Win + I: Open Windows Settings dashboard.",
+          "Win + R: Launch Run dialog (enter cmd, msconfig, %temp%, or app names).",
+          "Win + X: Open Power User Quick Link menu (Task Manager, Device Manager, Terminal).",
+          "Win + Tab: Open Task View with timeline and virtual desktops.",
+          "Win + Left / Right Arrow: Snap active window to left or right half of display.",
+          "Win + Up Arrow: Maximize window or snap to upper display quadrant.",
+          "Win + Down Arrow: Restore window size or minimize to taskbar.",
+          "Win + . (Period) or Win + ;: Open native Windows Emoji, GIF, Kaomoji & Symbol picker.",
+          "Win + G: Launch Xbox Game Bar for live FPS monitoring, audio mixing & clip capture.",
+          "Win + M: Minimize all open windows simultaneously.",
+          "Win + Shift + M: Restore all windows minimized via Win + M.",
+          "Ctrl + Shift + Esc: Open Task Manager directly (bypasses Ctrl+Alt+Del interrupt).",
+          "Alt + Tab: Fast visual application switcher (hold Alt, tap Tab to cycle).",
+          "Alt + F4: Close active program or prompt Windows Shut Down dialog.",
+          "Win + 1 through 9: Open or focus pinned taskbar applications by numeric position."
+        ]
+      },
+      {
+        heading: "2. Text Editing & Word Processing Essentials (18 Shortcuts)",
+        paragraphs: [
+          "Accelerate typing and document creation across Word, Google Docs, Notepad, and email clients:"
+        ],
+        bullets: [
+          "Ctrl + A: Select all contents in active document, page, or text field.",
+          "Ctrl + C: Copy selected text, image, or file to clipboard.",
+          "Ctrl + X: Cut selected item and store in clipboard.",
+          "Ctrl + V: Paste clipboard contents at active cursor position.",
+          "Ctrl + Z: Undo last action or keystroke.",
+          "Ctrl + Y: Redo previously undone action.",
+          "Ctrl + F: Open in-page Find search bar.",
+          "Ctrl + H: Open Find and Replace dialog.",
+          "Ctrl + B: Toggle Bold styling on selected text.",
+          "Ctrl + I: Toggle Italic styling on selected text.",
+          "Ctrl + U: Toggle Underline styling on selected text.",
+          "Ctrl + S: Immediately save active document or file.",
+          "Ctrl + P: Open Print preview and printer selection.",
+          "Ctrl + Backspace: Delete entire preceding word instead of single characters.",
+          "Ctrl + Delete: Delete entire subsequent word to the right of cursor.",
+          "Ctrl + Left / Right Arrow: Jump cursor word-by-word across text lines.",
+          "Ctrl + Shift + Left / Right Arrow: Highlight and select text word-by-word.",
+          "Shift + Home / End: Highlight all text from cursor to start or end of line."
+        ]
+      },
+      {
+        heading: "3. Web Browser & Tab Navigation (18 Shortcuts)",
+        paragraphs: [
+          "Speed up web navigation across Google Chrome, Microsoft Edge, Brave, and Mozilla Firefox:"
+        ],
+        bullets: [
+          "Ctrl + T: Open a new blank browser tab.",
+          "Ctrl + W: Close the currently active browser tab.",
+          "Ctrl + Shift + T: Reopen the most recently closed tab (saves accidentally closed work).",
+          "Ctrl + N: Open a completely new browser window.",
+          "Ctrl + Shift + N: Open an Incognito / Private browsing session.",
+          "Ctrl + Tab: Cycle forward to the next open tab.",
+          "Ctrl + Shift + Tab: Cycle backward to the previous open tab.",
+          "Ctrl + 1 through 8: Jump directly to the tab at that specific position.",
+          "Ctrl + 9: Jump directly to the very last open tab.",
+          "Ctrl + L or Alt + D: Highlight address bar URL for instant replacement search.",
+          "Ctrl + R or F5: Reload active webpage.",
+          "Ctrl + Shift + R or Ctrl + F5: Hard refresh page bypassing stored browser cache.",
+          "Ctrl + D: Bookmark current webpage.",
+          "Ctrl + J: Open browser Downloads manager.",
+          "Ctrl + H: Open full browsing history.",
+          "Ctrl + Plus (+) / Minus (-): Zoom in or zoom out page viewport.",
+          "Ctrl + 0: Reset browser zoom level to 100% default.",
+          "Alt + Left Arrow / Backspace: Navigate back to preceding page in history."
+        ]
+      },
+      {
+        heading: "4. File Explorer & Desktop Management (15 Shortcuts)",
+        paragraphs: [
+          "Manage directory structures, files, folders, and properties with zero mouse reliance:"
+        ],
+        bullets: [
+          "Ctrl + Shift + N: Create a brand new folder in current directory.",
+          "F2: Instantly rename selected file or folder.",
+          "F3: Jump cursor to File Explorer search field.",
+          "F4: Display address bar dropdown path history.",
+          "F5: Refresh folder contents and file directory state.",
+          "Alt + Enter: Open full Properties window for selected file or drive.",
+          "Alt + Up Arrow: Navigate up one directory level in folder hierarchy.",
+          "Alt + Left / Right Arrow: Move backward or forward in folder navigation history.",
+          "Shift + Delete: Permanently delete file bypassing Recycle Bin.",
+          "Ctrl + Shift + E: Expand all folder trees in navigation sidebar.",
+          "Alt + P: Toggle File Explorer Preview pane on the right side.",
+          "Alt + Shift + P: Toggle File Details pane for metadata inspection.",
+          "Ctrl + Mouse Wheel: Dynamically scale folder icon sizes (Extra Large to Details).",
+          "Ctrl + W: Close current File Explorer window.",
+          "Backspace: Move up to parent folder in Explorer history."
+        ]
+      },
+      {
+        heading: "5. macOS Productivity Equivalents (15 Shortcuts)",
+        paragraphs: [
+          "Equivalent essential Command and Option shortcuts for MacBook and Mac desktop users:"
+        ],
+        bullets: [
+          "Cmd + Space: Open Spotlight Search for instant app launching, calculations & conversions.",
+          "Cmd + Tab: Fast application switcher with dock icons.",
+          "Cmd + Q: Completely quit and terminate active application.",
+          "Cmd + W: Close active window or browser tab.",
+          "Cmd + C / Cmd + V / Cmd + X: Standard Copy, Paste, and Cut on macOS.",
+          "Cmd + Option + Esc: Open Force Quit Applications dialog.",
+          "Cmd + Shift + 3: Full-screen screenshot saved directly to Desktop.",
+          "Cmd + Shift + 4: Crosshair area screenshot capture.",
+          "Cmd + Shift + 5: Open macOS Screenshot & Screen Recording utility toolbar.",
+          "Cmd + H: Hide active application windows.",
+          "Cmd + Option + H: Hide all applications except the current foreground window.",
+          "Cmd + M: Minimize active window to macOS Dock.",
+          "Cmd + Z / Cmd + Shift + Z: Undo and Redo operations.",
+          "Option + Delete: Delete entire word backward from cursor.",
+          "Cmd + Delete: Move selected file directly to Bin / Trash."
+        ]
+      },
+      {
+        heading: "6. Coding, Development & Terminal Hotkeys (15 Shortcuts)",
+        paragraphs: [
+          "Accelerate software engineering and code editing in VS Code, Sublime, and terminal shells:"
+        ],
+        bullets: [
+          "Ctrl + P: Quick Open file by name across the entire project repository.",
+          "Ctrl + Shift + P or F1: Open IDE Command Palette to execute any editor action.",
+          "Ctrl + ` (Backtick): Toggle built-in integrated terminal console.",
+          "Ctrl + /: Toggle line comment on/off for selected code block.",
+          "Alt + Up / Down Arrow: Shift current line or block up or down.",
+          "Shift + Alt + Up / Down Arrow: Duplicate current line up or down.",
+          "Ctrl + D: Add next occurrence of selected word to multi-cursor editing.",
+          "Ctrl + Shift + L: Select all occurrences of word across the entire file.",
+          "Ctrl + B: Toggle primary editor sidebar and file tree visibility.",
+          "Ctrl + Shift + F: Global multi-file search across entire codebase.",
+          "Alt + Click: Insert multiple cursor positions anywhere in editor.",
+          "F12: Go to Definition of function, class, or variable.",
+          "Alt + F12: Peek Definition inline without navigating away from code.",
+          "Ctrl + Space: Manually trigger IntelliSense autocomplete suggestions.",
+          "Ctrl + K, Ctrl + S: Open keyboard shortcuts configuration and keybindings manager."
+        ]
+      },
+      {
+        heading: "7. Excel & Spreadsheet Mastery (15 Shortcuts)",
+        paragraphs: [
+          "Power-user spreadsheet shortcuts for Microsoft Excel and Google Sheets:"
+        ],
+        bullets: [
+          "F4: Repeat last action or toggle absolute cell reference ($A$1 -> A$1 -> $A1 -> A1).",
+          "Ctrl + Arrow Keys: Jump immediately to edge of current data region.",
+          "Ctrl + Shift + Arrow Keys: Highlight all cells to edge of data region.",
+          "Shift + Space: Highlight entire active worksheet row.",
+          "Ctrl + Space: Highlight entire active worksheet column.",
+          "Ctrl + Shift + Plus (+): Insert new cell, row, or column.",
+          "Ctrl + Minus (-): Delete selected cell, row, or column.",
+          "Alt + =: Instantly insert AutoSum formula (=SUM()) on adjacent cells.",
+          "Ctrl + ; (Semicolon): Insert current calendar date into active cell.",
+          "Ctrl + Shift + : (Colon): Insert current clock time into active cell.",
+          "Ctrl + 1: Open Format Cells dialog box (currency, percentages, borders).",
+          "Ctrl + Page Down / Page Up: Switch forward or backward between worksheet tabs.",
+          "F2: Edit active cell with cursor placed at end of text/formula.",
+          "Ctrl + Enter: Populate all highlighted cells with current formula entry.",
+          "Ctrl + ` (Backtick): Toggle between showing cell values and formula text."
+        ]
+      }
+    ]
+  },
+  {
+    id: 'keyboard-troubleshooting',
+    title: "Keyboard Ghosting, Key Rollover (NKRO) & Matrix Bugs",
+    badge: 'Hardware Diagnostic',
+    keywords: ['key rollover', 'nkro', 'ghosting', 'key rollover software', 'keybord analyse bug', 'matrix bug', 'anti-ghosting', 'chatter', 'erased keyboard', 'dead keys'],
+    sections: [
+      {
+        paragraphs: [
+          "Keyboard ghosting and dropped keystrokes occur when internal electrical grid circuits cannot differentiate simultaneous inputs. When multiple keys sharing an electrical row and column are actuated together on budget membrane keyboards, the controller either blocks additional inputs or falsely registers unpressed adjacent keys (ghosting)."
+        ]
+      },
+      {
+        heading: "Understanding Rollover Ratings: 2KRO, 6KRO & Full NKRO",
+        paragraphs: [
+          "Key Rollover (KRO) defines how many keys can be pressed simultaneously and registered reliably:"
+        ],
+        bullets: [
+          "2KRO / 3KRO (Budget Membrane): Only 2 or 3 keys can be held. Frequently causes dropped strafes (W+A+Shift) during gaming.",
+          "6KRO (Legacy USB): Up to 6 simultaneous alphanumeric keys plus modifiers. Standard for older USB HID specifications.",
+          "Full NKRO (N-Key Rollover): Every single key on the keyboard can be pressed simultaneously with zero ghosting or blocking. Achieved using discrete SMD diodes on every mechanical switch contact."
+        ]
+      },
+      {
+        heading: "Diagnosing Mechanical Key Chatter & Double-Typing",
+        paragraphs: [
+          "Key chatter occurs when oxidized mechanical switch leaves bounce rapidly upon contact. Instead of a single actuation, the switch sends 2–4 pulses in under 20ms. The Key Visualizer live log allows you to spot double-actuations instantly."
+        ]
+      },
+      {
+        heading: "Identifying Mystery or Erased Keycaps",
+        paragraphs: [
+          "If keycap legends are rubbed off or worn from heavy use, open FixedAim Key Visualizer and press the key. The on-screen virtual keyboard highlights the exact character code and location in real time."
+        ]
+      }
+    ]
+  },
+  {
+    id: 'streamer-kbm-overlay',
+    title: "On-Screen Keystroke Visualizers for Speedruns & OBS Streaming",
+    badge: 'Streaming & Esports',
+    keywords: ['kbm on screen', 'speedruns', 'input visualizer', 'keystroke visualizer', 'obs overlay', 'key tracker screen', 'real-time keyboard input', 'speedrun kbm'],
+    sections: [
+      {
+        paragraphs: [
+          "In competitive speedrunning communities (e.g. Minecraft, Celeste, Trackmania, Super Mario 64), leaderboard moderators require on-screen keyboard and mouse input overlays to verify runs against macros, TAS (Tool-Assisted Speedruns), and hardware automation."
+        ]
+      },
+      {
+        heading: "How Streamers Embed Browser Input Displays",
+        paragraphs: [
+          "FixedAim Key Visualizer is designed for clean integration with OBS Studio and Streamlabs:"
+        ],
+        bullets: [
+          "Window / Browser Source: Capture FixedAim in OBS with zero background CPU overhead.",
+          "Live Visual Proof: Viewers can observe movement techniques, strafe timing, and combo actuations in real time.",
+          "Zero Installation: Unlike desktop utilities like Vovsoft or NohBoard, FixedAim runs directly in the browser without third-party drivers."
+        ]
+      }
+    ]
+  },
+  {
+    id: 'tab-switch-detector',
+    title: "Tab Switch Detection, Window Focus & Anti-Cheat Mechanics",
+    badge: 'Browser Mechanics',
+    keywords: ['tab switch detector', 'tab switch detection', 'focus', 'blur', 'tab switch', 'window focus', 'visibilitychange'],
+    sections: [
+      {
+        paragraphs: [
+          "Modern web applications, proctoring systems, online exams, and competitive browser games monitor whether a user switches tabs or navigates away from the active window. This is achieved using browser document visibility APIs."
+        ]
+      },
+      {
+        heading: "How Browsers Detect Tab Switching",
+        paragraphs: [
+          "Three core JavaScript APIs handle window state and tab focus:"
+        ],
+        bullets: [
+          "document.visibilityState & visibilitychange: Fires whenever a tab is minimized or switched to background.",
+          "window.onblur & window.onfocus: Detects when the user clicks outside the browser window or opens another application.",
+          "Keyboard Tab Interception: Pressing Tab cycles through interactive DOM elements unless event.preventDefault() is explicitly configured."
+        ]
+      },
+      {
+        heading: "FixedAim Zero-Scroll Tab Handling",
+        paragraphs: [
+          "On FixedAim Key Visualizer, the Tab key is captured with passive: false event listeners. This allows you to test Tab switch illumination without browser viewport jumps."
+        ]
+      }
+    ]
   }
 ];
 
@@ -574,6 +849,119 @@ export const DiscoverMoreCard = memo(() => {
   );
 });
 DiscoverMoreCard.displayName = 'DiscoverMoreCard';
+
+// ─────────────────────────────────────────────
+// KEYBOARD DISCOVER MORE WIDGET (Matching user screenshot)
+// ─────────────────────────────────────────────
+export const KeyboardDiscoverCard = memo(() => {
+  return (
+    <div
+      style={{
+        background: '#161d2b',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '16px',
+        padding: '1.25rem 1.5rem',
+        marginBottom: '2rem',
+        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: '1.15rem',
+          fontWeight: 800,
+          color: '#ffffff',
+          marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
+        <BookOpen size={20} color="var(--neon-green, #00ff88)" />
+        <span>Discover Keyboard & Shortcut Guides</span>
+      </div>
+
+      {/* Quick Topic Links */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.25rem' }}>
+        {[
+          { label: '⚡ 100+ Essential PC & Laptop Shortcuts Guide', topicId: 'pc-shortcuts' },
+          { label: '🛡️ Key Rollover (NKRO) & Matrix Bug Guide', topicId: 'keyboard-troubleshooting' },
+          { label: '📺 Speedruns & Streaming KBM Overlay Guide', topicId: 'streamer-kbm-overlay' },
+          { label: '👁️ Tab Switch Detection & Anti-Cheat Guide', topicId: 'tab-switch-detector' },
+        ].map(item => (
+          <button
+            key={item.topicId}
+            type="button"
+            onClick={() => openContextSidebar({ topicId: item.topicId, title: item.label })}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '0.65rem 0.9rem',
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '10px',
+              color: '#e2e8f0',
+              fontSize: '0.92rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              textAlign: 'left',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.08)';
+              e.currentTarget.style.transform = 'translateX(3px)';
+              e.currentTarget.style.borderColor = 'rgba(0, 255, 136, 0.3)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.04)';
+              e.currentTarget.style.transform = 'translateX(0)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)';
+            }}
+          >
+            <span>{item.label}</span>
+            <ArrowRight size={15} style={{ opacity: 0.6 }} />
+          </button>
+        ))}
+      </div>
+
+      {/* Contextual Color Pills */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+        <ContextPill
+          label="100+ Short Keys"
+          variant="purple"
+          topicId="pc-shortcuts"
+          icon="none"
+        />
+        <ContextPill
+          label="NKRO Software"
+          variant="amber"
+          topicId="keyboard-troubleshooting"
+          icon="none"
+        />
+        <ContextPill
+          label="Tab Switch Detector"
+          variant="green"
+          topicId="tab-switch-detector"
+          icon="none"
+        />
+        <ContextPill
+          label="Speedrun KBM"
+          variant="blue"
+          topicId="streamer-kbm-overlay"
+          icon="none"
+        />
+        <ContextPill
+          label="Fix Erased Keys"
+          variant="cyan"
+          topicId="keyboard-troubleshooting"
+          icon="none"
+        />
+      </div>
+    </div>
+  );
+});
+KeyboardDiscoverCard.displayName = 'KeyboardDiscoverCard';
+
 
 // ─────────────────────────────────────────────
 // CONTEXT SIDEBAR DRAWER (Reader Panel — No Chat, No Message Input)

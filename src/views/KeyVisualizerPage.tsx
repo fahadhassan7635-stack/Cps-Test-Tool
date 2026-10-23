@@ -22,6 +22,8 @@ import {
   type ErrorInfo,
   type CSSProperties,
 } from 'react';
+import { Search, Copy, Check, BookOpen, Sparkles } from 'lucide-react';
+import { ContextSidebar, KeyboardDiscoverCard, ContextPill } from '../components/AIContextualAssistant';
 
 // ─── More Tools ───────────────────────────────────────────────────────────────
 interface ToolLink { label: string; href: string; icon: React.ReactNode; }
@@ -234,25 +236,29 @@ export const NUMPAD_KEYS: VirtualKey[] = [
   { id: 'NumpadDecimal', label: '.', subLabel: 'Del', matchKeys: ['numpaddecimal', 'decimal'], gridRowSpan: 1, gridColSpan: 1 },
 ];
 
-const ARTICLE_WORD_COUNT = 1_450;
+const ARTICLE_WORD_COUNT = 3_200;
 const READING_TIME_MIN   = Math.ceil(ARTICLE_WORD_COUNT / READING_TIME_WPM);
 
 const TOC_SECTIONS: ReadonlyArray<Readonly<{ id: string; label: string }>> = Object.freeze([
   Object.freeze({ id: 'how-to-use',       label: 'How to Use the Key Visualizer'           }),
   Object.freeze({ id: 'features',         label: 'Features of This Keyboard Visualizer'    }),
-  Object.freeze({ id: 'benefits-gamers',  label: 'Benefits for Gamers'                     }),
+  Object.freeze({ id: 'shortcuts-guide',  label: '100+ Essential PC & Laptop Shortcuts'    }),
+  Object.freeze({ id: 'streamer-overlay', label: 'Keystroke Display for Speedruns & Streamers' }),
+  Object.freeze({ id: 'tab-detector',     label: 'Tab Switch Detector & Window Focus'      }),
+  Object.freeze({ id: 'nkro-ghosting',    label: 'Key Rollover (NKRO) & Matrix Bug Testing'}),
+  Object.freeze({ id: 'troubleshoot-keys',label: 'Fixing Dead, Sticky, or Erased Keys'    }),
+  Object.freeze({ id: 'web-vs-desktop',   label: 'Web Key Visualizer vs Desktop Software'  }),
+  Object.freeze({ id: 'benefits-gamers',  label: 'Benefits for Gamers & Esports'           }),
   Object.freeze({ id: 'benefits-typists', label: 'Benefits for Programmers and Typists'    }),
-  Object.freeze({ id: 'common-problems',  label: 'Common Keyboard Problems You Can Detect' }),
-  Object.freeze({ id: 'browser-compat',   label: 'Browser Compatibility'                   }),
-  Object.freeze({ id: 'privacy',          label: 'Privacy'                                 }),
-  Object.freeze({ id: 'conclusion',       label: 'Conclusion'                              }),
+  Object.freeze({ id: 'browser-compat',   label: 'Browser Compatibility & Privacy'         }),
+  Object.freeze({ id: 'conclusion',       label: 'Conclusion & Next Steps'                 }),
 ]);
 
 const PAGE_META = Object.freeze({
-  title:      'Key Visualizer — Real-Time Keyboard Key Display Tool',
-  description:'Free online Key Visualizer: watch every keystroke light up in real time with 100% full keyboard, Numpad, and Arrow keys. Test keyboard ghosting, N-Key Rollover, key history, and usage stats locally in your browser.',
+  title:      'Key Visualizer — Real-Time Keyboard Key Display & 100+ PC Shortcuts',
+  description:'Free online Key Visualizer & keystroke viewer: watch every key press live in real time on a 104-key layout. Test keyboard ghosting, NKRO rollover software bugs, Tab switch detection, erased keys, and explore 100+ essential PC shortcut keys.',
   canonical:  'https://fixedaim.com/key-visualizer',
-  keywords:   'key visualizer, keyboard visualizer, keyboard tester, real-time key display, ghosting test, NKRO test, numpad test, f keys test, typing tool, keyboard diagnostics',
+  keywords:   'key visualizer, keyboard visualizer, keystroke visualizer, keyboard viewer, key display, tab switch detector, key rollover software, key tracker screen, kbm on screen for speedruns, input visualizer kbm, keyboard key display, real-time keyboard input display on screen, 100+ pc shortcut keys, pc shortcuts, laptop shortcuts',
   ogImage:    'https://fixedaim.com/og/key-visualizer.png',
   themeColor: '#00f5ff',
   author:     'FixedAim',
@@ -1172,6 +1178,377 @@ const SoundControls = memo(function SoundControls({ sound, repeat, onSound, onRe
   );
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 100+ SHORTCUTS DATABASE & CHEAT SHEET COMPONENT
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ShortcutItem {
+  keys: string[];
+  title: string;
+  desc: string;
+  category: 'windows' | 'editing' | 'browser' | 'explorer' | 'mac' | 'dev' | 'excel';
+}
+
+const SHORTCUTS_DATA: ReadonlyArray<ShortcutItem> = Object.freeze([
+  // ── WINDOWS SYSTEM (20) ──
+  { keys: ['Win', 'E'], title: 'File Explorer', desc: 'Instantly open Windows File Explorer from anywhere.', category: 'windows' },
+  { keys: ['Win', 'D'], title: 'Show/Hide Desktop', desc: 'Minimize all windows to view desktop; press again to restore.', category: 'windows' },
+  { keys: ['Win', 'L'], title: 'Lock Workstation', desc: 'Lock PC immediately to protect privacy or switch user.', category: 'windows' },
+  { keys: ['Win', 'V'], title: 'Clipboard History', desc: 'View previously copied text snippets and screenshots.', category: 'windows' },
+  { keys: ['Win', 'Shift', 'S'], title: 'Snipping Tool', desc: 'Capture custom rectangular, freeform, window, or full screenshot.', category: 'windows' },
+  { keys: ['Win', 'I'], title: 'Settings App', desc: 'Open main Windows Settings configuration panel.', category: 'windows' },
+  { keys: ['Win', 'R'], title: 'Run Dialog', desc: 'Launch Run box to open apps, cmd, regedit, or system folders.', category: 'windows' },
+  { keys: ['Win', 'X'], title: 'Quick Link Menu', desc: 'Power user menu: Task Manager, Terminal, Device Manager, Disk.', category: 'windows' },
+  { keys: ['Win', 'Tab'], title: 'Task View', desc: 'Display all open windows, virtual desktops, and activity history.', category: 'windows' },
+  { keys: ['Win', '← / →'], title: 'Snap Window', desc: 'Snap active window to the left or right half of screen.', category: 'windows' },
+  { keys: ['Win', '↑'], title: 'Maximize Window', desc: 'Maximize window to full screen or snap to upper quadrant.', category: 'windows' },
+  { keys: ['Win', '↓'], title: 'Minimize / Restore', desc: 'Restore window size or minimize active window to taskbar.', category: 'windows' },
+  { keys: ['Win', '.'], title: 'Emoji & Symbols', desc: 'Open Windows native Emoji, Kaomoji, GIF, and Special Symbol picker.', category: 'windows' },
+  { keys: ['Win', 'G'], title: 'Xbox Game Bar', desc: 'Overlay for live FPS counter, audio mixer, and instant replay capture.', category: 'windows' },
+  { keys: ['Win', 'M'], title: 'Minimize All', desc: 'Minimize all open windows simultaneously.', category: 'windows' },
+  { keys: ['Win', 'Shift', 'M'], title: 'Restore Minimized', desc: 'Restore all windows minimized with Win + M back onto display.', category: 'windows' },
+  { keys: ['Ctrl', 'Shift', 'Esc'], title: 'Task Manager', desc: 'Launch Task Manager directly without Ctrl+Alt+Del interrupt screen.', category: 'windows' },
+  { keys: ['Alt', 'Tab'], title: 'App Switcher', desc: 'Hold Alt and tap Tab to cycle through active applications.', category: 'windows' },
+  { keys: ['Alt', 'F4'], title: 'Close / Shut Down', desc: 'Close foreground application or bring up Windows Shutdown prompt.', category: 'windows' },
+  { keys: ['Win', '1..9'], title: 'Taskbar Launch', desc: 'Launch or switch to the pinned taskbar application by position number.', category: 'windows' },
+
+  // ── TEXT EDITING (18) ──
+  { keys: ['Ctrl', 'A'], title: 'Select All', desc: 'Select all text, elements, or files in active workspace.', category: 'editing' },
+  { keys: ['Ctrl', 'C'], title: 'Copy', desc: 'Copy selected text or files to system clipboard.', category: 'editing' },
+  { keys: ['Ctrl', 'X'], title: 'Cut', desc: 'Cut selected text or files into system clipboard.', category: 'editing' },
+  { keys: ['Ctrl', 'V'], title: 'Paste', desc: 'Insert clipboard text or files at cursor location.', category: 'editing' },
+  { keys: ['Ctrl', 'Z'], title: 'Undo', desc: 'Revert the most recent typing, styling, or editing action.', category: 'editing' },
+  { keys: ['Ctrl', 'Y'], title: 'Redo', desc: 'Reapply the most recently undone action.', category: 'editing' },
+  { keys: ['Ctrl', 'F'], title: 'Find', desc: 'Open search bar to locate specific text in document or page.', category: 'editing' },
+  { keys: ['Ctrl', 'H'], title: 'Find & Replace', desc: 'Search and replace words across document or file.', category: 'editing' },
+  { keys: ['Ctrl', 'B'], title: 'Bold', desc: 'Toggle bold weight on highlighted text.', category: 'editing' },
+  { keys: ['Ctrl', 'I'], title: 'Italic', desc: 'Toggle italic font styling on highlighted text.', category: 'editing' },
+  { keys: ['Ctrl', 'U'], title: 'Underline', desc: 'Toggle underline on highlighted text.', category: 'editing' },
+  { keys: ['Ctrl', 'S'], title: 'Save File', desc: 'Save changes to current document, spreadsheet, or project.', category: 'editing' },
+  { keys: ['Ctrl', 'P'], title: 'Print', desc: 'Open print preview and printer options dialog.', category: 'editing' },
+  { keys: ['Ctrl', 'Backspace'], title: 'Delete Word Left', desc: 'Delete entire preceding word instead of single character.', category: 'editing' },
+  { keys: ['Ctrl', 'Delete'], title: 'Delete Word Right', desc: 'Delete entire subsequent word to the right of cursor.', category: 'editing' },
+  { keys: ['Ctrl', '← / →'], title: 'Jump Word', desc: 'Move text cursor word-by-word across sentences.', category: 'editing' },
+  { keys: ['Ctrl', 'Shift', '← / →'], title: 'Select Word', desc: 'Select and highlight text word-by-word.', category: 'editing' },
+  { keys: ['Shift', 'Home / End'], title: 'Select Line', desc: 'Select all text from cursor to start or end of line.', category: 'editing' },
+
+  // ── WEB BROWSER (18) ──
+  { keys: ['Ctrl', 'T'], title: 'New Tab', desc: 'Open a new blank tab in Chrome, Edge, Firefox, or Brave.', category: 'browser' },
+  { keys: ['Ctrl', 'W'], title: 'Close Tab', desc: 'Close currently focused browser tab.', category: 'browser' },
+  { keys: ['Ctrl', 'Shift', 'T'], title: 'Reopen Closed Tab', desc: 'Restore the most recently closed tab with full history.', category: 'browser' },
+  { keys: ['Ctrl', 'N'], title: 'New Window', desc: 'Open an independent new browser window.', category: 'browser' },
+  { keys: ['Ctrl', 'Shift', 'N'], title: 'Incognito Window', desc: 'Launch private browsing mode with zero browsing history or cookies.', category: 'browser' },
+  { keys: ['Ctrl', 'Tab'], title: 'Next Tab', desc: 'Cycle forward to next tab to the right.', category: 'browser' },
+  { keys: ['Ctrl', 'Shift', 'Tab'], title: 'Previous Tab', desc: 'Cycle backward to tab on the left.', category: 'browser' },
+  { keys: ['Ctrl', '1..8'], title: 'Jump to Tab', desc: 'Instantly jump to tab at specific position (1 to 8).', category: 'browser' },
+  { keys: ['Ctrl', '9'], title: 'Jump to Last Tab', desc: 'Jump directly to the rightmost open tab.', category: 'browser' },
+  { keys: ['Ctrl', 'L'], title: 'Focus Address Bar', desc: 'Highlight URL address bar for instant typing or searching.', category: 'browser' },
+  { keys: ['Ctrl', 'R / F5'], title: 'Reload Page', desc: 'Refresh and reload active web page.', category: 'browser' },
+  { keys: ['Ctrl', 'Shift', 'R'], title: 'Hard Refresh', desc: 'Reload page while completely bypassing cached files and scripts.', category: 'browser' },
+  { keys: ['Ctrl', 'D'], title: 'Bookmark Page', desc: 'Save current URL to browser bookmarks bar.', category: 'browser' },
+  { keys: ['Ctrl', 'J'], title: 'Downloads', desc: 'Open browser download history manager.', category: 'browser' },
+  { keys: ['Ctrl', 'H'], title: 'History', desc: 'Open full browsing history page.', category: 'browser' },
+  { keys: ['Ctrl', '+ / -'], title: 'Zoom In / Out', desc: 'Increase or decrease page zoom scaling.', category: 'browser' },
+  { keys: ['Ctrl', '0'], title: 'Reset Zoom', desc: 'Reset page zoom scale back to default 100%.', category: 'browser' },
+  { keys: ['Alt', '← / Backspace'], title: 'Go Back', desc: 'Navigate to previous webpage in browser history.', category: 'browser' },
+
+  // ── FILE EXPLORER (15) ──
+  { keys: ['Ctrl', 'Shift', 'N'], title: 'New Folder', desc: 'Create a new folder in active directory immediately.', category: 'explorer' },
+  { keys: ['F2'], title: 'Rename Item', desc: 'Highlight file or folder name for instant renaming.', category: 'explorer' },
+  { keys: ['F3'], title: 'Search Folder', desc: 'Jump cursor to File Explorer search box.', category: 'explorer' },
+  { keys: ['F4'], title: 'Path Dropdown', desc: 'Display breadcrumb dropdown list in address bar.', category: 'explorer' },
+  { keys: ['F5'], title: 'Refresh Folder', desc: 'Update directory view with newly created or modified files.', category: 'explorer' },
+  { keys: ['Alt', 'Enter'], title: 'File Properties', desc: 'Open properties window for selected file or drive.', category: 'explorer' },
+  { keys: ['Alt', '↑'], title: 'Up Directory', desc: 'Navigate up one folder level in hierarchy.', category: 'explorer' },
+  { keys: ['Alt', '← / →'], title: 'History Nav', desc: 'Navigate back or forward in folder history.', category: 'explorer' },
+  { keys: ['Shift', 'Delete'], title: 'Permanent Delete', desc: 'Delete selected files permanently bypassing Recycle Bin.', category: 'explorer' },
+  { keys: ['Ctrl', 'Shift', 'E'], title: 'Expand Tree', desc: 'Expand all folders in the left navigation pane.', category: 'explorer' },
+  { keys: ['Alt', 'P'], title: 'Preview Pane', desc: 'Toggle file preview panel on right side of Explorer.', category: 'explorer' },
+  { keys: ['Alt', 'Shift', 'P'], title: 'Details Pane', desc: 'Toggle metadata details panel on right side of Explorer.', category: 'explorer' },
+  { keys: ['Ctrl', 'Scroll Wheel'], title: 'Icon Scaling', desc: 'Scale folder view between Large Icons, List, Details, and Tiles.', category: 'explorer' },
+  { keys: ['Ctrl', 'W'], title: 'Close Window', desc: 'Close current File Explorer window.', category: 'explorer' },
+  { keys: ['Backspace'], title: 'Parent Folder', desc: 'Navigate back to parent directory in history.', category: 'explorer' },
+
+  // ── MAC EQUIVALENTS (15) ──
+  { keys: ['Cmd', 'Space'], title: 'Spotlight Search', desc: 'Open Spotlight for instant app launching and web search.', category: 'mac' },
+  { keys: ['Cmd', 'Tab'], title: 'App Switcher', desc: 'Switch between running macOS applications.', category: 'mac' },
+  { keys: ['Cmd', 'Q'], title: 'Quit App', desc: 'Fully terminate and exit foreground macOS application.', category: 'mac' },
+  { keys: ['Cmd', 'W'], title: 'Close Window', desc: 'Close active window or browser tab.', category: 'mac' },
+  { keys: ['Cmd', 'C / V / X'], title: 'Copy / Paste / Cut', desc: 'Mac standard clipboard manipulation operations.', category: 'mac' },
+  { keys: ['Cmd', 'Option', 'Esc'], title: 'Force Quit', desc: 'Open Force Quit Applications dialog for unresponsive software.', category: 'mac' },
+  { keys: ['Cmd', 'Shift', '3'], title: 'Full Screenshot', desc: 'Capture entire Mac display and save directly to Desktop.', category: 'mac' },
+  { keys: ['Cmd', 'Shift', '4'], title: 'Area Screenshot', desc: 'Select screen rectangle with crosshair to capture image.', category: 'mac' },
+  { keys: ['Cmd', 'Shift', '5'], title: 'Screenshot HUD', desc: 'Open macOS Screen Capture and Video Recording toolbar.', category: 'mac' },
+  { keys: ['Cmd', 'H'], title: 'Hide App', desc: 'Hide foreground application windows from desktop.', category: 'mac' },
+  { keys: ['Cmd', 'Option', 'H'], title: 'Hide Others', desc: 'Hide all background windows except active app.', category: 'mac' },
+  { keys: ['Cmd', 'M'], title: 'Minimize Window', desc: 'Minimize foreground window smoothly into macOS Dock.', category: 'mac' },
+  { keys: ['Cmd', 'Z / Shift+Z'], title: 'Undo / Redo', desc: 'Revert or reapply actions in macOS software.', category: 'mac' },
+  { keys: ['Option', 'Delete'], title: 'Delete Word', desc: 'Delete preceding word in macOS text fields.', category: 'mac' },
+  { keys: ['Cmd', 'Delete'], title: 'Move to Trash', desc: 'Send selected file directly to macOS Bin / Trash.', category: 'mac' },
+
+  // ── DEV & TERMINAL (15) ──
+  { keys: ['Ctrl', 'P'], title: 'Quick Open', desc: 'Search and open any project file by filename in VS Code.', category: 'dev' },
+  { keys: ['Ctrl', 'Shift', 'P / F1'], title: 'Command Palette', desc: 'Open IDE Command Palette to execute all editor commands.', category: 'dev' },
+  { keys: ['Ctrl', '` (Backtick)'], title: 'Toggle Terminal', desc: 'Open or close integrated terminal console in VS Code.', category: 'dev' },
+  { keys: ['Ctrl', '/'], title: 'Toggle Comment', desc: 'Comment out or uncomment active line or selected code.', category: 'dev' },
+  { keys: ['Alt', '↑ / ↓'], title: 'Move Line', desc: 'Shift line or highlighted block up or down.', category: 'dev' },
+  { keys: ['Shift', 'Alt', '↑ / ↓'], title: 'Duplicate Line', desc: 'Duplicate current line or selection upward or downward.', category: 'dev' },
+  { keys: ['Ctrl', 'D'], title: 'Add Next Match', desc: 'Select next instance of current word for multi-cursor editing.', category: 'dev' },
+  { keys: ['Ctrl', 'Shift', 'L'], title: 'Select All Matches', desc: 'Put a cursor on every occurrence of selected word in file.', category: 'dev' },
+  { keys: ['Ctrl', 'B'], title: 'Toggle Sidebar', desc: 'Show or hide file tree and primary IDE sidebar.', category: 'dev' },
+  { keys: ['Ctrl', 'Shift', 'F'], title: 'Global Search', desc: 'Search text patterns across all files in repository.', category: 'dev' },
+  { keys: ['Alt', 'Click'], title: 'Multi-Cursor', desc: 'Insert additional simultaneous editing cursor anywhere in file.', category: 'dev' },
+  { keys: ['F12'], title: 'Go to Definition', desc: 'Navigate to source definition of function or symbol.', category: 'dev' },
+  { keys: ['Alt', 'F12'], title: 'Peek Definition', desc: 'Inspect source code inline without leaving current file.', category: 'dev' },
+  { keys: ['Ctrl', 'Space'], title: 'IntelliSense', desc: 'Manually trigger code autocomplete and suggestion dropdown.', category: 'dev' },
+  { keys: ['Ctrl', 'K, Ctrl', 'S'], title: 'Key Shortcuts', desc: 'Open keyboard shortcuts and custom keybindings menu.', category: 'dev' },
+
+  // ── EXCEL & SHEETS (15) ──
+  { keys: ['F4'], title: 'Repeat / Absolute', desc: 'Repeat last formatting or cycle absolute reference ($A$1).', category: 'excel' },
+  { keys: ['Ctrl', 'Arrow Keys'], title: 'Jump Data Edge', desc: 'Jump immediately to outermost edge of active data table.', category: 'excel' },
+  { keys: ['Ctrl', 'Shift', 'Arrows'], title: 'Select Data Edge', desc: 'Highlight all cells to the edge of the data region.', category: 'excel' },
+  { keys: ['Shift', 'Space'], title: 'Select Row', desc: 'Select the entire active worksheet row.', category: 'excel' },
+  { keys: ['Ctrl', 'Space'], title: 'Select Column', desc: 'Select the entire active worksheet column.', category: 'excel' },
+  { keys: ['Ctrl', 'Shift', '+'], title: 'Insert Row/Col', desc: 'Insert new cells, row, or column at selection.', category: 'excel' },
+  { keys: ['Ctrl', '-'], title: 'Delete Row/Col', desc: 'Delete selected cells, row, or column from sheet.', category: 'excel' },
+  { keys: ['Alt', '='], title: 'AutoSum Formula', desc: 'Instantly insert =SUM() formula on adjacent data cells.', category: 'excel' },
+  { keys: ['Ctrl', '; (Semicolon)'], title: 'Insert Date', desc: 'Insert current calendar date into active cell.', category: 'excel' },
+  { keys: ['Ctrl', 'Shift', ':'], title: 'Insert Time', desc: 'Insert current clock time into active cell.', category: 'excel' },
+  { keys: ['Ctrl', '1'], title: 'Format Cells', desc: 'Open Format Cells dialog (number, date, currency, borders).', category: 'excel' },
+  { keys: ['Ctrl', 'PgDn / PgUp'], title: 'Switch Sheets', desc: 'Cycle forward or backward between worksheet tabs.', category: 'excel' },
+  { keys: ['F2'], title: 'Edit Active Cell', desc: 'Edit formula or text directly inside active cell.', category: 'excel' },
+  { keys: ['Ctrl', 'Enter'], title: 'Fill Selection', desc: 'Populate all highlighted cells with current entry.', category: 'excel' },
+  { keys: ['Ctrl', '` (Backtick)'], title: 'Show Formulas', desc: 'Toggle between displaying formula text and calculated values.', category: 'excel' },
+]);
+
+const ShortcutsCheatSheet = memo(function ShortcutsCheatSheet() {
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const categories = [
+    { id: 'all', label: 'All Shortcuts', count: 116 },
+    { id: 'windows', label: '🪟 Windows System', count: 20 },
+    { id: 'editing', label: '✍️ Text Editing', count: 18 },
+    { id: 'browser', label: '🌐 Web Browser', count: 18 },
+    { id: 'explorer', label: '📁 File Explorer', count: 15 },
+    { id: 'mac', label: '🍎 Mac (macOS)', count: 15 },
+    { id: 'dev', label: '💻 Code & Dev', count: 15 },
+    { id: 'excel', label: '📊 Excel & Sheets', count: 15 },
+  ];
+
+  const filteredShortcuts = useMemo(() => {
+    return SHORTCUTS_DATA.filter(item => {
+      const matchCategory = activeCategory === 'all' || item.category === activeCategory;
+      if (!matchCategory) return false;
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase().trim();
+      return (
+        item.keys.some(k => k.toLowerCase().includes(q)) ||
+        item.title.toLowerCase().includes(q) ||
+        item.desc.toLowerCase().includes(q)
+      );
+    });
+  }, [activeCategory, searchQuery]);
+
+  const handleCopy = (keys: string[], id: string) => {
+    const text = keys.join(' + ');
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedKey(id);
+      setTimeout(() => setCopiedKey(null), 1800);
+    }
+  };
+
+  return (
+    <section
+      aria-label="100+ Essential PC and Laptop Shortcuts Cheat Sheet"
+      style={{
+        background: '#0c1322',
+        border: '1px solid rgba(0, 245, 255, 0.2)',
+        borderRadius: '16px',
+        padding: '1.75rem',
+        marginBottom: '3rem',
+        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.4)',
+      }}
+    >
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.25rem' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--neon-green, #00ff88)', fontSize: '0.85rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            <Sparkles size={16} />
+            <span>Productivity Database</span>
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff', margin: '0.25rem 0 0', letterSpacing: '-0.02em' }}>
+            100+ Essential PC & Laptop Shortcuts
+          </h2>
+          <p style={{ color: '#9ca3af', fontSize: '0.88rem', margin: '0.35rem 0 0' }}>
+            Master daily shortcuts for Windows, Mac, Chrome, Text Editing, VS Code & Excel. Press keys above on the visualizer to test!
+          </p>
+        </div>
+
+        {/* Live Search */}
+        <div style={{ position: 'relative', minWidth: '260px' }}>
+          <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search shortcuts (e.g. screenshot, tab)..."
+            style={{
+              width: '100%',
+              padding: '9px 12px 9px 36px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.12)',
+              borderRadius: '10px',
+              color: '#ffffff',
+              fontSize: '0.85rem',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Category Pills */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '1.5rem' }}>
+        {categories.map(c => {
+          const isActive = activeCategory === c.id;
+          return (
+            <button
+              key={c.id}
+              onClick={() => setActiveCategory(c.id)}
+              style={{
+                background: isActive ? 'linear-gradient(135deg, rgba(0,245,255,0.25), rgba(0,255,136,0.2))' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${isActive ? 'var(--neon-cyan, #00f5ff)' : 'rgba(255,255,255,0.08)'}`,
+                color: isActive ? '#00f5ff' : '#9ca3af',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                fontSize: '0.82rem',
+                fontWeight: isActive ? 700 : 500,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {c.label} ({c.count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Results Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', fontSize: '0.8rem', color: '#64748b' }}>
+        <span>Showing <strong>{filteredShortcuts.length}</strong> of 116 shortcuts</span>
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            style={{ background: 'transparent', border: 'none', color: 'var(--neon-cyan)', cursor: 'pointer', fontSize: '0.8rem' }}
+          >
+            Clear Search
+          </button>
+        )}
+      </div>
+
+      {/* Shortcuts Grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gap: '12px',
+          maxHeight: '520px',
+          overflowY: 'auto',
+          paddingRight: '6px',
+        }}
+      >
+        {filteredShortcuts.map((item, idx) => {
+          const itemKey = `${item.title}-${idx}`;
+          const isCopied = copiedKey === itemKey;
+          return (
+            <div
+              key={itemKey}
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.06)',
+                borderRadius: '10px',
+                padding: '0.9rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', alignItems: 'center' }}>
+                    {item.keys.map((k, ki) => (
+                      <span key={ki} style={{ display: 'inline-flex', alignItems: 'center' }}>
+                        <kbd
+                          style={{
+                            background: 'rgba(0, 245, 255, 0.1)',
+                            border: '1px solid rgba(0, 245, 255, 0.35)',
+                            borderRadius: '5px',
+                            padding: '2px 7px',
+                            color: '#00f5ff',
+                            fontSize: '0.78rem',
+                            fontWeight: 700,
+                            fontFamily: 'monospace',
+                            boxShadow: '0 2px 0 rgba(0,0,0,0.5)',
+                          }}
+                        >
+                          {k}
+                        </kbd>
+                        {ki < item.keys.length - 1 && (
+                          <span style={{ color: '#64748b', margin: '0 3px', fontSize: '0.75rem', fontWeight: 700 }}>+</span>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => handleCopy(item.keys, itemKey)}
+                    title="Copy shortcut"
+                    aria-label={`Copy ${item.title} shortcut`}
+                    style={{
+                      background: isCopied ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.05)',
+                      border: `1px solid ${isCopied ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                      color: isCopied ? 'var(--neon-green)' : '#9ca3af',
+                      borderRadius: '6px',
+                      padding: '4px 6px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {isCopied ? <Check size={13} /> : <Copy size={13} />}
+                  </button>
+                </div>
+
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.25rem' }}>
+                  {item.title}
+                </div>
+                <div style={{ fontSize: '0.78rem', color: '#9ca3af', lineHeight: 1.45 }}>
+                  {item.desc}
+                </div>
+              </div>
+
+              <div style={{ marginTop: '0.6rem', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: '#64748b' }}>
+                {item.category === 'windows' && '🪟 Windows'}
+                {item.category === 'editing' && '✍️ Text Editing'}
+                {item.category === 'browser' && '🌐 Browser'}
+                {item.category === 'explorer' && '📁 Explorer'}
+                {item.category === 'mac' && '🍎 macOS'}
+                {item.category === 'dev' && '💻 Dev & Shell'}
+                {item.category === 'excel' && '📊 Spreadsheets'}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+});
+
 const TableOfContents = memo(function TableOfContents() {
   return (
     <nav aria-label="Article table of contents" style={{ background: 'rgba(0,0,0,0.25)', borderRadius: '10px', padding: '1.25rem 1.5rem', marginBottom: '2rem', border: '1px solid var(--border)' }}>
@@ -1201,27 +1578,43 @@ const TableOfContents = memo(function TableOfContents() {
 const FAQ_DATA = [
   {
     q: 'Why do some system shortcut keys not light up on the Key Visualizer?',
-    a: 'Certain key combinations such as Alt+Tab or OS-level shortcuts are intercepted by your operating system before they reach the browser. The Key Visualizer captures all standard keys including F-keys, Numpad, and Arrows.',
+    a: 'Certain key combinations such as Alt+Tab or Win+L are intercepted directly by your operating system kernel before the browser receives the keydown event. The Key Visualizer captures all standard keys, function keys (F1–F12), Numpad, and navigation clusters.',
   },
   {
-    q: 'How is the Most Used Keys bar width calculated?',
-    a: 'The progress bar uses your highest single-key press count as the 100% anchor. All other keys scale proportionally, giving a clear visual comparison of your typing habits.',
+    q: 'How can I identify what key does what on a faded or erased keyboard?',
+    a: 'If your keyboard letters are worn off or erased, open FixedAim Key Visualizer and press the mystery switch. The on-screen virtual keyboard instantly highlights the exact key, character code, and physical layout position in real time.',
   },
   {
-    q: 'Can the Key Visualizer test Numpad and Arrow keys?',
-    a: 'Yes! The 100% Full Keyboard layout displays the complete numeric keypad (with NumLock, operators, numbers, and Numpad Enter) as well as the independent arrow and navigation clusters.',
+    q: 'What is a Tab Switch Detector and why do online tests and exams monitor it?',
+    a: 'Websites and exam proctoring platforms use browser document.visibilityState and window.onblur APIs to detect when you press Tab, Alt+Tab, or click outside the page. FixedAim Key Visualizer suppresses Tab page scrolling via passive: false event listeners so you can test your Tab key smoothly without jumping.',
   },
   {
-    q: 'Can the Key Visualizer detect multi-key rollover (NKRO) and ghosting?',
-    a: 'Yes. Press multiple keys simultaneously to test whether your keyboard registers all inputs without blocking or ghosting.',
+    q: 'What is N-Key Rollover (NKRO) and how do I test if my keyboard has ghosting bugs?',
+    a: 'N-Key Rollover (NKRO) allows every key pressed simultaneously to register independently. Budget membrane keyboards often suffer from ghosting or matrix bugs when pressing 3+ keys (like W + Shift + Space). Press multiple keys together to watch the Active Keys counter benchmark your rollover limit.',
   },
   {
-    q: 'Does the Key Visualizer store or transmit my keystrokes?',
-    a: 'No. All keystroke data is processed entirely in your browser memory. Nothing is stored in a database, sent to a server, or logged externally.',
+    q: 'Can I use FixedAim as an on-screen KBM input visualizer for speedruns or streaming?',
+    a: 'Yes! In speedrunning communities (like Minecraft, Trackmania, and Celeste) and OBS streaming, you can capture FixedAim as a Window or Browser Source to provide viewers with live on-screen proof of your keystrokes and strafing rhythm.',
   },
   {
-    q: 'What browsers does the Key Visualizer support?',
-    a: 'The Key Visualizer works on all modern browsers including Chrome, Firefox, Edge, Safari, and Opera. Tab navigation scrolling is prevented so you can test smoothly.',
+    q: 'How do I diagnose mechanical switch chatter and double-typing bugs?',
+    a: 'Key chatter happens when oxidized mechanical switch leaves bounce rapidly, generating 2 or more actuations from a single physical tap. The Key Visualizer live log lets you inspect actuation timestamps and detect switch bounce under 20ms.',
+  },
+  {
+    q: 'Why is an online browser-based key visualizer safer than desktop apps like Vovsoft or NohBoard?',
+    a: 'Desktop keyboard overlays require installing executable files or third-party drivers that could bundle background keyloggers. FixedAim runs 100% in local client browser memory with zero downloads, zero network telemetry, and zero security risk.',
+  },
+  {
+    q: 'Can the Key Visualizer test Function keys (F1-F12), Numpad, and Arrow keys?',
+    a: 'Yes! The 100% Full Keyboard layout displays the complete numeric keypad (with NumLock, operators, numbers, and Numpad Enter) as well as independent arrow keys and navigation clusters.',
+  },
+  {
+    q: 'Does this keyboard viewer work on Mac, Windows laptops, and Chromebooks?',
+    a: 'Yes. FixedAim Key Visualizer runs seamlessly across Windows 10/11, macOS, Linux, and ChromeOS in all modern browsers including Chrome, Edge, Firefox, and Safari.',
+  },
+  {
+    q: 'Does the Key Visualizer store, transmit, or log my keystrokes?',
+    a: 'No. All keystroke events are processed strictly in local browser memory. No data is ever transmitted across the network or stored in cookies, ensuring complete privacy.',
   },
 ];
 
@@ -1403,7 +1796,7 @@ const ArticleSection = lazy(() =>
         <article aria-label="Key Visualizer guide and information">
           <h2 id="how-to-use" style={h2Style}>How to Use the Key Visualizer</h2>
           <p style={pStyle}>
-            FixedAim&apos;s <strong>Key Visualizer</strong> is a high-precision, zero-latency keyboard testing suite.
+            FixedAim&apos;s <strong>Key Visualizer</strong> is a high-precision, zero-latency keyboard testing suite and real-time keystroke viewer.
             Simply start pressing any key on your physical keyboard to see it actuate on the virtual display in real time.
             Whether you are testing individual mechanical switches, identifying ghosted clusters, or benchmarking multi-key rollover (NKRO),
             every keystroke is captured with sub-millisecond hardware accuracy.
@@ -1423,7 +1816,8 @@ const ArticleSection = lazy(() =>
           <p style={pStyle}>
             Press and hold multiple keys simultaneously (e.g. <code style={codeStyle}>W + A + S + D + Shift + Space</code>).
             The <em>Active Keys</em> counter reflects the exact number of switches registered simultaneously.
-            Quality gaming keyboards feature N-Key Rollover (NKRO), allowing all held keys to register without dropped inputs.
+            Quality gaming keyboards feature N-Key Rollover (NKRO), allowing all held keys to register without dropped inputs.{' '}
+            <ContextPill label="NKRO Software" variant="amber" topicId="keyboard-troubleshooting" icon="none" />
           </p>
 
           <h2 id="features" style={h2Style}>Features of This Keyboard Visualizer</h2>
@@ -1433,43 +1827,103 @@ const ArticleSection = lazy(() =>
             <li style={liStyle}><strong>Live Key Log:</strong> Inspect your last 20 keystrokes with timestamps and clear badges.</li>
             <li style={liStyle}><strong>Usage Bar Chart:</strong> Analyze which keys receive the heaviest actuation during gaming and typing sessions.</li>
             <li style={liStyle}><strong>Mechanical Audio Feedback:</strong> Optional Web Audio click sounds simulate mechanical key switch actuation.</li>
+            <li style={liStyle}><strong>100+ Shortcut Cheat Sheet:</strong> Fast searchable reference table for Windows, Mac, Chrome, VS Code, and Excel.</li>
           </ul>
 
-          <h2 id="benefits-gamers" style={h2Style}>Benefits for Gamers</h2>
+          <h2 id="shortcuts-guide" style={h2Style}>100+ Essential PC & Laptop Shortcuts for Daily Life</h2>
           <p style={pStyle}>
-            In fast-paced competitive esports (Valorant, CS2, Fortnite, Apex Legends, and Minecraft PvP), input consistency is vital.
-            A single chatter-prone switch or unseated keycap can break strafe movement or weapon swaps.
-            Using this tool, gamers can diagnose switch debounce bounce, dead switches, and key rollover limits before entering ranked matches.
+            Keyboard shortcuts transform how you interact with your computer. Navigating menus with a mouse requires visual searching, moving the cursor, clicking, and waiting for sub-menus to open. In contrast, triggering a shortcut executes the command in under <strong>50 milliseconds</strong>.
+          </p>
+          <p style={pStyle}>
+            Whether you are capturing screenshots (<code style={codeStyle}>Win + Shift + S</code>), reopening accidentally closed tabs (<code style={codeStyle}>Ctrl + Shift + T</code>), opening clipboard history (<code style={codeStyle}>Win + V</code>), or locking your workstation (<code style={codeStyle}>Win + L</code>), memorizing high-frequency combinations saves hours every month.{' '}
+            <ContextPill label="100+ Short Keys" variant="purple" topicId="pc-shortcuts" icon="none" />
+          </p>
+          <p style={pStyle}>
+            Use the interactive <strong>100+ Shortcuts Cheat Sheet</strong> above to filter by your operating system or application (Windows, Mac, Browser, File Explorer, Developer, or Excel) and press the keys directly on your physical keyboard to confirm their registration on the visualizer!
           </p>
 
-          <h2 id="benefits-typists" style={h2Style}>Benefits for Programmers and Typists</h2>
+          <h2 id="streamer-overlay" style={h2Style}>Real-Time Keystroke Visualizer for Speedruns, OBS Streaming & Gaming</h2>
           <p style={pStyle}>
-            Programmers rely heavily on modifier keys (<code style={codeStyle}>Ctrl, Alt, Shift, Win</code>) and punctuation brackets (<code style={codeStyle}>&#123;&#125;, [], &lt;&gt;, ;, :</code>).
-            The Key Visualizer verifies that every modifier and symbol switch actuates reliably on both hands.
+            In competitive gaming, Twitch/YouTube streaming, and speedrunning leaderboards (such as Speedrun.com for Minecraft, Celeste, or Trackmania), proof of manual execution is paramount. Moderators and viewers require an on-screen keyboard display (KBM input visualizer) to verify that runs are performed without illegal macros, turbo controllers, or tool-assisted automation (TAS).{' '}
+            <ContextPill label="Speedrun KBM" variant="blue" topicId="streamer-kbm-overlay" icon="none" />
+          </p>
+          <p style={pStyle}>
+            FixedAim Key Visualizer serves as an instant, zero-install <strong>on-screen key tracker screen</strong>. Streamers can easily capture the FixedAim browser tab as an OBS or Streamlabs Window Source or Browser Source. Because it renders via lightweight GPU-accelerated CSS and native event listeners, it imposes virtually zero CPU or GPU load compared to bloated desktop overlay software.
           </p>
 
-          <h2 id="common-problems" style={h2Style}>Common Keyboard Problems You Can Detect</h2>
+          <h2 id="tab-detector" style={h2Style}>Tab Switch Detector & Window Focus Mechanics</h2>
+          <p style={pStyle}>
+            Modern web applications, online exams, remote proctoring portals, and competitive browser benchmarks frequently incorporate <strong>Tab Switch Detectors</strong>. When a user navigates away from an active tab or presses <code style={codeStyle}>Alt + Tab</code>, the browser fires <code style={codeStyle}>visibilitychange</code> and <code style={codeStyle}>window.onblur</code> events.{' '}
+            <ContextPill label="Tab Switch Detector" variant="green" topicId="tab-switch-detector" icon="none" />
+          </p>
+          <p style={pStyle}>
+            On standard websites, pressing the <code style={codeStyle}>Tab</code> key cycles focus through links and buttons, which causes sudden viewport scrolling. FixedAim Key Visualizer solves this by attaching <code style={codeStyle}>passive: false</code> event listeners to intercept <code style={codeStyle}>e.preventDefault()</code> exclusively on the Tab key. This enables users to test their Tab key actuation reliably without disorienting viewport jumps.
+          </p>
+
+          <h2 id="nkro-ghosting" style={h2Style}>Key Rollover (NKRO) & Keyboard Matrix Bug Testing</h2>
+          <p style={pStyle}>
+            Have you ever experienced your character freezing while strafing diagonally and jumping? Or does typing fast drop characters? This is caused by <strong>key rollover limits</strong> and matrix bugs. Budget membrane keyboards connect keys in an electrical grid of intersecting rows and columns without individual isolation diodes.
+          </p>
           <ul style={ulStyle}>
-            <li style={liStyle}><strong>Key Chatter (Double-Typing):</strong> If a single light tap increments the count by 2 or more, your mechanical switch leaf is bouncing or oxidized.</li>
-            <li style={liStyle}><strong>Dead Keys:</strong> If a keycap fails to illuminate when pressed, the PCB trace or switch diode may be faulty.</li>
-            <li style={liStyle}><strong>Key Ghosting:</strong> If pressing three keys causes an adjacent unpressed key to falsely register, your keyboard matrix lacks anti-ghosting diodes.</li>
+            <li style={liStyle}><strong>2-Key Rollover (2KRO):</strong> Basic membrane controllers can only detect 2 simultaneous keystrokes reliably. Pressing a 3rd key sharing an electrical trace causes dropped inputs.</li>
+            <li style={liStyle}><strong>6-Key Rollover (6KRO):</strong> Standard USB HID limit on legacy boards, allowing up to 6 simultaneous alphanumeric keys.</li>
+            <li style={liStyle}><strong>Full N-Key Rollover (NKRO):</strong> True gaming and enthusiast keyboards equip every mechanical switch with a discrete surface-mount diode. You can press 10, 20, or all 104 keys simultaneously, and every single switch will illuminate instantly.</li>
+          </ul>
+          <p style={pStyle}>
+            Press both hands across your keyboard right now to benchmark your hardware rollover limit. The <strong>Active Keys</strong> counter will immediately reveal whether your keyboard suffers from ghosting or matrix blocking.
+          </p>
+
+          <h2 id="troubleshoot-keys" style={h2Style}>Troubleshooting Dead, Sticky, or Erased Keys on Laptops & Mechanical Keyboards</h2>
+          <p style={pStyle}>
+            Over years of daily typing, keycap legends frequently fade, wear off, or become completely erased—especially on ABS keycaps (like <code style={codeStyle}>WASD, E, Space, Enter</code>). Users often ask: <em>&ldquo;Is there a way to show what key does what on my erased keyboard?&rdquo;</em>{' '}
+            <ContextPill label="Fix Erased Keys" variant="cyan" topicId="keyboard-troubleshooting" icon="none" />
+          </p>
+          <p style={pStyle}>
+            FixedAim Key Visualizer is the easiest way to identify mystery or blank keycaps. Press the faded switch, and the virtual 104-key layout will light up the exact key name, character symbol, and physical location on screen. Furthermore, you can diagnose common hardware faults:
+          </p>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>Switch Chatter (Double-Typing):</strong> If pressing a switch once registers 2, 3, or more counts in the Live Key Log, the switch leaf contacts are oxidized or bouncing. Cleaning with isopropyl alcohol or replacing the switch can resolve the issue.</li>
+            <li style={liStyle}><strong>Dead Keys:</strong> If pressing a key firmly fails to trigger any visual feedback or entry in the Live Log, the PCB hot-swap socket, ribbon cable, or switch diode is severed.</li>
+            <li style={liStyle}><strong>Sticky Keys & Spills:</strong> Sticky keys exhibit delayed release times, remaining highlighted in the Active Keys panel long after your finger has released the keycap.</li>
           </ul>
 
-          <h2 id="browser-compat" style={h2Style}>Browser Compatibility</h2>
+          <h2 id="web-vs-desktop" style={h2Style}>Web-Based Key Visualizer vs Desktop Software (Vovsoft, NohBoard)</h2>
           <p style={pStyle}>
-            FixedAim Key Visualizer is compatible with all modern desktop and mobile browsers, including Google Chrome, Mozilla Firefox, Microsoft Edge, Brave, and Apple Safari.
+            Many streamers and gamers historically relied on desktop software utilities like <em>Vovsoft Keystroke Visualizer</em> or <em>NohBoard</em>. While these tools function as local overlays, they present significant disadvantages compared to FixedAim:
+          </p>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>Zero Security Risk:</strong> Desktop visualizers require administrative installer permissions and low-level keyboard hook drivers. This introduces potential keylogger vulnerabilities. FixedAim runs entirely in your sandboxed web browser.</li>
+            <li style={liStyle}><strong>Zero Bloat & Zero Installation:</strong> No downloads, no unzipping, no background tray processes consuming system RAM. Simply open the URL and test instantly.</li>
+            <li style={liStyle}><strong>Cross-Platform Compatibility:</strong> Desktop software is almost universally restricted to Windows. FixedAim Key Visualizer runs flawlessly across Windows 10/11, macOS, Linux, and ChromeOS laptops.</li>
+          </ul>
+
+          <h2 id="benefits-gamers" style={h2Style}>Benefits for Gamers & Competitive Esports</h2>
+          <p style={pStyle}>
+            In competitive shooters like CS2, Valorant, Fortnite, Apex Legends, and Minecraft PvP, movement mechanics rely on rapid switch actuation:
+          </p>
+          <ul style={ulStyle}>
+            <li style={liStyle}><strong>Counter-Strafing:</strong> Rapidly releasing <code style={codeStyle}>A</code> and tapping <code style={codeStyle}>D</code> halts player velocity instantly for pinpoint first-bullet rifle accuracy.</li>
+            <li style={liStyle}><strong>Sprint Resets & W-Tapping:</strong> In Minecraft PvP, resetting your sprint key between sword hits maximizes knockback against your opponent.</li>
+            <li style={liStyle}><strong>Rapid Weapon Switching:</strong> Ensures number row (<code style={codeStyle}>1, 2, 3, 4</code>) actuates reliably without missing grenade or sidearm swaps.</li>
+          </ul>
+
+          <h2 id="benefits-typists" style={h2Style}>Benefits for Programmers, Data Entry & Ergonomics</h2>
+          <p style={pStyle}>
+            Software engineers and transcriptionists actuate modifier clusters thousands of times daily (<code style={codeStyle}>Ctrl, Alt, Shift, Cmd, Win</code>) alongside punctuation brackets (<code style={codeStyle}>&#123;&#125;, [], &lt;&gt;, ;, :</code>).
+            The Key Visualizer verifies that every modifier and symbol switch actuates with equal pressure on both hands, preventing wrist strain and repetitive strain injuries (RSI).
           </p>
 
-          <h2 id="privacy" style={h2Style}>Privacy & Security</h2>
+          <h2 id="browser-compat" style={h2Style}>Browser Compatibility & Zero-Log Privacy Guarantee</h2>
           <p style={pStyle}>
-            Your keystrokes are processed strictly in local browser memory via JavaScript event listeners.
-            No data is transmitted over the network, stored in cookies, or sent to any analytics server.
+            FixedAim Key Visualizer is compatible with all modern desktop and laptop browsers, including Google Chrome, Mozilla Firefox, Microsoft Edge, Brave, Opera, and Apple Safari.
+          </p>
+          <p style={pStyle}>
+            <strong>Your Privacy is 100% Protected:</strong> Every keystroke is captured exclusively in local browser RAM via native JavaScript event handlers. Zero keystroke data is ever recorded, stored in cookies, or transmitted to any remote server or analytics platform.
           </p>
 
-          <h2 id="conclusion" style={h2Style}>Conclusion</h2>
+          <h2 id="conclusion" style={h2Style}>Conclusion & Routine Keyboard Maintenance</h2>
           <p style={pStyle}>
-            Keep your peripherals in peak mechanical condition with FixedAim&apos;s full-size Key Visualizer.
-            Benchmark, diagnose, and train with confidence.
+            Keep your peripherals in pristine condition with FixedAim&apos;s full-size Key Visualizer. Test individual switches, verify multi-key rollover (NKRO), explore our 100+ shortcuts database, and diagnose hardware chatter before jumping into competitive ranked gaming or professional typing workflows.
           </p>
         </article>
       );
@@ -1629,6 +2083,9 @@ export default function KeyVisualizerPage() {
           </Suspense>
         </KeyVisualizerErrorBoundary>
 
+        {/* Keyboard Discover Card */}
+        <KeyboardDiscoverCard />
+
         {/* Divider before FAQ */}
         <hr style={{ border: 0, borderTop: '1px solid rgba(255,255,255,0.07)', margin: '3rem 0' }} />
 
@@ -1638,6 +2095,10 @@ export default function KeyVisualizerPage() {
         </KeyVisualizerErrorBoundary>
 
       </div>
+
+      {/* AI Contextual Sidebar */}
+      <ContextSidebar />
+
     </div>
   );
 }
