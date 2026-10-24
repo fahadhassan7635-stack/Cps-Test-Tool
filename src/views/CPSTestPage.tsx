@@ -8,8 +8,14 @@ import React, {
   memo,
 } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
+import dynamic from 'next/dynamic';
 import { Maximize2, Minimize2, ExternalLink } from 'lucide-react';
-import { ContextPill, ContextSidebar, DiscoverMoreCard } from '../components/AIContextualAssistant';
+import { ContextPill, DiscoverMoreCard } from '../components/AIContextualAssistant';
+
+const ContextSidebar = dynamic(
+  () => import('../components/AIContextualAssistant').then((m) => m.ContextSidebar),
+  { ssr: false }
+);
 
 // ─────────────────────────────────────────────
 // TYPES & CONSTANTS
@@ -84,61 +90,6 @@ const ArticleLink = memo(({ href, children }: { href: string; children: ReactNod
   </a>
 ));
 ArticleLink.displayName = 'ArticleLink';
-
-// ─────────────────────────────────────────────
-// GLOBAL CSS (extracted constant — no new string each render)
-// ─────────────────────────────────────────────
-const GLOBAL_STYLES = `
-  .sr-only {
-    position: absolute; width: 1px; height: 1px;
-    padding: 0; margin: -1px; overflow: hidden;
-    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
-  }
-  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-  @keyframes modalPopIn {
-    from { opacity:0; transform:translate(-50%,-50%) scale(0.85); }
-    to   { opacity:1; transform:translate(-50%,-50%) scale(1); }
-  }
-  @keyframes slideUp {
-    from { opacity:0; transform:translateY(20px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-  @keyframes rippleAnim {
-    0%   { transform:translate(-50%,-50%) scale(0);    opacity:0.45; }
-    50%  { transform:translate(-50%,-50%) scale(0.8);  opacity:0.22; }
-    100% { transform:translate(-50%,-50%) scale(1.2);  opacity:0;    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration:0.01ms !important;
-      animation-iteration-count:1 !important;
-      transition-duration:0.01ms !important;
-    }
-  }
-  @media (forced-colors: active) {
-    .cps-stat-card, .cps-modal-inner { border:2px solid ButtonText !important; }
-  }
-  @media (max-width:600px) {
-    .cps-page-wrap      { padding:1.25rem 0.75rem !important; }
-    .cps-duration-row   { gap:0.4rem !important; }
-    .cps-duration-btn   { padding:0.4rem 0.65rem !important; font-size:0.8rem !important; min-width:44px !important; }
-    .cps-custom-wrap    { width:100% !important; justify-content:center !important; }
-    .cps-stats-grid     { gap:0.5rem !important; }
-    .cps-stat-card      { padding:0.85rem 0.4rem !important; border-radius:10px !important; }
-    .cps-stat-value     { font-size:clamp(1.4rem,7vw,2.2rem) !important; }
-    .cps-stat-label     { font-size:0.6rem !important; letter-spacing:0.05em !important; }
-    .cps-modal-split    { grid-template-columns:1fr !important; min-height:unset !important; gap:0.75rem !important; }
-    .cps-modal-left     { border-right:none !important; border-bottom:1px solid rgba(255,255,255,0.08) !important; padding-right:0 !important; padding-bottom:0.75rem !important; }
-    .cps-modal-emoji    { font-size:3rem !important; }
-    .cps-modal-rank     { font-size:1.6rem !important; }
-    .cps-modal-inner    { padding:1.25rem 1rem !important; }
-    .cps-history-row    { font-size:0.78rem !important; gap:0.25rem !important; flex-wrap:wrap !important; padding:0.6rem 1rem !important; }
-    .cps-article        { padding:1.25rem !important; }
-    .cps-article h2     { font-size:1.4rem !important; }
-    .cps-article h3     { font-size:1.1rem !important; }
-    .cps-games-grid     { grid-template-columns:repeat(2,1fr) !important; gap:0.6rem !important; }
-  }
-`;
 
 // ─────────────────────────────────────────────
 // RATING HELPER (outside component — stable)
@@ -296,86 +247,6 @@ const FAQ_DATA = [
     q: "Can I train my right click speed separately?",
     a: "Yes. Use the Right Click mode in short daily sessions — 5 to 10 repeats of 5-second tests with 30-second rest periods. This builds independent ring finger fast-twitch endurance without cross-contaminating your left click muscle memory.",
   },
-];
-
-// ─────────────────────────────────────────────
-// JSON-LD SCHEMA DATA (stable constant)
-// ─────────────────────────────────────────────
-const JSON_LD_SCHEMAS: object[] = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'CPS Test — Free Click Speed Test, CPS Counter & Kohi Click Test | FixedAim',
-    alternateName: ['Click Speed Test', 'Clicks Per Second Test', 'CPS Counter', 'CPS Tester', 'Click Test', 'Kohi Click Test', 'Mouse Click Test', 'Right Click Test', 'Jitter Click Test', 'Butterfly Click Test', 'Click Speed Checker', 'CPS Test Unblocked'],
-    description:
-      'Free CPS Test & Click Speed Test — measure clicks per second (CPS) with left click, right click, jitter click, and butterfly click modes. Kohi click test inspired. Live CPS graph, session history, anti-cheat. Works on PC, mobile & tablet. No download.',
-    applicationCategory: 'GameApplication',
-    operatingSystem: 'All',
-    browserRequirements: 'Requires JavaScript',
-    url: 'https://fixedaim.com/cps-test',
-    sameAs: ['https://fixedaim.com/cps-test'],
-    inLanguage: 'en',
-    isAccessibleForFree: true,
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
-    featureList: [
-      'Left Click CPS Test',
-      'Right Click CPS Test',
-      'Real-time CPS Graph',
-      'Multiple test durations (1s to 300s)',
-      'Custom duration input',
-      'Live CPS counter',
-      'Anti-cheat detection',
-      'Session history table',
-      'Sound effects toggle',
-      'Mobile and tablet friendly',
-      'No download or registration required',
-    ],
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebPage',
-    '@id': 'https://fixedaim.com/cps-test',
-    name: 'CPS Test — Free Click Speed Test, CPS Counter & Kohi Click Test Online',
-    description: 'Free CPS Test & click speed test — measure clicks per second (CPS), test jitter click, right click, butterfly click speed. Kohi click test style. Live graph, anti-cheat, session history. Works on PC, mobile & tablet.',
-    url: 'https://fixedaim.com/cps-test',
-    inLanguage: 'en',
-    isPartOf: { '@type': 'WebSite', name: 'FixedAim', url: 'https://fixedaim.com' },
-    about: { '@type': 'Thing', name: 'CPS Test', description: 'A tool that measures mouse clicks per second (CPS) for gaming performance benchmarking.' },
-    keywords: 'CPS test, click speed test, clicks per second, CPS counter, click test, kohi click test, jitter click test, butterfly click test, drag click test, right click test, mouse click test, CPS checker, click counter, click speed checker, how fast can i click, clicks per second test, cps tester, gaming mouse test, minecraft pvp cps, cps test unblocked',
-    mainEntity: { '@type': 'SoftwareApplication', name: 'CPS Test', url: 'https://fixedaim.com/cps-test' },
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home',        item: 'https://fixedaim.com' },
-      { '@type': 'ListItem', position: 2, name: 'Mouse Tools', item: 'https://fixedaim.com/mouse' },
-      { '@type': 'ListItem', position: 3, name: 'CPS Test',    item: 'https://fixedaim.com/cps-test' },
-    ],
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: FAQ_DATA.map(({ q, a }) => ({
-      '@type': 'Question',
-      name: q,
-      acceptedAnswer: { '@type': 'Answer', text: a },
-    })),
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: 'How to Do a CPS Test — Measure Clicks Per Second Online',
-    description: 'Step-by-step guide to measuring your left and right click speed in clicks per second (CPS) online for free.',
-    step: [
-      { '@type': 'HowToStep', name: 'Select Duration',   text: 'Choose a test duration from 1 to 60 seconds, or enter a custom value up to 300 seconds.' },
-      { '@type': 'HowToStep', name: 'Start the Test',    text: 'Click the large click area to begin the countdown timer.' },
-      { '@type': 'HowToStep', name: 'Click Rapidly',     text: 'Click as fast as you can within the click area during the test period.' },
-      { '@type': 'HowToStep', name: 'View Your Results', text: 'When time runs out, your CPS score, total clicks, and rank are displayed in the results modal.' },
-      { '@type': 'HowToStep', name: 'Try Again',         text: 'Click Try Again to immediately start a new test and compare your scores in the session history.' },
-    ],
-  },
-
 ];
 
 // ─────────────────────────────────────────────
@@ -1675,9 +1546,6 @@ export default function CPSTestPage() {
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-      {/* Global style injections */}
-      <style dangerouslySetInnerHTML={{ __html: GLOBAL_STYLES }} />
-
       {/* ── HEADER ── */}
       <header style={{ textAlign: 'center', marginBottom: '2rem' }}>
         <div className="section-label" style={{ fontSize: '0.85rem', color: 'var(--neon-cyan, #00f5ff)', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 'bold' }}>CPS Test</div>

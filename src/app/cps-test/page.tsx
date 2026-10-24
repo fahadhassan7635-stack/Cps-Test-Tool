@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import CPSTestPage from '@/views/CPSTestPage';
 
 export const metadata: Metadata = {
   title: "CPS Test - Free Click Speed Test Online | FixedAim",
@@ -41,5 +41,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <CPSTestPage />;
 }

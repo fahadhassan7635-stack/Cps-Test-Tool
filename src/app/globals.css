@@ -673,3 +673,43 @@ html, body { margin: 0; padding: 0; }
 }
 @media (max-width: 768px) { .hero-gradient-text, .hero-pulse-dot { animation: none !important; } }
 
+/* ============================================================
+   CPS Test Page Optimized Styles
+   ============================================================ */
+@keyframes modalPopIn {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes rippleAnim {
+  0%   { transform: translate(-50%, -50%) scale(0);   opacity: 0.45; }
+  50%  { transform: translate(-50%, -50%) scale(0.8); opacity: 0.22; }
+  100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+}
+@media (forced-colors: active) {
+  .cps-stat-card, .cps-modal-inner { border: 2px solid ButtonText !important; }
+}
+@media (max-width: 600px) {
+  .cps-page-wrap      { padding: 1.25rem 0.75rem !important; }
+  .cps-duration-row   { gap: 0.4rem !important; }
+  .cps-duration-btn   { padding: 0.4rem 0.65rem !important; font-size: 0.8rem !important; min-width: 44px !important; }
+  .cps-custom-wrap    { width: 100% !important; justify-content: center !important; }
+  .cps-stats-grid     { gap: 0.5rem !important; }
+  .cps-stat-card      { padding: 0.85rem 0.4rem !important; border-radius: 10px !important; }
+  .cps-stat-value     { font-size: clamp(1.4rem, 7vw, 2.2rem) !important; }
+  .cps-stat-label     { font-size: 0.6rem !important; letter-spacing: 0.05em !important; }
+  .cps-modal-split    { grid-template-columns: 1fr !important; min-height: unset !important; gap: 0.75rem !important; }
+  .cps-modal-left     { border-right: none !important; border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important; padding-right: 0 !important; padding-bottom: 0.75rem !important; }
+  .cps-modal-emoji    { font-size: 3rem !important; }
+  .cps-modal-rank     { font-size: 1.6rem !important; }
+  .cps-modal-inner    { padding: 1.25rem 1rem !important; }
+  .cps-history-row    { font-size: 0.78rem !important; gap: 0.25rem !important; flex-wrap: wrap !important; padding: 0.6rem 1rem !important; }
+  .cps-article        { padding: 1.25rem !important; }
+  .cps-article h2     { font-size: 1.4rem !important; }
+  .cps-article h3     { font-size: 1.1rem !important; }
+  .cps-games-grid     { grid-template-columns: repeat(2, 1fr) !important; gap: 0.6rem !important; }
+}
+
