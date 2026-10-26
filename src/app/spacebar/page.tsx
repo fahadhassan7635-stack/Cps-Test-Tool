@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import SpacebarPage from '@/views/SpacebarPage';
 
 export const metadata: Metadata = {
   title: "Spacebar Counter - Free Spacebar Speed Test Online | FixedAim",
@@ -38,5 +38,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <SpacebarPage />;
 }

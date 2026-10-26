@@ -70,9 +70,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {/* TOP NAVIGATION BAR */}
       <nav className="top-nav" style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(8,13,20,0.95)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--border)',
+                borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between',
         height: '64px',
@@ -148,8 +146,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {menuOpen && (
         <div className="mobile-menu-overlay" style={{
           position: 'fixed', top: '64px', left: 0, right: 0,
-          background: 'rgba(8,13,20,0.98)', backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border)', zIndex: 99,
+                    borderBottom: '1px solid var(--border)', zIndex: 99,
           display: 'flex', flexDirection: 'column', gap: '0.5rem',
           maxHeight: 'calc(100vh - 64px)', overflowY: 'auto',
           boxSizing: 'border-box'

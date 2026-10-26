@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import VoyagerGame from '@/views/VoyagerGame';
 
 export const metadata: Metadata = {
   title: "Voyager Game - Space Endurance Arcade & CPS Trainer | FixedAim",
@@ -31,5 +31,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <VoyagerGame />;
 }

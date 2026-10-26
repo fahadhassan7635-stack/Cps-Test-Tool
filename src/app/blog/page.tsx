@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import BlogPage from '@/views/BlogPage';
 
 export const metadata: Metadata = {
   title: "Blog - Tips, Guides & Updates | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <BlogPage />;
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import MouseAccuracyPage from '@/views/MouseAccuracyPage';
 
 export const metadata: Metadata = {
   title: "Mouse Accuracy Test - DPI & Tracking Precision Test | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <MouseAccuracyPage />;
 }

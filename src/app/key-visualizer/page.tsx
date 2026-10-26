@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import KeyVisualizerPage from '@/views/KeyVisualizerPage';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -28,5 +28,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <KeyVisualizerPage />;
 }

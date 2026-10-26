@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import F1ReactionPage from '@/views/F1ReactionPage';
 
 export const metadata: Metadata = {
   title: "F1 Reaction Test - Formula 1 Race Start Simulator | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <F1ReactionPage />;
 }

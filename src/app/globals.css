@@ -506,10 +506,10 @@ body {
 
 html, body { margin: 0; padding: 0; }
 
-.top-nav            { padding: 0 2rem; }
+.top-nav            { padding: 0 2rem; background: rgba(8,13,20,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
 .main-content       { padding: 2rem; }
 .main-footer        { padding: 3rem 2rem 1.5rem; }
-.mobile-menu-overlay{ padding: 1rem 2rem; }
+.mobile-menu-overlay{ padding: 1rem 2rem; background: rgba(8,13,20,0.98); }
 
 .footer-grid { grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; }
 
@@ -604,8 +604,20 @@ html, body { margin: 0; padding: 0; }
 @media (max-width: 1024px) {
   .desktop-nav   { display: none !important; }
   .hamburger-btn { display: flex !important; }
-  .sidebar-pannel{ display: none !important; }
+  .sidebar-pannel{ display: none !important; content-visibility: hidden !important; pointer-events: none !important; }
   .footer-grid   { grid-template-columns: repeat(2, 1fr); }
+
+  /* Disable expensive backdrop-filter on mobile & tablet to fix scroll jank / frame drops */
+  .top-nav {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #080d14 !important;
+  }
+  .mobile-menu-overlay {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: #080d14 !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -614,6 +626,33 @@ html, body { margin: 0; padding: 0; }
   .main-footer         { padding: 2rem 1rem 1rem !important; }
   .mobile-menu-overlay { padding: 1rem !important; }
   .footer-grid         { grid-template-columns: 1fr; }
+
+  /* Grid background mobile GPU optimization */
+  .grid-bg {
+    transform: none !important;
+    will-change: auto !important;
+    opacity: 0.35 !important;
+    background-size: 40px 40px !important;
+  }
+
+  /* Eliminate multi-layer text-shadow rendering on mobile GPU */
+  * {
+    text-shadow: none !important;
+  }
+
+  /* Simplify box-shadows on buttons & interactive cards */
+  .btn-primary, .btn-secondary, .btn-danger {
+    box-shadow: none !important;
+  }
+  .card:hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
+  /* Disable multi-layer drop-shadow filters on mobile icons/images */
+  .top-nav img, .top-nav svg, .main-footer img {
+    filter: none !important;
+  }
 }
 
 /* ============================================================

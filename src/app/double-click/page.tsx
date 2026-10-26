@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import DynamicPage from './DynamicPage';
+import DoubleClickPage from '@/views/DoubleClickPage';
 
 export const metadata: Metadata = {
   title: "Double Click Test - Mouse Switch Health Checker | FixedAim",
@@ -25,5 +25,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <DynamicPage />;
+  return <DoubleClickPage />;
 }
