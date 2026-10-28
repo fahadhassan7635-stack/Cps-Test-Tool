@@ -3,16 +3,16 @@
 
 
 import {
-  useState, useRef, useCallback, useEffect, useReducer
+  useState, useRef, useCallback, useEffect, useReducer, memo
 } from 'react';
 import { Maximize, Minimize } from 'lucide-react';
 
-// â”€â”€ Target image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Target image ──────────────────────────────────────────────────────────────
 // Skull artwork used as the clickable target. Swap this data URL for your own
 // hosted image path (e.g. "/skull.png") if you'd rather not inline base64.
 
 
-// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Types ─────────────────────────────────────────────────────────────────────
 type Phase = 'idle' | 'countdown' | 'running' | 'paused' | 'done';
 type Grade = 'S' | 'A' | 'B' | 'C' | 'D' | 'F';
 type ModeKey = 'flick' | 'grid' | 'track';
@@ -100,7 +100,7 @@ type GameAction =
   | { type: 'MISCLICK' }
   | { type: 'EXPIRE' };
 
-// â”€â”€ Config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Config ────────────────────────────────────────────────────────────────────
 const MODE_CONFIG: Record<ModeKey, ModeConfig> = {
   flick: { label: 'Flick Shot', tag: 'FLK', color: '#60a5fa', glow: 'rgba(96,165,250,0.4)', accentRgb: '96,165,250', multiplier: 1, maxConcurrent: 1 },
   grid: { label: 'Grid Shot', tag: 'GRD', color: '#f59e0b', glow: 'rgba(245,158,11,0.4)', accentRgb: '245,158,11', multiplier: 1, maxConcurrent: 3 },
@@ -116,7 +116,7 @@ const DURATION_OPTIONS: { key: DurationKey; label: string; seconds: number | nul
   { key: '10', label: '10s', seconds: 10 },
   { key: '30', label: '30s', seconds: 30 },
   { key: 'custom', label: 'Custom', seconds: null },
-  { key: 'unlimited', label: 'âˆž', seconds: null },
+  { key: 'unlimited', label: '∞', seconds: null },
 ];
 
 const COMBO_THRESHOLDS = [5, 10, 20, 35] as const;
@@ -156,7 +156,7 @@ function formatDate(iso: string): string {
 }
 
 function durationLabelFor(key: DurationKey, customSeconds: number): string {
-  if (key === 'unlimited') return 'âˆž';
+  if (key === 'unlimited') return '∞';
   if (key === 'custom') return `${customSeconds}s`;
   return `${key}s`;
 }
@@ -197,7 +197,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
-// â”€â”€ Sound engine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Sound engine ──────────────────────────────────────────────────────────────
 function useSoundEngine(enabled: boolean, volume: number) {
   const ctxRef = useRef<AudioContext | null>(null);
   const getCtx = useCallback(() => {
@@ -239,7 +239,7 @@ function useSoundEngine(enabled: boolean, volume: number) {
   };
 }
 
-// â”€â”€ Canvas particle system â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Canvas particle system ────────────────────────────────────────────────────
 function useParticleCanvas(areaRef: React.RefObject<HTMLDivElement | null>) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const particlesRef = useRef<Particle[]>([]);
@@ -264,33 +264,44 @@ function useParticleCanvas(areaRef: React.RefObject<HTMLDivElement | null>) {
     const ro = new ResizeObserver(resize);
     ro.observe(areaRef.current);
 
-    let running = true;
-    const draw = () => {
-      if (!running || !canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      particlesRef.current = particlesRef.current.filter(p => p.life > 0);
-      for (const p of particlesRef.current) {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.18;
-        p.life -= 0.025;
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, p.life);
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
+    const isLoopingRef = { current: false };
+
+    const startDraw = () => {
+      if (isLoopingRef.current) return;
+      isLoopingRef.current = true;
+      const draw = () => {
+        if (!canvasRef.current) { isLoopingRef.current = false; return; }
+        const ctx = canvasRef.current.getContext('2d');
+        if (!ctx) { isLoopingRef.current = false; return; }
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        particlesRef.current = particlesRef.current.filter(p => p.life > 0);
+        if (particlesRef.current.length === 0) {
+          isLoopingRef.current = false;
+          return;
+        }
+        for (const p of particlesRef.current) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.18;
+          p.life -= 0.025;
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+        rafRef.current = requestAnimationFrame(draw);
+      };
       rafRef.current = requestAnimationFrame(draw);
     };
-    rafRef.current = requestAnimationFrame(draw);
+
+    (areaRef.current as any)._startParticleLoop = startDraw;
 
     return () => {
-      running = false;
-      cancelAnimationFrame(rafRef.current);
+      isLoopingRef.current = false;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       ro.disconnect();
       canvas?.remove();
       canvasRef.current = null;
@@ -312,12 +323,15 @@ function useParticleCanvas(areaRef: React.RefObject<HTMLDivElement | null>) {
       };
     });
     particlesRef.current.push(...newP);
-  }, []);
+    if ((areaRef.current as any)?._startParticleLoop) {
+      (areaRef.current as any)._startParticleLoop();
+    }
+  }, [areaRef]);
 
   return { burst };
 }
 
-// â”€â”€ SEO content data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── SEO content data ──────────────────────────────────────────────────────────
 const SUPPORTED_GAMES = [
   'osu!', 'League of Legends', 'Dota 2', 'Diablo IV',
   'Path of Exile', 'Enter the Gungeon', 'Hades', 'Hotline Miami',
@@ -329,11 +343,11 @@ interface FaqEntry { id: string; question: string; answer: React.ReactNode; }
 const FAQ_ENTRIES: FaqEntry[] = [
   {
     id: 'faq-free', question: 'Is this online aim trainer free to use?',
-    answer: 'Yes. The full game â€” every difficulty tier, every duration mode, sound, and session history â€” runs free in your browser. No account, download, or subscription is required.',
+    answer: 'Yes. The full game — every difficulty tier, every duration mode, sound, and session history — runs free in your browser. No account, download, or subscription is required.',
   },
   {
     id: 'faq-difficulty', question: 'What exactly changes between Easy, Normal, Hard, Pro, and Impossible?',
-    answer: 'Five variables shift together: target size, how long a target stays alive, how often new targets spawn, whether targets move (and how fast), and the score multiplier. Easy spawns large, stationary, slow-expiring targets at a Ã—1 multiplier. Impossible spawns tiny, fast, short-lived targets â€” up to three on screen at once â€” at a Ã—4.6 multiplier.',
+    answer: 'Five variables shift together: target size, how long a target stays alive, how often new targets spawn, whether targets move (and how fast), and the score multiplier. Easy spawns large, stationary, slow-expiring targets at a ×1 multiplier. Impossible spawns tiny, fast, short-lived targets — up to three on screen at once — at a ×4.6 multiplier.',
   },
   {
     id: 'faq-duration', question: 'What match durations can I choose from?',
@@ -345,11 +359,11 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
   {
     id: 'faq-combo', question: 'How does the combo multiplier system work?',
-    answer: 'Consecutive hits build a combo counter. Reaching 5, 10, 20, or 35 hits in a row raises your multiplier to Ã—1.5, Ã—2, Ã—2.5, and Ã—3 respectively. A misclick or an expired target resets the combo to zero immediately.',
+    answer: 'Consecutive hits build a combo counter. Reaching 5, 10, 20, or 35 hits in a row raises your multiplier to ×1.5, ×2, ×2.5, and ×3 respectively. A misclick or an expired target resets the combo to zero immediately.',
   },
   {
     id: 'faq-grade', question: 'How are the S through F grades determined?',
-    answer: 'Your grade blends accuracy with a difficulty bonus, since Impossible-tier accuracy is inherently harder to achieve than Easy-tier accuracy. An S grade additionally requires a sub-380ms average reaction time on top of a perfect adjusted score â€” it rewards both precision and speed together.',
+    answer: 'Your grade blends accuracy with a difficulty bonus, since Impossible-tier accuracy is inherently harder to achieve than Easy-tier accuracy. An S grade additionally requires a sub-380ms average reaction time on top of a perfect adjusted score — it rewards both precision and speed together.',
   },
   {
     id: 'faq-reaction-time', question: 'How is reaction time measured?',
@@ -357,7 +371,7 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
   {
     id: 'faq-moving-targets', question: 'Why do some targets move and others stay still?',
-    answer: 'Each difficulty tier has its own move chance. Easy targets never move, Normal targets move about a quarter of the time, and Pro and Impossible targets are moving almost every spawn â€” bouncing off the arena walls at increasing speed.',
+    answer: 'Each difficulty tier has its own move chance. Easy targets never move, Normal targets move about a quarter of the time, and Pro and Impossible targets are moving almost every spawn — bouncing off the arena walls at increasing speed.',
   },
   {
     id: 'faq-multiple-targets', question: 'Why are there sometimes two or three targets on screen at once?',
@@ -365,7 +379,7 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
   {
     id: 'faq-particles', question: 'What causes the burst of particles when I hit a target?',
-    answer: 'Every hit triggers a short-lived particle explosion rendered on an HTML canvas layered over the arena, plus an expanding ripple ring and a floating points label â€” all purely visual feedback with no effect on scoring.',
+    answer: 'Every hit triggers a short-lived particle explosion rendered on an HTML canvas layered over the arena, plus an expanding ripple ring and a floating points label — all purely visual feedback with no effect on scoring.',
   },
   {
     id: 'faq-sound', question: 'Can I turn the sound off or adjust the volume?',
@@ -385,7 +399,7 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
   {
     id: 'faq-history', question: 'Where is my session history stored?',
-    answer: 'Your last 30 sessions â€” including score, accuracy, grade, and reaction time â€” are saved locally in your browser. Nothing is uploaded anywhere, and clearing your browser data or pressing Clear in the history panel removes it permanently.',
+    answer: 'Your last 30 sessions — including score, accuracy, grade, and reaction time — are saved locally in your browser. Nothing is uploaded anywhere, and clearing your browser data or pressing Clear in the history panel removes it permanently.',
   },
   {
     id: 'faq-unlimited-mode', question: 'How does Unlimited mode differ from a timed match?',
@@ -405,11 +419,11 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
   {
     id: 'faq-warmup', question: 'Is this a good warm-up before ranked matches?',
-    answer: 'A focused 5â€“10 minute session on Normal or Hard activates hand-eye coordination without inducing fatigue, making it a reasonable pre-game warm-up. Save longer Impossible-tier grinding for dedicated practice blocks instead of right before you queue.',
+    answer: 'A focused 5–10 minute session on Normal or Hard activates hand-eye coordination without inducing fatigue, making it a reasonable pre-game warm-up. Save longer Impossible-tier grinding for dedicated practice blocks instead of right before you queue.',
   },
   {
     id: 'faq-transfer', question: 'Does practicing here actually improve my in-game aim?',
-    answer: 'Deliberate, repetitive practice on an isolated motor skill â€” like clicking small, fast, unpredictable targets â€” is well documented to transfer to related real-world tasks. Pairing short daily sessions here with regular in-game play tends to produce faster gains than either alone.',
+    answer: 'Deliberate, repetitive practice on an isolated motor skill — like clicking small, fast, unpredictable targets — is well documented to transfer to related real-world tasks. Pairing short daily sessions here with regular in-game play tends to produce faster gains than either alone.',
   },
   {
     id: 'faq-sensitivity', question: 'Should I use my in-game mouse sensitivity while training?',
@@ -429,7 +443,7 @@ const FAQ_ENTRIES: FaqEntry[] = [
   },
 ];
 
-// â”€â”€ More Tools data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── More Tools data ───────────────────────────────────────────────────────────
 interface ToolLink { label: string; href: string; icon: React.ReactNode; }
 
 const MORE_TOOLS: ToolLink[] = [
@@ -449,7 +463,7 @@ const MORE_TOOLS: ToolLink[] = [
   { label: 'Voyager Game', href: '/voyager-game', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" width="36" height="36"><path d="M12 2L8 10H2l5 4-2 8 7-4 7 4-2-8 5-4h-6z"/></svg> },
 ];
 
-// â”€â”€ Main â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function AimTrainerPage() {
   // Settings
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
@@ -659,36 +673,40 @@ export default function AimTrainerPage() {
     setTargets(prev => [...prev, target]);
   }, []);
 
-  // Movement RAF
+  // Movement RAF - only runs in track mode where targets move!
   useEffect(() => {
-    if (phase !== 'running') return;
+    if (phase !== 'running' || difficulty !== 'track') return;
     let raf: number;
     let last = performance.now();
+    const areaEl = areaRef.current;
+    let arenaWidth = areaEl ? areaEl.offsetWidth : 800;
+    let arenaHeight = areaEl ? areaEl.offsetHeight : 500;
+
     const loop = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
       setTargets(prev => {
         if (prev.length === 0) return prev;
-        const rect = areaRef.current?.getBoundingClientRect();
-        return prev.map(t => {
+        let moved = false;
+        const next = prev.map(t => {
           if (t.vx === 0 && t.vy === 0) return t;
+          moved = true;
           let nx = t.x + t.vx * dt, ny = t.y + t.vy * dt;
           let nvx = t.vx, nvy = t.vy;
-          if (rect) {
-            const r = t.size / 2 + 4;
-            if (nx - r < 0) { nx = r; nvx = Math.abs(nvx); }
-            if (nx + r > rect.width) { nx = rect.width - r; nvx = -Math.abs(nvx); }
-            if (ny - r < 0) { ny = r; nvy = Math.abs(nvy); }
-            if (ny + r > rect.height) { ny = rect.height - r; nvy = -Math.abs(nvy); }
-          }
+          const r = t.size / 2 + 4;
+          if (nx - r < 0) { nx = r; nvx = Math.abs(nvx); }
+          if (nx + r > arenaWidth) { nx = arenaWidth - r; nvx = -Math.abs(nvx); }
+          if (ny - r < 0) { ny = r; nvy = Math.abs(nvy); }
+          if (ny + r > arenaHeight) { ny = arenaHeight - r; nvy = -Math.abs(nvy); }
           return { ...t, x: nx, y: ny, vx: nvx, vy: nvy };
         });
+        return moved ? next : prev;
       });
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [phase]);
+  }, [phase, difficulty]);
 
   const endGame = useCallback(() => {
     if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null; }
@@ -814,7 +832,7 @@ export default function AimTrainerPage() {
     const newCombo = gameStateRef.current.combo + 1;
     if ((COMBO_THRESHOLDS as readonly number[]).includes(newCombo)) {
       sfx.combo(newCombo);
-      setComboFlash({ text: `${newCombo}Ã— COMBO`, key: Date.now() });
+      setComboFlash({ text: `${newCombo}× COMBO`, key: Date.now() });
       trackedTimeout(() => setComboFlash(null), 1400);
     }
   }, [sfx, burst, spawnRipple, spawnFloatText, trackedTimeout, spawnTarget]);
@@ -913,7 +931,7 @@ export default function AimTrainerPage() {
 
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '1.5rem 1.25rem', position: 'relative', zIndex: 1 }}>
 
-        {/* â”€â”€ Page header â”€â”€ */}
+        {/* ── Page header ── */}
         <header style={{ textAlign: 'center', padding: '1.5rem 0 2.25rem' }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center',
@@ -932,11 +950,11 @@ export default function AimTrainerPage() {
             2D Aim Trainer
           </h1>
           <p style={{ margin: 0, fontSize: '1.02rem', color: '#9ca3af', fontWeight: 400 }}>
-            Track and hit the small moving target â€” precision matters!
+            Track and hit the small moving target — precision matters!
           </p>
         </header>
 
-        {/* â”€â”€ Top bar â”€â”€ */}
+        {/* ── Top bar ── */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap',
           background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
@@ -1043,7 +1061,7 @@ export default function AimTrainerPage() {
               display: 'flex', alignItems: 'center', gap: '0.3rem', transition: 'all 0.15s ease',
             }}
           >
-            {soundEnabled ? 'ðŸ”Š' : 'ðŸ”‡'}
+            {soundEnabled ? '🔊' : '🔇'}
           </button>
           {soundEnabled && (
             <input type="range" min="0" max="1" step="0.05" value={volume}
@@ -1075,12 +1093,12 @@ export default function AimTrainerPage() {
                 color: '#f87171', transition: 'all 0.15s ease',
               }}
             >
-              â†º Reset
+              ↺ Reset
             </button>
           )}
         </div>
 
-        {/* â”€â”€ Live stats bar â”€â”€ */}
+        {/* ── Live stats bar ── */}
         {isActive && (
           <div style={{
             display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '0.6rem',
@@ -1091,9 +1109,9 @@ export default function AimTrainerPage() {
               { label: 'Accuracy', value: `${acc}%`, color: acc > 75 ? '#34d399' : acc > 50 ? '#f59e0b' : '#ef4444' },
               { label: 'Hits', value: gameState.hits, color: activeCfg.color },
               { label: 'Misses', value: gameState.misclicks + gameState.targetsMissed, color: '#ef4444' },
-              { label: 'Combo', value: `Ã—${gameState.combo}`, color: gameState.combo >= 5 ? '#f59e0b' : '#8888a0' },
-              { label: 'Best', value: `Ã—${gameState.peakCombo}`, color: '#8888a0' },
-              { label: 'React', value: avgRT ? `${avgRT}ms` : 'â€”', color: '#a78bfa' },
+              { label: 'Combo', value: `×${gameState.combo}`, color: gameState.combo >= 5 ? '#f59e0b' : '#8888a0' },
+              { label: 'Best', value: `×${gameState.peakCombo}`, color: '#8888a0' },
+              { label: 'React', value: avgRT ? `${avgRT}ms` : '—', color: '#a78bfa' },
               { label: isUnlimited ? 'Elapsed' : 'Time', value: isUnlimited ? `${clock.toFixed(1)}s` : `${clock.toFixed(1)}`, color: clock < ((sessionDurationRef.current ?? 100) * 0.2) && !isUnlimited ? '#ef4444' : '#60a5fa' },
             ].map(s => (
               <div key={s.label} style={{
@@ -1132,15 +1150,16 @@ export default function AimTrainerPage() {
               boxShadow: '0 0 16px rgba(245,158,11,0.2)',
               animation: 'pulse-soft 1.5s ease infinite alternate',
             }}>
-              âš¡ Ã—{multiplier} MULTIPLIER
+              ⚡ ×{multiplier} MULTIPLIER
             </span>
           </div>
         )}
 
-        {/* â”€â”€ Game arena â”€â”€ */}
+        {/* ── Game arena ── */}
         <div
           ref={areaRef}
-          onClick={handleAreaClick}
+          onMouseDown={phase === 'running' ? handleAreaClick : undefined}
+          onClick={phase !== 'running' ? handleAreaClick : undefined}
           role="application"
           aria-label={phase === 'idle' ? 'Click to start aim training' : 'Aim training arena'}
           style={{
@@ -1205,14 +1224,14 @@ export default function AimTrainerPage() {
                     {lastResult?.grade}
                   </div>
                   <div style={{ fontSize: '0.95rem', color: '#8888a0', fontWeight: 500 }}>
-                    {lastResult?.score.toLocaleString()} pts Â· {lastResult?.accuracy}% accuracy
+                    {lastResult?.score.toLocaleString()} pts · {lastResult?.accuracy}% accuracy
                   </div>
                   <button onClick={e => { e.stopPropagation(); beginCountdown(); }} style={{
                     fontFamily: 'inherit', fontWeight: 700, fontSize: '0.85rem', letterSpacing: '0.05em',
                     padding: '0.65rem 2rem', borderRadius: '12px', cursor: 'pointer',
                     background: `rgba(${activeCfg.accentRgb},0.15)`, border: `1px solid rgba(${activeCfg.accentRgb},0.4)`,
                     color: activeCfg.color, transition: 'all 0.2s ease',
-                  }}>â–¶ RUN IT BACK</button>
+                  }}>▶ RUN IT BACK</button>
                   <div style={{ fontSize: '0.72rem', color: '#33334a' }}>or press Space</div>
                 </>
               ) : (
@@ -1265,9 +1284,9 @@ export default function AimTrainerPage() {
             }}>
               <div style={{ fontWeight: 800, fontSize: '1.8rem', letterSpacing: '0.06em', color: '#fff' }}>PAUSED</div>
               <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <PremiumButton onClick={resume} variant="primary" color={activeCfg.color} rgb={activeCfg.accentRgb}>â–¶ Resume</PremiumButton>
-                <PremiumButton onClick={resetSession} variant="ghost">â†º Restart</PremiumButton>
-                <PremiumButton onClick={exitToIdle} variant="danger">âœ• Exit</PremiumButton>
+                <PremiumButton onClick={resume} variant="primary" color={activeCfg.color} rgb={activeCfg.accentRgb}>▶ Resume</PremiumButton>
+                <PremiumButton onClick={resetSession} variant="ghost">↺ Restart</PremiumButton>
+                <PremiumButton onClick={exitToIdle} variant="danger">✕ Exit</PremiumButton>
               </div>
               <div style={{ fontSize: '0.72rem', color: '#33334a' }}>P or Esc to resume</div>
             </div>
@@ -1315,7 +1334,7 @@ export default function AimTrainerPage() {
                 display: 'flex', alignItems: 'center', gap: '0.35rem',
               }}
             >
-              â¸ <span style={{ fontSize: '0.65rem' }}>P</span>
+              ⏸ <span style={{ fontSize: '0.65rem' }}>P</span>
             </button>
           )}
 
@@ -1331,7 +1350,7 @@ export default function AimTrainerPage() {
                 letterSpacing: '0.04em', transition: 'all 0.15s ease',
               }}
             >
-              â–  Stop
+              ■ Stop
             </button>
           )}
 
@@ -1345,13 +1364,13 @@ export default function AimTrainerPage() {
             }}>
               <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: activeCfg.color, boxShadow: `0 0 6px ${activeCfg.color}` }} />
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: activeCfg.color, letterSpacing: '0.06em' }}>{activeCfg.label.toUpperCase()}</span>
-              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.6rem' }}>Â·</span>
+              <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: '0.6rem' }}>·</span>
               <span style={{ fontSize: '0.68rem', color: '#55556a', letterSpacing: '0.04em' }}>{durationLabelRef.current}</span>
             </div>
           )}
         </div>
 
-        {/* â”€â”€ Result card â”€â”€ */}
+        {/* ── Result card ── */}
         {phase === 'done' && lastResult && (
           <div style={{
             background: 'rgba(255,255,255,0.025)', border: `1px solid ${gradeColors[lastResult.grade]}25`,
@@ -1368,11 +1387,11 @@ export default function AimTrainerPage() {
               <div>
                 <div style={{ display: 'flex', gap: '2px', marginBottom: '0.25rem' }}>
                   {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} style={{ fontSize: '1rem', color: i < lastResult.stars ? '#f59e0b' : 'rgba(255,255,255,0.1)', transition: 'color 0.3s ease' }}>â˜…</span>
+                    <span key={i} style={{ fontSize: '1rem', color: i < lastResult.stars ? '#f59e0b' : 'rgba(255,255,255,0.1)', transition: 'color 0.3s ease' }}>★</span>
                   ))}
                 </div>
                 <div style={{ fontSize: '0.72rem', color: '#55556a' }}>
-                  {MODE_CONFIG[lastResult.difficulty as ModeKey]?.label || lastResult.difficulty} Â· {lastResult.durationLabel}
+                  {MODE_CONFIG[lastResult.difficulty as ModeKey]?.label || lastResult.difficulty} · {lastResult.durationLabel}
                 </div>
               </div>
               <button
@@ -1385,7 +1404,7 @@ export default function AimTrainerPage() {
                   color: MODE_CONFIG[lastResult.difficulty as ModeKey]?.color || '#ffffff',
                   transition: 'all 0.15s ease',
                 }}
-              >â–¶ Run It Back</button>
+              >▶ Run It Back</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px,1fr))', gap: '0.55rem' }}>
               {[
@@ -1396,9 +1415,9 @@ export default function AimTrainerPage() {
                 { l: 'Missed', v: lastResult.targetsMissed, c: '#f87171' },
                 { l: 'Total Clicks', v: lastResult.totalClicks, c: '#8888a0' },
                 { l: 'Avg Pts', v: Math.round(lastResult.avgPoints), c: '#60a5fa' },
-                { l: 'Peak Combo', v: `Ã—${lastResult.peakCombo}`, c: '#f59e0b' },
+                { l: 'Peak Combo', v: `×${lastResult.peakCombo}`, c: '#f59e0b' },
                 { l: 'Hits/sec', v: lastResult.peakHitsPerSec.toFixed(1), c: '#a78bfa' },
-                { l: 'Avg React', v: lastResult.reactionTime ? `${Math.round(lastResult.reactionTime)}ms` : 'â€”', c: '#a78bfa' },
+                { l: 'Avg React', v: lastResult.reactionTime ? `${Math.round(lastResult.reactionTime)}ms` : '—', c: '#a78bfa' },
                 { l: 'Best Streak', v: lastResult.bestStreak, c: '#34d399' },
                 { l: 'Duration', v: lastResult.durationLabel, c: '#8888a0' },
               ].map(s => (
@@ -1414,7 +1433,7 @@ export default function AimTrainerPage() {
           </div>
         )}
 
-        {/* â”€â”€ History â”€â”€ */}
+        {/* ── History ── */}
         {history.length > 0 && (
           <div style={{ marginBottom: '1.5rem' }}>
             <button
@@ -1426,7 +1445,7 @@ export default function AimTrainerPage() {
                 marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '0.4rem',
               }}
             >
-              {showHistory ? 'â–¾' : 'â–¸'} Session History
+              {showHistory ? '▾' : '▸'} Session History
               <span style={{ background: 'rgba(255,255,255,0.08)', borderRadius: '20px', padding: '0 0.45rem', fontSize: '0.7rem' }}>{history.length}</span>
             </button>
             {showHistory && (
@@ -1474,7 +1493,7 @@ export default function AimTrainerPage() {
           {(phase === 'paused') && <><Hint k="P / Esc" label="Resume" /><Hint k="R" label="Restart" /></>}
         </div>
 
-        {/* â”€â”€ MORE TOOLS GRID â”€â”€ */}
+        {/* ── MORE TOOLS GRID ── */}
         <section aria-label="More Tools" style={{ marginTop: '1rem', marginBottom: '2.5rem' }}>
           <h2 style={{
             fontWeight: 800, fontSize: '1.5rem', color: '#fff',
@@ -1527,9 +1546,9 @@ export default function AimTrainerPage() {
           </div>
         </section>
 
-        {/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-            SEO ARTICLE â€” 20+ H2 headings
-        â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
+        {/* ══════════════════════════════════════════════════════════
+            SEO ARTICLE — 20+ H2 headings
+        ══════════════════════════════════════════════════════════ */}
         <article aria-label="Aim trainer guide and FAQ" style={{ paddingBottom: '3rem' }}>
 
           <SeoHero accentColor={activeCfg.color} accentRgb={activeCfg.accentRgb} />
@@ -1540,15 +1559,15 @@ export default function AimTrainerPage() {
               Every match runs on a lightweight engine built for one job: spawn a target, measure how fast
               and how precisely you click it in a 2D plane, then repeat. A short countdown primes your reflexes, targets
               appear one at a time or several at once depending on difficulty, and a live stats bar tracks
-              score, accuracy, combo, and reaction time as you play â€” no page reload, no waiting between hits.
+              score, accuracy, combo, and reaction time as you play — no page reload, no waiting between hits.
             </p>
           </SeoSection>
 
           <SeoSection accentColor={activeCfg.color}>
             <h2 style={h2Style}>Difficulty Tiers, From Easy to Impossible</h2>
             <p style={pStyle}>
-              Five tiers scale five variables together â€” target size, lifetime, spawn rate, movement, and
-              score multiplier â€” so the jump between tiers feels meaningfully different rather than just
+              Five tiers scale five variables together — target size, lifetime, spawn rate, movement, and
+              score multiplier — so the jump between tiers feels meaningfully different rather than just
               "smaller circle."
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px,1fr))', gap: '0.6rem', marginTop: '1rem' }}>
@@ -1561,7 +1580,7 @@ export default function AimTrainerPage() {
                   }}>
                     <div style={{ color: d.color, fontWeight: 800, fontSize: '0.85rem', marginBottom: '0.35rem' }}>{d.label}</div>
                     <div style={{ color: '#8888a0', fontSize: '0.72rem', lineHeight: 1.6 }}>
-                      Ã—{d.multiplier} score Â· {d.maxConcurrent} on screen Â· {0 > 0 ? 'moving' : 'stationary'}
+                      ×{d.multiplier} score · {d.maxConcurrent} on screen · {0 > 0 ? 'moving' : 'stationary'}
                     </div>
                   </div>
                 );
@@ -1581,19 +1600,19 @@ export default function AimTrainerPage() {
           <SeoSection accentColor={activeCfg.color}>
             <h2 style={h2Style}>The Combo Multiplier System Explained</h2>
             <p style={pStyle}>
-              Landing 5 hits in a row raises your multiplier to Ã—1.5. Ten in a row reaches Ã—2, twenty reaches
-              Ã—2.5, and a 35-hit streak caps it at Ã—3. A single misclick or expired target snaps the combo
-              â€” and the multiplier â€” straight back to zero, so consistency is rewarded far more than isolated
+              Landing 5 hits in a row raises your multiplier to ×1.5. Ten in a row reaches ×2, twenty reaches
+              ×2.5, and a 35-hit streak caps it at ×3. A single misclick or expired target snaps the combo
+              — and the multiplier — straight back to zero, so consistency is rewarded far more than isolated
               bursts of speed.
             </p>
           </SeoSection>
 
           <SeoSection accentColor={activeCfg.color}>
-            <h2 style={h2Style}>What the Sâ€“F Grade Actually Measures</h2>
+            <h2 style={h2Style}>What the S–F Grade Actually Measures</h2>
             <p style={pStyle}>
               Grades combine accuracy with a per-difficulty bonus, since a 90% accuracy run on Impossible
               represents a very different skill level than 90% on Easy. Reaching an S grade additionally
-              requires an average reaction time under 380 milliseconds â€” rewarding players who are fast and
+              requires an average reaction time under 380 milliseconds — rewarding players who are fast and
               precise together, not one at the expense of the other.
             </p>
           </SeoSection>
@@ -1601,9 +1620,9 @@ export default function AimTrainerPage() {
           <SeoSection accentColor={activeCfg.color}>
             <h2 style={h2Style}>Choosing a Match Duration</h2>
             <p style={pStyle}>
-              Short 1â€“5 second sprints are built for pure reaction-time testing. The 10 and 30 second presets
+              Short 1–5 second sprints are built for pure reaction-time testing. The 10 and 30 second presets
               suit a standard training rep. A custom length up to 600 seconds fits longer endurance sessions,
-              and Unlimited mode removes the clock entirely â€” the match runs until you choose to stop it.
+              and Unlimited mode removes the clock entirely — the match runs until you choose to stop it.
             </p>
           </SeoSection>
 
@@ -1611,7 +1630,7 @@ export default function AimTrainerPage() {
             <h2 style={h2Style}>Visual and Audio Feedback</h2>
             <p style={pStyle}>
               Every hit fires a canvas-rendered particle burst, an expanding ripple ring, and a floating
-              points label, layered with a zero-dependency Web Audio sound engine â€” distinct tones for hits,
+              points label, layered with a zero-dependency Web Audio sound engine — distinct tones for hits,
               misses, expired targets, combo unlocks, and the closing fanfare. Sound and particle effects
               respect your system's reduced-motion setting automatically.
             </p>
@@ -1642,7 +1661,7 @@ export default function AimTrainerPage() {
                   borderRadius: '10px', padding: '0.65rem 0.9rem', color: '#d1d1de', fontWeight: 600, fontSize: '0.85rem',
                   display: 'flex', alignItems: 'center', gap: '0.5rem',
                 }}>
-                  <span style={{ color: activeCfg.color }} aria-hidden="true">â—Ž</span>{game}
+                  <span style={{ color: activeCfg.color }} aria-hidden="true">◎</span>{game}
                 </li>
               ))}
             </ul>
@@ -1653,7 +1672,7 @@ export default function AimTrainerPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '0.5rem' }}>
               <div>
                 <h3 style={h3Style}>Warm up before you grind Impossible</h3>
-                <p style={pStyle}>Start each session on Easy or Normal for a minute before pushing into harder tiers â€” cold reflexes make small, fast targets feel far worse than they are.</p>
+                <p style={pStyle}>Start each session on Easy or Normal for a minute before pushing into harder tiers — cold reflexes make small, fast targets feel far worse than they are.</p>
               </div>
               <div>
                 <h3 style={h3Style}>Focus on cursor path efficiency</h3>
@@ -1661,7 +1680,7 @@ export default function AimTrainerPage() {
               </div>
               <div>
                 <h3 style={h3Style}>Protect your combo over chasing risky clicks</h3>
-                <p style={pStyle}>Since the multiplier resets on any miss, a controlled 20-hit streak at Ã—2.5 often out-scores several short bursts interrupted by misclicks.</p>
+                <p style={pStyle}>Since the multiplier resets on any miss, a controlled 20-hit streak at ×2.5 often out-scores several short bursts interrupted by misclicks.</p>
               </div>
               <div>
                 <h3 style={h3Style}>Match your real desktop sensitivity</h3>
@@ -1681,8 +1700,8 @@ export default function AimTrainerPage() {
               it, and it is made up of several distinct stages: the eye detecting the target, the visual
               signal traveling to the brain, the brain deciding on and issuing a motor command, and the
               signal traveling back down to the hand. According to general <SourceLink href="https://en.wikipedia.org/wiki/Mental_chronometry">mental chronometry research</SourceLink>,
-              simple visual reaction time in healthy young adults typically falls in the 150â€“250 millisecond
-              range, with choice reaction time â€” picking the correct target among several â€” running noticeably
+              simple visual reaction time in healthy young adults typically falls in the 150–250 millisecond
+              range, with choice reaction time — picking the correct target among several — running noticeably
               slower because the decision stage takes longer to resolve.
             </p>
             <p style={pStyle}>
@@ -1690,7 +1709,7 @@ export default function AimTrainerPage() {
               rather than expecting sub-150ms scores: by the time you factor in target acquisition, aiming
               correction, and the physical click itself on top of raw neural reaction time, 380ms represents
               genuinely fast, well-trained performance rather than a theoretical floor. Reaction time also has
-              a hard biological limit â€” no amount of practice will get a healthy adult meaningfully below the
+              a hard biological limit — no amount of practice will get a healthy adult meaningfully below the
               150ms mark, so gains from training come almost entirely from the surrounding stages: faster
               target detection, cleaner aim correction, and more efficient motor commands, not from shaving
               time off the nervous system's basic signal-transmission speed.
@@ -1701,8 +1720,8 @@ export default function AimTrainerPage() {
             <h2 style={h2Style}>How Muscle Memory and Motor Learning Actually Form</h2>
             <p style={pStyle}>
               What gamers casually call "muscle memory" is really a form of procedural learning that happens
-              in the brain, not the muscles themselves. Repeating a specific movement â€” like gliding your cursor to a
-              small target and clicking â€” strengthens the neural pathways responsible for that exact motion,
+              in the brain, not the muscles themselves. Repeating a specific movement — like gliding your cursor to a
+              small target and clicking — strengthens the neural pathways responsible for that exact motion,
               gradually shifting execution from a slow, consciously-monitored process to a fast, largely
               automatic one. Broad overviews of <SourceLink href="https://en.wikipedia.org/wiki/Motor_learning">motor learning</SourceLink> describe
               this shift as moving through cognitive, associative, and autonomous stages, with the autonomous
@@ -1725,7 +1744,7 @@ export default function AimTrainerPage() {
             <h2 style={h2Style}>Hand-Eye Coordination and Visuomotor Tracking</h2>
             <p style={pStyle}>
               Hitting a moving target on Hard, Pro, or Impossible difficulty depends heavily on visuomotor
-              tracking â€” the continuous, real-time process of your visual system feeding position and
+              tracking — the continuous, real-time process of your visual system feeding position and
               velocity information to the motor system that controls your hand. General material on <SourceLink href="https://en.wikipedia.org/wiki/Eye%E2%80%93hand_coordination">eye-hand coordination</SourceLink> describes
               this as a closed feedback loop: the eyes track the target, the brain continuously updates its
               prediction of where the target will be, and the hand adjusts its trajectory mid-movement based
@@ -1737,7 +1756,7 @@ export default function AimTrainerPage() {
               fast, erratic movement, some degree of short-horizon prediction becomes unavoidable simply
               because the visual feedback loop cannot update fast enough to correct a pure reactive movement
               in time. The practical skill worth training, then, is not eliminating prediction entirely but
-              learning to weight it correctly â€” trusting direct tracking on Easy and Normal targets, and
+              learning to weight it correctly — trusting direct tracking on Easy and Normal targets, and
               blending in light prediction only once a target's speed genuinely outpaces your visual
               feedback loop on Pro and Impossible.
             </p>
@@ -1750,13 +1769,13 @@ export default function AimTrainerPage() {
               move the mouse, and it is a product of two separate settings: the mouse's own DPI (dots per
               inch) and the in-game or in-tool sensitivity multiplier applied on top of it. Overviews of <SourceLink href="https://en.wikipedia.org/wiki/Dots_per_inch">DPI as a measurement concept</SourceLink> explain
               that a higher DPI simply means the sensor reports more counts per inch of physical movement,
-              which is not inherently better or worse â€” it only changes how finely that raw movement gets
+              which is not inherently better or worse — it only changes how finely that raw movement gets
               divided before the in-game multiplier is applied on top of it.
             </p>
             <p style={pStyle}>
               Chasing a professional player's exact DPI and sensitivity number is one of the most common
               mistakes newer players make, because the "right" sensitivity is really a function of your own
-              arm length, desk space, and preferred aiming style â€” a low-sensitivity player physically
+              arm length, desk space, and preferred aiming style — a low-sensitivity player physically
               sweeping their whole arm across a large mousepad is optimizing for a completely different
               motor pattern than a high-sensitivity player making small wrist flicks. What matters far more
               than the specific number is holding it constant: switching sensitivity frequently forces your
@@ -1771,7 +1790,7 @@ export default function AimTrainerPage() {
               A monitor's refresh rate, measured in Hertz, determines how many times per second the display
               redraws its image. General references on <SourceLink href="https://en.wikipedia.org/wiki/Refresh_rate">display refresh rate</SourceLink> note
               that a 60Hz panel redraws every 16.7ms, while a 144Hz panel redraws every 6.9ms and a 240Hz
-              panel every 4.2ms â€” meaning a higher refresh rate shows a moving target's updated position
+              panel every 4.2ms — meaning a higher refresh rate shows a moving target's updated position
               sooner and more frequently, which shortens the time between the target actually moving and you
               seeing that movement on screen.
             </p>
@@ -1782,7 +1801,7 @@ export default function AimTrainerPage() {
               reflexes have not changed. The gain is real but bounded: moving from 60Hz to 144Hz produces a
               far larger practical improvement than moving from 144Hz to 240Hz, since the marginal reduction
               in frame time shrinks quickly at the high end. A 60Hz display is still perfectly usable for
-              training and for tracking your own progress over time â€” differences of a few milliseconds in
+              training and for tracking your own progress over time — differences of a few milliseconds in
               display latency are dwarfed by the natural session-to-session variance in your own performance.
             </p>
           </SeoSection>
@@ -1793,12 +1812,12 @@ export default function AimTrainerPage() {
               Aim performance degrades with both physical and mental fatigue, and the two compound each
               other during a long training block. General discussion of <SourceLink href="https://en.wikipedia.org/wiki/Overtraining">overtraining</SourceLink> in
               athletic contexts describes how pushing volume without adequate recovery leads to diminishing,
-              and eventually negative, returns â€” a pattern that shows up in aim training as slowly climbing
+              and eventually negative, returns — a pattern that shows up in aim training as slowly climbing
               misclick rates and shrinking combo streaks late in a long session, even though the player feels
               like they are "trying just as hard" as they were at the start.
             </p>
             <p style={pStyle}>
-              The practical takeaway is that a focused 15â€“20 minute block, broken into several short matches
+              The practical takeaway is that a focused 15–20 minute block, broken into several short matches
               with brief rests between them, generally produces better measurable results than a single
               unbroken hour of grinding Impossible difficulty. Watching your own accuracy trend within a
               session is a simple, personal way to find your fatigue point: once accuracy starts dropping two
@@ -1813,14 +1832,14 @@ export default function AimTrainerPage() {
             <p style={pStyle}>
               Any repeated high-frequency clicking motion carries some risk of cumulative strain if done
               without attention to posture, grip, or rest. General clinical overviews of <SourceLink href="https://www.ncbi.nlm.nih.gov/books/NBK441882/">repetitive strain conditions</SourceLink> describe
-              early warning signs â€” persistent tingling, numbness, or joint soreness â€” as signals to stop the
+              early warning signs — persistent tingling, numbness, or joint soreness — as signals to stop the
               activity and rest rather than push through discomfort, since continuing to train through those
               symptoms is what typically turns a minor strain into a longer-term injury.
             </p>
             <p style={pStyle}>
               Keeping your wrist in a neutral, floating position rather than resting it against a hard desk
               edge, using a claw or fingertip grip that minimizes unnecessary forearm tension, and taking a
-              short break every 20â€“30 minutes of active clicking are all low-effort habits that meaningfully
+              short break every 20–30 minutes of active clicking are all low-effort habits that meaningfully
               reduce strain risk over a long training program. Because this tool's difficulty tiers can push
               click rates well above casual browsing speeds, especially on Pro and Impossible, treating longer
               sessions with the same care you would give any other repetitive physical activity is a sensible
@@ -1831,7 +1850,7 @@ export default function AimTrainerPage() {
           <SeoSection accentColor={activeCfg.color}>
             <h2 style={h2Style}>The Psychology Behind Combo Multipliers and Streaks</h2>
             <p style={pStyle}>
-              The combo system's escalating multiplier â€” resetting instantly on any miss â€” is deliberately
+              The combo system's escalating multiplier — resetting instantly on any miss — is deliberately
               designed around a well-studied behavioral principle: rewards that arrive on an uncertain,
               streak-dependent schedule tend to produce stronger engagement and more careful behavior than
               rewards that arrive predictably every time. General psychology references on <SourceLink href="https://en.wikipedia.org/wiki/Reinforcement">reinforcement schedules</SourceLink> describe
@@ -1843,7 +1862,7 @@ export default function AimTrainerPage() {
               game feel more exciting: because misclicks are punished so directly through combo loss, players
               tend to naturally self-correct toward more controlled, deliberate clicking rather than wild,
               rapid-fire flailing at every target on screen. Treating the multiplier as a built-in accuracy
-              coach â€” deliberately playing a notch more cautiously whenever your combo climbs past 10 or 20 â€”
+              coach — deliberately playing a notch more cautiously whenever your combo climbs past 10 or 20 —
               is a simple way to use the scoring system itself as a technique-improvement tool rather than
               just a scorekeeping gimmick.
             </p>
@@ -1862,7 +1881,7 @@ export default function AimTrainerPage() {
             </p>
             <p style={pStyle}>
               The appeal of an isolated benchmark like this one is that it strips away the noisy, unpredictable
-              variables of an actual match â€” teammates, enemy decisions, map layout â€” leaving a single, clean
+              variables of an actual match — teammates, enemy decisions, map layout — leaving a single, clean
               measurement of raw mechanical performance that can be tracked consistently across weeks or
               months. Used alongside regular in-game play rather than as a replacement for it, a short daily
               aim-training block gives you a controlled way to isolate whether a slump in your actual matches
@@ -1959,7 +1978,7 @@ export default function AimTrainerPage() {
   );
 }
 
-// â”€â”€ Shared SEO styles â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Shared SEO styles ─────────────────────────────────────────────────────────
 const h2Style: React.CSSProperties = {
   fontWeight: 800, fontSize: '1.55rem', color: '#ffffff', marginBottom: '0.85rem',
   letterSpacing: '-0.01em', lineHeight: 1.3,
@@ -1971,7 +1990,7 @@ const pStyle: React.CSSProperties = {
   color: '#9797a8', fontSize: '0.92rem', lineHeight: 1.75, margin: 0,
 };
 
-// â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ── Sub-components ────────────────────────────────────────────────────────────
 function SeoHero({ accentColor, accentRgb }: { accentColor: string; accentRgb: string }) {
   return (
     <header style={{ padding: '2.5rem 0 2rem', textAlign: 'center' }}>
@@ -1990,8 +2009,8 @@ function SeoHero({ accentColor, accentRgb }: { accentColor: string; accentRgb: s
         Train Faster, More Accurate Aim
       </h2>
       <p style={{ color: '#8888a0', fontSize: '1rem', maxWidth: '620px', margin: '0 auto', lineHeight: 1.7 }}>
-        A browser-based 2D aim trainer with five difficulty tiers, combo multipliers, Sâ€“F grading, and full
-        session history â€” built to sharpen the click accuracy and reaction speed that competitive shooters demand.
+        A browser-based 2D aim trainer with five difficulty tiers, combo multipliers, S–F grading, and full
+        session history — built to sharpen the click accuracy and reaction speed that competitive shooters demand.
       </p>
     </header>
   );
@@ -2068,7 +2087,7 @@ function FaqAccordionRow({
               transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease',
               fontSize: '0.8rem',
             }}
-          >â–¾</span>
+          >▾</span>
         </button>
       </h2>
       <div
@@ -2085,41 +2104,40 @@ function FaqAccordionRow({
   );
 }
 
-function TargetButton({
+const TargetButton = memo(function TargetButton({
   target, cfg, onHit,
 }: {
   target: TargetT;
   cfg: ModeConfig;
   onHit: (t: TargetT, e: React.MouseEvent | React.TouchEvent) => void;
 }) {
-  const [hovered, setHovered] = useState(false);
+  const handleHit = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onHit(target, e);
+  };
+
   return (
     <button
-      onClick={e => { e.stopPropagation(); onHit(target, e); }}
-      onTouchEnd={e => { e.stopPropagation(); onHit(target, e); }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      aria-label={`Target â€” ${target.points} pts`}
+      onMouseDown={handleHit}
+      onTouchStart={handleHit}
+      onClick={handleHit}
+      aria-label={`Target — ${target.points} pts`}
       style={{
         position: 'absolute',
         left: `${target.x}px`, top: `${target.y}px`,
         width: `${target.size}px`, height: `${target.size}px`,
         borderRadius: '50%',
-        transform: `translate(-50%,-50%) scale(${hovered ? 1.06 : 1})`,
+        transform: 'translate(-50%,-50%)',
         background: cfg.color,
-        
-        
-        border: `1.5px solid rgba(${cfg.accentRgb},${hovered ? 0.95 : 0.55})`,
+        border: `1.5px solid rgba(${cfg.accentRgb},0.75)`,
         cursor: 'crosshair',
         animation: 'none',
-        boxShadow: hovered
-          ? `0 0 34px ${cfg.glow}, 0 0 14px ${cfg.glow}, inset 0 0 14px rgba(0,0,0,0.6)`
-          : `0 0 20px ${cfg.glow}, 0 0 8px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.5)`,
-        transition: 'box-shadow 0.12s ease, border-color 0.12s ease, transform 0.12s ease',
+        boxShadow: `0 0 20px ${cfg.glow}, 0 0 8px rgba(0,0,0,0.6), inset 0 0 10px rgba(0,0,0,0.5)`,
         zIndex: 5, padding: 0,
         display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
         userSelect: 'none',
-        willChange: 'transform, box-shadow',
+        touchAction: 'none',
       }}
     >
       {target.size > 36 && (
@@ -2132,11 +2150,12 @@ function TargetButton({
           padding: '0 5px',
           marginBottom: '2px',
           textShadow: '0 0 6px rgba(0,0,0,0.8)',
+          pointerEvents: 'none',
         }}>{target.points}</span>
       )}
     </button>
   );
-}
+});
 
 function PremiumButton({
   children, onClick, variant = 'ghost', color = '#60a5fa', rgb = '96,165,250',
