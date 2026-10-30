@@ -87,6 +87,7 @@ export default function Footer() {
                 { to: '/space-defense', label: '🚀 Space Defense' },
                 { to: '/voyager-game', label: '🛸 Voyager Game' },
                 { to: '/space-waves', label: '🌊 Space Waves' },
+                { to: '/apm-drill', label: '⚡ APM Drill' },
                 { to: '/leaderboard', label: '🏆 Global Leaderboard' },
                 { to: '/hall-of-fame', label: '⭐ Hall of Fame' },
                 { to: '/blog', label: '📖 Gaming Blog' }

@@ -34,6 +34,14 @@ export default function GamesPage() {
       desc: 'Hold Space or click to soar, release to dive through a neon obstacle course. One wrong move sends you back to the start — how far can you push your reflexes?',
       color: '#2dd4bf',
       badge: 'SIDE-SCROLLER'
+    },
+    {
+      to: '/apm-drill',
+      icon: '⚡',
+      title: 'APM Drill',
+      desc: 'Measure and train your actions per minute with surgical precision. Choose from 3×3, 4×4, 5×5 grids or the 26-letter keyboard drill.',
+      color: '#00f5ff',
+      badge: 'NEW DRILL'
     }
   ];
 

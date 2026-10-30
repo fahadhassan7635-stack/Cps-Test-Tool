@@ -43,6 +43,7 @@ const TOOLS_LIST: (ToolItem & { icon: string })[] = [
   { to: '/space-defense', label: 'Space Defense', category: 'games', icon: '🚀' },
   { to: '/voyager-game', label: 'Voyager Game', category: 'games', icon: '🛸' },
   { to: '/space-waves', label: 'Space Waves', category: 'games', icon: '🌊' },
+  { to: '/apm-drill', label: 'APM Drill', category: 'games', icon: '⚡' },
 
   { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
   { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
