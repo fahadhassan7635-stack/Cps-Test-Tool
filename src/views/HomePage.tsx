@@ -686,34 +686,37 @@ export default function HomePage() {
               key={tool.to}
               href={tool.to}
               style={{
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border)',
-                borderRadius: '12px',
-                padding: '1.25rem',
+                background: '#0d0d0d',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderLeft: `3px solid ${tool.accent}`,
+                borderRadius: '4px',
+                padding: '1rem 1.25rem',
                 textDecoration: 'none',
                 color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '1rem',
+                gap: '0.85rem',
                 transition: 'all 0.2s ease',
               }}
               onMouseEnter={e => {
                 const el = e.currentTarget as HTMLElement;
                 el.style.borderColor = tool.accent;
+                el.style.borderLeftWidth = '5px';
                 el.style.transform = 'translateY(-3px)';
-                el.style.boxShadow = `0 10px 25px rgba(0,0,0,0.3), 0 0 20px ${tool.accent}20`;
+                el.style.boxShadow = '0 10px 28px rgba(0,0,0,0.5)';
               }}
               onMouseLeave={e => {
                 const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = 'var(--border)';
+                el.style.borderColor = 'rgba(255,255,255,0.07)';
+                el.style.borderLeftColor = tool.accent;
+                el.style.borderLeftWidth = '3px';
                 el.style.transform = 'translateY(0)';
                 el.style.boxShadow = 'none';
               }}
             >
-              <span style={{ fontSize: '2rem' }}>{tool.icon}</span>
               <div>
-                <div style={{ fontWeight: '600', fontSize: '0.9rem' }}>{tool.name}</div>
-                <div style={{ fontSize: '0.75rem', color: tool.accent }}>{tool.tag}</div>
+                <div style={{ fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif", fontWeight: 800, fontSize: '1rem', letterSpacing: '0.04em', textTransform: 'uppercase', lineHeight: 1.2 }}>{tool.name}</div>
+                <div style={{ fontSize: '0.72rem', color: tool.accent, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '0.2rem' }}>{tool.tag}</div>
               </div>
             </Link>
           ))}
@@ -937,9 +940,10 @@ export default function HomePage() {
                 key={article.to}
                 id={`seo-${article.to.replace('/', '')}`}
                 style={{
-                  background: 'var(--bg-card)',
-                  border: `1px solid ${isExpanded ? article.color : 'var(--border)'}`,
-                  borderRadius: '16px',
+                  background: '#0d0d0d',
+                  border: `1px solid ${isExpanded ? article.color : 'rgba(255,255,255,0.07)'}`,
+                  borderLeft: `3px solid ${article.color}`,
+                  borderRadius: '4px',
                   overflow: 'hidden',
                   transition: 'border-color 0.3s ease',
                   scrollMarginTop: '80px',
@@ -959,16 +963,7 @@ export default function HomePage() {
                     textAlign: 'left',
                   }}
                 >
-                  <div style={{
-                    width: '52px', height: '52px', flexShrink: 0,
-                    background: `${article.color}15`,
-                    border: `1px solid ${article.color}30`,
-                    borderRadius: '12px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.5rem',
-                  }}>
-                    {article.icon}
-                  </div>
+
 
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
@@ -985,19 +980,22 @@ export default function HomePage() {
                     </div>
                     <h3 style={{
                       color: 'var(--text-primary)',
-                      fontSize: 'clamp(0.95rem, 2vw, 1.15rem)',
-                      fontWeight: '700',
+                      fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                      fontSize: 'clamp(1rem, 2.5vw, 1.25rem)',
+                      fontWeight: 800,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
                       margin: 0,
-                      lineHeight: '1.35',
+                      lineHeight: '1.2',
                     }}>
                       {article.title}
                     </h3>
                   </div>
 
                   <div style={{
-                    width: '32px', height: '32px', flexShrink: 0,
-                    border: `1px solid ${article.color}40`,
-                    borderRadius: '8px',
+                    width: '28px', height: '28px', flexShrink: 0,
+                    border: `1px solid ${article.color}50`,
+                    borderRadius: '2px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     color: article.color,
                     fontSize: '1rem',
