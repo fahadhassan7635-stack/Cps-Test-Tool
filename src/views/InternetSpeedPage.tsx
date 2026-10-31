@@ -1281,7 +1281,7 @@ export default function InternetSpeedPage() {
         .st small { display: block; color: var(--mu); font-size: .75rem; }
         .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
         /* SEO and FAQ styling */
-        .seo { display: grid; gap: 14px; margin-top: 2rem; }
+        .seo { display: grid; gap: 14px; margin-top: 2rem; background: transparent; border: none; padding: 0; }
         .seo h2 { font-size: 1.35rem; font-weight: 800; color: var(--ac); margin: 16px 0 6px; }
         .seo h3 { font-size: 1.1rem; margin: 8px 0 4px; }
         .seo p, .seo li { color: var(--mu); margin: 0; line-height: 1.7; }
@@ -1407,7 +1407,7 @@ export default function InternetSpeedPage() {
         </section>
 
         {/* SEO GUIDE ARTICLE */}
-        <article className="seo card" aria-labelledby="seoT">
+        <article className="seo" aria-labelledby="seoT">
           <h2 id="seoT">How to read your internet speed test results</h2>
           <p>A speed test shows how quickly data moves between your device and the internet. The free FixedAim speed test above measures all of it in one run. The numbers look simple, but each one affects something different in daily life.</p>
           <ul>
@@ -1457,7 +1457,7 @@ export default function InternetSpeedPage() {
         </article>
 
         {/* FAQ ACCORDION */}
-        <section className="card" aria-labelledby="faqT">
+        <section aria-labelledby="faqT">
           <h2 className="faq-h" id="faqT">Frequently asked questions</h2>
           <div className="faq" style={{ marginTop: '12px' }}>
             <details open>

@@ -3,13 +3,13 @@ import InternetSpeedPage from '@/views/InternetSpeedPage';
 
 export const metadata: Metadata = {
   title: "Internet Speed Test – Check Download, Upload & Ping | FixedAim",
-  description: "Free internet speed test by FixedAim: measure your download speed, upload speed, ping, jitter and packet loss in seconds. Learn what a good speed is and fix slow connections.",
+  description: "Free internet speed test — measure download, upload, ping, jitter & packet loss in seconds. No sign-up needed. Start your speed test now on FixedAim.",
   alternates: {
     canonical: "https://fixedaim.com/internet-speed",
   },
   openGraph: {
     title: "Internet Speed Test – Check Download, Upload & Ping | FixedAim",
-    description: "Free internet speed test by FixedAim: measure your download speed, upload speed, ping, jitter and packet loss in seconds. Learn what a good speed is and fix slow connections.",
+    description: "Free internet speed test — measure download, upload, ping, jitter & packet loss in seconds. No sign-up needed. Start your speed test now on FixedAim.",
     url: "https://fixedaim.com/internet-speed",
     siteName: "FixedAim",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Internet Speed Test – Check Download, Upload & Ping | FixedAim",
-    description: "Free internet speed test by FixedAim: measure your download speed, upload speed, ping, jitter and packet loss in seconds.",
+    description: "Free internet speed test — measure download, upload, ping, jitter & packet loss. No sign-up. Start now on FixedAim.",
     images: ["/og-image.jpg"],
   },
 };
