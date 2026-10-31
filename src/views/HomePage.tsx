@@ -2,31 +2,8 @@
 
 import Link from 'next/link';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
-const leaderboardData = {
-  cps: [
-    { rank: 1, name: 'Arpon', score: '14.2 CPS', country: '🇰🇷', avatar: '⚡' },
-    { rank: 2, name: 'RapidFire99', score: '13.8 CPS', country: '🇺🇸', avatar: '🔥' },
-    { rank: 3, name: 'ClickMaster', score: '13.1 CPS', country: '🇧🇷', avatar: '💥' },
-    { rank: 4, name: 'XSpeedX', score: '12.9 CPS', country: '🇯🇵', avatar: '🎯' },
-    { rank: 5, name: 'ProClicker', score: '12.7 CPS', country: '🇩🇪', avatar: '🏆' },
-  ],
-  wpm: [
-    { rank: 1, name: 'Typeking', score: '187 WPM', country: '🇺🇸', avatar: '⌨️' },
-    { rank: 2, name: 'KeyboardNinja', score: '174 WPM', country: '🇸🇬', avatar: '🥷' },
-    { rank: 3, name: 'SpeedTyper', score: '168 WPM', country: '🇬🇧', avatar: '💨' },
-    { rank: 4, name: 'WPMKing', score: '162 WPM', country: '🇨🇳', avatar: '👑' },
-    { rank: 5, name: 'FastFingers', score: '158 WPM', country: '🇮🇳', avatar: '🚀' },
-  ],
-  reaction: [
-    { rank: 1, name: 'Reflexking', score: '118ms', country: '🇰🇷', avatar: '⚡' },
-    { rank: 2, name: 'QuickDraw', score: '124ms', country: '🇺🇸', avatar: '🎯' },
-    { rank: 3, name: 'NeuralLink', score: '131ms', country: '🇯🇵', avatar: '🧠' },
-    { rank: 4, name: 'SpeedBot', score: '138ms', country: '🇩🇪', avatar: '🤖' },
-    { rank: 5, name: 'FastReact', score: '142ms', country: '🇧🇷', avatar: '💫' },
-  ],
-};
 
 const tools = [
   { to: '/typing-test', icon: '⌨️', name: 'Typing Speed', tag: 'WPM Test', accent: 'var(--neon-cyan)' },
@@ -332,34 +309,8 @@ const seoArticles = [
 ];
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<'cps' | 'wpm' | 'reaction'>('cps');
-  const [challengeTime, setChallengeTime] = useState('00:00:00');
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
 
-  const tick = useCallback(() => {
-    const now = new Date();
-    const midnight = new Date();
-    midnight.setHours(24, 0, 0, 0);
-    const diff = midnight.getTime() - now.getTime();
-
-    if (diff <= 0) {
-      setChallengeTime('00:00:00');
-      return;
-    }
-
-    const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-    const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-    const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-    setChallengeTime(`${h}:${m}:${s}`);
-  }, []);
-
-  useEffect(() => {
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [tick]);
-
-  const lbData = leaderboardData[activeTab];
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem', paddingBottom: '3rem' }}>
@@ -723,145 +674,201 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Leaderboard + Daily Challenge */}
+      {/* Internet Speed Mini Widget */}
       <section style={{ marginBottom: '5rem' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '2rem',
-        }}>
-          <div>
-            <div className="section-label">Records</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>
-              Hall of Fame: Benchmark Scores
-            </h2>
+        <style>{`
+          @keyframes spin-gauge {
+            from { stroke-dashoffset: 283; }
+            to   { stroke-dashoffset: 0; }
+          }
+          .speed-gauge-arc {
+            transition: stroke-dashoffset 0.6s ease;
+          }
+          .speed-mini-card {
+            background: #0d0d0d;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid #00f5ff;
+            border-radius: 4px;
+            padding: 2rem;
+          }
+          .speed-mini-label {
+            font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            color: #00f5ff;
+            margin-bottom: 0.25rem;
+          }
+          .speed-mini-value {
+            font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+            font-weight: 800;
+            font-size: 2.5rem;
+            letter-spacing: 0.04em;
+            color: #fff;
+            line-height: 1;
+          }
+          .speed-mini-unit {
+            font-size: 0.9rem;
+            color: #8a9bb2;
+            font-weight: 600;
+            margin-left: 4px;
+          }
+          .speed-stat-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+          }
+          .speed-stat {
+            flex: 1;
+            min-width: 80px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+          }
+          .speed-stat-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #566679;
+            margin-bottom: 0.3rem;
+          }
+          .speed-stat-val {
+            font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #e7edf5;
+          }
+          .speed-cta-btn {
+            display: block;
+            width: 100%;
+            margin-top: 1.5rem;
+            padding: 0.85rem;
+            background: #00f5ff;
+            color: #000;
+            font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: opacity 0.2s;
+          }
+          .speed-cta-btn:hover { opacity: 0.85; }
+          .speed-secondary-btn {
+            display: block;
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: transparent;
+            color: #00f5ff;
+            font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            text-align: center;
+            text-decoration: none;
+            border: 1px solid rgba(0,245,255,0.3);
+            border-radius: 4px;
+            transition: border-color 0.2s, background 0.2s;
+          }
+          .speed-secondary-btn:hover { border-color: #00f5ff; background: rgba(0,245,255,0.06); }
+        `}</style>
 
-            <div style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: '16px',
-              overflow: 'hidden',
-              marginBottom: '1rem',
-            }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '1rem 1.25rem',
-                borderBottom: '1px solid var(--border)',
-                background: 'rgba(0,0,0,0.2)',
-              }}>
-                <span style={{ fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--neon-yellow)' }}>
-                  🏆 ALL-TIME HIGH
-                </span>
-                <div style={{ display: 'flex', gap: '0.25rem' }}>
-                  {(['cps', 'wpm', 'reaction'] as const).map(tab => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      style={{
-                        padding: '0.3rem 0.7rem',
-                        borderRadius: '6px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.05em',
-                        background: activeTab === tab ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.05)',
-                        color: activeTab === tab ? '#000' : 'var(--text-secondary)',
-                        transition: 'all 0.2s',
-                      }}
-                    >{tab}</button>
-                  ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem', alignItems: 'start' }}>
+
+          {/* LEFT: Mini Speed Dashboard */}
+          <div>
+            <div className="section-label">Benchmark</div>
+            <h2 style={{ fontFamily: "'Barlow Condensed','Arial Narrow',Arial,sans-serif", fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+              Internet Speed<br /><span style={{ color: '#00f5ff' }}>Monitor</span>
+            </h2>
+            <div className="speed-mini-card">
+              {/* Gauge */}
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                <svg width="180" height="100" viewBox="0 0 180 100" fill="none">
+                  {/* Track arc */}
+                  <path d="M 20 90 A 70 70 0 0 1 160 90" stroke="rgba(255,255,255,0.08)" strokeWidth="10" strokeLinecap="round" fill="none"/>
+                  {/* Active arc — static decorative at ~35% for preview */}
+                  <path d="M 20 90 A 70 70 0 0 1 160 90" stroke="url(#sg)" strokeWidth="10" strokeLinecap="round" fill="none"
+                    strokeDasharray="220" strokeDashoffset="143" style={{ transition: 'stroke-dashoffset 0.6s ease' }}/>
+                  {/* Needle */}
+                  <line x1="90" y1="90" x2="50" y2="40" stroke="#ef4444" strokeWidth="2.5" strokeLinecap="round"/>
+                  <circle cx="90" cy="90" r="5" fill="#ef4444"/>
+                  {/* Labels */}
+                  <text x="16" y="100" fill="#566679" fontSize="10" fontWeight="700">0</text>
+                  <text x="148" y="100" fill="#566679" fontSize="10" fontWeight="700">250</text>
+                  <defs>
+                    <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#00f5ff"/>
+                      <stop offset="100%" stopColor="#4ade80"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              {/* Speed value */}
+              <div style={{ textAlign: 'center', marginBottom: '0.25rem' }}>
+                <span className="speed-mini-value">—</span>
+                <span className="speed-mini-unit">Mbps</span>
+              </div>
+              <div style={{ textAlign: 'center', fontSize: '0.78rem', color: '#566679', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Run a test to see your speed</div>
+              {/* Stats row */}
+              <div className="speed-stat-row">
+                <div className="speed-stat">
+                  <div className="speed-stat-label">↓ Download</div>
+                  <div className="speed-stat-val">—</div>
+                </div>
+                <div className="speed-stat">
+                  <div className="speed-stat-label">↑ Upload</div>
+                  <div className="speed-stat-val">—</div>
+                </div>
+                <div className="speed-stat">
+                  <div className="speed-stat-label">Ping</div>
+                  <div className="speed-stat-val">—</div>
+                </div>
+                <div className="speed-stat">
+                  <div className="speed-stat-label">Jitter</div>
+                  <div className="speed-stat-val">—</div>
                 </div>
               </div>
+              {/* CTA buttons */}
+              <Link href="/internet-speed" className="speed-cta-btn">Run Speed Test →</Link>
+              <Link href="/benchmark" className="speed-secondary-btn">View Benchmark Hub</Link>
+            </div>
+          </div>
 
-              {lbData.map((entry, i) => (
-                <div key={entry.name} className="lb-row" style={{
-                  display: 'flex', alignItems: 'center', gap: '0.75rem',
-                  padding: '0.75rem 1.25rem',
-                  borderBottom: i < lbData.length - 1 ? '1px solid var(--border)' : 'none',
-                }}>
-                  <span style={{
-                    width: '28px', textAlign: 'center', fontWeight: '700',
-                    fontSize: '0.9rem',
-                    color: i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text-muted)',
-                  }}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${entry.rank}`}
-                  </span>
-                  <span style={{ fontSize: '1.25rem' }}>{entry.avatar}</span>
-                  <span style={{ flex: 1, fontWeight: '500', fontSize: '0.9rem' }}>{entry.name}</span>
-                  <span style={{ color: 'var(--neon-cyan)', fontWeight: '700', fontSize: '0.9rem' }}>{entry.score}</span>
-                  <span style={{ fontSize: '1rem' }}>{entry.country}</span>
+          {/* RIGHT: Info + why test */}
+          <div>
+            <div className="section-label">Why It Matters</div>
+            <h2 style={{ fontFamily: "'Barlow Condensed','Arial Narrow',Arial,sans-serif", fontSize: 'clamp(1.75rem, 4vw, 2.4rem)', fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
+              Know Your<br /><span style={{ color: '#00f5ff' }}>Connection</span>
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {[
+                { label: 'Download Speed', color: '#00f5ff', desc: 'How fast data arrives to you — affects streaming, web browsing, and game updates.' },
+                { label: 'Upload Speed',   color: '#4ade80', desc: 'How fast you send data — critical for video calls, live streaming, and cloud backups.' },
+                { label: 'Ping / Latency', color: '#fb923c', desc: 'Round-trip delay in ms. Under 50ms is great for online gaming. Lower = better.' },
+                { label: 'Jitter',         color: '#a855f7', desc: 'Variation in ping over time. High jitter = choppy video calls and rubberbanding in games.' },
+                { label: 'Packet Loss',    color: '#ef4444', desc: 'Percentage of data that never arrives. Even 1% causes noticeable lag and stutters.' },
+              ].map(item => (
+                <div key={item.label} style={{ background: '#0d0d0d', border: '1px solid rgba(255,255,255,0.07)', borderLeft: `3px solid ${item.color}`, borderRadius: '4px', padding: '1rem 1.25rem' }}>
+                  <div style={{ fontFamily: "'Barlow Condensed','Arial Narrow',Arial,sans-serif", fontWeight: 800, fontSize: '0.95rem', letterSpacing: '0.06em', textTransform: 'uppercase', color: item.color, marginBottom: '0.25rem' }}>{item.label}</div>
+                  <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.55' }}>{item.desc}</div>
                 </div>
               ))}
             </div>
-
-            <Link href="/leaderboard" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
-              View All Records →
-            </Link>
           </div>
 
-          <div>
-            <div className="section-label">Challenge</div>
-            <h2 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.5rem' }}>Can You Beat the World Record?</h2>
-
-            <div style={{
-              background: 'linear-gradient(135deg, rgba(0,245,255,0.05), rgba(0,255,136,0.05))',
-              border: '1px solid rgba(0,245,255,0.2)',
-              borderRadius: '16px',
-              padding: '1.75rem',
-            }}>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                padding: '0.3rem 0.75rem',
-                background: 'rgba(255,215,0,0.15)', border: '1px solid rgba(255,215,0,0.3)',
-                borderRadius: '50px', fontSize: '0.8rem', fontWeight: '700',
-                color: '#FFD700', marginBottom: '1rem',
-              }}>🏆 World Record Challenge</div>
-
-              <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '0.75rem' }}>Beat the Best</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-                Think you have what it takes? Test your clicking speed and see how close you can get to one of the highest reported CPS performances.
-              </p>
-
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
-                {[
-                  { icon: '🎯', label: 'Target', value: '10+ CPS' },
-                  { icon: '⏱️', label: 'Duration', value: '5 Seconds' },
-                ].map(r => (
-                  <div key={r.label} style={{
-                    display: 'flex', alignItems: 'center', gap: '0.5rem',
-                    padding: '0.5rem 1rem',
-                    background: 'rgba(255,255,255,0.05)',
-                    borderRadius: '8px', fontSize: '0.875rem',
-                  }}>
-                    <span>{r.icon}</span>
-                    <span style={{ color: 'var(--text-secondary)' }}>{r.label}: </span>
-                    <span style={{ color: 'var(--neon-cyan)', fontWeight: '700' }}>{r.value}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{
-                background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '1rem',
-                textAlign: 'center', marginBottom: '1.5rem',
-              }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.25rem' }}>Resets in</div>
-                <div suppressHydrationWarning style={{ fontSize: '2rem', fontWeight: '900', color: 'var(--neon-cyan)', fontVariantNumeric: 'tabular-nums' }}>
-                  {challengeTime}
-                </div>
-              </div>
-
-              <Link href="/cps-test" className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                ⚡ Accept Challenge
-              </Link>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Gear Section */}
-      <section style={{
+      {/* Gear Section */}      <section style={{
         marginBottom: '4rem',
         background: 'rgba(8,13,20,0.6)',
         border: '1px solid var(--border)',
