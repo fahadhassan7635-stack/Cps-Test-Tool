@@ -522,20 +522,89 @@ export default function HomePage() {
 
       {/* Category Cards */}
       <section style={{ marginBottom: '4rem' }}>
-        <div className="section-label">Tools & Games</div>
+        <div className="section-label">Tools &amp; Games</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Choose Your Arena</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Precision tools and skill games. Free, instant, no signup required.</p>
+
+        <style>{String.raw`
+          @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&display=swap');
+          .cod-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px;
+            padding: 1.75rem 1.75rem 1.5rem 1.75rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            display: block;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+          }
+          .cod-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 3px; height: 100%;
+            background: var(--card-accent, #00f5ff);
+            transition: width 0.2s ease;
+          }
+          .cod-card:hover::before { width: 5px; }
+          .cod-card:hover {
+            border-color: var(--card-accent, #00f5ff);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 24px rgba(0,0,0,0.3);
+          }
+          .cod-card-title {
+            font-family: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin-bottom: 0.6rem;
+            margin-top: 0.5rem;
+          }
+          .cod-card-desc {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.55;
+            margin-bottom: 1.25rem;
+          }
+          .cod-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.25rem 0.65rem;
+            border-radius: 2px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            border: 1px solid;
+          }
+          .cod-arrow {
+            position: absolute;
+            top: 1.25rem; right: 1.25rem;
+            font-size: 1rem;
+            opacity: 0.45;
+            transition: opacity 0.2s, transform 0.2s;
+          }
+          .cod-card:hover .cod-arrow {
+            opacity: 1;
+            transform: translate(2px, -2px);
+          }
+        `}</style>
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-          gap: '1.5rem',
+          gap: '1.25rem',
         }}>
           {[
             {
               to: '/keyboard', icon: '⌨️', title: 'Keyboard Tools',
               desc: 'Test and improve your typing speed, accuracy, and keyboard mastery. From WPM records to key visualizers.',
-              color: 'var(--neon-cyan)',
+              color: '#00f5ff',
               pills: [
                 { to: '/typing-test', label: '⌨ Typing Speed' },
                 { to: '/key-visualizer', label: '👁 Key Visualizer' },
@@ -544,7 +613,7 @@ export default function HomePage() {
             {
               to: '/mouse', icon: '🖱️', title: 'Mouse Tools',
               desc: 'Measure clicks per second, test double-click intervals, and challenge your overall mouse precision.',
-              color: 'var(--neon-green)',
+              color: '#4ade80',
               pills: [
                 { to: '/cps-test', label: '⚡ CPS Test' },
                 { to: '/double-click', label: '🖱 Double Click' },
@@ -553,7 +622,7 @@ export default function HomePage() {
             {
               to: '/aim', icon: '🎯', title: 'Aim & Reaction',
               desc: 'Train your reflexes, sharpen your aim, and simulate real FPS-style scenarios with moving targets.',
-              color: 'var(--neon-orange)',
+              color: '#fb923c',
               pills: [
                 { to: '/reaction-time', label: '⚡ Reaction Time' },
                 { to: '/aim-trainer', label: '🎯 Aim Trainer' },
@@ -561,8 +630,8 @@ export default function HomePage() {
             },
             {
               to: '/benchmark', icon: '📊', title: 'Benchmark Hub',
-              desc: 'Benchmark your network speed, latency, clicking speed, and typing performance with instant analytics.',
-              color: 'var(--neon-cyan)',
+              desc: 'Benchmark your network speed, ping latency, jitter, and packet loss with real-time analytics.',
+              color: '#00f5ff',
               pills: [
                 { to: '/benchmark', label: '📊 Benchmark Hub' },
                 { to: '/internet-speed', label: '🌐 Internet Speed' },
@@ -571,7 +640,7 @@ export default function HomePage() {
             {
               to: '/games', icon: '🎮', title: 'Skill Games',
               desc: 'Try our interactive games to develop your reaction time and CPS skills in a highly engaging environment.',
-              color: 'var(--neon-purple)',
+              color: '#a855f7',
               pills: [
                 { to: '/space-defense', label: '🚀 Space Defense' },
                 { to: '/voyager-game', label: '🌌 Voyager Game' },
@@ -581,57 +650,28 @@ export default function HomePage() {
             <Link
               key={cat.to}
               href={cat.to}
-              style={{
-                background: 'var(--bg-card)',
-                border: `1px solid var(--border)`,
-                borderRadius: '16px',
-                padding: '1.75rem',
-                textDecoration: 'none',
-                color: 'var(--text-primary)',
-                display: 'block',
-                transition: 'all 0.3s ease',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-              onMouseEnter={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = cat.color;
-                el.style.transform = 'translateY(-6px)';
-                el.style.boxShadow = `0 20px 40px rgba(0,0,0,0.4), 0 0 30px ${cat.color}20`;
-              }}
-              onMouseLeave={e => {
-                const el = e.currentTarget as HTMLElement;
-                el.style.borderColor = 'var(--border)';
-                el.style.transform = 'translateY(0)';
-                el.style.boxShadow = 'none';
-              }}
+              className="cod-card"
+              style={{ ['--card-accent' as string]: cat.color }}
             >
-              <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>{cat.icon}</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem', color: cat.color }}>{cat.title}</div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: '1.6', marginBottom: '1.25rem' }}>{cat.desc}</p>
+              <span className="cod-arrow" style={{ color: cat.color }}>↗</span>
+              <div style={{ fontSize: '2rem', lineHeight: 1 }}>{cat.icon}</div>
+              <div className="cod-card-title" style={{ color: cat.color }}>{cat.title}</div>
+              <p className="cod-card-desc">{cat.desc}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                 {cat.pills.map(p => (
-                  <span key={p.label} style={{
-                    padding: '0.3rem 0.7rem',
-                    borderRadius: '50px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    background: `${cat.color}15`,
+                  <span key={p.label} className="cod-pill" style={{
+                    background: cat.color + '18',
                     color: cat.color,
-                    border: `1px solid ${cat.color}30`,
+                    borderColor: cat.color + '40',
                   }}>{p.label}</span>
                 ))}
               </div>
-              <span style={{
-                position: 'absolute', top: '1.5rem', right: '1.5rem',
-                fontSize: '1.25rem', color: cat.color, opacity: 0.6,
-              }}>↗</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Quick Launch */}
+            {/* Quick Launch */}
       <section id="all-tools" style={{ marginBottom: '4rem' }}>
         <div className="section-label">Quick Launch</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Jump In Instantly</h2>
