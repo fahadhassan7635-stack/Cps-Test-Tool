@@ -602,48 +602,48 @@ export default function HomePage() {
         }}>
           {[
             {
-              to: '/keyboard', icon: '⌨️', title: 'Keyboard Tools',
+              to: '/keyboard', title: 'Keyboard Tools',
               desc: 'Test and improve your typing speed, accuracy, and keyboard mastery. From WPM records to key visualizers.',
               color: '#00f5ff',
               pills: [
-                { to: '/typing-test', label: '⌨ Typing Speed' },
-                { to: '/key-visualizer', label: '👁 Key Visualizer' },
+                { to: '/typing-test', label: 'Typing Speed' },
+                { to: '/key-visualizer', label: 'Key Visualizer' },
               ],
             },
             {
-              to: '/mouse', icon: '🖱️', title: 'Mouse Tools',
+              to: '/mouse', title: 'Mouse Tools',
               desc: 'Measure clicks per second, test double-click intervals, and challenge your overall mouse precision.',
               color: '#4ade80',
               pills: [
-                { to: '/cps-test', label: '⚡ CPS Test' },
-                { to: '/double-click', label: '🖱 Double Click' },
+                { to: '/cps-test', label: 'CPS Test' },
+                { to: '/double-click', label: 'Double Click' },
               ],
             },
             {
-              to: '/aim', icon: '🎯', title: 'Aim & Reaction',
+              to: '/aim', title: 'Aim & Reaction',
               desc: 'Train your reflexes, sharpen your aim, and simulate real FPS-style scenarios with moving targets.',
               color: '#fb923c',
               pills: [
-                { to: '/reaction-time', label: '⚡ Reaction Time' },
-                { to: '/aim-trainer', label: '🎯 Aim Trainer' },
+                { to: '/reaction-time', label: 'Reaction Time' },
+                { to: '/aim-trainer', label: 'Aim Trainer' },
               ],
             },
             {
-              to: '/benchmark', icon: '📊', title: 'Benchmark Hub',
+              to: '/benchmark', title: 'Benchmark Hub',
               desc: 'Benchmark your network speed, ping latency, jitter, and packet loss with real-time analytics.',
               color: '#00f5ff',
               pills: [
-                { to: '/benchmark', label: '📊 Benchmark Hub' },
-                { to: '/internet-speed', label: '🌐 Internet Speed' },
+                { to: '/benchmark', label: 'Benchmark Hub' },
+                { to: '/internet-speed', label: 'Internet Speed' },
               ],
             },
             {
-              to: '/games', icon: '🎮', title: 'Skill Games',
+              to: '/games', title: 'Skill Games',
               desc: 'Try our interactive games to develop your reaction time and CPS skills in a highly engaging environment.',
               color: '#a855f7',
               pills: [
-                { to: '/space-defense', label: '🚀 Space Defense' },
-                { to: '/voyager-game', label: '🌌 Voyager Game' },
+                { to: '/space-defense', label: 'Space Defense' },
+                { to: '/voyager-game', label: 'Voyager Game' },
               ],
             },
           ].map(cat => (
@@ -654,7 +654,6 @@ export default function HomePage() {
               style={{ ['--card-accent' as string]: cat.color }}
             >
               <span className="cod-arrow" style={{ color: cat.color }}>↗</span>
-              <div style={{ fontSize: '2rem', lineHeight: 1 }}>{cat.icon}</div>
               <div className="cod-card-title" style={{ color: cat.color }}>{cat.title}</div>
               <p className="cod-card-desc">{cat.desc}</p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
