@@ -1193,7 +1193,7 @@ export default function InternetSpeedPage() {
         .pill { padding: 4px 12px; border-radius: 99px; font-size: .85rem; background: var(--cd); border: 1px solid var(--bd); }
         .pill::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; background: #dc2626; }
         .pill[data-on="1"]::before { background: #16a34a; }
-        .card { background: var(--cd); border: 1px solid var(--bd); border-radius: 18px; padding: 18px; contain: layout style; }
+        .card { background: var(--cd); border: 1px solid var(--bd); border-radius: 4px; padding: 18px; contain: layout style; }
         #hero { text-align: center; }
         #hero .gauge { width: min(420px, 100%); }
         .ph { font-weight: 700; font-size: 1.05rem; color: var(--ac); margin: 6px 0 12px; }
@@ -1209,7 +1209,7 @@ export default function InternetSpeedPage() {
         [data-q="Poor"] { color: #dc2626; }
         #hero .ctrl { margin-top: 16px; }
         .ctrl { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-        .btn { min-height: 42px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--bd); background: rgba(255,255,255,0.04); color: var(--tx); font: inherit; font-weight: 600; cursor: pointer; touch-action: manipulation; transition: transform .1s, opacity .2s; }
+        .btn { min-height: 42px; padding: 0 18px; border-radius: 4px; border: 1px solid var(--bd); background: rgba(255,255,255,0.04); color: var(--tx); font: inherit; font-weight: 600; cursor: pointer; touch-action: manipulation; transition: transform .1s, opacity .2s; }
         .btn:active:not(:disabled) { transform: scale(.97); }
         #bStart { background: var(--ac); border-color: var(--ac); color: #000; box-shadow: 0 0 14px rgba(0,245,255,0.45); font-weight: 700; }
         .btn.pri { background: var(--ac); border-color: var(--ac); color: #000; }
@@ -1241,30 +1241,30 @@ export default function InternetSpeedPage() {
         #fw.open .mi { visibility: visible; opacity: 1; pointer-events: auto; transform: translate(var(--dx), var(--dy)) scale(1); transition-delay: calc(var(--i,0)*25ms), calc(var(--i,0)*25ms), 0s; }
         .mi:hover, .mi:active { background: var(--ac); color: #000; }
         /* panels */
-        #dash { position: fixed; z-index: 9100; width: 290px; max-width: calc(100vw - 16px); background: var(--cd); color: var(--tx); border: 1px solid var(--bd); border-radius: 18px; box-shadow: var(--sh); padding: 14px; visibility: hidden; opacity: 0; transform: scale(.92); transition: opacity .2s, transform .2s, visibility 0s .2s; backdrop-filter: blur(10px); }
+        #dash { position: fixed; z-index: 9100; width: 290px; max-width: calc(100vw - 16px); background: var(--cd); color: var(--tx); border: 1px solid var(--bd); border-radius: 4px; box-shadow: var(--sh); padding: 14px; visibility: hidden; opacity: 0; transform: scale(.92); transition: opacity .2s, transform .2s, visibility 0s .2s; backdrop-filter: blur(10px); }
         #dash.show { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
         .dh { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 6px; font-size: 0.95rem; }
-        .ib { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--bd); background: rgba(255,255,255,0.06); color: var(--tx); cursor: pointer; font-size: 14px; }
+        .ib { width: 34px; height: 34px; border-radius: 4px; border: 1px solid var(--bd); background: rgba(255,255,255,0.06); color: var(--tx); cursor: pointer; font-size: 14px; }
         #dash .gauge { width: 200px; }
         .two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center; margin: 6px 0; }
         .two b { display: block; font-size: 1.15rem; font-weight: 700; }
         .two span { font-size: .75rem; color: var(--mu); }
         .det { display: none; }
         #dash.det .det { display: block; }
-        #cv { width: 100%; height: 70px; display: block; margin: 8px 0; border-radius: 8px; background: rgba(0,0,0,0.3); }
+        #cv { width: 100%; height: 70px; display: block; margin: 8px 0; border-radius: 4px; background: rgba(0,0,0,0.3); }
         .sm { font-size: .78rem; color: var(--mu); margin: 4px 0; }
         #dash .btn { width: 100%; margin-top: 8px; }
         #bk { position: fixed; inset: 0; z-index: 9290; background: rgba(0,0,0,.6); backdrop-filter: blur(4px); }
-        #set { position: fixed; z-index: 9300; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(400px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--cd); border: 1px solid var(--bd); border-radius: 18px; box-shadow: var(--sh); padding: 20px; }
+        #set { position: fixed; z-index: 9300; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(400px, calc(100vw - 24px)); max-height: calc(100vh - 24px); overflow: auto; background: var(--cd); border: 1px solid var(--bd); border-radius: 4px; box-shadow: var(--sh); padding: 20px; }
         #set[hidden], #bk[hidden] { display: none; }
         #set h2 { margin: 0 0 12px; font-size: 1.2rem; font-weight: 700; color: var(--ac); }
         .f { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; font-size: 0.92rem; }
         .f select, .f input[type=range] { max-width: 55%; font: inherit; }
-        .f select { padding: 6px 10px; border-radius: 8px; border: 1px solid var(--bd); background: rgba(255,255,255,0.06); color: var(--tx); }
+        .f select { padding: 6px 10px; border-radius: 4px; border: 1px solid var(--bd); background: rgba(255,255,255,0.06); color: var(--tx); }
         .f input[type=range] { accent-color: var(--ac); cursor: pointer; }
         .f input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--ac); }
         .cv2 { width: 100%; height: 150px; display: block; margin-top: 6px; cursor: crosshair; }
-        #tip { position: fixed; z-index: 9500; pointer-events: none; background: #111823; color: #fff; border: 1px solid var(--bd); border-radius: 8px; padding: 8px 12px; font: 12px/1.5 system-ui, sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.6); white-space: nowrap; }
+        #tip { position: fixed; z-index: 9500; pointer-events: none; background: #111823; color: #fff; border: 1px solid var(--bd); border-radius: 4px; padding: 8px 12px; font: 12px/1.5 system-ui, sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.6); white-space: nowrap; }
         #tip[hidden] { display: none; }
         #tip i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
         .qs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 8px; text-align: center; }
@@ -1275,7 +1275,7 @@ export default function InternetSpeedPage() {
         .info dt { color: var(--mu); }
         .info dd { margin: 0; word-break: break-word; }
         /* Packet Loss Bar (Exact green and red styling) */
-        .plb { display: flex; height: 22px; border-radius: 6px; overflow: hidden; margin-top: 8px; background: rgba(255,255,255,0.06); }
+        .plb { display: flex; height: 22px; border-radius: 4px; overflow: hidden; margin-top: 8px; background: rgba(255,255,255,0.06); }
         .plb i { display: block; height: 100%; background: #4ade80; transition: width .3s; }
         .plb i + i { background: #dc2626; }
         .st small { display: block; color: var(--mu); font-size: .75rem; }
@@ -1287,7 +1287,7 @@ export default function InternetSpeedPage() {
         .seo p, .seo li { color: var(--mu); margin: 0; line-height: 1.7; }
         .seo ul, .seo ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
         .seo strong { color: var(--tx); }
-        .tw { overflow-x: auto; border: 1px solid var(--bd); border-radius: 12px; background: var(--cd); margin: 12px 0; }
+        .tw { overflow-x: auto; border: 1px solid var(--bd); border-radius: 4px; background: var(--cd); margin: 12px 0; }
         .tw table { width: 100%; border-collapse: collapse; min-width: 440px; font-size: .92rem; }
         .tw th, .tw td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--bd); color: var(--mu); }
         .tw th { color: var(--tx); font-weight: 700; border-bottom: 1px solid var(--ac); }
@@ -1295,7 +1295,7 @@ export default function InternetSpeedPage() {
         .tw td:first-child { color: var(--tx); font-weight: 600; }
         .faq { display: grid; gap: 10px; margin-top: 10px; }
         .faq-h { font-size: 1.35rem; font-weight: 800; color: var(--ac); margin: 20px 0 6px; }
-        .faq details { border: 1px solid var(--bd); border-radius: 12px; background: rgba(255,255,255,0.02); transition: border-color .2s; }
+        .faq details { border: 1px solid var(--bd); border-radius: 4px; background: rgba(255,255,255,0.02); transition: border-color .2s; }
         .faq details[open] { border-color: var(--ac); background: rgba(0,245,255,0.02); }
         .faq summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 18px; font-weight: 700; font-size: 1rem; }
         .faq summary::-webkit-details-marker { display: none; }

@@ -80,23 +80,41 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         boxSizing: 'border-box'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', textDecoration: 'none' }}>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
             <div style={{
-              width: '44px', height: '44px',
+              width: '40px', height: '40px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               background: 'transparent',
             }}>
-              <Image src={mouseIcon} alt="Logo" width={44} height={44} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} priority />
+              <Image src={mouseIcon} alt="Logo" width={40} height={40} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 0 6px rgba(0,245,255,0.7)) drop-shadow(0 0 14px rgba(0,245,255,0.4))' }} priority />
             </div>
-            <span style={{
-              fontWeight: '700', fontSize: '1.4rem', color: 'var(--text-primary)', letterSpacing: '-0.02em',
-              textShadow: '0 0 8px rgba(0,245,255,0.6), 0 0 18px rgba(0,245,255,0.35)'
-            }}>
-              Fixed <span style={{
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', lineHeight: 1 }}>
+              <span style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontWeight: 800,
+                fontSize: '1.65rem',
+                color: 'var(--text-primary)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                textShadow: '0 0 8px rgba(0,245,255,0.5)',
+                lineHeight: 1,
+              }}>
+                FIXED <span style={{
+                  color: 'var(--neon-cyan)',
+                  textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)'
+                }}>AIM</span>
+              </span>
+              <span style={{
+                fontFamily: "'Barlow Condensed', 'Arial Narrow', Arial, sans-serif",
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
                 color: 'var(--neon-cyan)',
-                textShadow: '0 0 8px var(--neon-cyan), 0 0 20px var(--neon-cyan)'
-              }}>Aim</span>
-            </span>
+                opacity: 0.65,
+                marginTop: '2px',
+              }}>TEST · TRAIN · DOMINATE</span>
+            </div>
           </Link>
         </div>
 
