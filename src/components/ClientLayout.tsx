@@ -10,7 +10,7 @@ const mouseIcon = '/gun-pfp.png';
 interface ToolItem {
   to: string;
   label: string;
-  category: 'mouse' | 'keyboard' | 'aim' | 'games' | 'misc';
+  category: 'mouse' | 'keyboard' | 'aim' | 'benchmark' | 'games' | 'misc';
 }
 
 const NAV_ITEMS = [
@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { to: '/keyboard', label: 'Keyboard' },
   { to: '/mouse', label: 'Mouse' },
   { to: '/aim', label: 'Aim & Reaction' },
-  { to: '/hall-of-fame', label: 'Hall of Fame' },
+  { to: '/benchmark', label: 'Benchmark' },
   { to: '/games', label: 'Games' },
   { to: '/blog', label: 'Blog' },
 ];
@@ -46,7 +46,8 @@ const TOOLS_LIST: (ToolItem & { icon: string })[] = [
   { to: '/apm-drill', label: 'APM Drill', category: 'games', icon: '⚡' },
 
   { to: '/blog', label: 'Blog', category: 'misc', icon: '📝' },
-  { to: '/hall-of-fame', label: 'Hall of Record', category: 'misc', icon: '🏆' },
+  { to: '/benchmark', label: 'Benchmark Hub', category: 'benchmark', icon: '📊' },
+  { to: '/internet-speed', label: 'Internet Speed Test', category: 'benchmark', icon: '🌐' },
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -266,6 +267,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <option value="mouse">MOUSE TOOLS</option>
               <option value="keyboard">KEYBOARD TOOLS</option>
               <option value="aim">AIM & REACTION</option>
+              <option value="benchmark">BENCHMARKS</option>
               <option value="games">ARCADE GAMES</option>
               <option value="misc">OTHER SECTIONS</option>
             </select>

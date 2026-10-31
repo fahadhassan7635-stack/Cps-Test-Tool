@@ -89,7 +89,8 @@ export default function Footer() {
                 { to: '/space-waves', label: '🌊 Space Waves' },
                 { to: '/apm-drill', label: '⚡ APM Drill' },
                 { to: '/leaderboard', label: '🏆 Global Leaderboard' },
-                { to: '/hall-of-fame', label: '⭐ Hall of Fame' },
+                { to: '/benchmark', label: '📊 Benchmark Hub' },
+                { to: '/internet-speed', label: '🌐 Internet Speed Test' },
                 { to: '/blog', label: '📖 Gaming Blog' }
               ].map(l => (
                 <li key={l.to}><Link href={l.to} className="footer-link">{l.label}</Link></li>

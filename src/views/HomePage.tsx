@@ -560,12 +560,12 @@ export default function HomePage() {
               ],
             },
             {
-              to: '/hall-of-fame', icon: '🏆', title: 'Compete Globally',
-              desc: 'Submit your scores, track your history, complete daily challenges, and climb the worldwide leaderboard.',
-              color: 'var(--neon-yellow)',
+              to: '/benchmark', icon: '📊', title: 'Benchmark Hub',
+              desc: 'Benchmark your network speed, latency, clicking speed, and typing performance with instant analytics.',
+              color: 'var(--neon-cyan)',
               pills: [
-                { to: '/hall-of-fame', label: '🏆 Hall of Fame' },
-                { to: '/cps-test', label: '📅 Daily Challenge' },
+                { to: '/benchmark', label: '📊 Benchmark Hub' },
+                { to: '/internet-speed', label: '🌐 Internet Speed' },
               ],
             },
             {
@@ -754,7 +754,7 @@ export default function HomePage() {
               ))}
             </div>
 
-            <Link href="/hall-of-fame" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
+            <Link href="/leaderboard" className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center' }}>
               View All Records →
             </Link>
           </div>
