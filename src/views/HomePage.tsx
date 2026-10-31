@@ -529,8 +529,8 @@ export default function HomePage() {
         <style>{String.raw`
           @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&display=swap');
           .cod-card {
-            background: var(--bg-card);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #0d0d0d;
+            border: 1px solid rgba(255,255,255,0.07);
             border-radius: 4px;
             padding: 1.75rem 1.75rem 1.5rem 1.75rem;
             text-decoration: none;
