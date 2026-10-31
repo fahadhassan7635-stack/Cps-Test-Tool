@@ -96,7 +96,7 @@ Typing quickly isn't really a finger-strength problem, it's a motor memory probl
 - **60 to 90 WPM:** Add punctuation-heavy and number-heavy typing test passages. This is the range where most people plateau because they've mastered plain lowercase words but haven't drilled the harder characters.
 - **90+ WPM:** Focus almost entirely on consistency across multiple back-to-back typing tests rather than chasing a single lucky high score, since real-world typing speed is an average, not a personal best.
 
-**Why Typing Speed Matters Beyond Gaming Forums and Leaderboards**
+**Why Typing Speed Matters Beyond Gaming Forums**
 A fast, accurate typing test score isn't just a bragging right. Programmers, writers, students, and remote workers all benefit directly from higher sustained typing speed because it removes a physical bottleneck between having a thought and getting it onto the screen. Customer support agents and data entry professionals are frequently measured on typing speed and accuracy as a literal job requirement. Even outside of work, faster typing means less friction in everyday communication, whether that's a long email, a school essay, or chatting with friends. The habits you build chasing a higher typing test score carry directly into every situation where you need to get words onto a screen quickly and correctly.
 
 **Ergonomics: Protecting Your Hands While You Train**
@@ -269,7 +269,7 @@ An aim trainer breaks your mouse control down into three distinct skills:
 - Week 3: Shrink the targets. Force yourself to be precise instead of just fast. Speed comes naturally from precision.
 - Week 4: Play dynamic scenarios where targets move vertically and horizontally at random intervals.
 
-Remember, an aim trainer is just a gym. Don't stress over getting a high score on the leaderboard. Focus on perfect technique, and the kills will follow in-game.
+Remember, an aim trainer is just a gym. Don't stress over getting a high score. Focus on perfect technique, and the kills will follow in-game.
 
 **Beginner's Guide: Your First Aim Trainer Session**
 If you're brand new to using an aim trainer, don't start with the hardest scenario you can find. Begin with large, slow-moving, stationary targets and focus entirely on drawing a clean, straight line to each one. Your very first sessions should feel almost boringly easy. The goal at this stage isn't to post a high score, it's to teach your hand what a correct, controlled mouse movement feels like before you introduce any speed or pressure at all.

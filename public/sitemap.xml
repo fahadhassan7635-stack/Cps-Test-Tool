@@ -159,12 +159,6 @@
   </url>
 
   <!-- Leaderboard -->
-  <url>
-    <loc>https://fixedaim.com/leaderboard</loc>
-    <lastmod>2026-10-05</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
 
   <url>
     <loc>https://fixedaim.com/internet-speed</loc>

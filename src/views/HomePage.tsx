@@ -877,7 +877,7 @@ export default function HomePage() {
       }}>
         <div className="section-label">Gear Up</div>
         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: '800', marginBottom: '0.75rem' }}>Top Gaming Gear Picks</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Equipment used by top performers on our leaderboard. Affiliate links help keep this platform free.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Top gear picked by competitive gamers and professionals. Affiliate links help keep this platform free.</p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.25rem' }}>
           {gearItems.map(gear => (

@@ -88,7 +88,6 @@ export default function Footer() {
                 { to: '/voyager-game', label: '🛸 Voyager Game' },
                 { to: '/space-waves', label: '🌊 Space Waves' },
                 { to: '/apm-drill', label: '⚡ APM Drill' },
-                { to: '/leaderboard', label: '🏆 Global Leaderboard' },
                 { to: '/benchmark', label: '📊 Benchmark Hub' },
                 { to: '/internet-speed', label: '🌐 Internet Speed Test' },
                 { to: '/blog', label: '📖 Gaming Blog' }
