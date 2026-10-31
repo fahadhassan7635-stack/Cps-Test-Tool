@@ -2,14 +2,14 @@ import type { Metadata } from 'next';
 import BenchmarkPage from '@/views/BenchmarkPage';
 
 export const metadata: Metadata = {
-  title: "Benchmark Hub - Internet Speed, Reaction, CPS & Performance Tests | FixedAim",
-  description: "Test and benchmark your network speed, latency, clicking speed, typing WPM, and peripheral input performance with real-time analytics. Free online benchmarks.",
+  title: "Benchmark Hub – Internet Speed Test | FixedAim",
+  description: "Benchmark your internet connection speed with real-time download, upload, ping, jitter & packet loss tests. Free, no sign-up required — FixedAim.",
   alternates: {
     canonical: "https://fixedaim.com/benchmark",
   },
   openGraph: {
-    title: "Benchmark Hub - Internet Speed, Reaction, CPS & Performance Tests | FixedAim",
-    description: "Test and benchmark your network speed, latency, clicking speed, typing WPM, and peripheral input performance with real-time analytics. Free online benchmarks.",
+    title: "Benchmark Hub – Internet Speed Test | FixedAim",
+    description: "Benchmark your internet connection speed with real-time download, upload, ping, jitter & packet loss tests. Free, no sign-up required — FixedAim.",
     url: "https://fixedaim.com/benchmark",
     siteName: "FixedAim",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Benchmark Hub - Internet Speed, Reaction, CPS & Performance Tests | FixedAim",
-    description: "Test and benchmark your network speed, latency, clicking speed, typing WPM, and peripheral input performance with real-time analytics.",
+    title: "Benchmark Hub – Internet Speed Test | FixedAim",
+    description: "Benchmark your internet speed — download, upload, ping, jitter & packet loss. Free on FixedAim.",
     images: ["/og-image.jpg"],
   },
 };

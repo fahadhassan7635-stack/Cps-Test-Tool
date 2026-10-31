@@ -7,47 +7,7 @@ const benchmarks = [
     title: 'Internet Speed Test',
     desc: 'Measure your real-time download speed, upload speed, ping latency, jitter, and packet loss in seconds.',
     color: '#00f5ff',
-    tag: 'NEW BENCHMARK'
-  },
-  {
-    to: '/cps-test',
-    icon: '⚡',
-    title: 'CPS Click Benchmark',
-    desc: 'Benchmark your raw clicking speed in clicks per second across standardized 1s, 5s, 10s, and 60s tests.',
-    color: 'var(--neon-green)',
-    tag: 'MOST POPULAR'
-  },
-  {
-    to: '/reaction-time',
-    icon: '⏱️',
-    title: 'Reaction Latency Benchmark',
-    desc: 'Benchmark your visual reflex response time in milliseconds. Compare your score with global player averages.',
-    color: 'var(--neon-orange)',
-    tag: 'REFLEX'
-  },
-  {
-    to: '/typing-test',
-    icon: '⌨️',
-    title: 'Typing Speed Benchmark',
-    desc: 'Benchmark your words per minute (WPM) and keystroke accuracy on standardized prose passages.',
-    color: 'var(--neon-purple)',
-    tag: 'WPM'
-  },
-  {
-    to: '/apm-drill',
-    icon: '🎯',
-    title: 'APM Drill Benchmark',
-    desc: 'Benchmark your actions per minute, rapid target acquisition, and keyboard recall under pressure.',
-    color: 'var(--neon-cyan)',
-    tag: 'ESPORTS'
-  },
-  {
-    to: '/mouse-accuracy',
-    icon: '🖲️',
-    title: 'Mouse Accuracy Benchmark',
-    desc: 'Benchmark your cursor tracking precision and hand-eye coordination with dynamically sizing targets.',
-    color: '#3b82f6',
-    tag: 'PRECISION'
+    tag: 'BENCHMARK'
   },
 ];
 
@@ -73,7 +33,7 @@ export default function BenchmarkPage() {
         <div className="section-label">Category</div>
         <h1 className="tool-title">Benchmark <span style={{ color: 'var(--neon-cyan)' }}>Hub</span></h1>
         <p className="tool-subtitle">
-          Benchmark your network speed, latency, hardware input responsiveness, and reaction precision with instant analytics.
+          Benchmark your network speed, ping latency, jitter, and packet loss with real-time analytics and live performance graphs.
         </p>
       </div>
 
